@@ -1,0 +1,61 @@
+# compile verilog/system verilog design source files
+sv xil_defaultlib  -i "../../../../../cv32e40p-master/rtl/include" -i "../../../../../Memory" -i "../../../../../Çevre Birimleri/files_1" --include "../../../../../../../../../../AMDDesignTools/2025.2/Vivado/data/rsb/busdef" \
+"../../../../../Memory/axi_lite_interconnect.sv" \
+"../../../../../Memory/axil_arbiter_2to1.sv" \
+"../../../../../Memory/axil_arbiter_3to1.sv" \
+"../../../../../boot/boot_rom.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_aligner.sv" \
+"../../../../../cv32e40p-master/rtl/include/cv32e40p_pkg.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_alu.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_alu_div.sv" \
+"../../../../../cv32e40p-master/rtl/include/cv32e40p_apu_core_pkg.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_apu_disp.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_compressed_decoder.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_controller.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_core.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_cs_registers.sv" \
+"../../../../../cv32e40p-master/rtl/include/cv32e40p_fpu_pkg.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_decoder.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_ex_stage.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_ff_one.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_fifo.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_hwloop_regs.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_id_stage.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_if_stage.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_int_controller.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_load_store_unit.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_mult.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_obi_interface.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_popcnt.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_prefetch_buffer.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_prefetch_controller.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_register_file_latch.sv" \
+"../../../../../cv32e40p-master/bhv/cv32e40p_sim_clock_gate.sv" \
+"../../../../../cv32e40p-master/rtl/cv32e40p_sleep_unit.sv" \
+"../../../../../Çevre Birimleri/dma_controller.sv" \
+"../../../../../Çevre Birimleri/gpio_peripheral.sv" \
+"../../../../../Çevre Birimleri/i2c_peripheral.sv" \
+"../../../../../Çevre Birimleri/jtag_debug.sv" \
+"../../../../../Memory/memory_map_pck.sv" \
+"../../../../../Çevre Birimleri/npu_accelerator.sv" \
+"../../../../../Çevre Birimleri/npu_compute_engine.sv" \
+"../../../../../Çevre Birimleri/npu_csr.sv" \
+"../../../../../Çevre Birimleri/npu_tcm_sram.sv" \
+"../../../../../Memory/obi_to_axi_simple.sv" \
+"../../../../../Çevre Birimleri/qspi_master.sv" \
+"../../../../../Memory/soc_top.sv" \
+"../../../../../Memory/sram_module.sv" \
+"../../../../../Çevre Birimleri/files_1/sync_fifo.sv" \
+"../../../../../Çevre Birimleri/timer_peripheral.sv" \
+"../../../../../Çevre Birimleri/files_1/uart_pkg.sv" \
+"../../../../../Çevre Birimleri/files_1/uart_peripheral.sv" \
+"../../../../../Çevre Birimleri/files_1/uart_rx.sv" \
+"../../../../../Çevre Birimleri/files_1/uart_stream_peripheral.sv" \
+"../../../../../Çevre Birimleri/files_1/uart_tx.sv" \
+"../../../../../Memory/tb_soc_top.sv" \
+
+# compile glbl module
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort
