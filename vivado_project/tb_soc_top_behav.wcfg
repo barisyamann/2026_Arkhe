@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_soc_top_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="cv32e40p_apu_core_pkg" />
+            <top_module name="cv32e40p_fpu_pkg" />
+            <top_module name="cv32e40p_pkg" />
+            <top_module name="glbl" />
+            <top_module name="memory_map_pck" />
+            <top_module name="tb_soc_top" />
+            <top_module name="uart_pkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="817.333 ns"></ZoomStartTime>
+      <ZoomEndTime time="1,036.534 ns"></ZoomEndTime>
+      <Cursor1Time time="1,000.000 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="206"></NameColumnWidth>
+      <ValueColumnWidth column_width="234"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="9" />
+   <wvobject fp_name="/tb_soc_top/uut/u_core/pc_if" type="array">
+      <obj_property name="ElementShortName">pc_if[31:0]</obj_property>
+      <obj_property name="ObjectShortName">pc_if[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_soc_top/uut/u_core/instr_rdata_i" type="array">
+      <obj_property name="ElementShortName">instr_rdata_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instr_rdata_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_soc_top/uut/u_core/instr_rdata_id" type="array">
+      <obj_property name="ElementShortName">instr_rdata_id[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instr_rdata_id[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_soc_top/uut/u_interconnect/m_araddr" type="array">
+      <obj_property name="ElementShortName">m_araddr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">m_araddr[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_soc_top/uut/u_interconnect/m_arvalid" type="logic">
+      <obj_property name="ElementShortName">m_arvalid</obj_property>
+      <obj_property name="ObjectShortName">m_arvalid</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_soc_top/uut/u_interconnect/m_awaddr" type="array">
+      <obj_property name="ElementShortName">m_awaddr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">m_awaddr[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_soc_top/uut/u_interconnect/m_awvalid" type="logic">
+      <obj_property name="ElementShortName">m_awvalid</obj_property>
+      <obj_property name="ObjectShortName">m_awvalid</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_soc_top/uut/u_core/regfile_wdata" type="array">
+      <obj_property name="ElementShortName">regfile_wdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">regfile_wdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_soc_top/uut/u_core/regfile_waddr_ex" type="array">
+      <obj_property name="ElementShortName">regfile_waddr_ex[5:0]</obj_property>
+      <obj_property name="ObjectShortName">regfile_waddr_ex[5:0]</obj_property>
+   </wvobject>
+</wave_config>
