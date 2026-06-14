@@ -1,6 +1,7 @@
 `timescale 1ns / 1ps
 // Description: AXI4-Lite Slave register interface for the NPU.
 //              Provides control/status signals and configures memory offsets.
+//              Implements sticky DONE and interrupt clearing mechanisms.
 
 module npu_csr (
     input  logic        clk,
@@ -34,7 +35,10 @@ module npu_csr (
     // --- Compute Engine Durum Sinyalleri ---
     input  logic        busy_i,
     input  logic        done_i,
-    input  logic [1:0]  class_in
+    input  logic [1:0]  class_in,
+
+    // --- Kesme Çıkışı ---
+    output logic        irq_o
 );
 
     // Register Offsets
@@ -45,18 +49,38 @@ module npu_csr (
     localparam logic [4:0] REG_CLASS_OUT  = 5'h10; // 0x10
 
     // Yazmaç Değişkenleri
-    logic [31:0] reg_ctrl;
+    logic        reg_start;
+    logic        reg_npu_reset;
+    logic        reg_irq_enable;
     logic [31:0] reg_in_addr;
     logic [31:0] reg_out_addr;
-    logic [31:0] reg_status;
+    
+    // Sticky done ve interrupt mantığı
+    logic        done_sticky;
+    logic        irq_clear_pulse;
 
-    assign start_o      = reg_ctrl[0];
-    assign npu_reset_o  = reg_ctrl[1];
+    assign start_o      = reg_start;
+    assign npu_reset_o  = reg_npu_reset;
     assign in_addr_o    = reg_in_addr[12:0];
     assign out_addr_o   = reg_out_addr[12:0];
 
-    // Status register mapping: Bit 0 = BUSY, Bit 1 = DONE
-    assign reg_status = {30'b0, done_i, busy_i};
+    // Status register mapping: Bit 0 = BUSY, Bit 1 = DONE, Bit 2 = IRQ_STATUS
+    logic [31:0] reg_status;
+    assign reg_status = {29'b0, (done_sticky && reg_irq_enable), done_sticky, busy_i};
+
+    // Kesme Çıkışı
+    assign irq_o = done_sticky && reg_irq_enable;
+
+    // Sticky done saklayıcısı kontrolü
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            done_sticky <= 1'b0;
+        end else if (reg_npu_reset || irq_clear_pulse || reg_start) begin
+            done_sticky <= 1'b0;
+        end else if (done_i) begin
+            done_sticky <= 1'b1;
+        end
+    end
 
     // --- AXI4-Lite Yazma İşlemleri (Write Channel) ---
     logic [31:0] aw_addr_lat;
@@ -69,20 +93,25 @@ module npu_csr (
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            s_axi_awready <= 1'b0;
-            s_axi_wready  <= 1'b0;
-            s_axi_bvalid  <= 1'b0;
-            s_axi_bresp   <= 2'b00;
-            aw_valid_lat  <= 1'b0;
-            w_valid_lat   <= 1'b0;
-            aw_addr_lat   <= '0;
-            w_data_lat    <= '0;
-            reg_ctrl      <= 32'b0;
-            reg_in_addr   <= 32'b0;
-            reg_out_addr  <= 32'h0000_1DAC; // Varsayılan 7600 offset
+            s_axi_awready   <= 1'b0;
+            s_axi_wready    <= 1'b0;
+            s_axi_bvalid    <= 1'b0;
+            s_axi_bresp     <= 2'b00;
+            aw_valid_lat    <= 1'b0;
+            w_valid_lat     <= 1'b0;
+            aw_addr_lat     <= '0;
+            w_data_lat      <= '0;
+            reg_start       <= 1'b0;
+            reg_npu_reset   <= 1'b0;
+            reg_irq_enable  <= 1'b0;
+            irq_clear_pulse <= 1'b0;
+            reg_in_addr     <= 32'b0;
+            reg_out_addr    <= 32'h0000_1DAC; // Varsayılan 7600 offset (TCM çıkış adresi)
         end else begin
-            // Start darbesini (pulse) 1 döngü sonra otomatik sıfırla
-            if (reg_ctrl[0]) reg_ctrl[0] <= 1'b0;
+            // Tek döngülük kontrol sinyallerini otomatik temizle
+            if (reg_start)       reg_start       <= 1'b0;
+            if (reg_npu_reset)   reg_npu_reset   <= 1'b0;
+            if (irq_clear_pulse) irq_clear_pulse <= 1'b0;
 
             // AW Handshake
             if (s_axi_awvalid && !aw_valid_lat) begin
@@ -112,7 +141,12 @@ module npu_csr (
                 $display("[%0t] [NPU_CSR WRITE] addr=0x%h, data=0x%h", $time, aw_addr_lat, w_data_lat);
 
                 case (aw_addr_lat[4:0])
-                    REG_CTRL:     reg_ctrl     <= w_data_lat;
+                    REG_CTRL: begin
+                        reg_start       <= w_data_lat[0];
+                        reg_npu_reset   <= w_data_lat[1];
+                        irq_clear_pulse <= w_data_lat[2];
+                        reg_irq_enable  <= w_data_lat[3];
+                    end
                     REG_IN_ADDR:  reg_in_addr  <= w_data_lat;
                     REG_OUT_ADDR: reg_out_addr <= w_data_lat;
                     default:;
@@ -154,7 +188,7 @@ module npu_csr (
                 s_axi_rresp  <= 2'b00;
 
                 case (ar_addr_lat[4:0])
-                    REG_CTRL:      s_axi_rdata <= reg_ctrl;
+                    REG_CTRL:      s_axi_rdata <= {28'b0, reg_irq_enable, 1'b0, reg_npu_reset, reg_start};
                     REG_STATUS:    s_axi_rdata <= reg_status;
                     REG_IN_ADDR:   s_axi_rdata <= reg_in_addr;
                     REG_OUT_ADDR:  s_axi_rdata <= reg_out_addr;
@@ -162,7 +196,7 @@ module npu_csr (
                     default:       s_axi_rdata <= 32'b0;
                 endcase
 
-                $display("[%0t] [NPU_CSR READ] addr=0x%h, status=0x%h, ctrl=0x%h", $time, ar_addr_lat, reg_status, reg_ctrl);
+                $display("[%0t] [NPU_CSR READ] addr=0x%h, status=0x%h", $time, ar_addr_lat, reg_status);
             end
 
             if (s_axi_rvalid && s_axi_rready) begin

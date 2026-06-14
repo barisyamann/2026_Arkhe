@@ -93,9 +93,14 @@ add_files -norecurse [list \
     "$periph_dir/files_1/uart_peripheral.sv" \
     "$periph_dir/files_1/uart_stream_peripheral.sv" \
     "$npu_dir/npu_accelerator.sv" \
+    "$npu_dir/npu_axi_controller.sv" \
     "$npu_dir/npu_compute_engine.sv" \
     "$npu_dir/npu_csr.sv" \
     "$npu_dir/npu_tcm_sram.sv" \
+    "./weights/dw_weights.mem" \
+    "./weights/dw_bias.mem" \
+    "./weights/fc_weights.mem" \
+    "./weights/fc_bias.mem" \
     "$periph_dir/dma_controller.sv" \
     "$periph_dir/jtag_debug.sv" \
 ]
@@ -115,6 +120,7 @@ add_files -norecurse [list \
 # 7. Simülasyon Dosyalarını sim_1 Setine Ekle
 add_files -fileset sim_1 -norecurse [list \
     "./tb/tb_soc_top.sv" \
+    "./tb/tb_npu_compute_engine.sv" \
     "./rtl/boot/boot.hex" \
 ]
 

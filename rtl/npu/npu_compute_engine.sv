@@ -63,30 +63,19 @@ module npu_compute_engine (
     logic signed [31:0] fc_acc [0:3];
     logic [12:0]        probs [0:3];
 
-    // --- Ağırlık ve Sapma (Weight & Bias) ROM Fonksiyonları ---
-    // Sentez sırasında devasa flip-flop veya LUT kaplanmasını önlemek ve timing
-    // closure'ı kolaylaştırmak için ağırlıklar fonksiyonel ROM olarak kodlanmıştır.
-    function automatic logic signed [7:0] get_conv_weight(input int h, input int w, input int d);
-        return 8'sd1; // Evrişim filtre ağırlığı
-    endfunction
+    // --- Ağırlık ve Sapma (Weight & Bias) ROM Dizi Tanımlamaları ---
+    logic signed [7:0]  dw_weights [0:639];
+    logic signed [31:0] dw_bias    [0:7];
+    logic signed [7:0]  fc_weights [0:15999];
+    logic signed [31:0] fc_bias    [0:3];
 
-    function automatic logic signed [7:0] get_fc_weight(input int flat_idx, input int class_idx);
-        // Testbench'teki girdileri doğru sınıflandıracak şekilde:
-        // Eğer giriş "Yes" (0x55555555) ise flat_idx == 0 anında Class 2'ye pozitif ağırlık verilir.
-        // Eğer giriş "No" (0xAAAAAAAA) ise girdiler negatif olduğundan ReLU sonucu hepsi sıfır kalır
-        // ve FullyConnected bias değeri sayesinde Class 3 tahmin edilir.
-        if (class_idx == 2) begin
-            if (flat_idx == 0) return 8'sd1;
-            else return 8'sd0;
-        end else begin
-            return 8'sd0;
-        end
-    endfunction
-
-    function automatic logic signed [31:0] get_fc_bias(input int class_idx);
-        if (class_idx == 3) return 32'sd1000; // "No" sınıfı için varsayılan bias
-        else return 32'sd0;
-    endfunction
+    // ROM Belleklerin Dosyadan Okunarak İlklendirilmesi
+    initial begin
+        $readmemh("dw_weights.mem", dw_weights);
+        $readmemh("dw_bias.mem", dw_bias);
+        $readmemh("fc_weights.mem", fc_weights);
+        $readmemh("fc_bias.mem", fc_bias);
+    end
 
     // --- Adres ve Sınır Güvenliği Mantığı (Reshape 49x40x1) ---
     logic signed [31:0] t_in_signed;
@@ -140,39 +129,52 @@ module npu_compute_engine (
     logic [15:0] div_den;
     logic        div_start;
     logic        div_done;
-    logic [28:0] dividend;
     logic [15:0] divisor;
+    logic [15:0] dividend_acc;
     logic [12:0] quotient;
-    logic [4:0]  bit_index;
+    logic [3:0]  bit_index;
     logic        div_active;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            dividend   <= '0;
-            divisor    <= '0;
-            quotient   <= '0;
-            bit_index  <= '0;
-            div_active <= 1'b0;
-            div_done   <= 1'b0;
+            dividend_acc <= '0;
+            divisor      <= '0;
+            quotient     <= '0;
+            bit_index    <= '0;
+            div_active   <= 1'b0;
+            div_done     <= 1'b0;
         end else if (div_start) begin
-            dividend   <= {div_num, 14'b0}; // Q0.12 formatı için sola kaydır (num << 14)
             divisor    <= div_den;
             quotient   <= '0;
-            bit_index  <= 5'd12;
+            bit_index  <= 4'd12;
             div_active <= 1'b1;
             div_done   <= 1'b0;
+            if (div_num >= div_den) begin
+                quotient[12] <= 1'b1;
+                dividend_acc <= '0;
+            end else begin
+                quotient[12] <= 1'b0;
+                dividend_acc <= {3'b0, div_num};
+            end
         end else if (div_active) begin
-            if (bit_index == 5'd0) begin
+            logic [16:0] sub_val;
+            logic [15:0] next_acc;
+            next_acc = {dividend_acc[14:0], 1'b0};
+            sub_val = {1'b0, next_acc} - {1'b0, divisor};
+            
+            if (sub_val[16] == 1'b0) begin
+                dividend_acc <= sub_val[15:0];
+                quotient[bit_index-1] <= 1'b1;
+            end else begin
+                dividend_acc <= next_acc;
+                quotient[bit_index-1] <= 1'b0;
+            end
+
+            if (bit_index == 4'd1) begin
                 div_active <= 1'b0;
                 div_done   <= 1'b1;
             end else begin
-                if (dividend[28:13] >= divisor) begin
-                    dividend <= { (dividend[28:13] - divisor), dividend[12:0] } << 1;
-                    quotient[bit_index-1] <= 1'b1;
-                end else begin
-                    dividend <= dividend << 1;
-                end
-                bit_index <= bit_index - 5'd1;
+                bit_index  <= bit_index - 4'd1;
             end
         end else begin
             div_done <= 1'b0;
@@ -241,16 +243,16 @@ module npu_compute_engine (
                         d_out       <= '0;
                         kh          <= '0;
                         kw          <= '0;
-                        conv_acc    <= '0;
                         $display("[%0t] [NPU_ENGINE] Starting upgraded NPU computation: in_addr=0x%h, out_addr=0x%h", $time, in_addr_i, out_addr_i);
                     end
                 end
 
                 INIT: begin
                     for (int i = 0; i < 4; i++) begin
-                        fc_acc[i] <= get_fc_bias(i);
+                        fc_acc[i] <= fc_bias[i];
                     end
-                    state <= CONV_READ_REQ;
+                    conv_acc <= dw_bias[0]; // Akümülatörü kanal 0 bias değeriyle ilkle
+                    state    <= CONV_READ_REQ;
                 end
 
                 CONV_READ_REQ: begin
@@ -276,7 +278,8 @@ module npu_compute_engine (
                         x_val = 8'sd0; // Padding alanı
                     end
 
-                    w_val = get_conv_weight(kh, kw, d_out);
+                    // ROM tabanlı ağırlık erişimi
+                    w_val = dw_weights[int'(kh) * 64 + int'(kw) * 8 + int'(d_out)];
                     conv_acc <= conv_acc + x_val * w_val;
 
                     if (kw == 7) begin
@@ -301,15 +304,15 @@ module npu_compute_engine (
                     Y_conv   = (conv_acc < 32'sd0) ? 32'sd0 : conv_acc;
                     flat_idx = (int'(t_out) * 20 + int'(f_out)) * 8 + int'(d_out);
 
-                    fc_acc[0] <= fc_acc[0] + Y_conv * get_fc_weight(flat_idx, 0);
-                    fc_acc[1] <= fc_acc[1] + Y_conv * get_fc_weight(flat_idx, 1);
-                    fc_acc[2] <= fc_acc[2] + Y_conv * get_fc_weight(flat_idx, 2);
-                    fc_acc[3] <= fc_acc[3] + Y_conv * get_fc_weight(flat_idx, 3);
-
-                    conv_acc  <= 32'sd0; // Akümülatörü sıfırla
+                    // ROM tabanlı FC ağırlık erişimi
+                    fc_acc[0] <= fc_acc[0] + Y_conv * fc_weights[flat_idx];
+                    fc_acc[1] <= fc_acc[1] + Y_conv * fc_weights[4000 + flat_idx];
+                    fc_acc[2] <= fc_acc[2] + Y_conv * fc_weights[8000 + flat_idx];
+                    fc_acc[3] <= fc_acc[3] + Y_conv * fc_weights[12000 + flat_idx];
 
                     if (d_out == 7) begin
                         d_out <= '0;
+                        conv_acc <= dw_bias[0]; // Sıradaki koordinat için kanal 0 biası yükle
                         if (f_out == 19) begin
                             f_out <= '0;
                             if (t_out == 24) begin
@@ -325,6 +328,7 @@ module npu_compute_engine (
                         end
                     end else begin
                         d_out <= d_out + 1;
+                        conv_acc <= dw_bias[d_out + 1]; // Bir sonraki kanal biasını yükle
                         state <= CONV_READ_REQ;
                     end
                 end
@@ -449,4 +453,3 @@ module npu_compute_engine (
     end
 
 endmodule
-

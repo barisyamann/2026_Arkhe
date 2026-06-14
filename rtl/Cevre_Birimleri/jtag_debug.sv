@@ -84,22 +84,26 @@ module jtag_debug (
     // CPU Debug kontrol
     assign debug_req_o = dbg_halted;
 
-
     // =========================================================================
-    // JTAG TAP - Basitleştirilmiş Shift Register
+    // JTAG TAP - Standard IEEE 1149.1 TAP Controller
     // =========================================================================
-    // JTAG TAP Controller States (IEEE 1149.1 basitleştirilmiş)
     typedef enum logic [3:0] {
-        TAP_RESET     = 4'd0,
-        TAP_IDLE      = 4'd1,
-        TAP_DR_SCAN   = 4'd2,
-        TAP_DR_CAPTURE= 4'd3,
-        TAP_DR_SHIFT  = 4'd4,
-        TAP_DR_UPDATE = 4'd5,
-        TAP_IR_SCAN   = 4'd6,
-        TAP_IR_CAPTURE= 4'd7,
-        TAP_IR_SHIFT  = 4'd8,
-        TAP_IR_UPDATE = 4'd9
+        TEST_LOGIC_RESET = 4'h0,
+        RUN_TEST_IDLE    = 4'h1,
+        SELECT_DR_SCAN   = 4'h2,
+        CAPTURE_DR       = 4'h3,
+        SHIFT_DR         = 4'h4,
+        EXIT1_DR         = 4'h5,
+        PAUSE_DR         = 4'h6,
+        EXIT2_DR         = 4'h7,
+        UPDATE_DR        = 4'h8,
+        SELECT_IR_SCAN   = 4'h9,
+        CAPTURE_IR       = 4'hA,
+        SHIFT_IR         = 4'hB,
+        EXIT1_IR         = 4'hC,
+        PAUSE_IR         = 4'hD,
+        EXIT2_IR         = 4'hE,
+        UPDATE_IR        = 4'hF
     } tap_state_t;
 
     tap_state_t tap_state;
@@ -122,10 +126,10 @@ module jtag_debug (
     logic [3:0]  jtag_ir_latched;
     logic [63:0] jtag_dr_latched;
 
-    // TCK Domain - TAP State Machine
+    // TCK Domain - TAP State Machine (IEEE 1149.1 Compliant)
     always_ff @(posedge jtag_tck or negedge jtag_trst_n) begin
         if (!jtag_trst_n) begin
-            tap_state      <= TAP_RESET;
+            tap_state      <= TEST_LOGIC_RESET;
             ir_reg         <= IR_BYPASS;
             dr_reg         <= 64'b0;
             shift_cnt      <= 6'b0;
@@ -135,54 +139,76 @@ module jtag_debug (
             jtag_tdo       <= 1'b0;
         end else begin
             case (tap_state)
-                TAP_RESET: begin
-                    ir_reg    <= IR_BYPASS;
-                    tap_state <= jtag_tms ? TAP_RESET : TAP_IDLE;
-                end
-                TAP_IDLE: begin
+                TEST_LOGIC_RESET: begin
+                    ir_reg         <= IR_BYPASS;
                     jtag_cmd_valid <= 1'b0;
-                    tap_state <= jtag_tms ? TAP_DR_SCAN : TAP_IDLE;
+                    tap_state      <= jtag_tms ? TEST_LOGIC_RESET : RUN_TEST_IDLE;
                 end
-                TAP_DR_SCAN: begin
-                    tap_state <= jtag_tms ? TAP_IR_SCAN : TAP_DR_CAPTURE;
+                RUN_TEST_IDLE: begin
+                    jtag_cmd_valid <= 1'b0;
+                    tap_state      <= jtag_tms ? SELECT_DR_SCAN : RUN_TEST_IDLE;
                 end
-                TAP_DR_CAPTURE: begin
-                    shift_cnt <= 6'd0;
-                    // IR koduna göre DR'ye ID yükle
+                SELECT_DR_SCAN: begin
+                    tap_state      <= jtag_tms ? SELECT_IR_SCAN : CAPTURE_DR;
+                end
+                CAPTURE_DR: begin
+                    shift_cnt      <= 6'd0;
+                    // IR koduna göre DR'ye ID veya okunan veriyi yükle
                     if (ir_reg == IR_IDCODE) begin
-                        dr_reg <= {32'h0, 32'h41524B48}; // "ARKH" identifier
+                        dr_reg     <= {32'h0, 32'h41524B48}; // "ARKH" identifier
+                    end else if (ir_reg == IR_MEM_READ) begin
+                        dr_reg     <= {bus_rdata_result, 32'h0}; // Hafızadan okunan veri
                     end
-                    tap_state <= jtag_tms ? TAP_DR_UPDATE : TAP_DR_SHIFT;
+                    tap_state      <= jtag_tms ? EXIT1_DR : SHIFT_DR;
                 end
-                TAP_DR_SHIFT: begin
-                    jtag_tdo  <= dr_reg[0];
-                    dr_reg    <= {jtag_tdi, dr_reg[63:1]};
-                    shift_cnt <= shift_cnt + 6'd1;
-                    tap_state <= jtag_tms ? TAP_DR_UPDATE : TAP_DR_SHIFT;
+                SHIFT_DR: begin
+                    jtag_tdo       <= dr_reg[0];
+                    dr_reg         <= {jtag_tdi, dr_reg[63:1]};
+                    shift_cnt      <= shift_cnt + 6'd1;
+                    tap_state      <= jtag_tms ? EXIT1_DR : SHIFT_DR;
                 end
-                TAP_DR_UPDATE: begin
+                EXIT1_DR: begin
+                    tap_state      <= jtag_tms ? UPDATE_DR : PAUSE_DR;
+                end
+                PAUSE_DR: begin
+                    tap_state      <= jtag_tms ? EXIT2_DR : PAUSE_DR;
+                end
+                EXIT2_DR: begin
+                    tap_state      <= jtag_tms ? UPDATE_DR : SHIFT_DR;
+                end
+                UPDATE_DR: begin
                     jtag_dr_latched <= dr_reg;
                     jtag_ir_latched <= ir_reg;
                     jtag_cmd_valid  <= 1'b1;
-                    tap_state       <= jtag_tms ? TAP_DR_SCAN : TAP_IDLE;
+                    tap_state       <= jtag_tms ? SELECT_DR_SCAN : RUN_TEST_IDLE;
                 end
-                TAP_IR_SCAN: begin
-                    tap_state <= jtag_tms ? TAP_RESET : TAP_IR_CAPTURE;
+                SELECT_IR_SCAN: begin
+                    tap_state      <= jtag_tms ? TEST_LOGIC_RESET : CAPTURE_IR;
                 end
-                TAP_IR_CAPTURE: begin
-                    shift_cnt <= 6'd0;
-                    tap_state <= jtag_tms ? TAP_IR_UPDATE : TAP_IR_SHIFT;
+                CAPTURE_IR: begin
+                    shift_cnt      <= 6'd0;
+                    tap_state      <= jtag_tms ? EXIT1_IR : SHIFT_IR;
                 end
-                TAP_IR_SHIFT: begin
-                    jtag_tdo  <= ir_reg[0];
-                    ir_reg    <= {jtag_tdi, ir_reg[3:1]};
-                    shift_cnt <= shift_cnt + 6'd1;
-                    tap_state <= jtag_tms ? TAP_IR_UPDATE : TAP_IR_SHIFT;
+                SHIFT_IR: begin
+                    jtag_tdo       <= ir_reg[0];
+                    ir_reg         <= {jtag_tdi, ir_reg[3:1]};
+                    shift_cnt      <= shift_cnt + 6'd1;
+                    tap_state      <= jtag_tms ? EXIT1_IR : SHIFT_IR;
                 end
-                TAP_IR_UPDATE: begin
-                    tap_state <= jtag_tms ? TAP_DR_SCAN : TAP_IDLE;
+                EXIT1_IR: begin
+                    tap_state      <= jtag_tms ? UPDATE_IR : PAUSE_IR;
                 end
-                default: tap_state <= TAP_RESET;
+                PAUSE_IR: begin
+                    tap_state      <= jtag_tms ? EXIT2_IR : PAUSE_IR;
+                end
+                EXIT2_IR: begin
+                    tap_state      <= jtag_tms ? UPDATE_IR : SHIFT_IR;
+                end
+                UPDATE_IR: begin
+                    jtag_ir_latched <= ir_reg;
+                    tap_state      <= jtag_tms ? SELECT_DR_SCAN : RUN_TEST_IDLE;
+                end
+                default: tap_state <= TEST_LOGIC_RESET;
             endcase
         end
     end

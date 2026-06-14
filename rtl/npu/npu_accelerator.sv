@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 // Description: Top Level Wrapper of the Arkhe AI Accelerator (NPU).
-//              Instantiates npu_csr, npu_tcm_sram, and npu_compute_engine.
+//              Instantiates npu_csr, npu_axi_controller, npu_tcm_sram, and npu_compute_engine.
 //              Provides two AXI4-Lite Slave ports:
 //              1) CSR Config Port (REG_AXI)
 //              2) 30 kB Local Memory Port (MEM_AXI)
@@ -60,6 +60,7 @@ module npu_accelerator (
     logic        busy_sig;
     logic        done_sig;
     logic [1:0]  class_sig;
+    logic        irq_sig;
 
     // SRAM Port A Kontrol Sinyalleri
     logic        ram_en_a;
@@ -75,8 +76,8 @@ module npu_accelerator (
     logic [31:0] ram_wdata_b;
     logic [31:0] ram_rdata_b;
 
-    // Kesme Çıkışı
-    assign irq_o = done_sig;
+    // Kesme Çıkışı bağlantısı
+    assign irq_o = irq_sig;
 
     // =========================================================================
     // NPU Kontrol ve Durum Yazmaçları (CSR)
@@ -111,7 +112,63 @@ module npu_accelerator (
         .out_addr_o     (out_offset_addr),
         .busy_i         (busy_sig),
         .done_i         (done_sig),
-        .class_in       (class_sig)
+        .class_in       (class_sig),
+        .irq_o          (irq_sig)
+    );
+
+    // =========================================================================
+    // NPU TCM AXI Denetleyicisi (AXI Controller)
+    // =========================================================================
+    npu_axi_controller u_npu_axi_ctrl (
+        .clk            (clk),
+        .rst_n          (rst_n),
+        
+        // AXI Slave (MEM)
+        .mem_awaddr     (mem_awaddr),
+        .mem_awvalid    (mem_awvalid),
+        .mem_awready    (mem_awready),
+        .mem_wdata      (mem_wdata),
+        .mem_wstrb      (mem_wstrb),
+        .mem_wvalid     (mem_wvalid),
+        .mem_wready     (mem_wready),
+        .mem_bresp      (mem_bresp),
+        .mem_bvalid     (mem_bvalid),
+        .mem_bready     (mem_bready),
+        .mem_araddr     (mem_araddr),
+        .mem_arvalid    (mem_arvalid),
+        .mem_arready    (mem_arready),
+        .mem_rdata      (mem_rdata),
+        .mem_rresp      (mem_rresp),
+        .mem_rvalid     (mem_rvalid),
+        .mem_rready     (mem_rready),
+        
+        // SRAM Port A
+        .ram_en_o       (ram_en_a),
+        .ram_we_o       (ram_we_a),
+        .ram_addr_o     (ram_addr_a),
+        .ram_wdata_o    (ram_wdata_a),
+        .ram_rdata_i    (ram_rdata_a)
+    );
+
+    // =========================================================================
+    // NPU Yerel Belleği (TCM SRAM)
+    // =========================================================================
+    npu_tcm_sram u_npu_sram (
+        .clk            (clk),
+        
+        // Port A (AXI Slave Access)
+        .en_a           (ram_en_a),
+        .we_a           (ram_we_a),
+        .addr_a         (ram_addr_a),
+        .wdata_a        (ram_wdata_a),
+        .rdata_a        (ram_rdata_a),
+        
+        // Port B (Compute Engine Access)
+        .en_b           (ram_en_b),
+        .we_b           (ram_we_b),
+        .addr_b         (ram_addr_b),
+        .wdata_b        (ram_wdata_b),
+        .rdata_b        (ram_rdata_b)
     );
 
     // =========================================================================
@@ -137,131 +194,5 @@ module npu_accelerator (
         .mem_wdata_b    (ram_wdata_b),
         .mem_rdata_b    (ram_rdata_b)
     );
-
-    // =========================================================================
-    // 30 kB Yerel TCM SRAM Belleği
-    // =========================================================================
-    npu_tcm_sram u_npu_sram (
-        .clk            (clk),
-        
-        // Port A (AXI Slave Access)
-        .en_a           (ram_en_a),
-        .we_a           (ram_we_a),
-        .addr_a         (ram_addr_a),
-        .wdata_a        (ram_wdata_a),
-        .rdata_a        (ram_rdata_a),
-        
-        // Port B (Compute Engine Access)
-        .en_b           (ram_en_b),
-        .we_b           (ram_we_b),
-        .addr_b         (ram_addr_b),
-        .wdata_b        (ram_wdata_b),
-        .rdata_b        (ram_rdata_b)
-    );
-
-    // =========================================================================
-    // TCM SRAM AXI4-Lite Slave Arayüzü (Port A)
-    // =========================================================================
-    logic [31:0] mem_aw_addr_lat;
-    logic        mem_aw_valid_lat;
-    logic [31:0] mem_w_data_lat;
-    logic        mem_w_valid_lat;
-    logic        mem_do_write;
-    logic [31:0] mem_ar_addr_lat;
-    logic        mem_ar_valid_lat;
-
-    assign mem_do_write = mem_aw_valid_lat && mem_w_valid_lat;
-
-    // RAM Kontrol Sinyalleri
-    assign ram_en_a    = mem_do_write || (mem_ar_valid_lat && !mem_rvalid);
-    assign ram_we_a    = mem_do_write ? mem_wstrb : 4'b0000;
-    assign ram_wdata_a = mem_w_data_lat;
-
-    // Adres dilimleme ve sınır güvenliği (7680 kelime üst sınır)
-    logic [12:0] byte_addr_write;
-    logic [12:0] byte_addr_read;
-    assign byte_addr_write = mem_aw_addr_lat[14:2];
-    assign byte_addr_read  = mem_ar_addr_lat[14:2];
-
-    assign ram_addr_a  = mem_do_write ? 
-                         ((byte_addr_write < 13'd7680) ? byte_addr_write : 13'd0) :
-                         ((byte_addr_read  < 13'd7680) ? byte_addr_read  : 13'd0);
-
-    // AXI Write Kanalları
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            mem_awready      <= 1'b0;
-            mem_wready       <= 1'b0;
-            mem_bvalid       <= 1'b0;
-            mem_bresp        <= 2'b00;
-            mem_aw_valid_lat <= 1'b0;
-            mem_w_valid_lat  <= 1'b0;
-            mem_aw_addr_lat  <= '0;
-            mem_w_data_lat   <= '0;
-        end else begin
-            // AW Handshake
-            if (mem_awvalid && !mem_aw_valid_lat) begin
-                mem_awready      <= 1'b1;
-                mem_aw_addr_lat  <= mem_awaddr;
-                mem_aw_valid_lat <= 1'b1;
-            end else begin
-                mem_awready      <= 1'b0;
-            end
-
-            // W Handshake
-            if (mem_wvalid && !mem_w_valid_lat) begin
-                mem_wready      <= 1'b1;
-                mem_w_data_lat  <= mem_wdata;
-                mem_w_valid_lat <= 1'b1;
-            end else begin
-                mem_wready      <= 1'b0;
-            end
-
-            // B Channel
-            if (mem_do_write) begin
-                mem_aw_valid_lat <= 1'b0;
-                mem_w_valid_lat  <= 1'b0;
-                mem_bvalid       <= 1'b1;
-                mem_bresp        <= 2'b00;
-            end
-
-            if (mem_bvalid && mem_bready) begin
-                mem_bvalid <= 1'b0;
-            end
-        end
-    end
-
-    // AXI Read Kanalları
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            mem_arready      <= 1'b0;
-            mem_rvalid       <= 1'b0;
-            mem_rresp        <= 2'b00;
-            mem_rdata        <= '0;
-            mem_ar_valid_lat <= 1'b0;
-            mem_ar_addr_lat  <= '0;
-        end else begin
-            // AR Handshake
-            if (mem_arvalid && !mem_ar_valid_lat) begin
-                mem_arready      <= 1'b1;
-                mem_ar_addr_lat  <= mem_araddr;
-                mem_ar_valid_lat <= 1'b1;
-            end else begin
-                mem_arready      <= 1'b0;
-            end
-
-            // R Channel
-            if (mem_ar_valid_lat && !mem_rvalid) begin
-                mem_ar_valid_lat <= 1'b0;
-                mem_rvalid       <= 1'b1;
-                mem_rresp        <= 2'b00;
-                mem_rdata        <= ram_rdata_a;
-            end
-
-            if (mem_rvalid && mem_rready) begin
-                mem_rvalid <= 1'b0;
-            end
-        end
-    end
 
 endmodule

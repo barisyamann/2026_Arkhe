@@ -24,7 +24,7 @@
 //                                                                            //
 // Description:    Top level module of the RISC-V core.                       //
 //                 added APU, FPU parameter to include the APU_dispatcher     //
-//                 and the FPU                                                //
+//                 and the FPU               q                                 //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 

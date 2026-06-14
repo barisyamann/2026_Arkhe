@@ -3,6 +3,7 @@
 //              Size: Exactly 30 kB (7680 words x 32-bit).
 //              Port A is for external AXI Bus access.
 //              Port B is for internal Compute Engine access.
+//              Includes boundary protection logic.
 
 module npu_tcm_sram (
     input  logic        clk,
@@ -32,25 +33,33 @@ module npu_tcm_sram (
         end
     end
 
-    // Port A Read/Write
+    // Port A Read/Write with boundary checks
     always_ff @(posedge clk) begin
         if (en_a) begin
-            if (we_a[0]) ram[addr_a][7:0]   <= wdata_a[7:0];
-            if (we_a[1]) ram[addr_a][15:8]  <= wdata_a[15:8];
-            if (we_a[2]) ram[addr_a][23:16] <= wdata_a[23:16];
-            if (we_a[3]) ram[addr_a][31:24] <= wdata_a[31:24];
-            rdata_a <= ram[addr_a];
+            if (addr_a < 13'd7680) begin
+                if (we_a[0]) ram[addr_a][7:0]   <= wdata_a[7:0];
+                if (we_a[1]) ram[addr_a][15:8]  <= wdata_a[15:8];
+                if (we_a[2]) ram[addr_a][23:16] <= wdata_a[23:16];
+                if (we_a[3]) ram[addr_a][31:24] <= wdata_a[31:24];
+                rdata_a <= ram[addr_a];
+            end else begin
+                rdata_a <= 32'h0; // Sınır dışı okuma durumunda güvenli sıfır dön
+            end
         end
     end
 
-    // Port B Read/Write
+    // Port B Read/Write with boundary checks
     always_ff @(posedge clk) begin
         if (en_b) begin
-            if (we_b[0]) ram[addr_b][7:0]   <= wdata_b[7:0];
-            if (we_b[1]) ram[addr_b][15:8]  <= wdata_b[15:8];
-            if (we_b[2]) ram[addr_b][23:16] <= wdata_b[23:16];
-            if (we_b[3]) ram[addr_b][31:24] <= wdata_b[31:24];
-            rdata_b <= ram[addr_b];
+            if (addr_b < 13'd7680) begin
+                if (we_b[0]) ram[addr_b][7:0]   <= wdata_b[7:0];
+                if (we_b[1]) ram[addr_b][15:8]  <= wdata_b[15:8];
+                if (we_b[2]) ram[addr_b][23:16] <= wdata_b[23:16];
+                if (we_b[3]) ram[addr_b][31:24] <= wdata_b[31:24];
+                rdata_b <= ram[addr_b];
+            end else begin
+                rdata_b <= 32'h0; // Sınır dışı okuma durumunda güvenli sıfır dön
+            end
         end
     end
 
