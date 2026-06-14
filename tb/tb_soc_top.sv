@@ -147,8 +147,10 @@ module tb_soc_top;
 
         $display("[%0t] Reset kaldırıldı. İşlemci çalışıyor...", $time);
 
-        // İşlemcinin Boot ROM'dan kod çekmesini bekleyin ve simülasyonu izleyin
-        #150000; // NPU çıkarımı için gereken zamanı kapsayacak şekilde simülasyon süresini artırdık
+        // NPU donanım motorunun hesaplamayı bitirmesini dinamik olarak bekle (~964 bin çevrim, ~19.3 ms)
+        $display("[%0t] NPU donanım motorunun tamamlanması bekleniyor...", $time);
+        wait(uut.u_npu.u_npu_engine.done_o == 1'b1);
+        $display("[%0t] NPU donanım motoru DONE sinyalini verdi!", $time);
 
         // GPIO Pinlerini Değiştirip Test Etme
         @ (posedge clk);
@@ -161,21 +163,30 @@ module tb_soc_top;
     end
 
     // --- İzleme (Monitoring) ---
+    logic [31:0] last_pc;
     always @(posedge clk) begin
         if (rst_n) begin
-            $display("[%0t] PC_ID=0x%h | x10(a0)=0x%h | x12(a2)=0x%h | x13(a3)=0x%h | x14(a4)=0x%h | x15(a5)=0x%h | awaddr=0x%h | awvalid=%b | rx_wr=%0d | rx_rd=%0d | rx_empty=%0b", 
-                     $time, 
-                     uut.u_core.id_stage_i.pc_id_i,
-                     uut.u_core.id_stage_i.register_file_i.mem[10],
-                     uut.u_core.id_stage_i.register_file_i.mem[12],
-                     uut.u_core.id_stage_i.register_file_i.mem[13],
-                     uut.u_core.id_stage_i.register_file_i.mem[14],
-                     uut.u_core.id_stage_i.register_file_i.mem[15],
-                     uut.data_axil_awaddr,
-                     uut.data_axil_awvalid,
-                     uut.u_qspi.rx_wr_ptr,
-                     uut.u_qspi.rx_rd_ptr,
-                     uut.u_qspi.rx_empty);
+            if (uut.u_core.id_stage_i.pc_id_i != last_pc) begin
+                last_pc <= uut.u_core.id_stage_i.pc_id_i;
+                // Polling döngüsünü (0x0100002c, 0x01000030, 0x01000034) log kirliliğini önlemek için filtrele
+                if (uut.u_core.id_stage_i.pc_id_i != 32'h0100002c &&
+                    uut.u_core.id_stage_i.pc_id_i != 32'h01000030 &&
+                    uut.u_core.id_stage_i.pc_id_i != 32'h01000034) begin
+                    $display("[%0t] PC_ID=0x%h | x10(a0)=0x%h | x12(a2)=0x%h | x13(a3)=0x%h | x14(a4)=0x%h | x15(a5)=0x%h | awaddr=0x%h | awvalid=%b | rx_wr=%0d | rx_rd=%0d | rx_empty=%0b", 
+                             $time, 
+                             uut.u_core.id_stage_i.pc_id_i,
+                             uut.u_core.id_stage_i.register_file_i.mem[10],
+                             uut.u_core.id_stage_i.register_file_i.mem[12],
+                             uut.u_core.id_stage_i.register_file_i.mem[13],
+                             uut.u_core.id_stage_i.register_file_i.mem[14],
+                             uut.u_core.id_stage_i.register_file_i.mem[15],
+                             uut.data_axil_awaddr,
+                             uut.data_axil_awvalid,
+                             uut.u_qspi.rx_wr_ptr,
+                             uut.u_qspi.rx_rd_ptr,
+                             uut.u_qspi.rx_empty);
+                end
+            end
         end
     end
 

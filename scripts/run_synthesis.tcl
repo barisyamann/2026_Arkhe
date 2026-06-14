@@ -3,15 +3,15 @@
 #  TEKNOFEST 2026 Çip Tasarım Yarışması - Sentez Scripti
 # ==============================================================================
 
-# 1. Çalışma dizinini projenin bulunduğu yere yönlendir (Dinamik)
+# 1. Çalışma dizinini projenin kök dizinine yönlendir (Dinamik)
 set script_dir [file dirname [file normalize [info script]]]
-cd $script_dir
+cd [file join $script_dir ".."]
 
 # Açık proje varsa kapat (çakışmaları önlemek için)
 catch {close_project}
 
 # 2. Projeyi yeniden oluştur (XPR dosyası silindiği için sıfırdan kuruyoruz)
-source create_project.tcl
+source [file join $script_dir "create_project.tcl"]
 
 # 2. Sentezi başlat (tek çekirdek — Windows'ta OOM riskini azaltmak için)
 puts "Sentez baslatiliyor..."

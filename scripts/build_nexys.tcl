@@ -7,7 +7,7 @@
 catch {close_project}
 
 # Open the project
-open_project ./vivado_nexys_project/Arkhe_SoC_Nexys.xpr
+open_project ./vivado/vivado_nexys_project/Arkhe_SoC_Nexys.xpr
 
 # Reset existing runs to ensure a clean build
 puts "Resetting existing runs..."

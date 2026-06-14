@@ -1,4 +1,4 @@
-open_project ./vivado_project/Arkhe_SoC.xpr
+open_project ./vivado/vivado_project/Arkhe_SoC.xpr
 puts "========================================"
 set runs [get_runs]
 foreach r $runs {

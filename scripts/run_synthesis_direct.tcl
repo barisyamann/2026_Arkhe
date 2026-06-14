@@ -4,13 +4,13 @@
 # ==============================================================================
 
 set script_dir [file dirname [file normalize [info script]]]
-cd $script_dir
+cd [file join $script_dir ".."]
 
 # Acik proje varsa kapat
 catch {close_project}
 
 # Projeyi yeniden olustur
-source create_project.tcl
+source [file join $script_dir "create_project.tcl"]
 
 # Thread sinirlamasini ayarla
 set_param general.maxThreads 1

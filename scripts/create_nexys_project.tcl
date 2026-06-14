@@ -5,17 +5,18 @@
 # ==============================================================================
 
 # Karakter kodlaması ve boşluk uyumsuzluğunu önlemek için dizini kontrol ediyoruz
-if {[file exists "./Cevre_Birimleri"]} {
-    set periph_dir "./Cevre_Birimleri"
-} elseif {[file exists "./Çevre Birimleri"]} {
-    set periph_dir "./Çevre Birimleri"
+if {[file exists "./rtl/Cevre_Birimleri"]} {
+    set periph_dir "./rtl/Cevre_Birimleri"
+} elseif {[file exists "./rtl/Çevre Birimleri"]} {
+    set periph_dir "./rtl/Çevre Birimleri"
 } else {
-    set periph_dir "./Cevre_Birimleri"
+    set periph_dir "./rtl/Cevre_Birimleri"
 }
+set npu_dir "./rtl/npu"
 puts "Bulunan Cevre Birimleri Dizini: $periph_dir"
 
 set project_name "Arkhe_SoC_Nexys"
-set project_dir "./vivado_nexys_project"
+set project_dir "./vivado/vivado_nexys_project"
 
 # 1. Projeyi Oluştur (Nexys 4 DDR FPGA: XC7A100T-1CSG324C)
 create_project $project_name $project_dir -part xc7a100tcsg324-1 -force
@@ -28,8 +29,8 @@ set_property target_language Verilog [current_project]
 
 # 2. Include Arama Yolları Tanımlama (Package ve Header dosyaları için)
 set include_dirs [list \
-    [file normalize "./cv32e40p-master/rtl/include"] \
-    [file normalize "./Memory"] \
+    [file normalize "./rtl/cv32e40p-master/rtl/include"] \
+    [file normalize "./rtl/Memory"] \
     [file normalize "$periph_dir/files_1"] \
 ]
 set_property include_dirs $include_dirs [current_fileset]
@@ -37,41 +38,41 @@ set_property include_dirs $include_dirs [get_filesets sim_1]
 
 # 3. Paket Dosyalarını Önce Ekle
 add_files -norecurse [list \
-    "./Memory/memory_map_pck.sv" \
-    "./cv32e40p-master/rtl/include/cv32e40p_apu_core_pkg.sv" \
-    "./cv32e40p-master/rtl/include/cv32e40p_fpu_pkg.sv" \
-    "./cv32e40p-master/rtl/include/cv32e40p_pkg.sv" \
+    "./rtl/Memory/memory_map_pck.sv" \
+    "./rtl/cv32e40p-master/rtl/include/cv32e40p_apu_core_pkg.sv" \
+    "./rtl/cv32e40p-master/rtl/include/cv32e40p_fpu_pkg.sv" \
+    "./rtl/cv32e40p-master/rtl/include/cv32e40p_pkg.sv" \
     "$periph_dir/files_1/uart_pkg.sv" \
 ]
 update_compile_order -fileset sources_1
 
 # 4. RISC-V İşlemci Çekirdeği (CV32E40P) Dosyalarını Ekle
 add_files -norecurse [list \
-    "./cv32e40p-master/rtl/cv32e40p_aligner.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_alu.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_alu_div.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_apu_disp.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_compressed_decoder.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_controller.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_core.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_cs_registers.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_decoder.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_ex_stage.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_ff_one.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_fifo.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_hwloop_regs.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_id_stage.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_if_stage.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_int_controller.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_load_store_unit.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_mult.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_obi_interface.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_popcnt.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_prefetch_buffer.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_prefetch_controller.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_register_file_ff.sv" \
-    "./cv32e40p-master/rtl/cv32e40p_sleep_unit.sv" \
-    "./cv32e40p-master/bhv/cv32e40p_sim_clock_gate.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_aligner.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_alu.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_alu_div.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_apu_disp.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_compressed_decoder.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_controller.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_core.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_cs_registers.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_fifo.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_hwloop_regs.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_id_stage.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_if_stage.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_int_controller.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_mult.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_obi_interface.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_popcnt.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_prefetch_buffer.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_prefetch_controller.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_register_file_ff.sv" \
+    "./rtl/cv32e40p-master/rtl/cv32e40p_sleep_unit.sv" \
+    "./rtl/cv32e40p-master/bhv/cv32e40p_sim_clock_gate.sv" \
 ]
 
 # 5. Çevre Birimleri (Peripherals) Dosyalarını Ekle
@@ -85,33 +86,34 @@ add_files -norecurse [list \
     "$periph_dir/files_1/uart_tx.sv" \
     "$periph_dir/files_1/uart_peripheral.sv" \
     "$periph_dir/files_1/uart_stream_peripheral.sv" \
-    "$periph_dir/npu_accelerator.sv" \
-    "$periph_dir/npu_compute_engine.sv" \
-    "$periph_dir/npu_csr.sv" \
-    "$periph_dir/npu_tcm_sram.sv" \
+    "$npu_dir/npu_accelerator.sv" \
+    "$npu_dir/npu_compute_engine.sv" \
+    "$npu_dir/npu_csr.sv" \
+    "$npu_dir/npu_tcm_sram.sv" \
     "$periph_dir/dma_controller.sv" \
     "$periph_dir/jtag_debug.sv" \
 ]
 
 # 6. Bellek ve En Üst Seviye (Top) Dosyalarını Ekle (nexys_top.sv dahil)
 add_files -norecurse [list \
-    "./boot/boot_rom.sv" \
-    "./Memory/sram_module.sv" \
-    "./Memory/axil_arbiter_2to1.sv" \
-    "./Memory/axil_arbiter_3to1.sv" \
-    "./Memory/obi_to_axi_simple.sv" \
-    "./Memory/axi_lite_interconnect.sv" \
-    "./Memory/soc_top.sv" \
-    "./Memory/nexys_top.sv" \
+    "./rtl/boot/boot_rom.sv" \
+    "./rtl/Memory/sram_module.sv" \
+    "./rtl/Memory/axil_arbiter_2to1.sv" \
+    "./rtl/Memory/axil_arbiter_3to1.sv" \
+    "./rtl/Memory/axil_protocol_checker.sv" \
+    "./rtl/Memory/obi_to_axi_simple.sv" \
+    "./rtl/Memory/axi_lite_interconnect.sv" \
+    "./rtl/Memory/soc_top.sv" \
+    "./rtl/Memory/nexys_top.sv" \
 ]
 
 # 7. Kısıt Dosyalarını (Constraints) Ekle
-add_files -fileset constrs_1 -norecurse [list "./nexys4ddr.xdc"]
+add_files -fileset constrs_1 -norecurse [list "./rtl/nexys4ddr.xdc"]
 
 # 8. Simülasyon Dosyalarını sim_1 Setine Ekle
 add_files -fileset sim_1 -norecurse [list \
-    "./Memory/tb_soc_top.sv" \
-    "./boot/boot.hex" \
+    "./tb/tb_soc_top.sv" \
+    "./rtl/boot/boot.hex" \
 ]
 
 # 9. Hiyerarşi Top Modüllerini Belirle (Nexys Top olarak ayarlandı)
