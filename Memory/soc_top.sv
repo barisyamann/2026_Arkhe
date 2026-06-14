@@ -1,20 +1,10 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Arkhe RTL Team
-// Engineer: Antigravity AI
-// 
-// Create Date: 25.04.2026
-// Update Date: 12.06.2026
-// Design Name: soc_top
-// Module Name: soc_top
 // Description: Top Level Module of the Arkhe RISC-V SoC.
 //              Instantiates the CORE-V CV32E40P CPU, OBI-to-AXI Bridges,
 //              3-to-1 AXI4-Lite Master Arbiter (CPU/JTAG/DMA),
 //              AXI4-Lite Interconnect (1M→13S), Boot ROM, I-RAM, D-RAM,
 //              Peripherals (GPIO, Timer, UART1, UART2 Stream, I2C Master,
 //              QSPI Master, NPU Accelerator, DMA Controller, JTAG Debug).
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module soc_top (
     input  logic        clk_i,

@@ -1,19 +1,10 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Arkhe RTL Team
-// Engineer: Antigravity AI
-// 
-// Create Date: 11.06.2026
-// Design Name: npu_accelerator
-// Module Name: npu_accelerator
 // Description: Top Level Wrapper of the Arkhe AI Accelerator (NPU).
 //              Instantiates npu_csr, npu_tcm_sram, and npu_compute_engine.
 //              Provides two AXI4-Lite Slave ports:
 //              1) CSR Config Port (REG_AXI)
 //              2) 30 kB Local Memory Port (MEM_AXI)
 //              And one Interrupt Output port (irq_o).
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module npu_accelerator (
     input  logic        clk,

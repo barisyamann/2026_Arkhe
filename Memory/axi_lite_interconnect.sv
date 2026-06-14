@@ -1,17 +1,7 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Arkhe RTL Team
-// Engineer: Antigravity AI
-// 
-// Create Date: 26.04.2026
-// Update Date: 11.06.2026
-// Design Name: axi_lite_interconnect
-// Module Name: axi_lite_interconnect
 // Description: Expanded AXI4-Lite Interconnect (1 Master to 13 Slaves).
 //              Routes Write Address, Write Data, Write Response, Read Address,
 //              and Read Data channels. Includes default error responder.
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module axi_lite_interconnect (
     input  logic        clk,

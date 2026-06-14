@@ -1,16 +1,7 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Arkhe RTL Team
-// Engineer: Antigravity AI
-// 
-// Create Date: 11.06.2026
-// Design Name: npu_compute_engine
-// Module Name: npu_compute_engine
 // Description: FSM and arithmetic unit for NPU computing.
 //              Performs symbolic inference modeling (DepthwiseConv2D, ReLU, FC, Softmax)
 //              by loading 1960 inputs and classifying them.
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module npu_compute_engine (
     input  logic        clk,

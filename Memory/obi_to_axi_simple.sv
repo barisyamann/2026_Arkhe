@@ -1,17 +1,7 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Arkhe RTL Team
-// Engineer: Antigravity AI
-// 
-// Create Date: 26.04.2026
-// Update Date: 11.06.2026
-// Design Name: obi_to_axi_simple
-// Module Name: obi_to_axi_simple
 // Description: Robust OBI (Open Bus Interface) to AXI4-Lite Master bridge.
 //              Correctly manages independent write address/data handshakes and 
 //              translates responses back to the OBI protocol.
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module obi_to_axi_simple (
     input  logic        clk_i,

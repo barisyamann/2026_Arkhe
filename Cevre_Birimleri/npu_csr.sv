@@ -1,15 +1,6 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Arkhe RTL Team
-// Engineer: Antigravity AI
-// 
-// Create Date: 11.06.2026
-// Design Name: npu_csr
-// Module Name: npu_csr
 // Description: AXI4-Lite Slave register interface for the NPU.
 //              Provides control/status signals and configures memory offsets.
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module npu_csr (
     input  logic        clk,

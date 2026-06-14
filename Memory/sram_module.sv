@@ -1,16 +1,7 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Arkhe RTL Team
-// Engineer: Antigravity AI
-// 
-// Create Date: 11.06.2026
-// Design Name: sram_module
-// Module Name: sram_module
 // Description: Parametric 8 kB SRAM module with a standard AXI4-Lite Slave Interface.
 //              Supports 4-bit write strobes (byte write enable) for BRAM inference in Vivado.
 //              Refactored to separate RAM array logic from asynchronous resets.
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module sram_module #(
     parameter int AXI_ADDR_W = 32,

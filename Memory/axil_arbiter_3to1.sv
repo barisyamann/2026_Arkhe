@@ -1,18 +1,9 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Arkhe RTL Team
-// Engineer: Antigravity AI
-// 
-// Create Date: 12.06.2026
-// Design Name: axil_arbiter_3to1
-// Module Name: axil_arbiter_3to1
 // Description: AXI4-Lite 3-to-1 Arbiter.
 //              Merges CPU Data, DMA Master, and JTAG Master into a single
 //              AXI4-Lite master output for the interconnect.
 //              Priority: CPU (M0) > JTAG (M1) > DMA (M2)
 //              Uses a simple priority-based FSM per channel.
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module axil_arbiter_3to1 (
     input  logic        clk,

@@ -1,18 +1,9 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Arkhe RTL Team
-// Engineer: Antigravity AI
-// 
-// Create Date: 12.06.2026
-// Design Name: dma_controller
-// Module Name: dma_controller
 // Description: Single-Channel DMA Controller with AXI4-Lite interfaces.
 //              Provides Memory-to-Memory data transfer capability.
 //              Primary use case: UART-Stream → NPU TCM data transfers.
 //              CSR Slave port for CPU configuration + Master port for data moves.
 //              Ref: ÖTR Bölüm 3.2.8
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module dma_controller (
     input  logic        clk,

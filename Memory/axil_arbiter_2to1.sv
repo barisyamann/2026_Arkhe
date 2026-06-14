@@ -1,15 +1,6 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Arkhe RTL Team
-// Engineer: Antigravity AI
-// 
-// Create Date: 11.06.2026
-// Design Name: axil_arbiter_2to1
-// Module Name: axil_arbiter_2to1
 // Description: AXI4-Lite 2-to-1 Arbiter/Multiplexer. Allows Master 0 (read-only)
 //              and Master 1 (read/write) to share a single AXI4-Lite slave.
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module axil_arbiter_2to1 (
     input  logic        clk,

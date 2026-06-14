@@ -1,17 +1,8 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Arkhe RTL Team
-// Engineer: Antigravity AI
-// 
-// Create Date: 11.06.2026
-// Design Name: npu_tcm_sram
-// Module Name: npu_tcm_sram
 // Description: Dual-Port Tightly Coupled Memory (TCM) for NPU.
 //              Size: Exactly 30 kB (7680 words x 32-bit).
 //              Port A is for external AXI Bus access.
 //              Port B is for internal Compute Engine access.
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module npu_tcm_sram (
     input  logic        clk,

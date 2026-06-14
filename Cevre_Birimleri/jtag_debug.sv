@@ -1,11 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Arkhe RTL Team
-// Engineer: Antigravity AI
-// 
-// Create Date: 12.06.2026
-// Design Name: jtag_debug
-// Module Name: jtag_debug
 // Description: Simplified JTAG Debug Bridge for the Arkhe SoC.
 //              Provides external debug access via JTAG TAP pins.
 //              Features:
@@ -13,8 +6,6 @@
 //              - CPU halt/resume control via debug_req_o signal
 //              - AXI4-Lite Slave CSR for internal debug register access
 //              Ref: ÖTR Bölüm 3.2.7
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module jtag_debug (
     input  logic        clk,

@@ -1,16 +1,7 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: Arkhe RTL Team
-// Engineer: Antigravity AI
-// 
-// Create Date: 11.06.2026
-// Design Name: tb_soc_top
-// Module Name: tb_soc_top
 // Description: Testbench to verify Arkhe SoC Top Integration in Vivado.
 //              Generates a 50 MHz clock, handles system reset, and mocks
 //              external peripheral pins to verify early CPU boot cycles.
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 module tb_soc_top;
 
