@@ -1449,88 +1449,92 @@ module cv32e40p_cs_registers
   endgenerate
 
   // ------------------------
+  // ------------------------
   // HPM Registers
   //  Counter Registers: mhpcounter_q[]
-  genvar cnt_gidx;
-  generate
-    for (cnt_gidx = 0; cnt_gidx < 32; cnt_gidx++) begin : gen_mhpmcounter
-      // mcyclce  is located at index 0
-      // there is no counter at index 1
-      // minstret is located at index 2
-      // Programable HPM counters start at index 3
-      if ((cnt_gidx == 1) || (cnt_gidx >= (NUM_MHPMCOUNTERS + 3))) begin : gen_non_implemented
-        assign mhpmcounter_q[cnt_gidx] = 'b0;
-      end else begin : gen_implemented
-        always_ff @(posedge clk, negedge rst_n)
-          if (!rst_n) begin
-            mhpmcounter_q[cnt_gidx] <= 'b0;
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      for (int i = 0; i < 32; i = i + 1) begin
+        mhpmcounter_q[i] <= 'b0;
+      end
+    end else begin
+      for (int i = 0; i < 32; i = i + 1) begin
+        if ((i == 1) || (i >= (NUM_MHPMCOUNTERS + 3))) begin
+          mhpmcounter_q[i] <= 'b0;
+        end else begin
+          if (PULP_PERF_COUNTERS && (i == 2 || i == 0)) begin
+            mhpmcounter_q[i] <= 'b0;
           end else begin
-            if (PULP_PERF_COUNTERS && (cnt_gidx == 2 || cnt_gidx == 0)) begin
-              mhpmcounter_q[cnt_gidx] <= 'b0;
-            end else begin
-              if (mhpmcounter_write_lower[cnt_gidx]) begin
-                mhpmcounter_q[cnt_gidx][31:0] <= csr_wdata_int;
-              end else if (mhpmcounter_write_upper[cnt_gidx]) begin
-                mhpmcounter_q[cnt_gidx][63:32] <= csr_wdata_int;
-              end else if (mhpmcounter_write_increment[cnt_gidx]) begin
-                mhpmcounter_q[cnt_gidx] <= mhpmcounter_increment[cnt_gidx];
-              end
+            if (mhpmcounter_write_lower[i]) begin
+              mhpmcounter_q[i][31:0] <= csr_wdata_int;
+            end else if (mhpmcounter_write_upper[i]) begin
+              mhpmcounter_q[i][63:32] <= csr_wdata_int;
+            end else if (mhpmcounter_write_increment[i]) begin
+              mhpmcounter_q[i] <= mhpmcounter_increment[i];
             end
           end
+        end
       end
     end
-  endgenerate
+  end
 
   //  Event Register: mhpevent_q[]
-  genvar evt_gidx;
-  generate
-    for (evt_gidx = 0; evt_gidx < 32; evt_gidx++) begin : gen_mhpmevent
-      // programable HPM events start at index3
-      if ((evt_gidx < 3) || (evt_gidx >= (NUM_MHPMCOUNTERS + 3))) begin : gen_non_implemented
-        assign mhpmevent_q[evt_gidx] = 'b0;
-      end else begin : gen_implemented
-        if (NUM_HPM_EVENTS < 32) begin : gen_tie_off
-          assign mhpmevent_q[evt_gidx][31:NUM_HPM_EVENTS] = 'b0;
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      for (int i = 0; i < 32; i = i + 1) begin
+        mhpmevent_q[i] <= 'b0;
+      end
+    end else begin
+      for (int i = 0; i < 32; i = i + 1) begin
+        if ((i < 3) || (i >= (NUM_MHPMCOUNTERS + 3))) begin
+          mhpmevent_q[i] <= 'b0;
+        end else begin
+          if (NUM_HPM_EVENTS < 32) begin
+            mhpmevent_q[i] <= { { (32-NUM_HPM_EVENTS){1'b0} }, mhpmevent_n[i][NUM_HPM_EVENTS-1:0] };
+          end else begin
+            mhpmevent_q[i] <= mhpmevent_n[i];
+          end
         end
-        always_ff @(posedge clk, negedge rst_n)
-          if (!rst_n) mhpmevent_q[evt_gidx][NUM_HPM_EVENTS-1:0] <= 'b0;
-          else
-            mhpmevent_q[evt_gidx][NUM_HPM_EVENTS-1:0] <= mhpmevent_n[evt_gidx][NUM_HPM_EVENTS-1:0];
       end
     end
-  endgenerate
+  end
 
-  //  Enable Regsiter: mcounteren_q
-  genvar en_gidx;
-  generate
-    for (en_gidx = 0; en_gidx < 32; en_gidx++) begin : gen_mcounteren
-      if( (PULP_SECURE == 0) ||
-          (en_gidx == 1) ||
-          (en_gidx >= (NUM_MHPMCOUNTERS+3) ) )
-        begin : gen_non_implemented
-        assign mcounteren_q[en_gidx] = 'b0;
-      end else begin : gen_implemented
-        always_ff @(posedge clk, negedge rst_n)
-          if (!rst_n) mcounteren_q[en_gidx] <= 'b0;  // default disable
-          else mcounteren_q[en_gidx] <= mcounteren_n[en_gidx];
+  //  Enable Register: mcounteren_q
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      mcounteren_q <= 32'h0;
+    end else begin
+      for (int i = 0; i < 32; i = i + 1) begin
+        if ((PULP_SECURE == 0) || (i == 1) || (i >= (NUM_MHPMCOUNTERS + 3))) begin
+          mcounteren_q[i] <= 1'b0;
+        end else begin
+          mcounteren_q[i] <= mcounteren_n[i];
+        end
       end
     end
-  endgenerate
+  end
 
-  //  Inhibit Regsiter: mcountinhibit_q
+  //  Inhibit Register: mcountinhibit_q
   //  Note: implemented counters are disabled out of reset to save power
-  genvar inh_gidx;
-  generate
-    for (inh_gidx = 0; inh_gidx < 32; inh_gidx++) begin : gen_mcountinhibit
-      if ((inh_gidx == 1) || (inh_gidx >= (NUM_MHPMCOUNTERS + 3))) begin : gen_non_implemented
-        assign mcountinhibit_q[inh_gidx] = 'b0;
-      end else begin : gen_implemented
-        always_ff @(posedge clk, negedge rst_n)
-          if (!rst_n) mcountinhibit_q[inh_gidx] <= 'b1;  // default disable
-          else mcountinhibit_q[inh_gidx] <= mcountinhibit_n[inh_gidx];
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      for (int i = 0; i < 32; i = i + 1) begin
+        if ((i == 1) || (i >= (NUM_MHPMCOUNTERS + 3))) begin
+          mcountinhibit_q[i] <= 1'b0;
+        end else begin
+          mcountinhibit_q[i] <= 1'b1;
+        end
+      end
+    end else begin
+      for (int i = 0; i < 32; i = i + 1) begin
+        if ((i == 1) || (i >= (NUM_MHPMCOUNTERS + 3))) begin
+          mcountinhibit_q[i] <= 1'b0;
+        end else begin
+          mcountinhibit_q[i] <= mcountinhibit_n[i];
+        end
       end
     end
-  endgenerate
+  end
 
 `ifdef CV32E40P_ASSERT_ON
 

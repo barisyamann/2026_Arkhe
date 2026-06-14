@@ -16,8 +16,6 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-`include "memory_map_pck.sv"
-
 module soc_top (
     input  logic        clk_i,
     input  logic        rst_ni,

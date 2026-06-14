@@ -8,6 +8,7 @@
 // Module Name: sram_module
 // Description: Parametric 8 kB SRAM module with a standard AXI4-Lite Slave Interface.
 //              Supports 4-bit write strobes (byte write enable) for BRAM inference in Vivado.
+//              Refactored to separate RAM array logic from asynchronous resets.
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -51,11 +52,10 @@ module sram_module #(
     logic aw_active;
     logic w_active;
     logic [AXI_ADDR_W-1:0] aw_addr_reg;
-    logic [AXI_ADDR_W-1:0] ar_addr_reg;
 
     localparam logic [1:0] RESP_OKAY = 2'b00;
 
-    // --- AXI Yazma Kontrolü ---
+    // --- AXI Yazma Kontrol Yazmaçları (Async reset içerir) ---
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             aw_active      <= 1'b0;
@@ -83,23 +83,12 @@ module sram_module #(
                 s_axil_wready  <= s_axil_wvalid;
             end
 
-            // Yazma işleminin RAM'e uygulanması
+            // Yazma işleminin tamamlanması
             if (aw_active && w_active && !s_axil_bvalid) begin
                 aw_active     <= 1'b0;
                 w_active      <= 1'b0;
                 s_axil_bvalid <= 1'b1;
                 s_axil_bresp  <= RESP_OKAY;
-
-                // Adres kelime hizalaması (word alignment): [12:2] bitlerini kullanıyoruz (2048 satır için)
-                // (aw_addr_reg - BASE) işleminin üst modülde veya interconnect'te yapıldığı varsayılır,
-                // buraya doğrudan RAM içi offset gelir veya adresin ilgili bitleri filtrelenir.
-                // RAM_DEPTH 2048 ise $clog2(RAM_DEPTH)+1 bit gereklidir. [12:2] bitleri 2048 kelimeyi adresler.
-                if (aw_addr_reg[$clog2(RAM_DEPTH)+1 : 2] < RAM_DEPTH) begin
-                    if (s_axil_wstrb[0]) ram[aw_addr_reg[$clog2(RAM_DEPTH)+1 : 2]][7:0]   <= s_axil_wdata[7:0];
-                    if (s_axil_wstrb[1]) ram[aw_addr_reg[$clog2(RAM_DEPTH)+1 : 2]][15:8]  <= s_axil_wdata[15:8];
-                    if (s_axil_wstrb[2]) ram[aw_addr_reg[$clog2(RAM_DEPTH)+1 : 2]][23:16] <= s_axil_wdata[23:16];
-                    if (s_axil_wstrb[3]) ram[aw_addr_reg[$clog2(RAM_DEPTH)+1 : 2]][31:24] <= s_axil_wdata[31:24];
-                end
             end
 
             // Yanıt tamamlama
@@ -109,25 +98,29 @@ module sram_module #(
         end
     end
 
-    // --- AXI Okuma Kontrolü ---
+    // --- RAM Yazma Mantığı (RESET İÇERMEZ, Saf BRAM Çıkarımı) ---
+    always_ff @(posedge clk) begin
+        if (aw_active && w_active && !s_axil_bvalid) begin
+            if (aw_addr_reg[$clog2(RAM_DEPTH)+1 : 2] < RAM_DEPTH) begin
+                if (s_axil_wstrb[0]) ram[aw_addr_reg[$clog2(RAM_DEPTH)+1 : 2]][7:0]   <= s_axil_wdata[7:0];
+                if (s_axil_wstrb[1]) ram[aw_addr_reg[$clog2(RAM_DEPTH)+1 : 2]][15:8]  <= s_axil_wdata[15:8];
+                if (s_axil_wstrb[2]) ram[aw_addr_reg[$clog2(RAM_DEPTH)+1 : 2]][23:16] <= s_axil_wdata[23:16];
+                if (s_axil_wstrb[3]) ram[aw_addr_reg[$clog2(RAM_DEPTH)+1 : 2]][31:24] <= s_axil_wdata[31:24];
+            end
+        end
+    end
+
+    // --- AXI Okuma Kontrol Yazmaçları (Async reset içerir) ---
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             s_axil_arready <= 1'b0;
             s_axil_rvalid  <= 1'b0;
-            s_axil_rdata   <= '0;
             s_axil_rresp   <= RESP_OKAY;
         end else begin
             if (s_axil_arvalid && !s_axil_rvalid) begin
                 s_axil_arready <= 1'b1;
                 s_axil_rvalid  <= 1'b1;
                 s_axil_rresp   <= RESP_OKAY;
-                
-                // RAM'den veri okuma (Bir çevrim gecikmeli)
-                if (s_axil_araddr[$clog2(RAM_DEPTH)+1 : 2] < RAM_DEPTH) begin
-                    s_axil_rdata <= ram[s_axil_araddr[$clog2(RAM_DEPTH)+1 : 2]];
-                end else begin
-                    s_axil_rdata <= 32'hDEADBEEF; // Geçersiz adres okuması
-                end
             end else begin
                 s_axil_arready <= 1'b0;
             end
@@ -138,5 +131,23 @@ module sram_module #(
             end
         end
     end
+
+    // --- RAM Okuma Mantığı (RESET İÇERMEZ, Saf BRAM Çıkarımı) ---
+    logic [31:0] ram_rdata;
+    logic [$clog2(RAM_DEPTH)-1:0] raddr;
+    assign raddr = s_axil_araddr[$clog2(RAM_DEPTH)+1 : 2];
+
+    always_ff @(posedge clk) begin
+        if (s_axil_arvalid && !s_axil_rvalid) begin
+            if (raddr < RAM_DEPTH) begin
+                ram_rdata <= ram[raddr];
+            end else begin
+                ram_rdata <= 32'hDEADBEEF; // Geçersiz adres okuması
+            end
+        end
+    end
+
+    // Okuma verisi doğrudan RAM register'ından sürülür
+    assign s_axil_rdata = ram_rdata;
 
 endmodule

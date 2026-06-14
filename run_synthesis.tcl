@@ -3,12 +3,20 @@
 #  TEKNOFEST 2026 Çip Tasarım Yarışması - Sentez Scripti
 # ==============================================================================
 
-# 1. Projeyi yeniden oluştur
+# 1. Çalışma dizinini projenin bulunduğu yere yönlendir (Dinamik)
+set script_dir [file dirname [file normalize [info script]]]
+cd $script_dir
+
+# Açık proje varsa kapat (çakışmaları önlemek için)
+catch {close_project}
+
+# 2. Projeyi yeniden oluştur (XPR dosyası silindiği için sıfırdan kuruyoruz)
 source create_project.tcl
 
-# 2. Sentezi başlat (jobs sayısını 4 olarak ayarlayalım)
+# 2. Sentezi başlat (tek çekirdek — Windows'ta OOM riskini azaltmak için)
 puts "Sentez baslatiliyor..."
-launch_runs synth_1 -jobs 4
+set_param general.maxThreads 1
+launch_runs synth_1 -jobs 1
 wait_on_run synth_1
 
 # Durumu kontrol et
@@ -19,10 +27,9 @@ puts "Sentez Durumu: $run_status ($run_progress)"
 if {[string first "Complete" $run_status] != -1 || $run_progress == "100%"} {
     puts "Sentez basariyla tamamlandi. Raporlar uretiliyor..."
     open_run synth_1
-    report_utilization -file utilization_report.rpt
-    report_utilization -hierarchical -file utilization_hierarchical_report.rpt
-    puts "Raporlar olusturuldu: utilization_report.rpt ve utilization_hierarchical_report.rpt"
+    report_utilization -file [file join $script_dir "utilization_report.rpt"]
+    report_utilization -hierarchical -file [file join $script_dir "utilization_hierarchical_report.rpt"]
+    puts "Raporlar olusturuldu: [file join $script_dir "utilization_report.rpt"] ve [file join $script_dir "utilization_hierarchical_report.rpt"]"
 } else {
     puts "HATA: Sentez tamamlanamadi!"
-    exit 1
 }

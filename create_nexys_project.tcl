@@ -1,13 +1,7 @@
 # ==============================================================================
-#  create_project.tcl
-#  TEKNOFEST 2026 Çip Tasarım Yarışması - Mikrodenetleyici Kategorisi
+#  create_nexys_project.tcl
+#  TEKNOFEST 2026 - Nexys 4 DDR (XC7A100T) Proje Oluşturma Scripti
 #  Tasarım Ekibi: Arkhe
-# ==============================================================================
-#  Açıklama: Bu script Vivado üzerinde sıfırdan tüm projeyi otomatik oluşturur,
-#             paket derleme sıralarını düzenler ve simülasyona hazır hale verir.
-#
-#  Kullanımı: Vivado TCL Console'a şu komutu yazın:
-#             source create_project.tcl
 # ==============================================================================
 
 # Karakter kodlaması ve boşluk uyumsuzluğunu önlemek için dizini kontrol ediyoruz
@@ -20,13 +14,13 @@ if {[file exists "./Cevre_Birimleri"]} {
 }
 puts "Bulunan Cevre Birimleri Dizini: $periph_dir"
 
-set project_name "Arkhe_SoC"
-set project_dir "./vivado_project"
+set project_name "Arkhe_SoC_Nexys"
+set project_dir "./vivado_nexys_project"
 
-# 1. Projeyi Oluştur (Varsayılan FPGA: Artix-7 A35T)
-create_project $project_name $project_dir -part xc7a35tcsg324-1 -force
+# 1. Projeyi Oluştur (Nexys 4 DDR FPGA: XC7A100T-1CSG324C)
+create_project $project_name $project_dir -part xc7a100tcsg324-1 -force
 
-# Board part property'yi temizle (gereksiz Versal board uyarılarını önlemek için)
+# Board part property'yi temizle
 set_property BOARD_PART "" [current_project]
 
 # Hedef dili Verilog olarak ayarla
@@ -41,7 +35,7 @@ set include_dirs [list \
 set_property include_dirs $include_dirs [current_fileset]
 set_property include_dirs $include_dirs [get_filesets sim_1]
 
-# 3. Paket Dosyalarını Önce Ekle (SystemVerilog'da derleme sırası için kritiktir)
+# 3. Paket Dosyalarını Önce Ekle
 add_files -norecurse [list \
     "./Memory/memory_map_pck.sv" \
     "./cv32e40p-master/rtl/include/cv32e40p_apu_core_pkg.sv" \
@@ -99,7 +93,7 @@ add_files -norecurse [list \
     "$periph_dir/jtag_debug.sv" \
 ]
 
-# 6. Bellek ve En Üst Seviye (Top) Dosyalarını Ekle
+# 6. Bellek ve En Üst Seviye (Top) Dosyalarını Ekle (nexys_top.sv dahil)
 add_files -norecurse [list \
     "./boot/boot_rom.sv" \
     "./Memory/sram_module.sv" \
@@ -108,19 +102,20 @@ add_files -norecurse [list \
     "./Memory/obi_to_axi_simple.sv" \
     "./Memory/axi_lite_interconnect.sv" \
     "./Memory/soc_top.sv" \
+    "./Memory/nexys_top.sv" \
 ]
 
-# 7. Simülasyon Dosyalarını sim_1 Setine Ekle
+# 7. Kısıt Dosyalarını (Constraints) Ekle
+add_files -fileset constrs_1 -norecurse [list "./nexys4ddr.xdc"]
+
+# 8. Simülasyon Dosyalarını sim_1 Setine Ekle
 add_files -fileset sim_1 -norecurse [list \
     "./Memory/tb_soc_top.sv" \
     "./boot/boot.hex" \
 ]
 
-# 8. Kısıt Dosyalarını (Constraints) Ekle
-add_files -fileset constrs_1 -norecurse [list "./constraints.xdc"]
-
-# 9. Hiyerarşi Top Modüllerini Belirle
-set_property top soc_top [current_fileset]
+# 9. Hiyerarşi Top Modüllerini Belirle (Nexys Top olarak ayarlandı)
+set_property top nexys_top [current_fileset]
 set_property top tb_soc_top [get_filesets sim_1]
 
 # 10. Derleme sırasını ve hiyerarşiyi güncelle
@@ -128,8 +123,7 @@ update_compile_order -fileset sources_1
 update_compile_order -fileset sim_1
 
 puts "================================================================"
-puts " Arkhe SoC Vivado Projesi Başarıyla Oluşturuldu!"
-puts " Ana Modül (Top): soc_top.sv"
-puts " Simülasyon Modülü (Testbench): tb_soc_top.sv"
-puts " Simülasyonu başlatmak için Vivado'da 'Run Simulation' diyebilirsiniz."
+puts " Nexys 4 DDR SoC Vivado Projesi Başarıyla Oluşturuldu!"
+puts " Ana Modül (Top): nexys_top.sv"
+puts " Zamanlama Kısıtları: nexys4ddr.xdc"
 puts "================================================================"

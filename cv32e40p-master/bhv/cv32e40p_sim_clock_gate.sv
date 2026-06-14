@@ -19,6 +19,10 @@ module cv32e40p_clock_gate (
     output logic clk_o
 );
 
+`ifdef SYNTHESIS
+  // FPGA'da latch bazli clock gate yerine dogrudan saati gecirerek zamanlama (timing) sorunlarini onluyoruz.
+  assign clk_o = clk_i;
+`else
   logic clk_en;
 
   always_latch begin
@@ -26,5 +30,6 @@ module cv32e40p_clock_gate (
   end
 
   assign clk_o = clk_i & clk_en;
+`endif
 
 endmodule  // cv32e40p_clock_gate
