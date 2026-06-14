@@ -105,6 +105,7 @@ add_files -norecurse [list \
     "./Memory/sram_module.sv" \
     "./Memory/axil_arbiter_2to1.sv" \
     "./Memory/axil_arbiter_3to1.sv" \
+    "./Memory/axil_protocol_checker.sv" \
     "./Memory/obi_to_axi_simple.sv" \
     "./Memory/axi_lite_interconnect.sv" \
     "./Memory/soc_top.sv" \

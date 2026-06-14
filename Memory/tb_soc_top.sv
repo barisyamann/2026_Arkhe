@@ -197,4 +197,29 @@ module tb_soc_top;
         end
     end
 
+    // --- AXI4-Lite Protokol Denetleyicisi Bağlantısı (SVA) ---
+    // bind ifadesiyle soc_top modülünün içine axil_protocol_checker instantiator'ını bağlıyoruz.
+    // Bu sayede soc_top.sv ve teknotest dosyaları orijinal ve temiz kalır.
+    bind soc_top axil_protocol_checker u_protocol_checker (
+        .clk      (clk_i),
+        .rst_n    (rst_ni),
+        .awaddr   (merged_m_awaddr),
+        .awvalid  (merged_m_awvalid),
+        .awready  (merged_m_awready),
+        .wdata    (merged_m_wdata),
+        .wstrb    (merged_m_wstrb),
+        .wvalid   (merged_m_wvalid),
+        .wready   (merged_m_wready),
+        .bresp    (merged_m_bresp),
+        .bvalid   (merged_m_bvalid),
+        .bready   (merged_m_bready),
+        .araddr   (merged_m_araddr),
+        .arvalid  (merged_m_arvalid),
+        .arready  (merged_m_arready),
+        .rdata    (merged_m_rdata),
+        .rresp    (merged_m_rresp),
+        .rvalid   (merged_m_rvalid),
+        .rready   (merged_m_rready)
+    );
+
 endmodule

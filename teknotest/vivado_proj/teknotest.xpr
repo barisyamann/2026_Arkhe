@@ -4,11 +4,11 @@
 <!-- Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.                   -->
 <!-- Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.   -->
 
-<Project Product="Vivado" Version="7" Minor="71" Path="C:/Arkhe_2026/vivado_project/Arkhe_SoC.xpr">
+<Project Product="Vivado" Version="7" Minor="71" Path="C:/Arkhe_2026/teknotest/vivado_proj/teknotest.xpr">
   <DefaultLaunch Dir="$PRUNDIR"/>
   <Configuration>
-    <Option Name="Id" Val="fef389a51ac44a638428cad80fbbccb4"/>
-    <Option Name="Part" Val="xc7a35tcsg324-1"/>
+    <Option Name="Id" Val="c1964623f34243d68dc6d17dae46abb9"/>
+    <Option Name="Part" Val="xc7k325tffg900-2"/>
     <Option Name="CompiledLibDir" Val="$PCACHEDIR/compile_simlib"/>
     <Option Name="CompiledLibDirXSim" Val=""/>
     <Option Name="CompiledLibDirModelSim" Val="$PCACHEDIR/compile_simlib/modelsim"/>
@@ -89,372 +89,377 @@
   <FileSets Version="1" Minor="32">
     <FileSet Name="sources_1" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1" RelGenDir="$PGENDIR/sources_1">
       <Filter Type="Srcs"/>
-      <File Path="$PPRDIR/../Memory/axil_protocol_checker.sv">
+      <File Path="$PPRDIR/../sw/build/helloworld.mem">
         <FileInfo>
-          <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Memory/axi_lite_interconnect.sv">
+      <File Path="$PPRDIR/../../Memory/axi_lite_interconnect.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Memory/axil_arbiter_2to1.sv">
+      <File Path="$PPRDIR/../../Memory/axil_arbiter_2to1.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Memory/axil_arbiter_3to1.sv">
+      <File Path="$PPRDIR/../../Memory/axil_arbiter_3to1.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../boot/boot_rom.sv">
+      <File Path="$PPRDIR/../../boot/boot_rom.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_aligner.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_aligner.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/include/cv32e40p_pkg.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/include/cv32e40p_pkg.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_alu.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_alu.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_alu_div.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_alu_div.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/include/cv32e40p_apu_core_pkg.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/include/cv32e40p_apu_core_pkg.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_apu_disp.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_apu_disp.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_compressed_decoder.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_compressed_decoder.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_controller.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_controller.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_core.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_core.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_cs_registers.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_cs_registers.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/include/cv32e40p_fpu_pkg.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/include/cv32e40p_fpu_pkg.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_decoder.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_decoder.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_ex_stage.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_ex_stage.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_ff_one.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_ff_one.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_fifo.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_fifo.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_hwloop_regs.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_hwloop_regs.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_id_stage.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_id_stage.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_if_stage.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_if_stage.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_int_controller.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_int_controller.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_load_store_unit.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_load_store_unit.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_mult.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_mult.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_obi_interface.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_obi_interface.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_popcnt.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_popcnt.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_prefetch_buffer.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_prefetch_buffer.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_prefetch_controller.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_prefetch_controller.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_register_file_ff.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_register_file_ff.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/bhv/cv32e40p_sim_clock_gate.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/bhv/cv32e40p_sim_clock_gate.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../cv32e40p-master/rtl/cv32e40p_sleep_unit.sv">
+      <File Path="$PPRDIR/../../cv32e40p-master/rtl/cv32e40p_sleep_unit.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/dma_controller.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/dma_controller.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/gpio_peripheral.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/gpio_peripheral.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/i2c_peripheral.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/i2c_peripheral.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/jtag_debug.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/jtag_debug.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Memory/memory_map_pck.sv">
+      <File Path="$PPRDIR/../../Memory/memory_map_pck.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/npu_accelerator.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/npu_accelerator.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/npu_compute_engine.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/npu_compute_engine.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/npu_csr.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/npu_csr.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/npu_tcm_sram.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/npu_tcm_sram.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Memory/obi_to_axi_simple.sv">
+      <File Path="$PPRDIR/../../Memory/obi_to_axi_simple.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/qspi_master.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/qspi_master.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Memory/sram_module.sv">
+      <File Path="$PPRDIR/../../Memory/soc_top.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/files_1/sync_fifo.sv">
+      <File Path="$PPRDIR/../../Memory/sram_module.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/timer_peripheral.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/files_1/sync_fifo.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/files_1/uart_pkg.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/timer_peripheral.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/files_1/uart_peripheral.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/files_1/uart_pkg.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/files_1/uart_rx.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/files_1/uart_peripheral.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/files_1/uart_stream_peripheral.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/files_1/uart_rx.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Cevre_Birimleri/files_1/uart_tx.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/files_1/uart_stream_peripheral.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../Memory/soc_top.sv">
+      <File Path="$PPRDIR/../../Cevre_Birimleri/files_1/uart_tx.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../user_files/teknotest_wrapper.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
@@ -463,27 +468,19 @@
       </File>
       <Config>
         <Option Name="DesignMode" Val="RTL"/>
-        <Option Name="TopModule" Val="soc_top"/>
-        <Option Name="VerilogDir" Val="$PPRDIR/../cv32e40p-master/rtl/include"/>
-        <Option Name="VerilogDir" Val="$PPRDIR/../Memory"/>
-        <Option Name="VerilogDir" Val="$PPRDIR/../Cevre_Birimleri/files_1"/>
+        <Option Name="TopModule" Val="teknotest_wrapper"/>
+        <Option Name="TopAutoSet" Val="TRUE"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../user_files"/>
       </Config>
     </FileSet>
     <FileSet Name="constrs_1" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1" RelGenDir="$PGENDIR/constrs_1">
       <Filter Type="Constrs"/>
-      <File Path="$PPRDIR/../constraints.xdc">
-        <FileInfo>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="implementation"/>
-        </FileInfo>
-      </File>
       <Config>
         <Option Name="ConstrsType" Val="XDC"/>
       </Config>
     </FileSet>
     <FileSet Name="sim_1" Type="SimulationSrcs" RelSrcDir="$PSRCDIR/sim_1" RelGenDir="$PGENDIR/sim_1">
-      <File Path="$PPRDIR/../boot/boot.hex"/>
-      <File Path="$PPRDIR/../Memory/tb_soc_top.sv">
+      <File Path="$PPRDIR/../tb/teknotest_tb.sv">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
@@ -492,10 +489,8 @@
       </File>
       <Config>
         <Option Name="DesignMode" Val="RTL"/>
-        <Option Name="TopModule" Val="tb_soc_top"/>
-        <Option Name="VerilogDir" Val="$PPRDIR/../cv32e40p-master/rtl/include"/>
-        <Option Name="VerilogDir" Val="$PPRDIR/../Memory"/>
-        <Option Name="VerilogDir" Val="$PPRDIR/../Cevre_Birimleri/files_1"/>
+        <Option Name="TopModule" Val="teknotest_tb"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../user_files"/>
         <Option Name="TransportPathDelay" Val="0"/>
         <Option Name="TransportIntDelay" Val="0"/>
         <Option Name="SelectedSimModel" Val="rtl"/>
@@ -544,7 +539,7 @@
     </Simulator>
   </Simulators>
   <Runs Version="1" Minor="22">
-    <Run Id="synth_1" Type="Ft3:Synth" SrcSet="sources_1" Part="xc7a35tcsg324-1" ConstrsSet="constrs_1" Description="Vivado Synthesis Defaults" AutoIncrementalCheckpoint="true" WriteIncrSynthDcp="false" State="current" IncludeInArchive="true" IsChild="false" AutoIncrementalDir="$PSRCDIR/utils_1/imports/synth_1" AutoRQSDir="$PSRCDIR/utils_1/imports/synth_1" ParallelReportGen="true">
+    <Run Id="synth_1" Type="Ft3:Synth" SrcSet="sources_1" Part="xc7k325tffg900-2" ConstrsSet="constrs_1" Description="Vivado Synthesis Defaults" AutoIncrementalCheckpoint="true" WriteIncrSynthDcp="false" State="current" IncludeInArchive="true" IsChild="false" AutoIncrementalDir="$PSRCDIR/utils_1/imports/synth_1" AutoRQSDir="$PSRCDIR/utils_1/imports/synth_1" ParallelReportGen="true">
       <Strategy Version="1" Minor="2">
         <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2025">
           <Desc>Vivado Synthesis Defaults</Desc>
@@ -555,7 +550,7 @@
       <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
       <RQSFiles/>
     </Run>
-    <Run Id="impl_1" Type="Ft2:EntireDesign" Part="xc7a35tcsg324-1" ConstrsSet="constrs_1" Description="Default settings for Implementation." AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" State="current" SynthRun="synth_1" IncludeInArchive="true" IsChild="false" GenFullBitstream="true" AutoIncrementalDir="$PSRCDIR/utils_1/imports/impl_1" AutoRQSDir="$PSRCDIR/utils_1/imports/impl_1" ParallelReportGen="true">
+    <Run Id="impl_1" Type="Ft2:EntireDesign" Part="xc7k325tffg900-2" ConstrsSet="constrs_1" Description="Default settings for Implementation." AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" State="current" SynthRun="synth_1" IncludeInArchive="true" IsChild="false" GenFullBitstream="true" AutoIncrementalDir="$PSRCDIR/utils_1/imports/impl_1" AutoRQSDir="$PSRCDIR/utils_1/imports/impl_1" ParallelReportGen="true">
       <Strategy Version="1" Minor="2">
         <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2025">
           <Desc>Default settings for Implementation.</Desc>

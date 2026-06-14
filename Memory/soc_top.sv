@@ -835,7 +835,6 @@ module soc_top (
         .s_axi_bresp    (s12_bresp),   .s_axi_bvalid  (s12_bvalid),  .s_axi_bready  (s12_bready),
         .s_axi_araddr   (s12_araddr),  .s_axi_arvalid (s12_arvalid),  .s_axi_arready (s12_arready),
         .s_axi_rdata    (s12_rdata),   .s_axi_rresp   (s12_rresp),   .s_axi_rvalid  (s12_rvalid),  .s_axi_rready  (s12_rready),
-        // AXI Master - Bellek Erişim Portu
         .m_axi_awaddr   (jtag_m_awaddr),  .m_axi_awvalid (jtag_m_awvalid),  .m_axi_awready (jtag_m_awready),
         .m_axi_wdata    (jtag_m_wdata),   .m_axi_wstrb   (jtag_m_wstrb),   .m_axi_wvalid  (jtag_m_wvalid),  .m_axi_wready  (jtag_m_wready),
         .m_axi_bresp    (jtag_m_bresp),   .m_axi_bvalid  (jtag_m_bvalid),  .m_axi_bready  (jtag_m_bready),
