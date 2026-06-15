@@ -1,0 +1,33 @@
+# Vivado/ISE/EDK/SDx/Petalinux/HLS generated paths
+# Standard Vivado gitignore template
+
+# Vivado project work directories
+*.runs/
+*.cache/
+*.hw/
+*.ip_user_files/
+*.sim/
+
+# Vivado log/jou files
+*.log
+*.jou
+*.pb
+*.rpt
+*.dcp
+*.str
+
+# Vivado simulation/compilation folders
+.Xil/
+xsim.dir/
+work/
+msim/
+covhtmlreport/
+
+# SDK/Vitis workspace directories
+.metadata/
+.sdk/
+webtalk/
+
+# OS files
+.DS_Store
+Thumbs.db

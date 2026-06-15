@@ -1,0 +1,76 @@
+
+There are no discarded input sections
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+BOOTROM          0x00000000         0x00000400         xr
+RAM              0x20000000         0x00002000         xrw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD C:\Arkhe_2026\sw_nexys\build\main.o
+LOAD C:\Arkhe_2026\sw_nexys\build\crt0.o
+
+.text           0x00000000      0x2e4
+                0x00000000                        . = ALIGN (0x4)
+ *(.init)
+ *(.text.start)
+ .text.start    0x00000000       0x4e C:\Arkhe_2026\sw_nexys\build\crt0.o
+                0x00000000                _start
+ *(.text*)
+ .text          0x0000004e       0xb0 C:\Arkhe_2026\sw_nexys\build\main.o
+                0x0000004e                uart_init
+                0x00000062                uart_putc
+                0x0000007e                uart_print
+                0x000000ac                uart_print_dec
+ .text.startup  0x000000fe      0x15e C:\Arkhe_2026\sw_nexys\build\main.o
+                0x000000fe                main
+ .text          0x0000025c        0x0 C:\Arkhe_2026\sw_nexys\build\crt0.o
+ *(.rodata*)
+ .rodata.str1.4
+                0x0000025c       0x85 C:\Arkhe_2026\sw_nexys\build\main.o
+                                 0x89 (size before relaxing)
+                0x000002e4                        . = ALIGN (0x4)
+ *fill*         0x000002e1        0x3 
+
+.rela.dyn       0x000002e4        0x0
+ .rela.text.start
+                0x000002e4        0x0 C:\Arkhe_2026\sw_nexys\build\main.o
+
+.data           0x20000000        0x0 load address 0x000002e4
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __data_start = .
+ *(.data*)
+ .data          0x20000000        0x0 C:\Arkhe_2026\sw_nexys\build\main.o
+ .data          0x20000000        0x0 C:\Arkhe_2026\sw_nexys\build\crt0.o
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __data_end = .
+                0x000002e4                        __data_load_start = LOADADDR (.data)
+
+.bss            0x20000000        0x0 load address 0x000002e4
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __bss_start = .
+ *(.bss*)
+ .bss           0x20000000        0x0 C:\Arkhe_2026\sw_nexys\build\main.o
+ .bss           0x20000000        0x0 C:\Arkhe_2026\sw_nexys\build\crt0.o
+ *(COMMON)
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __bss_end = .
+
+.stack          0x20000000        0x0 load address 0x000002e4
+                0x20000000                        . = ALIGN (0x10)
+                0x20002000                        __stack_top = (ORIGIN (RAM) + LENGTH (RAM))
+OUTPUT(C:\Arkhe_2026\sw_nexys\build\fpga_test.elf elf32-littleriscv)
+
+.comment        0x00000000       0x33
+ .comment       0x00000000       0x33 C:\Arkhe_2026\sw_nexys\build\main.o
+                                 0x34 (size before relaxing)
+
+.riscv.attributes
+                0x00000000       0x2f
+ .riscv.attributes
+                0x00000000       0x2f C:\Arkhe_2026\sw_nexys\build\main.o
+ .riscv.attributes
+                0x0000002f       0x2d C:\Arkhe_2026\sw_nexys\build\crt0.o

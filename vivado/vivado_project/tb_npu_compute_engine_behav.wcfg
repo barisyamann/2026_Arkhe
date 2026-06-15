@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_npu_compute_engine_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="tb_npu_compute_engine" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="2,729,993 ps"></ZoomStartTime>
+      <ZoomEndTime time="2,730,002 ps"></ZoomEndTime>
+      <Cursor1Time time="2,730,000 ps"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="135"></NameColumnWidth>
+      <ValueColumnWidth column_width="157"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="6" />
+   <wvobject fp_name="/tb_npu_compute_engine/uut/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_npu_compute_engine/uut/rst_n" type="logic">
+      <obj_property name="ElementShortName">rst_n</obj_property>
+      <obj_property name="ObjectShortName">rst_n</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_npu_compute_engine/uut/state" type="array">
+      <obj_property name="ElementShortName">state[3:0]</obj_property>
+      <obj_property name="ObjectShortName">state[3:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_npu_compute_engine/uut/class_o" type="array">
+      <obj_property name="ElementShortName">class_o[1:0]</obj_property>
+      <obj_property name="ObjectShortName">class_o[1:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_npu_compute_engine/uut/probs" type="array">
+      <obj_property name="ElementShortName">probs[0:3][12:0]</obj_property>
+      <obj_property name="ObjectShortName">probs[0:3][12:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_npu_compute_engine/uut/fc_acc" type="array">
+      <obj_property name="ElementShortName">fc_acc[0:3][31:0]</obj_property>
+      <obj_property name="ObjectShortName">fc_acc[0:3][31:0]</obj_property>
+   </wvobject>
+</wave_config>
