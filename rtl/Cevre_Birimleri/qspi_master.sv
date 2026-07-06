@@ -1,33 +1,13 @@
-// =============================================================================
-// QSPI Master Peripheral
-// TEKNOFEST 2026 Çip Tasarım Yarışması - Mikrodenetleyici Kategorisi
-// Şartname: EK-2 Çevre Birimi Yazmaçları / QSPI Master bölümü
-// =============================================================================
-// Özellikler:
-//   - AXI4-Lite konfigürasyon arayüzü
-//   - x1 (SPI), x2 (DSPI), x4 (QSPI) veri genişliği desteği
-//   - 256 baytlık sayfa yazma/okuma
-//   - 4-bayt adres modu (tüm flash alanı)
-//   - SPI Mod 0 (CPOL=0, CPHA=0)
-//   - SDR (Single Data Rate) çalışma
-//   - 64x32-bit TX ve RX FIFO
-//   - Programlanabilir prescaler (QSPI_CCR[30:25])
-//   - Desteklenen komutlar: READ, DOR, QOR, PP, QPP, SE, READ_ID, RDID,
-//     RES, RDSR1, RDSR2, RDCR, WRR, WRDI, WREN, CLSR, RESET
-// =============================================================================
-
 `timescale 1ns/1ps
 
 module qspi_master #(
-    parameter FIFO_DEPTH   = 64,   // TX/RX FIFO derinliği (64x32-bit)
-    parameter AXI_AW       = 32,   // AXI adres genişliği
-    parameter AXI_DW       = 32    // AXI veri genişliği
+    parameter FIFO_DEPTH   = 64,
+    parameter AXI_AW       = 32,
+    parameter AXI_DW       = 32
 )(
-    // Saat ve Sıfırlama
     input  logic        clk,
     input  logic        rst_n,
 
-    // AXI4-Lite Slave Arayüzü (Konfigürasyon)
     input  logic [AXI_AW-1:0] s_axi_awaddr,
     input  logic        s_axi_awvalid,
     output logic        s_axi_awready,
@@ -46,30 +26,22 @@ module qspi_master #(
     output logic        s_axi_rvalid,
     input  logic        s_axi_rready,
 
-    // QSPI Fiziksel Pinler
     output logic        qspi_sck,
     output logic        qspi_cs_n,
-    inout  logic        qspi_io0,   // MOSI / IO0
-    inout  logic        qspi_io1,   // MISO / IO1
-    inout  logic        qspi_io2,   // IO2 (QSPI)
-    inout  logic        qspi_io3,   // IO3 (QSPI)
+    inout  logic        qspi_io0,
+    inout  logic        qspi_io1,
+    inout  logic        qspi_io2,
+    inout  logic        qspi_io3,
 
-    // Kesme çıkışı
     output logic        irq
 );
 
-// ---------------------------------------------------------------------------
-// Yazmaç Ofset Tanımları (Şartname EK-2)
-// ---------------------------------------------------------------------------
-localparam ADDR_QSPI_CCR = 5'h00;  // Communication Config Register
-localparam ADDR_QSPI_ADR = 5'h04;  // Address Register
-localparam ADDR_QSPI_DR  = 5'h08;  // Data Register
-localparam ADDR_QSPI_STA = 5'h0C;  // Status Register
-localparam ADDR_QSPI_FCR = 5'h10;  // FIFO Control Register
+localparam ADDR_QSPI_CCR = 5'h00;
+localparam ADDR_QSPI_ADR = 5'h04;
+localparam ADDR_QSPI_DR  = 5'h08;
+localparam ADDR_QSPI_STA = 5'h0C;
+localparam ADDR_QSPI_FCR = 5'h10;
 
-// ---------------------------------------------------------------------------
-// Flash Komut Kodları
-// ---------------------------------------------------------------------------
 localparam CMD_READ      = 8'h03;
 localparam CMD_DOR       = 8'h3B;
 localparam CMD_QOR       = 8'h6B;
@@ -88,38 +60,29 @@ localparam CMD_WREN      = 8'h06;
 localparam CMD_CLSR      = 8'h30;
 localparam CMD_RESET     = 8'hF0;
 
-// ---------------------------------------------------------------------------
-// İç Yazmaçlar
-// ---------------------------------------------------------------------------
-logic [31:0] reg_ccr;   // QSPI_CCR - RW
-logic [31:0] reg_adr;   // QSPI_ADR - RW
-logic [31:0] reg_sta;   // QSPI_STA - RO
+logic [31:0] reg_ccr;
+logic [31:0] reg_adr;
+logic [31:0] reg_sta;
 
-// CCR alanları
-logic [7:0]  ccr_instr;         // [7:0]   - Instruction value
-logic [1:0]  ccr_data_mode;     // [9:8]   - Data mode (00=no data,01=x1,10=x2,11=x4)
-logic        ccr_write_read_n;  // [10]    - 0=read, 1=write
-logic [4:0]  ccr_dummy_cycles;  // [15:11] - Dummy cycle count
-logic [7:0]  ccr_data_size;     // [23:16] - Data size (N+1 bytes)
-// [24] REZERVE
-logic [5:0]  ccr_prescaler;     // [30:25] - SCK prescaler
-logic        ccr_clr_status;    // [31]    - Clear status
+logic [7:0]  ccr_instr;
+logic [1:0]  ccr_data_mode;
+logic        ccr_write_read_n;
+logic [4:0]  ccr_dummy_cycles;
+logic [7:0]  ccr_data_size;
+logic [5:0]  ccr_prescaler;
+logic        ccr_clr_status;
 
-// Status alanları
-logic        sta_done;          // [0] - Transaction complete
-logic        sta_busy;          // [1] - Busy
-logic        sta_rx_full;       // [4] - RX FIFO full
-logic        sta_rx_empty;      // [5] - RX FIFO empty
-logic        sta_tx_full;       // [6] - TX FIFO full
-logic        sta_tx_empty;      // [7] - TX FIFO empty
-logic [3:0]  sta_fifo_err;      // [11:8] - FIFO error flags
+logic        sta_done;
+logic        sta_busy;
+logic        sta_rx_full;
+logic        sta_rx_empty;
+logic        sta_tx_full;
+logic        sta_tx_empty;
+logic [3:0]  sta_fifo_err;
 logic        err_rx_empty;
 logic        err_rx_full;
 logic        err_tx_full;
 
-// ---------------------------------------------------------------------------
-// FIFO Yapıları (64 x 32-bit)
-// ---------------------------------------------------------------------------
 logic [31:0] tx_fifo [0:FIFO_DEPTH-1];
 logic [31:0] rx_fifo [0:FIFO_DEPTH-1];
 logic [$clog2(FIFO_DEPTH):0] tx_wr_ptr, tx_rd_ptr;
@@ -134,15 +97,12 @@ assign rx_full  = (rx_wr_ptr[$clog2(FIFO_DEPTH)] != rx_rd_ptr[$clog2(FIFO_DEPTH)
                   (rx_wr_ptr[$clog2(FIFO_DEPTH)-1:0] == rx_rd_ptr[$clog2(FIFO_DEPTH)-1:0]);
 assign rx_empty = (rx_wr_ptr == rx_rd_ptr);
 
-// ---------------------------------------------------------------------------
-// AXI4-Lite Slave - Yazma Kanalı
-// ---------------------------------------------------------------------------
 logic [AXI_AW-1:0] aw_addr_lat;
-logic               aw_valid_lat;
+logic              aw_valid_lat;
 logic [AXI_DW-1:0] w_data_lat;
-logic               w_valid_lat;
-logic               do_write;
-logic               ccr_written;   // CCR'ye yazma: transaction tetikler
+logic              w_valid_lat;
+logic              do_write;
+logic              ccr_written;
 
 assign do_write = aw_valid_lat && w_valid_lat;
 
@@ -167,7 +127,6 @@ always_ff @(posedge clk or negedge rst_n) begin
         ccr_written <= 1'b0;
         tx_flush    <= 1'b0;
         rx_flush    <= 1'b0;
-        // AW handshake
         if (s_axi_awvalid && !aw_valid_lat) begin
             s_axi_awready <= 1'b1;
             aw_addr_lat   <= s_axi_awaddr;
@@ -175,7 +134,6 @@ always_ff @(posedge clk or negedge rst_n) begin
         end else begin
             s_axi_awready <= 1'b0;
         end
-        // W handshake
         if (s_axi_wvalid && !w_valid_lat) begin
             s_axi_wready <= 1'b1;
             w_data_lat   <= s_axi_wdata;
@@ -183,13 +141,11 @@ always_ff @(posedge clk or negedge rst_n) begin
         end else begin
             s_axi_wready <= 1'b0;
         end
-        // B channel
         if (do_write) begin
             aw_valid_lat <= 1'b0;
             w_valid_lat  <= 1'b0;
             s_axi_bvalid <= 1'b1;
             s_axi_bresp  <= 2'b00;
-            // Yazmaç yazımları
             case (aw_addr_lat[4:0])
                 ADDR_QSPI_CCR: begin
                     reg_ccr <= w_data_lat;
@@ -197,18 +153,16 @@ always_ff @(posedge clk or negedge rst_n) begin
                 end
                 ADDR_QSPI_ADR: reg_adr <= w_data_lat;
                 ADDR_QSPI_DR: begin
-                    // TX FIFO'ya yaz logic is moved below to avoid concurrent drivers
                 end
                 ADDR_QSPI_FCR: begin
-                    if (w_data_lat[0]) rx_flush <= 1'b1; // RX FIFO flush
-                    if (w_data_lat[1]) tx_flush <= 1'b1; // TX FIFO flush
+                    if (w_data_lat[0]) rx_flush <= 1'b1;
+                    if (w_data_lat[1]) tx_flush <= 1'b1;
                 end
                 default:;
             endcase
         end
         if (s_axi_bvalid && s_axi_bready) s_axi_bvalid <= 1'b0;
 
-        // tx_wr_ptr and err_tx_full update logic
         if (tx_flush) begin
             tx_wr_ptr <= '0;
         end else if (ccr_written && reg_ccr[31]) begin
@@ -223,18 +177,14 @@ always_ff @(posedge clk or negedge rst_n) begin
     end
 end
 
-// TX FIFO RAM yazma — BRAM çıkarımı için reset içermez
 always_ff @(posedge clk) begin
     if (do_write && aw_addr_lat[4:0] == ADDR_QSPI_DR && !tx_full) begin
         tx_fifo[tx_wr_ptr[$clog2(FIFO_DEPTH)-1:0]] <= w_data_lat;
     end
 end
 
-// ---------------------------------------------------------------------------
-// AXI4-Lite Slave - Okuma Kanalı
-// ---------------------------------------------------------------------------
 logic [AXI_AW-1:0] ar_addr_lat;
-logic               ar_valid_lat;
+logic              ar_valid_lat;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
@@ -262,14 +212,11 @@ always_ff @(posedge clk or negedge rst_n) begin
                 ADDR_QSPI_CCR: s_axi_rdata <= reg_ccr;
                 ADDR_QSPI_ADR: s_axi_rdata <= reg_adr;
                 ADDR_QSPI_DR: begin
-                    // RX FIFO'dan oku
                     if (!rx_empty) begin
                         s_axi_rdata <= rx_fifo[rx_rd_ptr[$clog2(FIFO_DEPTH)-1:0]];
-                        $display("[%0t] [QSPI_MASTER] Read from RX_FIFO[%0d] = 0x%h, rx_empty=%0b, rx_wr_ptr=%0d", $time, rx_rd_ptr, rx_fifo[rx_rd_ptr[$clog2(FIFO_DEPTH)-1:0]], rx_empty, rx_wr_ptr);
                         rx_rd_ptr   <= rx_rd_ptr + 1;
                     end else begin
                         s_axi_rdata  <= 32'hDEAD_BEEF;
-                        $display("[%0t] [QSPI_MASTER] Read from empty RX_FIFO, returning DEADBEEF", $time);
                         err_rx_empty <= 1'b1;
                     end
                 end
@@ -289,9 +236,6 @@ always_ff @(posedge clk or negedge rst_n) begin
     end
 end
 
-// ---------------------------------------------------------------------------
-// CCR Alanları Decode
-// ---------------------------------------------------------------------------
 assign ccr_instr        = reg_ccr[7:0];
 assign ccr_data_mode    = reg_ccr[9:8];
 assign ccr_write_read_n = reg_ccr[10];
@@ -300,34 +244,25 @@ assign ccr_data_size    = reg_ccr[23:16];
 assign ccr_prescaler    = reg_ccr[30:25];
 assign ccr_clr_status   = reg_ccr[31];
 
-// ---------------------------------------------------------------------------
-// Durum yazmacı birleştir
-// ---------------------------------------------------------------------------
 assign sta_fifo_err = {2'b00, err_tx_full, err_rx_empty | err_rx_full};
 assign reg_sta = {20'h0,
-                  sta_fifo_err,      // [11:8]
-                  sta_tx_empty,      // [7]
-                  sta_tx_full,       // [6]
-                  sta_rx_empty,      // [5]
-                  sta_rx_full,       // [4]
-                  2'b00,             // [3:2] rezerve
-                  sta_busy,          // [1]
-                  sta_done};         // [0]
+                  sta_fifo_err,
+                  sta_tx_empty,
+                  sta_tx_full,
+                  sta_rx_empty,
+                  sta_rx_full,
+                  2'b00,
+                  sta_busy,
+                  sta_done};
 
 assign sta_rx_full  = rx_full;
 assign sta_rx_empty = rx_empty;
 assign sta_tx_full  = tx_full;
 assign sta_tx_empty = tx_empty;
 
-// ---------------------------------------------------------------------------
-// SCK Üretimi (Prescaler)
-// SCK frekansı = sys_clk / (prescaler + 1)
-// CCR[30:25] = 0  → SCLK = sys_clk
-// CCR[30:25] = 1  → SCLK = sys_clk / 2
-// ---------------------------------------------------------------------------
 logic [5:0]  sck_cnt;
 logic        sck_en;
-logic        sck_int;   // dahili SCK toggling
+logic        sck_int;
 logic        sck_edge_rise, sck_edge_fall;
 logic [5:0]  sck_half_period;
 
@@ -343,7 +278,6 @@ always_ff @(posedge clk or negedge rst_n) begin
         sck_edge_rise <= 1'b0;
         sck_edge_fall <= 1'b0;
         if (sck_half_period == 6'h0) begin
-            // Prescaler 0: Her clk'da toggle (SCLK = sys_clk)
             sck_int       <= ~sck_int;
             sck_edge_rise <= ~sck_int;
             sck_edge_fall <=  sck_int;
@@ -365,15 +299,11 @@ always_ff @(posedge clk or negedge rst_n) begin
     end
 end
 
-// SPI Mod 0: CPOL=0, CPHA=0 — SCK boşta '0'
 assign qspi_sck = sck_en ? sck_int : 1'b0;
 
-// ---------------------------------------------------------------------------
-// IO Yönlendirme (tristate)
-// ---------------------------------------------------------------------------
-logic        io_oe;          // çıkış enable
-logic [3:0]  io_out;         // çıkış verisi
-logic [3:0]  io_in;          // giriş verisi (capture)
+logic        io_oe;
+logic [3:0]  io_out;
+logic [3:0]  io_in;
 
 assign qspi_io0 = io_oe ? io_out[0] : 1'bz;
 assign qspi_io1 = (io_oe && ccr_data_mode[1]) ? io_out[1] : 1'bz;
@@ -385,9 +315,6 @@ assign io_in[1] = qspi_io1;
 assign io_in[2] = qspi_io2;
 assign io_in[3] = qspi_io3;
 
-// ---------------------------------------------------------------------------
-// Ana Durum Makinesi
-// ---------------------------------------------------------------------------
 typedef enum logic [3:0] {
     IDLE        = 4'd0,
     ASSERT_CS   = 4'd1,
@@ -402,23 +329,20 @@ typedef enum logic [3:0] {
 
 state_t state;
 
-// TX shift register
 logic [7:0]  shift_out;
 logic [7:0]  shift_in;
-logic [2:0]  bit_cnt;        // x1 modda bit sayacı
-logic [1:0]  nibble_cnt;     // x2/x4 modda sayaç
-logic [7:0]  byte_cnt;       // kaç byte gönderildi/alındı
-logic [7:0]  total_bytes;    // toplam gönderilecek/alınacak byte
-logic [4:0]  dummy_cnt;      // dummy cycle sayacı
-logic [31:0] addr_shift;     // adres shift reg
-logic [2:0]  addr_byte_cnt;  // gönderilen adres byte sayısı
+logic [2:0]  bit_cnt;
+logic [1:0]  nibble_cnt;
+logic [7:0]  byte_cnt;
+logic [7:0]  total_bytes;
+logic [4:0]  dummy_cnt;
+logic [31:0] addr_shift;
+logic [2:0]  addr_byte_cnt;
 
-// TX FIFO'dan okuma
-logic [31:0] tx_word;        // şu an gönderilen 32-bit kelime
-logic [1:0]  tx_byte_idx;    // kelime içindeki byte indeksi (0-3)
-logic        need_addr;       // bu komut adres gerektiriyor mu
+logic [31:0] tx_word;
+logic [1:0]  tx_byte_idx;
+logic        need_addr;
 
-// Adres gerektiren komutlar
 function automatic logic cmd_needs_addr(input logic [7:0] cmd);
     case (cmd)
         CMD_READ, CMD_DOR, CMD_QOR, CMD_PP, CMD_QPP, CMD_SE: return 1'b1;
@@ -426,7 +350,6 @@ function automatic logic cmd_needs_addr(input logic [7:0] cmd);
     endcase
 endfunction
 
-// Veri gerektiren komutlar (data_mode != 00)
 function automatic logic cmd_needs_data(input logic [1:0] dm);
     return (dm != 2'b00);
 endfunction
@@ -454,7 +377,6 @@ always_ff @(posedge clk or negedge rst_n) begin
         tx_rd_ptr    <= '0;
         rx_wr_ptr    <= '0;
     end else begin
-        // FIFO hata bitleri CCR yazımıyla temizle
         if (ccr_written && reg_ccr[31]) begin
             err_rx_full <= 1'b0;
             sta_done    <= 1'b0;
@@ -465,21 +387,18 @@ always_ff @(posedge clk or negedge rst_n) begin
         end
 
         case (state)
-            // ------------------------------------------------------------------
             IDLE: begin
                 qspi_cs_n <= 1'b1;
                 sck_en    <= 1'b0;
                 io_oe     <= 1'b0;
                 sta_busy  <= 1'b0;
                 if (ccr_written) begin
-                    // CCR'ye yazma → transaction başlat
                     sta_busy  <= 1'b1;
                     state     <= ASSERT_CS;
-                    total_bytes <= reg_ccr[23:16] + 1; // N+1 byte
+                    total_bytes <= reg_ccr[23:16] + 1;
                     byte_cnt    <= 8'h0;
                     addr_byte_cnt <= 3'h0;
                     dummy_cnt   <= 5'h0;
-                    // İlk TX kelimesini yükle
                     if (!tx_empty) begin
                         tx_word     <= tx_fifo[tx_rd_ptr[$clog2(FIFO_DEPTH)-1:0]];
                         tx_rd_ptr   <= tx_rd_ptr + 1;
@@ -488,33 +407,28 @@ always_ff @(posedge clk or negedge rst_n) begin
                 end
             end
 
-            // ------------------------------------------------------------------
             ASSERT_CS: begin
-                qspi_cs_n <= 1'b0;       // CS aktif
+                qspi_cs_n <= 1'b0;
                 sck_en    <= 1'b0;
                 io_oe     <= 1'b1;
-                shift_out <= ccr_instr;   // Komut byte'ını yükle
+                shift_out <= ccr_instr;
                 bit_cnt   <= 3'd7;
                 state     <= SEND_CMD;
             end
 
-            // ------------------------------------------------------------------
-            // Komut Gönder (her zaman x1, MSB first)
             SEND_CMD: begin
                 sck_en <= 1'b1;
                 io_oe  <= 1'b1;
-                io_out[0] <= shift_out[7]; // MOSI
-                io_out[3:1] <= 3'b111;     // diğerleri high-Z
+                io_out[0] <= shift_out[7];
+                io_out[3:1] <= 3'b111;
 
                 if (sck_edge_fall) begin
                     if (bit_cnt == 3'h0) begin
-                        // Komut bitti
                         if (cmd_needs_addr(ccr_instr)) begin
-                            // 3-byte adres gönder (MSB byte önce)
                             addr_shift    <= reg_adr;
                             addr_byte_cnt <= 3'd0;
                             state         <= SEND_ADDR;
-                            shift_out     <= reg_adr[23:16]; // adres[23:16]
+                            shift_out     <= reg_adr[23:16];
                             bit_cnt       <= 3'd7;
                         end else if (ccr_dummy_cycles > 5'h0) begin
                             dummy_cnt <= ccr_dummy_cycles;
@@ -526,7 +440,6 @@ always_ff @(posedge clk or negedge rst_n) begin
                             if (!ccr_write_read_n) io_oe <= 1'b0;
                             bit_cnt  <= 3'd7;
                             if (ccr_write_read_n) begin
-                                // İlk byte'ı TX kelimesinden al
                                 shift_out   <= tx_word[7:0];
                                 tx_byte_idx <= 2'd1;
                             end
@@ -541,8 +454,6 @@ always_ff @(posedge clk or negedge rst_n) begin
                 end
             end
 
-            // ------------------------------------------------------------------
-            // Adres Gönder (x1, 3-byte, MSB byte önce)
             SEND_ADDR: begin
                 io_oe     <= 1'b1;
                 io_out[0] <= shift_out[7];
@@ -552,15 +463,12 @@ always_ff @(posedge clk or negedge rst_n) begin
                     if (bit_cnt == 3'h0) begin
                         addr_byte_cnt <= addr_byte_cnt + 1;
                         if (addr_byte_cnt == 3'd1) begin
-                            // İkinci adres byte'ı
                             shift_out <= reg_adr[15:8];
                             bit_cnt   <= 3'd7;
                         end else if (addr_byte_cnt == 3'd2) begin
-                            // Üçüncü adres byte'ı (LSB)
                             shift_out <= reg_adr[7:0];
                             bit_cnt   <= 3'd7;
                         end else begin
-                            // Adres bitti
                             if (ccr_dummy_cycles > 5'h0) begin
                                 dummy_cnt <= ccr_dummy_cycles;
                                 state     <= DUMMY;
@@ -569,7 +477,6 @@ always_ff @(posedge clk or negedge rst_n) begin
                                 bit_cnt  <= 3'd7;
                                 if (ccr_write_read_n) begin
                                     state    <= WRITE_DATA;
-                                    // x1 için TX'den ilk byte
                                     shift_out   <= tx_word[7:0];
                                     tx_byte_idx <= 2'd1;
                                 end else begin
@@ -588,8 +495,6 @@ always_ff @(posedge clk or negedge rst_n) begin
                 end
             end
 
-            // ------------------------------------------------------------------
-            // Dummy Cycle'lar
             DUMMY: begin
                 io_oe <= 1'b0;
                 if (sck_edge_rise) begin
@@ -616,16 +521,13 @@ always_ff @(posedge clk or negedge rst_n) begin
                 end
             end
 
-            // ------------------------------------------------------------------
-            // Veri Yazma
-            // x1: bit-serial, x2: 2-bit/cycle, x4: 4-bit/cycle
             WRITE_DATA: begin
                 io_oe  <= 1'b1;
                 sck_en <= 1'b1;
 
                 if (sck_edge_fall) begin
                     case (ccr_data_mode)
-                        2'b01: begin // x1
+                        2'b01: begin
                             io_out[0] <= shift_out[7];
                             if (bit_cnt == 3'h0) begin
                                 byte_cnt <= byte_cnt + 1;
@@ -633,15 +535,13 @@ always_ff @(posedge clk or negedge rst_n) begin
                                     state  <= DEASSERT_CS;
                                     sck_en <= 1'b0;
                                 end else begin
-                                    // Sonraki byte'ı al
                                     if (tx_byte_idx == 2'd3) begin
-                                        // Yeni kelime yükle
                                         if (!tx_empty) begin
                                             tx_word     <= tx_fifo[tx_rd_ptr[$clog2(FIFO_DEPTH)-1:0]];
                                             tx_rd_ptr   <= tx_rd_ptr + 1;
                                         end
                                         tx_byte_idx <= 2'd0;
-                                        shift_out   <= tx_word[7:0]; // güncellenir
+                                        shift_out   <= tx_word[7:0];
                                     end else begin
                                         case (tx_byte_idx)
                                             2'd0: shift_out <= tx_word[7:0];
@@ -658,7 +558,7 @@ always_ff @(posedge clk or negedge rst_n) begin
                                 bit_cnt   <= bit_cnt - 1;
                             end
                         end
-                        2'b10: begin // x2 - 2-bit/cycle
+                        2'b10: begin
                             io_out[1:0] <= shift_out[7:6];
                             if (nibble_cnt == 2'd3) begin
                                 nibble_cnt <= 2'd0;
@@ -675,7 +575,7 @@ always_ff @(posedge clk or negedge rst_n) begin
                                 nibble_cnt <= nibble_cnt + 1;
                             end
                         end
-                        2'b11: begin // x4 - 4-bit/cycle
+                        2'b11: begin
                             io_out[3:0] <= shift_out[7:4];
                             if (nibble_cnt[0] == 1'b1) begin
                                 nibble_cnt <= 2'd0;
@@ -692,25 +592,21 @@ always_ff @(posedge clk or negedge rst_n) begin
                                 nibble_cnt <= nibble_cnt + 1;
                             end
                         end
-                        default:; // 00 = veri yok
+                        default:;
                     endcase
                 end
             end
 
-            // ------------------------------------------------------------------
-            // Veri Okuma
             READ_DATA: begin
-                io_oe  <= 1'b0;  // MOSI serbest
+                io_oe  <= 1'b0;
                 sck_en <= 1'b1;
 
                 if (sck_edge_rise) begin
                     case (ccr_data_mode)
-                        2'b01: begin // x1
-                            shift_in <= {shift_in[6:0], io_in[1]}; // MISO = IO1
+                        2'b01: begin
+                            shift_in <= {shift_in[6:0], io_in[1]};
                             if (bit_cnt == 3'h0) begin
-                                // Byte tamamlandı, RX FIFO pointer/hata güncelle
                                 if (!rx_full) begin
-                                    // 4 byte dolduğunda pointer artır
                                     if (byte_cnt[1:0] == 2'd3) begin
                                         rx_wr_ptr <= rx_wr_ptr + 1;
                                     end
@@ -719,7 +615,6 @@ always_ff @(posedge clk or negedge rst_n) begin
                                 end
                                 byte_cnt <= byte_cnt + 1;
                                 if (byte_cnt + 1 >= total_bytes) begin
-                                    // Kalan baytları flush et
                                     if (byte_cnt[1:0] != 2'd3 && !rx_full)
                                         rx_wr_ptr <= rx_wr_ptr + 1;
                                     state  <= DEASSERT_CS;
@@ -731,7 +626,7 @@ always_ff @(posedge clk or negedge rst_n) begin
                                 bit_cnt <= bit_cnt - 1;
                             end
                         end
-                        2'b10: begin // x2
+                        2'b10: begin
                             shift_in   <= {shift_in[5:0], io_in[1:0]};
                             if (nibble_cnt == 2'd3) begin
                                 nibble_cnt <= 2'd0;
@@ -751,7 +646,7 @@ always_ff @(posedge clk or negedge rst_n) begin
                                 nibble_cnt <= nibble_cnt + 1;
                             end
                         end
-                        2'b11: begin // x4
+                        2'b11: begin
                             shift_in <= {shift_in[3:0], io_in[3:0]};
                             if (nibble_cnt[0]) begin
                                 nibble_cnt <= 2'd0;
@@ -776,7 +671,6 @@ always_ff @(posedge clk or negedge rst_n) begin
                 end
             end
 
-            // ------------------------------------------------------------------
             DEASSERT_CS: begin
                 sck_en    <= 1'b0;
                 io_oe     <= 1'b0;
@@ -784,7 +678,6 @@ always_ff @(posedge clk or negedge rst_n) begin
                 state     <= DONE_ST;
             end
 
-            // ------------------------------------------------------------------
             DONE_ST: begin
                 sta_busy <= 1'b0;
                 state    <= IDLE;
@@ -802,13 +695,10 @@ always_ff @(posedge clk or negedge rst_n) begin
     end
 end
 
-// ---------------------------------------------------------------------------
-// RX FIFO RAM yazma — BRAM çıkarımı için reset içermez
-// ---------------------------------------------------------------------------
 always_ff @(posedge clk) begin
     if (state == READ_DATA && sck_edge_rise && !rx_full) begin
         case (ccr_data_mode)
-            2'b01: begin // x1
+            2'b01: begin
                 if (bit_cnt == 3'h0) begin
                     case (byte_cnt[1:0])
                         2'd0: rx_fifo[rx_wr_ptr[$clog2(FIFO_DEPTH)-1:0]][7:0]   <= {shift_in[6:0], io_in[1]};
@@ -818,7 +708,7 @@ always_ff @(posedge clk) begin
                     endcase
                 end
             end
-            2'b10: begin // x2
+            2'b10: begin
                 if (nibble_cnt == 2'd3) begin
                     case (byte_cnt[1:0])
                         2'd0: rx_fifo[rx_wr_ptr[$clog2(FIFO_DEPTH)-1:0]][7:0]   <= {shift_in[5:0], io_in[1:0]};
@@ -828,7 +718,7 @@ always_ff @(posedge clk) begin
                     endcase
                 end
             end
-            2'b11: begin // x4
+            2'b11: begin
                 if (nibble_cnt[0]) begin
                     case (byte_cnt[1:0])
                         2'd0: rx_fifo[rx_wr_ptr[$clog2(FIFO_DEPTH)-1:0]][7:0]   <= {shift_in[3:0], io_in[3:0]};
@@ -843,22 +733,13 @@ always_ff @(posedge clk) begin
     end
 end
 
-// ---------------------------------------------------------------------------
-// IRQ - İşlem tamamlanınca
-// ---------------------------------------------------------------------------
 assign irq = sta_done;
 
-// ---------------------------------------------------------------------------
-// Formal / Assertion'lar
-// ---------------------------------------------------------------------------
 `ifdef FORMAL
-    // CS aktifken SCK kullanılıyor olmalı
     assert property (@(posedge clk) disable iff (!rst_n)
         (state == SEND_CMD || state == WRITE_DATA || state == READ_DATA) |-> sck_en);
-    // IDLE'da CS pasif
     assert property (@(posedge clk) disable iff (!rst_n)
         (state == IDLE) |-> qspi_cs_n);
-    // TX FIFO dolu değilken yazma hatası olmamalı
     assert property (@(posedge clk) disable iff (!rst_n)
         !tx_full |-> !sta_fifo_err[1]);
 `endif
