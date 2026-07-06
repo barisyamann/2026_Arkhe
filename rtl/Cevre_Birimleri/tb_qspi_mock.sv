@@ -62,7 +62,7 @@ module tb_qspi_mock;
     #5000 $finish;
   end
 
-  // Yeni Monolitik QSPI Master Modülü
+
   qspi_master #(
       .FIFO_DEPTH(64),
       .AXI_AW(32),
@@ -96,7 +96,7 @@ module tb_qspi_mock;
       .irq           (irq)
   );
 
-  // Gerçek Micron Flash Modeli (Doğru portlarla)
+
   MT25QL256ABA8E12 flash_memory (
       .S   (spi_cs_n),
       .C   (spi_sck),
