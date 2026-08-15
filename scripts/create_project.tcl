@@ -101,6 +101,7 @@ add_files -norecurse [list \
     "./weights/dw_bias.mem" \
     "./weights/fc_weights.mem" \
     "./weights/fc_bias.mem" \
+    "./weights/softmax_exp_lut.mem" \
     "$periph_dir/dma_controller.sv" \
     "$periph_dir/jtag_debug.sv" \
 ]
@@ -121,6 +122,8 @@ add_files -norecurse [list \
 add_files -fileset sim_1 -norecurse [list \
     "./tb/tb_soc_top.sv" \
     "./tb/tb_npu_compute_engine.sv" \
+    "./tb/npu_golden/tb_npu_golden.sv" \
+    "./tb/npu_golden/test_input_pattern.mem" \
     "./rtl/boot/boot.hex" \
 ]
 
