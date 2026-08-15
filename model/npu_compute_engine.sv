@@ -46,7 +46,8 @@ module npu_compute_engine (
         WRITE_OUT_1     = 4'd10,
         WRITE_OUT_2     = 4'd11,
         WRITE_OUT_3     = 4'd12,
-        DONE            = 4'd13
+        DONE            = 4'd13,
+        FC_REQUANT      = 4'd14
     } state_t;
 
     state_t state;
@@ -58,11 +59,17 @@ module npu_compute_engine (
     logic [3:0] kh;      // 0 .. 9  (Kernel Yükseklik)
     logic [3:0] kw;      // 0 .. 7  (Kernel Genişlik)
 
-    // Akümülatörler
-    logic signed [31:0] conv_acc;
-    logic signed [31:0] fc_acc [0:3];
-    logic [12:0]        probs [0:3];
+logic signed [31:0] conv_acc;
+logic signed [31:0] fc_acc [0:3];
 
+// TFLite FC katmanının quantized INT8 çıkışları
+logic signed [7:0] fc_logits [0:3];
+
+// Hangi sınıfın requantization işleminin yapıldığını tutar
+logic [1:0] fc_q_idx;
+
+logic [12:0] probs [0:3];
+    
     // --- Ağırlık ve Sapma (Weight & Bias) ROM Dizi Tanımlamaları ---
     logic signed [7:0]  dw_weights [0:639];
     logic signed [31:0] dw_bias    [0:7];
@@ -377,11 +384,16 @@ endfunction
 
                 INIT: begin
                     for (int i = 0; i < 4; i++) begin
-                        fc_acc[i] <= fc_bias[i];
+                        fc_acc[i]    <= fc_bias[i];
+                        fc_logits[i] <= '0;
                     end
-                    conv_acc <= dw_bias[0]; // Akümülatörü kanal 0 bias değeriyle ilkle
+
+                    fc_q_idx <= 2'd0;
+
+                    conv_acc <= dw_bias[0];
                     state    <= CONV_READ_REQ;
                 end
+                    
 
                 CONV_READ_REQ: begin
                     state <= CONV_READ_WAIT;
@@ -498,15 +510,17 @@ CONV_ReLU_FC: begin
                     if (d_out == 7) begin
                         d_out <= '0;
                         conv_acc <= dw_bias[0]; // Sıradaki koordinat için kanal 0 biası yükle
-                        if (f_out == 19) begin
-                            f_out <= '0;
-                            if (t_out == 24) begin
-                                t_out <= '0;
-                                state <= SOFTMAX_INIT;
-                            end else begin
-                                t_out <= t_out + 1;
-                                state <= CONV_READ_REQ;
-                            end
+                    if (f_out == 19) begin
+                        f_out <= '0;
+
+                        if (t_out == 24) begin
+                            t_out    <= '0;
+                            fc_q_idx <= 2'd0;
+                            state    <= FC_REQUANT;
+                        end else begin
+                            t_out <= t_out + 1;
+                            state <= CONV_READ_REQ;
+                        end
                         end else begin
                             f_out <= f_out + 1;
                             state <= CONV_READ_REQ;
@@ -517,7 +531,49 @@ CONV_ReLU_FC: begin
                         state <= CONV_READ_REQ;
                     end
                 end
+                FC_REQUANT: begin
 
+                    logic signed [31:0] scaled_fc;
+                    logic signed [31:0] quant_fc;
+
+                    // --------------------------------------------------------
+                    // TFLite FC requantization
+                    //
+                    // real multiplier ≈ 0.000439331661
+                    // integer multiplier = 1932201080
+                    // right shift = 11
+                    // output zero-point = 14
+                    // --------------------------------------------------------
+
+                   scaled_fc = multiply_quantized(
+                       fc_acc[fc_q_idx],
+                       32'sd1932201080,
+                       11
+                   );
+
+                   // TFLite output zero-point ekle
+                   quant_fc = scaled_fc + 32'sd14;
+
+                   // INT8 saturation
+                   if (quant_fc > 32'sd127)
+                       fc_logits[fc_q_idx] <= 8'sd127;
+
+                   else if (quant_fc < -32'sd128)
+                       fc_logits[fc_q_idx] <= -8'sd128;
+
+                   else
+                       fc_logits[fc_q_idx] <= quant_fc[7:0];
+
+
+                   // Dört sınıfı sırayla işle
+                   if (fc_q_idx == 2'd3) begin
+                       fc_q_idx <= 2'd0;
+                       state    <= SOFTMAX_INIT;
+                   end
+                   else begin
+                       fc_q_idx <= fc_q_idx + 2'd1;
+                   end
+                end
                 SOFTMAX_INIT: begin
                     exp_val[0] <= get_exp(max_score - fc_acc[0]);
                     exp_val[1] <= get_exp(max_score - fc_acc[1]);
