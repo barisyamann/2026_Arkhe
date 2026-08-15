@@ -101,6 +101,7 @@ add_files -norecurse [list \
     "./weights/dw_bias.mem" \
     "./weights/fc_weights.mem" \
     "./weights/fc_bias.mem" \
+    "./weights/softmax_exp_lut.mem" \
     "$periph_dir/dma_controller.sv" \
     "$periph_dir/jtag_debug.sv" \
 ]
