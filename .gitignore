@@ -35,3 +35,7 @@ Thumbs.db
 !tb/FPGA_Reports/*.rpt
 !asic/reports/**/*.rpt
 !asic/reports/**/*.log
+
+# Kanit paketi: log ve rapor dosyalari surum kontrolunde tutulur
+!evidence/
+!evidence/**
