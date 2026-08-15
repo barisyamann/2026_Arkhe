@@ -2,6 +2,9 @@
 // Description: Testbench to verify Arkhe SoC Top Integration in Vivado.
 //              Generates a 50 MHz clock, handles system reset, and mocks
 //              external peripheral pins to verify early CPU boot cycles.
+//
+//              Self-checking: error_count + check() + $fatal
+//              PC trace `ifdef TRACE_ON ile acilir (varsayilan: kapali)
 
 module tb_soc_top;
 
@@ -42,8 +45,8 @@ module tb_soc_top;
     logic        jtag_trst_n;
 
     // --- I2C ve QSPI için Pull-up direnç simülasyonları ---
-    assign (weak1, weak0) i2c_sda = 1'b1;
-    assign (weak1, weak0) i2c_scl = 1'b1;
+    assign (weak1, weak0) i2c_sda  = 1'b1;
+    assign (weak1, weak0) i2c_scl  = 1'b1;
     assign (weak1, weak0) qspi_io0 = 1'b1;
     assign (weak1, weak0) qspi_io1 = 1'b1;
     assign (weak1, weak0) qspi_io2 = 1'b1;
@@ -53,43 +56,44 @@ module tb_soc_top;
     soc_top uut (
         .clk_i        (clk),
         .rst_ni       (rst_n),
-        
+
         .gpio_i       (gpio_i),
         .gpio_o       (gpio_o),
         .gpio_tx_en_o (gpio_tx_en_o),
-        
+
         .uart1_rxd    (uart1_rxd),
         .uart1_txd    (uart1_txd),
-        
+
         .uart2_rxd    (uart2_rxd),
         .uart2_txd    (uart2_txd),
-        
+
         .i2c_sda      (i2c_sda),
         .i2c_scl      (i2c_scl),
-        
+
         .qspi_sck     (qspi_sck),
         .qspi_cs_n    (qspi_cs_n),
         .qspi_io0     (qspi_io0),
         .qspi_io1     (qspi_io1),
         .qspi_io2     (qspi_io2),
         .qspi_io3     (qspi_io3),
-        
+
         .jtag_tms     (jtag_tms),
         .jtag_tck     (jtag_tck),
         .jtag_tdi     (jtag_tdi),
         .jtag_tdo     (jtag_tdo),
         .jtag_trst_n  (jtag_trst_n)
         );
+
     // --- SystemVerilog Functional Coverage (Kapsama) Tanımları ---
     covergroup cg_soc_verification @(posedge clk);
         option.per_instance = 1;
-        
+
         // GPIO çıkışlarının fonksiyonel kapsaması
         cov_gpio: coverpoint gpio_o {
             bins idle    = {16'h0000};
             bins success = {16'h5555};
         }
-        
+
         // JTAG TMS pininin geçişleri
         cov_jtag_tms: coverpoint jtag_tms {
             bins low  = {1'b0};
@@ -123,13 +127,29 @@ module tb_soc_top;
 
     // --- Log Dosyası Yazma Altyapısı ---
     int log_file;
-    
+
     function automatic void log_print(input string msg);
         $display("%s", msg);
         if (log_file != 0) begin
             $fdisplay(log_file, "%s", msg);
         end
     endfunction
+
+    // =========================================================================
+    // Self-checking altyapisi
+    // =========================================================================
+    int error_count = 0;
+
+    task automatic check(input string        ad,
+                         input logic [63:0]  gercek,
+                         input logic [63:0]  beklenen);
+        if (gercek !== beklenen) begin
+            error_count++;
+            log_print($sformatf("      [HATA] %s: beklenen=0x%h gercek=0x%h", ad, beklenen, gercek));
+        end else begin
+            log_print($sformatf("      [OK]   %s = 0x%h", ad, gercek));
+        end
+    endtask
 
     // --- Test Akışı ---
     initial begin
@@ -139,7 +159,7 @@ module tb_soc_top;
         end
 
         log_print($sformatf("[%0t] SoC Simülasyonu Başlatıldı.", $time));
-        
+
         // Başlangıç Değerleri
         rst_n       = 1'b0;
         gpio_i      = 16'h0000;
@@ -166,38 +186,61 @@ module tb_soc_top;
         end
 
         // QSPI RX FIFO ön yüklemesi - 24 Kelimelik Yapay Zeka Hızlandırıcı Test Programı
-        uut.u_qspi.rx_fifo[0]  = 32'h40000537; // lui a0, 0x40000      (GPIO Base)
-        uut.u_qspi.rx_fifo[1]  = 32'h400605b7; // lui a1, 0x40060      (NPU CSR Base)
-        uut.u_qspi.rx_fifo[2]  = 32'h20010637; // lui a2, 0x20010      (NPU Memory Base)
-        uut.u_qspi.rx_fifo[3]  = 32'h555556b7; // lui a3, 0x55555      
-        uut.u_qspi.rx_fifo[4]  = 32'h55568693; // addi a3, a3, 0x555   (a3 = 0x55555555 - Evet ve GPIO çıkış modu şablonu)
-        uut.u_qspi.rx_fifo[5]  = 32'haaaab737; // lui a4, 0xAAAAB      
-        uut.u_qspi.rx_fifo[6]  = 32'haaa70713; // addi a4, a4, -1366   (a4 = 0xAAAAAAAA - Hayır şablonu)
-        uut.u_qspi.rx_fifo[7]  = 32'h00d52423; // sw a3, 8(a0)         (GPIO_MODE'a yaz -> Tüm pinleri çıkış yap)
-        uut.u_qspi.rx_fifo[8]  = 32'h00d62023; // sw a3, 0(a2)         (TCM[0] = 0x55555555 -> NPU toplamını 0x55 yapmak için)
-        uut.u_qspi.rx_fifo[9]  = 32'h00100793; // addi a5, zero, 1     
-        uut.u_qspi.rx_fifo[10] = 32'h00f5a023; // sw a5, 0(a1)         (NPU'yu Başlat - REG_CTRL = 1)
-        uut.u_qspi.rx_fifo[11] = 32'h0045a783; // lw a5, 4(a1)         (NPU Durumunu Oku - REG_STATUS)
-        uut.u_qspi.rx_fifo[12] = 32'h0027f793; // andi a5, a5, 2       (Done bitini maskele)
-        uut.u_qspi.rx_fifo[13] = 32'hfe078ce3; // beq a5, zero, -8     (Done olana kadar bekle)
-        uut.u_qspi.rx_fifo[14] = 32'h0105a783; // lw a5, 16(a1)        (REG_CLASS_OUT oku)
-        uut.u_qspi.rx_fifo[15] = 32'h00200e13; // addi t3, zero, 2     
-        uut.u_qspi.rx_fifo[16] = 32'h01c78863; // beq a5, t3, 16       (Eğer sınıf 2 (Evet) ise GPIO = 0x5555)
-        uut.u_qspi.rx_fifo[17] = 32'h00300e13; // addi t3, zero, 3     
-        uut.u_qspi.rx_fifo[18] = 32'h01c78863; // beq a5, t3, 16       (Eğer sınıf 3 (Hayır) ise GPIO = 0xAAAA)
-        uut.u_qspi.rx_fifo[19] = 32'h0100006f; // jal zero, 16         (Eşleşme yoksa doğrudan bitiş döngüsüne git)
-        uut.u_qspi.rx_fifo[20] = 32'h00d52223; // sw a3, 4(a0)         (GPIO_ODR = 0x5555)
-        uut.u_qspi.rx_fifo[21] = 32'h0080006f; // jal zero, 8          (Bitiş döngüsüne atla)
-        uut.u_qspi.rx_fifo[22] = 32'h00e52223; // sw a4, 4(a0)         (GPIO_ODR = 0xAAAA)
-        uut.u_qspi.rx_fifo[23] = 32'h0000006f; // jal zero, 0          (Sonsuz döngü)
-        uut.u_qspi.rx_wr_ptr   = 7'd24;        // RX FIFO'ya 24 kelime eklendi
+        uut.u_qspi.rx_fifo[0]  = 32'h40000537; // lui  a0, 0x40000     (GPIO Base)
+        uut.u_qspi.rx_fifo[1]  = 32'h400605b7; // lui  a1, 0x40060     (NPU CSR Base)
+        uut.u_qspi.rx_fifo[2]  = 32'h20010637; // lui  a2, 0x20010     (NPU Memory Base)
+        uut.u_qspi.rx_fifo[3]  = 32'h555556b7; // lui  a3, 0x55555
+        uut.u_qspi.rx_fifo[4]  = 32'h55568693; // addi a3, a3, 0x555   (a3 = 0x55555555)
+        uut.u_qspi.rx_fifo[5]  = 32'haaaab737; // lui  a4, 0xAAAAB
+        uut.u_qspi.rx_fifo[6]  = 32'haaa70713; // addi a4, a4, -1366   (a4 = 0xAAAAAAAA)
+        uut.u_qspi.rx_fifo[7]  = 32'h00d52423; // sw   a3, 8(a0)       (GPIO_MODE)
+        uut.u_qspi.rx_fifo[8]  = 32'h00d62023; // sw   a3, 0(a2)       (TCM[0] = 0x55555555)
+        uut.u_qspi.rx_fifo[9]  = 32'h00100793; // addi a5, zero, 1
+        uut.u_qspi.rx_fifo[10] = 32'h00f5a023; // sw   a5, 0(a1)       (NPU START)
+        uut.u_qspi.rx_fifo[11] = 32'h0045a783; // lw   a5, 4(a1)       (REG_STATUS)
+        uut.u_qspi.rx_fifo[12] = 32'h0027f793; // andi a5, a5, 2       (Done biti)
+        uut.u_qspi.rx_fifo[13] = 32'hfe078ce3; // beq  a5, zero, -8    (bekle)
+        uut.u_qspi.rx_fifo[14] = 32'h0105a783; // lw   a5, 16(a1)      (REG_CLASS_OUT)
+        uut.u_qspi.rx_fifo[15] = 32'h00200e13; // addi t3, zero, 2
+        uut.u_qspi.rx_fifo[16] = 32'h01c78863; // beq  a5, t3, 16      (sinif 2 -> 0x5555)
+        uut.u_qspi.rx_fifo[17] = 32'h00300e13; // addi t3, zero, 3
+        uut.u_qspi.rx_fifo[18] = 32'h01c78863; // beq  a5, t3, 16      (sinif 3 -> 0xAAAA)
+        uut.u_qspi.rx_fifo[19] = 32'h0100006f; // jal  zero, 16
+        uut.u_qspi.rx_fifo[20] = 32'h00d52223; // sw   a3, 4(a0)       (GPIO_ODR = 0x5555)
+        uut.u_qspi.rx_fifo[21] = 32'h0080006f; // jal  zero, 8
+        uut.u_qspi.rx_fifo[22] = 32'h00e52223; // sw   a4, 4(a0)       (GPIO_ODR = 0xAAAA)
+        uut.u_qspi.rx_fifo[23] = 32'h0000006f; // jal  zero, 0         (sonsuz dongu)
+        uut.u_qspi.rx_wr_ptr   = 7'd24;
 
         log_print($sformatf("[%0t] Reset kaldırıldı. İşlemci çalışıyor...", $time));
 
-        // NPU donanım motorunun hesaplamayı bitirmesini dinamik olarak bekle (~964 bin çevrim, ~19.3 ms)
+        // NPU donanım motorunun hesaplamayı bitirmesini dinamik olarak bekle
         log_print($sformatf("[%0t] NPU donanım motorunun tamamlanması bekleniyor...", $time));
-        wait(uut.u_npu.u_npu_engine.done_o == 1'b1);
+        wait (uut.u_npu.u_npu_engine.done_o == 1'b1);
         log_print($sformatf("[%0t] NPU donanım motoru DONE sinyalini verdi!", $time));
+
+        // =====================================================================
+        // KONTROL 1: CPU sinif sonucunu okuyup GPIO'ya yazdi mi?
+        //
+        // Sinifin 2 mi 3 mu oldugunu burada kontrol etmiyoruz; gercek
+        // agirliklarla bu girdinin hangi sinifa dustugu ayrica olculecek.
+        // Burada kanitlanan sey: CPU -> NPU -> CPU -> GPIO zinciri calisiyor.
+        //
+        // CPU once UART'tan "Class: N" yazdirdigi icin (~1.3 ms) zaman asimli
+        // bekleme kullaniyoruz.
+        // =====================================================================
+        fork : wait_gpio
+            wait (gpio_o == 16'h5555 || gpio_o == 16'hAAAA);
+            #5_000_000;   // 5 ms zaman asimi
+        join_any
+        disable wait_gpio;
+
+        if (gpio_o == 16'h5555 || gpio_o == 16'hAAAA) begin
+            log_print($sformatf("      [OK]   CPU sinif sonucunu GPIO'ya yazdi: 0x%h", gpio_o));
+        end else begin
+            error_count++;
+            log_print($sformatf("      [HATA] GPIO 5 ms icinde beklenen desende yazilmadi: 0x%h", gpio_o));
+        end
 
         // GPIO Pinlerini Değiştirip Test Etme
         @ (posedge clk);
@@ -207,27 +250,47 @@ module tb_soc_top;
         #5000;
         run_jtag_test();
         log_print($sformatf("[%0t] SoC Simülasyonu Tamamlandı.", $time));
-        
+
         if (log_file != 0) begin
             $fclose(log_file);
             log_file = 0;
         end
-        $finish;
 
+        // =====================================================================
+        // Makine-okunabilir sonuc: cikis kodu ile basari/basarisizlik
+        // =====================================================================
+        if (error_count != 0) begin
+            $display("================================================================");
+            $display(" TEST BASARISIZ - %0d hata bulundu", error_count);
+            $display("================================================================");
+            $fatal(1, "Dogrulama basarisiz");
+        end else begin
+            $display("================================================================");
+            $display(" TUM TESTLER GECTI");
+            $display("================================================================");
+            $finish;
+        end
     end
 
-    // --- İzleme (Monitoring) ---
+    // =========================================================================
+    // İzleme (Monitoring)
+    //
+    // Cevrim basina PC trace varsayilan olarak KAPALI. Acmak icin Vivado
+    // simulasyon derleme secenegine  -d TRACE_ON  ekleyin.
+    // (T2.1 Spike trace karsilastirmasi bu logu kullanir.)
+    // =========================================================================
+`ifdef TRACE_ON
     logic [31:0] last_pc = 32'h0;
     always @(posedge clk) begin
         if (rst_n) begin
             if (uut.u_core.id_stage_i.pc_id_i !== last_pc) begin
                 last_pc <= uut.u_core.id_stage_i.pc_id_i;
-                // Polling döngüsünü (0x0100002c, 0x01000030, 0x01000034) log kirliliğini önlemek için filtrele
+                // Polling döngüsünü log kirliliğini önlemek için filtrele
                 if (uut.u_core.id_stage_i.pc_id_i != 32'h0100002c &&
                     uut.u_core.id_stage_i.pc_id_i != 32'h01000030 &&
                     uut.u_core.id_stage_i.pc_id_i != 32'h01000034) begin
-                    log_print($sformatf("[%0t] PC_ID=0x%h | x10(a0)=0x%h | x12(a2)=0x%h | x13(a3)=0x%h | x14(a4)=0x%h | x15(a5)=0x%h | awaddr=0x%h | awvalid=%b | rx_wr=%0d | rx_rd=%0d | rx_empty=%0b", 
-                             $time, 
+                    log_print($sformatf("[%0t] PC_ID=0x%h | x10(a0)=0x%h | x12(a2)=0x%h | x13(a3)=0x%h | x14(a4)=0x%h | x15(a5)=0x%h | awaddr=0x%h | awvalid=%b | rx_wr=%0d | rx_rd=%0d | rx_empty=%0b",
+                             $time,
                              uut.u_core.id_stage_i.pc_id_i,
                              uut.u_core.id_stage_i.register_file_i.mem[10],
                              uut.u_core.id_stage_i.register_file_i.mem[12],
@@ -243,6 +306,7 @@ module tb_soc_top;
             end
         end
     end
+`endif
 
     always @(gpio_o) begin
         log_print($sformatf("[%0t] GPIO Çıkışı Değişti: gpio_o = 16'h%h", $time, gpio_o));
@@ -288,7 +352,7 @@ module tb_soc_top;
     // =========================================================================
     // JTAG Sürücü Yardımcı Görevleri (Tasks)
     // =========================================================================
-    
+
     // TCK darbesi üret
     task automatic jtag_clock();
         jtag_tck = 1'b0;
@@ -312,40 +376,36 @@ module tb_soc_top;
 
     // IR (Instruction Register) Shift et
     task automatic jtag_shift_ir(input logic [3:0] ir_in);
-        // IDLE -> DR_SCAN -> IR_SCAN -> IR_CAPTURE -> IR_SHIFT
         jtag_tms = 1'b1; jtag_clock(); // -> SELECT_DR_SCAN
         jtag_tms = 1'b1; jtag_clock(); // -> SELECT_IR_SCAN
         jtag_tms = 1'b0; jtag_clock(); // -> CAPTURE_IR
         jtag_tms = 1'b0; jtag_clock(); // -> SHIFT_IR
 
-        // 4 bit IR değerini shift et
         for (int i = 0; i < 4; i++) begin
             jtag_tdi = ir_in[i];
-            jtag_tms = (i == 3) ? 1'b1 : 1'b0; // Son bitte EXIT1_IR durumuna geç
+            jtag_tms = (i == 3) ? 1'b1 : 1'b0;   // Son bitte EXIT1_IR
             jtag_clock();
         end
 
-        // EXIT1_IR -> UPDATE_IR -> IDLE
         jtag_tms = 1'b1; jtag_clock(); // -> UPDATE_IR
         jtag_tms = 1'b0; jtag_clock(); // -> RUN_TEST_IDLE
     endtask
 
     // DR (Data Register) Shift et
-    task automatic jtag_shift_dr(input logic [63:0] dr_in, input int len, output logic [63:0] dr_out);
-        // IDLE -> DR_SCAN -> DR_CAPTURE -> DR_SHIFT
+    task automatic jtag_shift_dr(input  logic [63:0] dr_in,
+                                 input  int          len,
+                                 output logic [63:0] dr_out);
         jtag_tms = 1'b1; jtag_clock(); // -> SELECT_DR_SCAN
         jtag_tms = 1'b0; jtag_clock(); // -> CAPTURE_DR
         jtag_tms = 1'b0; jtag_clock(); // -> SHIFT_DR
 
-        // len bit DR değerini shift et
         for (int i = 0; i < len; i++) begin
             jtag_tdi = dr_in[i];
-            jtag_tms = (i == len - 1) ? 1'b1 : 1'b0; // Son bitte EXIT1_DR durumuna geç
+            jtag_tms = (i == len - 1) ? 1'b1 : 1'b0;   // Son bitte EXIT1_DR
             jtag_clock();
             dr_out[i] = jtag_tdo;
         end
 
-        // EXIT1_DR -> UPDATE_DR -> IDLE
         jtag_tms = 1'b1; jtag_clock(); // -> UPDATE_DR
         jtag_tms = 1'b0; jtag_clock(); // -> RUN_TEST_IDLE
     endtask
@@ -362,60 +422,39 @@ module tb_soc_top;
         // 1. IDCODE OKUMA
         log_print(" ---> JTAG IDCODE okunuyor...");
         jtag_shift_ir(4'h1); // IR_IDCODE
-        jtag_shift_dr(64'h0, 32, jtag_rdata); // 32-bit IDCODE oku
-        log_print($sformatf("      Okunan JTAG IDCODE: 0x%h (Beklenen: 0x41524b48)", jtag_rdata[31:0]));
-        if (jtag_rdata[31:0] == 32'h41524B48) begin
-            log_print("      [BASARILI] IDCODE dogru!");
-        end else begin
-            log_print("      [HATA] IDCODE uyusmuyor!");
-        end
+        jtag_shift_dr(64'h0, 32, jtag_rdata);
+        check("JTAG IDCODE", jtag_rdata[31:0], 32'h41524B48);
 
         // 2. CPU HALT (DURDURMA)
         log_print(" ---> CPU'ya HALT istegi gonderiliyor...");
         jtag_shift_ir(4'h4); // IR_DBG_CTRL
-        jtag_shift_dr(64'h1, 64, jtag_rdata); // Latch halt = 1
-        #100; // Senkronizasyon gecikmesi
-        if (uut.u_jtag.debug_req_o == 1'b1) begin
-            log_print("      [BASARILI] CPU debug_req_o (Halt) sinyali 1 oldu!");
-        end else begin
-            log_print("      [HATA] debug_req_o sinyali 1 olmadi!");
-        end
+        jtag_shift_dr(64'h1, 64, jtag_rdata);
+        #100;
+        check("CPU halt (debug_req_o)", uut.u_jtag.debug_req_o, 1'b1);
 
         // 3. JTAG BELLEK YAZMA (TCM SRAM'e yaz)
         log_print(" ---> JTAG uzerinden TCM SRAM adresine veri yaziliyor (0x20011000 = 0xDEADBEEF)...");
         jtag_shift_ir(4'h3); // IR_MEM_WRITE
-        // Adres ve veri birleştirilip gönderiliyor: {wdata, addr}
         jtag_shift_dr({32'hDEADBEEF, 32'h20011000}, 64, jtag_rdata);
-        #500; // AXI transferinin tamamlanması için bekle
+        #500;
 
         // 4. JTAG BELLEK OKUMA (TCM SRAM'den oku)
         log_print(" ---> JTAG uzerinden TCM SRAM adresi okunuyor (0x20011000)...");
         jtag_shift_ir(4'h2); // IR_MEM_READ
         jtag_shift_dr({32'h0, 32'h20011000}, 64, jtag_rdata);
-        #500; // AXI transferinin tamamlanması için bekle
-        
-        // Bir sonraki shift işleminde veri TDO'dan kayacaktır
-        jtag_shift_dr(64'h0, 64, jtag_rdata);
-        log_print($sformatf("      Okunan Veri: 0x%h (Beklenen: 0xdeadbeef)", jtag_rdata[63:32]));
-        if (jtag_rdata[63:32] == 32'hDEADBEEF) begin
-            log_print("      [BASARILI] JTAG bellek okuma/yazma testi dogru!");
-        end else begin
-            log_print("      [HATA] Bellek okuma/yazma uyumsuz!");
-        end
+        #500;
+        jtag_shift_dr(64'h0, 64, jtag_rdata);   // veri bir sonraki shift'te TDO'dan gelir
+        check("JTAG bellek okuma/yazma", jtag_rdata[63:32], 32'hDEADBEEF);
 
         // 5. CPU RESUME (DEVAM ETTİRME)
         log_print(" ---> CPU Resume ediliyor...");
         jtag_shift_ir(4'h4); // IR_DBG_CTRL
-        jtag_shift_dr(64'h0, 64, jtag_rdata); // Latch halt = 0
+        jtag_shift_dr(64'h0, 64, jtag_rdata);
         #100;
-        if (uut.u_jtag.debug_req_o == 1'b0) begin
-            log_print("      [BASARILI] CPU debug_req_o sinyali tekrar 0 oldu!");
-        end else begin
-            log_print("      [HATA] debug_req_o sinyali 0 olmadi!");
-        end
+        check("CPU resume (debug_req_o)", uut.u_jtag.debug_req_o, 1'b0);
 
         log_print("================================================================");
-        log_print(" JTAG PORTU DOGRULAMA TESTI BASARIYLA TAMAMLANDI!");
+        log_print(" JTAG PORTU DOGRULAMA TESTI TAMAMLANDI");
         log_print("================================================================");
     endtask
 
