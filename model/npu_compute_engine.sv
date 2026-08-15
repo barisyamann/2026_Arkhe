@@ -263,24 +263,32 @@ module npu_compute_engine (
                     state <= CONV_MAC;
                 end
 
-                CONV_MAC: begin
-                    logic signed [7:0] x_val;
-                    logic signed [7:0] w_val;
-                    
-                    if (in_bounds) begin
-                        logic [7:0] raw_byte;
-                        raw_byte = (byte_offset == 2'd0) ? mem_rdata_b[7:0]   :
-                                   (byte_offset == 2'd1) ? mem_rdata_b[15:8]  :
-                                   (byte_offset == 2'd2) ? mem_rdata_b[23:16] :
-                                                           mem_rdata_b[31:24];
-                        x_val = $signed(raw_byte);
-                    end else begin
-                        x_val = 8'sd0; // Padding alanı
-                    end
+               CONV_MAC: begin
+    logic signed [8:0] x_centered;
+    logic signed [7:0] w_val;
 
-                    // ROM tabanlı ağırlık erişimi
-                    w_val = dw_weights[int'(kh) * 64 + int'(kw) * 8 + int'(d_out)];
-                    conv_acc <= conv_acc + x_val * w_val;
+    if (in_bounds) begin
+        logic [7:0] raw_byte;
+
+        raw_byte = (byte_offset == 2'd0) ? mem_rdata_b[7:0]   :
+                   (byte_offset == 2'd1) ? mem_rdata_b[15:8]  :
+                   (byte_offset == 2'd2) ? mem_rdata_b[23:16] :
+                                           mem_rdata_b[31:24];
+
+        // TFLite input zero-point = -128
+        // x_centered = x_q - (-128) = x_q + 128
+        x_centered = $signed({raw_byte[7], raw_byte}) + 9'sd128;
+
+    end else begin
+        // SAME padding gerçek değer olarak 0 olmalıdır.
+        // Zero-point çıkarıldıktan sonra centered değer doğrudan 0'dır.
+        x_centered = 9'sd0;
+    end
+
+    // Depthwise weight zero-point = 0
+    w_val = dw_weights[int'(kh) * 64 + int'(kw) * 8 + int'(d_out)];
+
+    conv_acc <= conv_acc + x_centered * w_val;
 
                     if (kw == 7) begin
                         kw <= '0;
