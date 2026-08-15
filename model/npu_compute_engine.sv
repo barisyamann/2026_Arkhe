@@ -94,7 +94,135 @@ module npu_compute_engine (
 
     logic [1:0] byte_offset;
     assign byte_offset = flat_idx_in[1:0];
+// ============================================================
+// TFLite INT8 Depthwise requantization yardımcı fonksiyonları
+// ============================================================
 
+// TFLite benzeri:
+// SaturatingRoundingDoublingHighMul
+function automatic logic signed [31:0] sat_round_high_mul(
+    input logic signed [31:0] a,
+    input logic signed [31:0] b
+);
+    logic signed [63:0] ab;
+    logic signed [63:0] nudge;
+    logic signed [63:0] result64;
+
+    begin
+        // Özel overflow durumu
+        if ((a == 32'sh80000000) &&
+            (b == 32'sh80000000)) begin
+
+            sat_round_high_mul = 32'sh7fffffff;
+
+        end else begin
+
+            ab = $signed(a) * $signed(b);
+
+            if (ab >= 0)
+                nudge = 64'sd1073741824;   // 2^30
+            else
+                nudge = -64'sd1073741823;  // 1 - 2^30
+
+            result64 = (ab + nudge) / 64'sd2147483648; // 2^31
+
+            sat_round_high_mul = result64[31:0];
+        end
+    end
+endfunction
+
+
+// 2^N'e bölme + yuvarlama
+function automatic logic signed [31:0] rounding_divide_by_pot(
+    input logic signed [31:0] x,
+    input integer exponent
+);
+    logic signed [31:0] mask;
+    logic signed [31:0] remainder;
+    logic signed [31:0] threshold;
+
+    begin
+        mask = (32'sd1 <<< exponent) - 1;
+
+        remainder = x & mask;
+
+        threshold =
+            (mask >>> 1) +
+            ((x < 0) ? 32'sd1 : 32'sd0);
+
+        rounding_divide_by_pot =
+            (x >>> exponent) +
+            ((remainder > threshold) ? 32'sd1 : 32'sd0);
+    end
+endfunction
+
+
+// TFLite quantized multiplier
+function automatic logic signed [31:0] multiply_quantized(
+    input logic signed [31:0] x,
+    input logic signed [31:0] multiplier,
+    input integer right_shift
+);
+    logic signed [31:0] temp;
+
+    begin
+        temp = sat_round_high_mul(x, multiplier);
+
+        multiply_quantized =
+            rounding_divide_by_pot(temp, right_shift);
+    end
+endfunction
+
+
+// ============================================================
+// Gerçek TFLite modelinden çıkarılan
+// Depthwise kanal multiplier değerleri
+// ============================================================
+function automatic logic signed [31:0] get_dw_multiplier(
+    input logic [2:0] channel
+);
+    begin
+        case (channel)
+
+            3'd0: get_dw_multiplier = 32'sd1653229999;
+            3'd1: get_dw_multiplier = 32'sd1516545207;
+            3'd2: get_dw_multiplier = 32'sd2000799311;
+            3'd3: get_dw_multiplier = 32'sd1159928266;
+            3'd4: get_dw_multiplier = 32'sd1498403863;
+            3'd5: get_dw_multiplier = 32'sd1285645282;
+            3'd6: get_dw_multiplier = 32'sd2146175029;
+            3'd7: get_dw_multiplier = 32'sd1756589032;
+
+            default:
+                get_dw_multiplier = 32'sd0;
+
+        endcase
+    end
+endfunction
+
+
+// Her kanalın sağa kaydırma miktarı
+function automatic integer get_dw_rshift(
+    input logic [2:0] channel
+);
+    begin
+        case (channel)
+
+            3'd0: get_dw_rshift = 10;
+            3'd1: get_dw_rshift = 12;
+            3'd2: get_dw_rshift = 10;
+            3'd3: get_dw_rshift = 10;
+            3'd4: get_dw_rshift = 10;
+            3'd5: get_dw_rshift = 10;
+            3'd6: get_dw_rshift = 10;
+            3'd7: get_dw_rshift = 10;
+
+            default:
+                get_dw_rshift = 10;
+
+        endcase
+    end
+endfunction
     // --- Softmax Exponent LUT Arayüzü ---
     // Q0.12 sabit nokta formatında e^(-x) hesaplayan donanım dostu LUT.
     function automatic logic [12:0] get_exp(input int diff);
@@ -305,18 +433,67 @@ module npu_compute_engine (
                     end
                 end
 
-                CONV_ReLU_FC: begin
-                    logic signed [31:0] Y_conv;
-                    int flat_idx;
-                    
-                    Y_conv   = (conv_acc < 32'sd0) ? 32'sd0 : conv_acc;
-                    flat_idx = (int'(t_out) * 20 + int'(f_out)) * 8 + int'(d_out);
+CONV_ReLU_FC: begin
 
-                    // ROM tabanlı FC ağırlık erişimi
-                    fc_acc[0] <= fc_acc[0] + Y_conv * fc_weights[flat_idx];
-                    fc_acc[1] <= fc_acc[1] + Y_conv * fc_weights[4000 + flat_idx];
-                    fc_acc[2] <= fc_acc[2] + Y_conv * fc_weights[8000 + flat_idx];
-                    fc_acc[3] <= fc_acc[3] + Y_conv * fc_weights[12000 + flat_idx];
+    logic signed [31:0] scaled_conv;
+    logic signed [8:0]  Y_conv_centered;
+
+    int flat_idx;
+
+    // --------------------------------------------------------
+    // 1. 32-bit convolution sonucunu gerçek TFLite
+    //    quantization değerleriyle yeniden ölçekle
+    // --------------------------------------------------------
+    scaled_conv = multiply_quantized(
+        conv_acc,
+        get_dw_multiplier(d_out[2:0]),
+        get_dw_rshift(d_out[2:0])
+    );
+
+    // --------------------------------------------------------
+    // 2. ReLU + INT8 saturation
+    //
+    // Depthwise çıkış zero-point = -128
+    //
+    // FC hesabında (q - zero_point) gerektiği için:
+    //
+    //     q - (-128) = q + 128
+    //
+    // centred değer 0..255 olur.
+    // --------------------------------------------------------
+    if (scaled_conv < 32'sd0)
+        Y_conv_centered = 9'sd0;
+
+    else if (scaled_conv > 32'sd255)
+        Y_conv_centered = 9'sd255;
+
+    else
+        Y_conv_centered = scaled_conv[8:0];
+
+
+    flat_idx =
+        (int'(t_out) * 20 + int'(f_out)) * 8
+        + int'(d_out);
+
+
+    // --------------------------------------------------------
+    // 3. Fully Connected MAC
+    // --------------------------------------------------------
+    fc_acc[0] <= fc_acc[0]
+        + $signed(Y_conv_centered)
+        * $signed(fc_weights[flat_idx]);
+
+    fc_acc[1] <= fc_acc[1]
+        + $signed(Y_conv_centered)
+        * $signed(fc_weights[4000 + flat_idx]);
+
+    fc_acc[2] <= fc_acc[2]
+        + $signed(Y_conv_centered)
+        * $signed(fc_weights[8000 + flat_idx]);
+
+    fc_acc[3] <= fc_acc[3]
+        + $signed(Y_conv_centered)
+        * $signed(fc_weights[12000 + flat_idx]);
 
                     if (d_out == 7) begin
                         d_out <= '0;
