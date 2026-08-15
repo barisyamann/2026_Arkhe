@@ -42,13 +42,24 @@ module tb_npu_golden;
 
     // Basit 1-cycle synchronous TCM modeli.
     always_ff @(posedge clk) begin
-        if (mem_en_b) begin
+        if (!rst_n) begin
+            mem_rdata_b <= '0;
+        end
+        else if (mem_en_b) begin
             if (mem_we_b != 4'b0000) begin
-                if (mem_we_b[0]) mem[mem_addr_b][7:0]   <= mem_wdata_b[7:0];
-                if (mem_we_b[1]) mem[mem_addr_b][15:8]  <= mem_wdata_b[15:8];
-                if (mem_we_b[2]) mem[mem_addr_b][23:16] <= mem_wdata_b[23:16];
-                if (mem_we_b[3]) mem[mem_addr_b][31:24] <= mem_wdata_b[31:24];
-            end else begin
+                if (mem_we_b[0])
+                    mem[mem_addr_b][7:0] <= mem_wdata_b[7:0];
+
+                if (mem_we_b[1])
+                    mem[mem_addr_b][15:8] <= mem_wdata_b[15:8];
+
+                if (mem_we_b[2])
+                    mem[mem_addr_b][23:16] <= mem_wdata_b[23:16];
+
+                if (mem_we_b[3])
+                    mem[mem_addr_b][31:24] <= mem_wdata_b[31:24];
+            end
+            else begin
                 mem_rdata_b <= mem[mem_addr_b];
             end
         end
@@ -67,7 +78,7 @@ module tb_npu_golden;
         npu_reset_i = 1'b0;
         in_addr_i   = 13'd0;
         out_addr_i  = 13'd1024;
-        mem_rdata_b = '0;
+
         cycles      = 0;
 
         repeat (5) @(posedge clk);
