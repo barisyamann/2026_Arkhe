@@ -8,9 +8,10 @@
 //              5) Stable Softmax probability scaling (Q0.12 format) using iterative divider.
 //              6) Argmax class selection.
 //
-//              NOT: FC hesaplama yolu zamanlama kapatmak icin boru hattina
-//              ayrilmistir (CONV_ReLU_FC -> ... -> FC_MAC3). Aritmetik
-//              degistirilmemistir; sadece cevrimlere yayilmistir.
+//              NOT: Hem depthwise requantization + FC MAC yolu (CONV_ReLU_FC ...
+//              FC_MAC3) hem de FC requantization yolu (FC_REQUANT ... FC_RQ_SAT)
+//              zamanlama kapatmak icin boru hattina ayrilmistir.
+//              Aritmetik degistirilmemistir; sadece cevrimlere yayilmistir.
 
 module npu_compute_engine (
     input  logic        clk,
@@ -52,14 +53,18 @@ module npu_compute_engine (
         WRITE_OUT_3     = 5'd12,
         DONE            = 5'd13,
         FC_REQUANT      = 5'd14,
-        // --- FC boru hatti durumlari (zamanlama icin eklendi) ---
+        // --- Depthwise requantization + FC MAC boru hatti ---
         CONV_RQ_NUDGE   = 5'd15,
         CONV_RQ_SHIFT   = 5'd16,
         CONV_RELU       = 5'd17,
         FC_MAC0         = 5'd18,
         FC_MAC1         = 5'd19,
         FC_MAC2         = 5'd20,
-        FC_MAC3         = 5'd21
+        FC_MAC3         = 5'd21,
+        // --- FC requantization boru hatti ---
+        FC_RQ_NUDGE     = 5'd22,
+        FC_RQ_SHIFT     = 5'd23,
+        FC_RQ_SAT       = 5'd24
     } state_t;
 
     state_t state;
@@ -82,7 +87,9 @@ module npu_compute_engine (
 
     logic [12:0] probs [0:3];
 
-    // --- FC boru hatti ara yazmaclari ---
+    // --- Requantization boru hatti ara yazmaclari ---
+    // Hem depthwise (CONV_*) hem FC (FC_RQ_*) yolunda kullanilir;
+    // ikisi hicbir zaman ayni anda aktif olmaz.
     logic signed [63:0] rq_ab;      // 32x32 carpim sonucu
     logic               rq_ovf;     // 0x80000000 * 0x80000000 ozel durumu
     logic [31:0]        rq_shift;   // sag kaydirma miktari
@@ -258,17 +265,10 @@ endfunction
     // --- Softmax Exponent LUT Arayüzü ---
     // Q0.12 sabit nokta formatında e^(-x) hesaplayan donanım dostu LUT.
     // ------------------------------------------------------------
-    // Softmax exponent LUT
-    //
     // diff = max_logit - current_logit
-    //
-    // LUT:
-    // exp(-diff * FC_OUTPUT_SCALE)
-    //
+    // LUT: exp(-diff * FC_OUTPUT_SCALE)
     // FC_OUTPUT_SCALE = 0.09173192083835602
-    //
-    // Çıkış formatı: Q0.12
-    // 4096 = 1.0
+    // Çıkış formatı: Q0.12  (4096 = 1.0)
     // ------------------------------------------------------------
 function automatic logic [12:0] get_exp(
     input integer diff
@@ -390,7 +390,7 @@ endfunction
             c_div       <= '0;
             sum_exp     <= '0;
 
-            // FC boru hatti yazmaclari
+            // Requantization boru hatti yazmaclari
             rq_ab       <= '0;
             rq_ovf      <= 1'b0;
             rq_shift    <= '0;
@@ -430,7 +430,7 @@ endfunction
 
             fc_q_idx    <= '0;
 
-            // FC boru hatti yazmaclari
+            // Requantization boru hatti yazmaclari
             rq_ab       <= '0;
             rq_ovf      <= 1'b0;
             rq_shift    <= '0;
@@ -526,7 +526,7 @@ endfunction
                 end
 
                 // ============================================================
-                // Asama 1: 32x32 carpma (DSP)
+                // Depthwise requantization - Asama 1: 32x32 carpma (DSP)
                 // ============================================================
                 CONV_ReLU_FC: begin
                     logic signed [31:0] m;
@@ -538,10 +538,7 @@ endfunction
                     state    <= CONV_RQ_NUDGE;
                 end
 
-                // ============================================================
                 // Asama 2: nudge ekleme + 2^31'e bolme
-                // (sat_round_high_mul'un ikinci yarisi)
-                // ============================================================
                 CONV_RQ_NUDGE: begin
                     logic signed [63:0] nudge;
                     logic signed [63:0] r64;
@@ -557,20 +554,14 @@ endfunction
                     state <= CONV_RQ_SHIFT;
                 end
 
-                // ============================================================
                 // Asama 3: rounding_divide_by_pot (degisken kaydirma)
-                // ============================================================
                 CONV_RQ_SHIFT: begin
                     rq_scaled <= rounding_divide_by_pot(rq_srhm, rq_shift);
                     state     <= CONV_RELU;
                 end
 
-                // ============================================================
                 // Asama 4: ReLU + INT8 doygunluk + FC indeks hesabi
-                //
-                // Depthwise cikis zero-point = -128, bu yuzden
-                // centered deger 0..255 araliginda.
-                // ============================================================
+                // Depthwise cikis zero-point = -128, centered deger 0..255.
                 CONV_RELU: begin
                     if (rq_scaled < 32'sd0)
                         fc_y <= 9'sd0;
@@ -638,30 +629,43 @@ endfunction
                     end
                 end
 
+                // ============================================================
+                // FC requantization - Asama 1: 32x32 carpma
+                //
+                // real multiplier    ~ 0.000439331661
+                // integer multiplier = 1932201080
+                // right shift        = 11
+                // output zero-point  = 14
+                // ============================================================
                 FC_REQUANT: begin
+                    rq_ab <= $signed(fc_acc[fc_q_idx]) * 32'sd1932201080;
+                    state <= FC_RQ_NUDGE;
+                end
 
-                    logic signed [31:0] scaled_fc;
+                // Asama 2: nudge ekleme + 2^31'e bolme
+                FC_RQ_NUDGE: begin
+                    logic signed [63:0] nudge;
+                    logic signed [63:0] r64;
+
+                    nudge   = (rq_ab >= 0) ?  64'sd1073741824
+                                           : -64'sd1073741823;
+                    r64     = (rq_ab + nudge) / 64'sd2147483648;
+                    rq_srhm <= r64[31:0];
+                    state   <= FC_RQ_SHIFT;
+                end
+
+                // Asama 3: sabit 11 bit saga kaydirma + yuvarlama
+                FC_RQ_SHIFT: begin
+                    rq_scaled <= rounding_divide_by_pot(rq_srhm, 11);
+                    state     <= FC_RQ_SAT;
+                end
+
+                // Asama 4: zero-point ekleme + INT8 doygunluk + sonraki sinif
+                FC_RQ_SAT: begin
                     logic signed [31:0] quant_fc;
 
-                    // --------------------------------------------------------
-                    // TFLite FC requantization
-                    //
-                    // real multiplier ≈ 0.000439331661
-                    // integer multiplier = 1932201080
-                    // right shift = 11
-                    // output zero-point = 14
-                    // --------------------------------------------------------
+                    quant_fc = rq_scaled + 32'sd14;
 
-                    scaled_fc = multiply_quantized(
-                        fc_acc[fc_q_idx],
-                        32'sd1932201080,
-                        11
-                    );
-
-                    // TFLite output zero-point ekle
-                    quant_fc = scaled_fc + 32'sd14;
-
-                    // INT8 saturation
                     if (quant_fc > 32'sd127)
                         fc_logits[fc_q_idx] <= 8'sd127;
 
@@ -671,14 +675,13 @@ endfunction
                     else
                         fc_logits[fc_q_idx] <= quant_fc[7:0];
 
-
-                    // Dört sınıfı sırayla işle
+                    // Dort sinifi sirayla isle
                     if (fc_q_idx == 2'd3) begin
                         fc_q_idx <= 2'd0;
                         state    <= SOFTMAX_INIT;
-                    end
-                    else begin
+                    end else begin
                         fc_q_idx <= fc_q_idx + 2'd1;
+                        state    <= FC_REQUANT;
                     end
                 end
 
