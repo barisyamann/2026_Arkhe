@@ -122,6 +122,8 @@ add_files -norecurse [list \
 add_files -fileset sim_1 -norecurse [list \
     "./tb/tb_soc_top.sv" \
     "./tb/tb_npu_compute_engine.sv" \
+    "./tb/npu_golden/tb_npu_golden.sv" \
+    "./tb/npu_golden/test_input_pattern.mem" \
     "./rtl/boot/boot.hex" \
 ]
 
