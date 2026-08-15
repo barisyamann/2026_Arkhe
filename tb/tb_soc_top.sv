@@ -251,25 +251,29 @@ module tb_soc_top;
         run_jtag_test();
         log_print($sformatf("[%0t] SoC Simülasyonu Tamamlandı.", $time));
 
+        // =====================================================================
+        // Sonuc ozeti - hem ekrana hem log dosyasina yazilir
+        // =====================================================================
+        log_print("================================================================");
+        if (error_count != 0) begin
+            log_print($sformatf(" TEST BASARISIZ - %0d hata bulundu", error_count));
+        end else begin
+            log_print(" TUM TESTLER GECTI - 0 hata");
+        end
+        log_print("================================================================");
+
         if (log_file != 0) begin
             $fclose(log_file);
             log_file = 0;
         end
 
-        // =====================================================================
-        // Makine-okunabilir sonuc: cikis kodu ile basari/basarisizlik
-        // =====================================================================
+        // Makine-okunabilir sonuc: simulator cikis kodu
         if (error_count != 0) begin
-            $display("================================================================");
-            $display(" TEST BASARISIZ - %0d hata bulundu", error_count);
-            $display("================================================================");
             $fatal(1, "Dogrulama basarisiz");
         end else begin
-            $display("================================================================");
-            $display(" TUM TESTLER GECTI");
-            $display("================================================================");
             $finish;
         end
+
     end
 
     // =========================================================================
