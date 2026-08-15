@@ -283,6 +283,13 @@ endfunction
             bit_index    <= '0;
             div_active   <= 1'b0;
             div_done     <= 1'b0;
+        end else if (npu_reset_i) begin
+            dividend_acc <= '0;
+            divisor      <= '0;
+            quotient     <= '0;
+            bit_index    <= '0;
+            div_active   <= 1'b0;
+            div_done     <= 1'b0;
         end else if (div_start) begin
             divisor    <= div_den;
             quotient   <= '0;
@@ -368,20 +375,36 @@ endfunction
             end
 
             fc_q_idx <= '0;
-        end else if (npu_reset_i) begin
-            state       <= IDLE;
-            busy_o      <= 1'b0;
-            done_o      <= 1'b0;
-            class_o     <= 2'b00;
-            t_out       <= '0;
-            f_out       <= '0;
-            d_out       <= '0;
-            kh          <= '0;
-            kw          <= '0;
-            conv_acc    <= '0;
-            div_start   <= 1'b0;
-            c_div       <= '0;
-        end else begin
+            end else if (npu_reset_i) begin
+                state       <= IDLE;
+                busy_o      <= 1'b0;
+                done_o      <= 1'b0;
+                class_o     <= 2'b00;
+
+                t_out       <= '0;
+                f_out       <= '0;
+                d_out       <= '0;
+                kh          <= '0;
+                kw          <= '0;
+
+                conv_acc    <= '0;
+
+                div_start   <= 1'b0;
+                div_num     <= '0;
+                div_den     <= '0;
+                c_div       <= '0;
+                sum_exp     <= '0;
+
+                fc_q_idx    <= '0;
+
+                for (int i = 0; i < 4; i++) begin
+                    fc_acc[i]    <= '0;
+                    fc_logits[i] <= '0;
+                    probs[i]     <= '0;
+                    exp_val[i]   <= '0;
+                end
+
+            end else begin
             case (state)
                 IDLE: begin
                     busy_o <= 1'b0;
