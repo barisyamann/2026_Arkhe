@@ -88,9 +88,9 @@ module tb_npu_compute_engine;
 
     // --- Test Akışı ---
     initial begin
-        log_file = $fopen("C:/Arkhe_2026/tb/T1.1_npu_block_level/simulation.log", "w");
+        log_file = $fopen("simulation.log", "w");
         if (log_file == 0) begin
-            $display("HATA: C:/Arkhe_2026/tb/T1.1_npu_block_level/simulation.log dosyası açılamadı!");
+            $display("HATA: simulation.log dosyası açılamadı!");
         end
 
         log_print("================================================================");
