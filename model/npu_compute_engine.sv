@@ -75,6 +75,7 @@ logic [12:0] probs [0:3];
     logic signed [31:0] dw_bias    [0:7];
     logic signed [7:0]  fc_weights [0:15999];
     logic signed [31:0] fc_bias    [0:3];
+    logic [12:0] softmax_exp_lut [0:255];
 
     // ROM Belleklerin Dosyadan Okunarak İlklendirilmesi
     initial begin
@@ -82,6 +83,7 @@ logic [12:0] probs [0:3];
         $readmemh("dw_bias.mem", dw_bias);
         $readmemh("fc_weights.mem", fc_weights);
         $readmemh("fc_bias.mem", fc_bias);
+        $readmemh("softmax_exp_lut.mem", softmax_exp_lut);
     end
 
     // --- Adres ve Sınır Güvenliği Mantığı (Reshape 49x40x1) ---
@@ -232,32 +234,35 @@ function automatic integer get_dw_rshift(
 endfunction
     // --- Softmax Exponent LUT Arayüzü ---
     // Q0.12 sabit nokta formatında e^(-x) hesaplayan donanım dostu LUT.
-    function automatic logic [12:0] get_exp(input int diff);
-        int idx;
-        idx = diff >> 5; // Ölçekleme faktörü
-        if (idx > 63) return 13'd0;
-        else begin
-            case (idx)
-                0:  return 13'd4096; 1:  return 12'd3848; 2:  return 12'd3615; 3:  return 12'd3396;
-                4:  return 12'd3191; 5:  return 12'd2997; 6:  return 12'd2816; 7:  return 12'd2645;
-                8:  return 12'd2484; 9:  return 12'd2334; 10: return 12'd2192; 11: return 12'd2060;
-                12: return 12'd1935; 13: return 12'd1818; 14: return 12'd1708; 15: return 12'd1604;
-                16: return 12'd1507; 17: return 12'd1416; 18: return 12'd1330; 19: return 12'd1249;
-                20: return 12'd1174; 21: return 12'd1103; 22: return 12'd1036; 23: return 12'd973;
-                24: return 12'd914;  25: return 12'd859;  26: return 12'd807;  27: return 12'd758;
-                28: return 12'd712;  29: return 12'd669;  30: return 12'd629;  31: return 12'd591;
-                32: return 12'd555;  33: return 12'd521;  34: return 12'd490;  35: return 12'd460;
-                36: return 12'd432;  37: return 12'd406;  38: return 12'd381;  39: return 12'd358;
-                40: return 12'd336;  41: return 12'd316;  42: return 12'd297;  43: return 12'd279;
-                44: return 12'd262;  45: return 12'd246;  46: return 12'd231;  47: return 12'd217;
-                48: return 12'd204;  49: return 12'd192;  50: return 12'd180;  51: return 12'd169;
-                52: return 12'd159;  53: return 12'd149;  54: return 12'd140;  55: return 12'd132;
-                56: return 12'd124;  57: return 12'd116;  58: return 12'd109;  59: return 12'd103;
-                60: return 12'd96;   61: return 12'd91;   62: return 12'd85;
-                default: return 13'd0;
-            endcase
-        end
-    endfunction
+    // ------------------------------------------------------------
+// Softmax exponent LUT
+//
+// diff = max_logit - current_logit
+//
+// LUT:
+// exp(-diff * FC_OUTPUT_SCALE)
+//
+// FC_OUTPUT_SCALE = 0.09173192083835602
+//
+// Çıkış formatı: Q0.12
+// 4096 = 1.0
+// ------------------------------------------------------------
+function automatic logic [12:0] get_exp(
+    input integer diff
+);
+    begin
+
+        if (diff <= 0)
+            get_exp = 13'd4096;
+
+        else if (diff >= 256)
+            get_exp = 13'd0;
+
+        else
+            get_exp = softmax_exp_lut[diff];
+
+    end
+endfunction
 
     // --- Softmax Bölücü Birimi (Divider) ---
     logic [12:0] div_num;
@@ -323,10 +328,18 @@ endfunction
     logic [1:0]         c_div;
 
     always_comb begin
-        max_score = fc_acc[0];
-        if (fc_acc[1] > max_score) max_score = fc_acc[1];
-        if (fc_acc[2] > max_score) max_score = fc_acc[2];
-        if (fc_acc[3] > max_score) max_score = fc_acc[3];
+
+        max_score = $signed(fc_logits[0]);
+
+        if ($signed(fc_logits[1]) > max_score)
+            max_score = $signed(fc_logits[1]);
+
+        if ($signed(fc_logits[2]) > max_score)
+            max_score = $signed(fc_logits[2]);
+
+        if ($signed(fc_logits[3]) > max_score)
+            max_score = $signed(fc_logits[3]);
+
     end
 
     always_ff @(posedge clk or negedge rst_n) begin
@@ -575,12 +588,16 @@ CONV_ReLU_FC: begin
                    end
                 end
                 SOFTMAX_INIT: begin
-                    exp_val[0] <= get_exp(max_score - fc_acc[0]);
-                    exp_val[1] <= get_exp(max_score - fc_acc[1]);
-                    exp_val[2] <= get_exp(max_score - fc_acc[2]);
-                    exp_val[3] <= get_exp(max_score - fc_acc[3]);
-                    c_div      <= '0;
-                    state      <= SOFTMAX_DIV_REQ;
+
+                    // FC requantization sonrası gerçek INT8 logits kullanılır.
+                    exp_val[0] <= get_exp(max_score - $signed(fc_logits[0]));
+                    exp_val[1] <= get_exp(max_score - $signed(fc_logits[1]));
+                    exp_val[2] <= get_exp(max_score - $signed(fc_logits[2]));
+                    exp_val[3] <= get_exp(max_score - $signed(fc_logits[3]));
+
+                    c_div <= '0;
+                    state <= SOFTMAX_DIV_REQ;
+
                 end
 
                 SOFTMAX_DIV_REQ: begin
@@ -619,15 +636,33 @@ CONV_ReLU_FC: begin
 
                 WRITE_OUT_3: begin
                     state <= DONE;
-                    // Argmax Karar Mantığı
-                    if (probs[2] >= probs[3] && probs[2] >= probs[1] && probs[2] >= probs[0]) begin
-                        class_o <= 2'd2; // YES
-                    end else if (probs[3] >= probs[2] && probs[3] >= probs[1] && probs[3] >= probs[0]) begin
-                        class_o <= 2'd3; // NO
-                    end else if (probs[1] >= probs[0] && probs[1] >= probs[2] && probs[1] >= probs[3]) begin
-                        class_o <= 2'd1; // UNKNOWN
-                    end else begin
+                    // --------------------------------------------------------
+                    // Sınıf seçimi doğrudan quantized FC logits üzerinden.
+                    // Softmax sıralamayı değiştirmez.
+                    // --------------------------------------------------------
+
+                    if (($signed(fc_logits[0]) >= $signed(fc_logits[1])) &&
+                        ($signed(fc_logits[0]) >= $signed(fc_logits[2])) &&
+                        ($signed(fc_logits[0]) >= $signed(fc_logits[3]))) begin
+
                         class_o <= 2'd0; // SILENCE
+
+                    end
+                    else if (($signed(fc_logits[1]) >= $signed(fc_logits[2])) &&
+                    ($signed(fc_logits[1]) >= $signed(fc_logits[3]))) begin
+
+                        class_o <= 2'd1; // UNKNOWN
+
+                    end
+                    else if ($signed(fc_logits[2]) >= $signed(fc_logits[3])) begin
+
+                        class_o <= 2'd2; // YES
+
+                    end
+                    else begin
+
+                        class_o <= 2'd3; // NO
+
                     end
                 end
 
