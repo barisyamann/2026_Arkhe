@@ -7,6 +7,10 @@
 //              4) Streaming Flatten & FullyConnected matrix multiply-accumulate to 4 output classes.
 //              5) Stable Softmax probability scaling (Q0.12 format) using iterative divider.
 //              6) Argmax class selection.
+//
+//              NOT: FC hesaplama yolu zamanlama kapatmak icin boru hattina
+//              ayrilmistir (CONV_ReLU_FC -> ... -> FC_MAC3). Aritmetik
+//              degistirilmemistir; sadece cevrimlere yayilmistir.
 
 module npu_compute_engine (
     input  logic        clk,
@@ -32,22 +36,30 @@ module npu_compute_engine (
 );
 
     // FSM Durum Tanımları
-    typedef enum logic [3:0] {
-        IDLE            = 4'd0,
-        INIT            = 4'd1,
-        CONV_READ_REQ   = 4'd2,
-        CONV_READ_WAIT  = 4'd3,
-        CONV_MAC        = 4'd4,
-        CONV_ReLU_FC    = 4'd5,
-        SOFTMAX_INIT    = 4'd6,
-        SOFTMAX_DIV_REQ = 4'd7,
-        SOFTMAX_DIV_WAIT= 4'd8,
-        WRITE_OUT_0     = 4'd9,
-        WRITE_OUT_1     = 4'd10,
-        WRITE_OUT_2     = 4'd11,
-        WRITE_OUT_3     = 4'd12,
-        DONE            = 4'd13,
-        FC_REQUANT      = 4'd14
+    typedef enum logic [4:0] {
+        IDLE            = 5'd0,
+        INIT            = 5'd1,
+        CONV_READ_REQ   = 5'd2,
+        CONV_READ_WAIT  = 5'd3,
+        CONV_MAC        = 5'd4,
+        CONV_ReLU_FC    = 5'd5,
+        SOFTMAX_INIT    = 5'd6,
+        SOFTMAX_DIV_REQ = 5'd7,
+        SOFTMAX_DIV_WAIT= 5'd8,
+        WRITE_OUT_0     = 5'd9,
+        WRITE_OUT_1     = 5'd10,
+        WRITE_OUT_2     = 5'd11,
+        WRITE_OUT_3     = 5'd12,
+        DONE            = 5'd13,
+        FC_REQUANT      = 5'd14,
+        // --- FC boru hatti durumlari (zamanlama icin eklendi) ---
+        CONV_RQ_NUDGE   = 5'd15,
+        CONV_RQ_SHIFT   = 5'd16,
+        CONV_RELU       = 5'd17,
+        FC_MAC0         = 5'd18,
+        FC_MAC1         = 5'd19,
+        FC_MAC2         = 5'd20,
+        FC_MAC3         = 5'd21
     } state_t;
 
     state_t state;
@@ -59,17 +71,26 @@ module npu_compute_engine (
     logic [3:0] kh;      // 0 .. 9  (Kernel Yükseklik)
     logic [3:0] kw;      // 0 .. 7  (Kernel Genişlik)
 
-logic signed [31:0] conv_acc;
-logic signed [31:0] fc_acc [0:3];
+    logic signed [31:0] conv_acc;
+    logic signed [31:0] fc_acc [0:3];
 
-// TFLite FC katmanının quantized INT8 çıkışları
-logic signed [7:0] fc_logits [0:3];
+    // TFLite FC katmanının quantized INT8 çıkışları
+    logic signed [7:0] fc_logits [0:3];
 
-// Hangi sınıfın requantization işleminin yapıldığını tutar
-logic [1:0] fc_q_idx;
+    // Hangi sınıfın requantization işleminin yapıldığını tutar
+    logic [1:0] fc_q_idx;
 
-logic [12:0] probs [0:3];
-    
+    logic [12:0] probs [0:3];
+
+    // --- FC boru hatti ara yazmaclari ---
+    logic signed [63:0] rq_ab;      // 32x32 carpim sonucu
+    logic               rq_ovf;     // 0x80000000 * 0x80000000 ozel durumu
+    logic [31:0]        rq_shift;   // sag kaydirma miktari
+    logic signed [31:0] rq_srhm;    // sat_round_high_mul sonucu
+    logic signed [31:0] rq_scaled;  // multiply_quantized sonucu
+    logic signed [8:0]  fc_y;       // ReLU + doygunluk sonrasi aktivasyon
+    logic [13:0]        fc_idx;     // FC agirlik indeksi (0..3999)
+
     // --- Ağırlık ve Sapma (Weight & Bias) ROM Dizi Tanımlamaları ---
     logic signed [7:0]  dw_weights [0:639];
     logic signed [31:0] dw_bias    [0:7];
@@ -103,6 +124,7 @@ logic [12:0] probs [0:3];
 
     logic [1:0] byte_offset;
     assign byte_offset = flat_idx_in[1:0];
+
 // ============================================================
 // TFLite INT8 Depthwise requantization yardımcı fonksiyonları
 // ============================================================
@@ -232,21 +254,22 @@ function automatic integer get_dw_rshift(
         endcase
     end
 endfunction
+
     // --- Softmax Exponent LUT Arayüzü ---
     // Q0.12 sabit nokta formatında e^(-x) hesaplayan donanım dostu LUT.
     // ------------------------------------------------------------
-// Softmax exponent LUT
-//
-// diff = max_logit - current_logit
-//
-// LUT:
-// exp(-diff * FC_OUTPUT_SCALE)
-//
-// FC_OUTPUT_SCALE = 0.09173192083835602
-//
-// Çıkış formatı: Q0.12
-// 4096 = 1.0
-// ------------------------------------------------------------
+    // Softmax exponent LUT
+    //
+    // diff = max_logit - current_logit
+    //
+    // LUT:
+    // exp(-diff * FC_OUTPUT_SCALE)
+    //
+    // FC_OUTPUT_SCALE = 0.09173192083835602
+    //
+    // Çıkış formatı: Q0.12
+    // 4096 = 1.0
+    // ------------------------------------------------------------
 function automatic logic [12:0] get_exp(
     input integer diff
 );
@@ -308,7 +331,7 @@ endfunction
             logic [15:0] next_acc;
             next_acc = {dividend_acc[14:0], 1'b0};
             sub_val = {1'b0, next_acc} - {1'b0, divisor};
-            
+
             if (sub_val[16] == 1'b0) begin
                 dividend_acc <= sub_val[15:0];
                 quotient[bit_index-1] <= 1'b1;
@@ -366,7 +389,16 @@ endfunction
             div_den     <= '0;
             c_div       <= '0;
             sum_exp     <= '0;
-            
+
+            // FC boru hatti yazmaclari
+            rq_ab       <= '0;
+            rq_ovf      <= 1'b0;
+            rq_shift    <= '0;
+            rq_srhm     <= '0;
+            rq_scaled   <= '0;
+            fc_y        <= '0;
+            fc_idx      <= '0;
+
             for (int i = 0; i < 4; i++) begin
                 fc_acc[i]    <= '0;
                 fc_logits[i] <= '0;
@@ -375,36 +407,46 @@ endfunction
             end
 
             fc_q_idx <= '0;
-            end else if (npu_reset_i) begin
-                state       <= IDLE;
-                busy_o      <= 1'b0;
-                done_o      <= 1'b0;
-                class_o     <= 2'b00;
 
-                t_out       <= '0;
-                f_out       <= '0;
-                d_out       <= '0;
-                kh          <= '0;
-                kw          <= '0;
+        end else if (npu_reset_i) begin
+            state       <= IDLE;
+            busy_o      <= 1'b0;
+            done_o      <= 1'b0;
+            class_o     <= 2'b00;
 
-                conv_acc    <= '0;
+            t_out       <= '0;
+            f_out       <= '0;
+            d_out       <= '0;
+            kh          <= '0;
+            kw          <= '0;
 
-                div_start   <= 1'b0;
-                div_num     <= '0;
-                div_den     <= '0;
-                c_div       <= '0;
-                sum_exp     <= '0;
+            conv_acc    <= '0;
 
-                fc_q_idx    <= '0;
+            div_start   <= 1'b0;
+            div_num     <= '0;
+            div_den     <= '0;
+            c_div       <= '0;
+            sum_exp     <= '0;
 
-                for (int i = 0; i < 4; i++) begin
-                    fc_acc[i]    <= '0;
-                    fc_logits[i] <= '0;
-                    probs[i]     <= '0;
-                    exp_val[i]   <= '0;
-                end
+            fc_q_idx    <= '0;
 
-            end else begin
+            // FC boru hatti yazmaclari
+            rq_ab       <= '0;
+            rq_ovf      <= 1'b0;
+            rq_shift    <= '0;
+            rq_srhm     <= '0;
+            rq_scaled   <= '0;
+            fc_y        <= '0;
+            fc_idx      <= '0;
+
+            for (int i = 0; i < 4; i++) begin
+                fc_acc[i]    <= '0;
+                fc_logits[i] <= '0;
+                probs[i]     <= '0;
+                exp_val[i]   <= '0;
+            end
+
+        end else begin
             case (state)
                 IDLE: begin
                     busy_o <= 1'b0;
@@ -432,7 +474,6 @@ endfunction
                     conv_acc <= dw_bias[0];
                     state    <= CONV_READ_REQ;
                 end
-                    
 
                 CONV_READ_REQ: begin
                     state <= CONV_READ_WAIT;
@@ -442,32 +483,32 @@ endfunction
                     state <= CONV_MAC;
                 end
 
-               CONV_MAC: begin
-    logic signed [8:0] x_centered;
-    logic signed [7:0] w_val;
+                CONV_MAC: begin
+                    logic signed [8:0] x_centered;
+                    logic signed [7:0] w_val;
 
-    if (in_bounds) begin
-        logic [7:0] raw_byte;
+                    if (in_bounds) begin
+                        logic [7:0] raw_byte;
 
-        raw_byte = (byte_offset == 2'd0) ? mem_rdata_b[7:0]   :
-                   (byte_offset == 2'd1) ? mem_rdata_b[15:8]  :
-                   (byte_offset == 2'd2) ? mem_rdata_b[23:16] :
-                                           mem_rdata_b[31:24];
+                        raw_byte = (byte_offset == 2'd0) ? mem_rdata_b[7:0]   :
+                                   (byte_offset == 2'd1) ? mem_rdata_b[15:8]  :
+                                   (byte_offset == 2'd2) ? mem_rdata_b[23:16] :
+                                                           mem_rdata_b[31:24];
 
-        // TFLite input zero-point = -128
-        // x_centered = x_q - (-128) = x_q + 128
-        x_centered = $signed({raw_byte[7], raw_byte}) + 9'sd128;
+                        // TFLite input zero-point = -128
+                        // x_centered = x_q - (-128) = x_q + 128
+                        x_centered = $signed({raw_byte[7], raw_byte}) + 9'sd128;
 
-    end else begin
-        // SAME padding gerçek değer olarak 0 olmalıdır.
-        // Zero-point çıkarıldıktan sonra centered değer doğrudan 0'dır.
-        x_centered = 9'sd0;
-    end
+                    end else begin
+                        // SAME padding gerçek değer olarak 0 olmalıdır.
+                        // Zero-point çıkarıldıktan sonra centered değer doğrudan 0'dır.
+                        x_centered = 9'sd0;
+                    end
 
-    // Depthwise weight zero-point = 0
-    w_val = dw_weights[int'(kh) * 64 + int'(kw) * 8 + int'(d_out)];
+                    // Depthwise weight zero-point = 0
+                    w_val = dw_weights[int'(kh) * 64 + int'(kw) * 8 + int'(d_out)];
 
-    conv_acc <= conv_acc + x_centered * w_val;
+                    conv_acc <= conv_acc + x_centered * w_val;
 
                     if (kw == 7) begin
                         kw <= '0;
@@ -484,92 +525,119 @@ endfunction
                     end
                 end
 
-CONV_ReLU_FC: begin
+                // ============================================================
+                // Asama 1: 32x32 carpma (DSP)
+                // ============================================================
+                CONV_ReLU_FC: begin
+                    logic signed [31:0] m;
 
-    logic signed [31:0] scaled_conv;
-    logic signed [8:0]  Y_conv_centered;
+                    m        = get_dw_multiplier(d_out[2:0]);
+                    rq_ab    <= $signed(conv_acc) * $signed(m);
+                    rq_ovf   <= (conv_acc == 32'sh80000000) && (m == 32'sh80000000);
+                    rq_shift <= get_dw_rshift(d_out[2:0]);
+                    state    <= CONV_RQ_NUDGE;
+                end
 
-    int flat_idx;
+                // ============================================================
+                // Asama 2: nudge ekleme + 2^31'e bolme
+                // (sat_round_high_mul'un ikinci yarisi)
+                // ============================================================
+                CONV_RQ_NUDGE: begin
+                    logic signed [63:0] nudge;
+                    logic signed [63:0] r64;
 
-    // --------------------------------------------------------
-    // 1. 32-bit convolution sonucunu gerçek TFLite
-    //    quantization değerleriyle yeniden ölçekle
-    // --------------------------------------------------------
-    scaled_conv = multiply_quantized(
-        conv_acc,
-        get_dw_multiplier(d_out[2:0]),
-        get_dw_rshift(d_out[2:0])
-    );
+                    if (rq_ovf) begin
+                        rq_srhm <= 32'sh7fffffff;
+                    end else begin
+                        nudge   = (rq_ab >= 0) ?  64'sd1073741824    // 2^30
+                                               : -64'sd1073741823;   // 1 - 2^30
+                        r64     = (rq_ab + nudge) / 64'sd2147483648; // 2^31
+                        rq_srhm <= r64[31:0];
+                    end
+                    state <= CONV_RQ_SHIFT;
+                end
 
-    // --------------------------------------------------------
-    // 2. ReLU + INT8 saturation
-    //
-    // Depthwise çıkış zero-point = -128
-    //
-    // FC hesabında (q - zero_point) gerektiği için:
-    //
-    //     q - (-128) = q + 128
-    //
-    // centred değer 0..255 olur.
-    // --------------------------------------------------------
-    if (scaled_conv < 32'sd0)
-        Y_conv_centered = 9'sd0;
+                // ============================================================
+                // Asama 3: rounding_divide_by_pot (degisken kaydirma)
+                // ============================================================
+                CONV_RQ_SHIFT: begin
+                    rq_scaled <= rounding_divide_by_pot(rq_srhm, rq_shift);
+                    state     <= CONV_RELU;
+                end
 
-    else if (scaled_conv > 32'sd255)
-        Y_conv_centered = 9'sd255;
+                // ============================================================
+                // Asama 4: ReLU + INT8 doygunluk + FC indeks hesabi
+                //
+                // Depthwise cikis zero-point = -128, bu yuzden
+                // centered deger 0..255 araliginda.
+                // ============================================================
+                CONV_RELU: begin
+                    if (rq_scaled < 32'sd0)
+                        fc_y <= 9'sd0;
+                    else if (rq_scaled > 32'sd255)
+                        fc_y <= 9'sd255;
+                    else
+                        fc_y <= rq_scaled[8:0];
 
-    else
-        Y_conv_centered = scaled_conv[8:0];
+                    fc_idx <= (int'(t_out) * 20 + int'(f_out)) * 8 + int'(d_out);
+                    state  <= FC_MAC0;
+                end
 
+                // ============================================================
+                // Asama 5-8: dort FC MAC, her cevrimde TEK ROM okumasi
+                // (D9 bulgusu burada kapaniyor)
+                // ============================================================
+                FC_MAC0: begin
+                    fc_acc[0] <= fc_acc[0]
+                        + $signed(fc_y) * $signed(fc_weights[fc_idx]);
+                    state <= FC_MAC1;
+                end
 
-    flat_idx =
-        (int'(t_out) * 20 + int'(f_out)) * 8
-        + int'(d_out);
+                FC_MAC1: begin
+                    fc_acc[1] <= fc_acc[1]
+                        + $signed(fc_y) * $signed(fc_weights[fc_idx + 14'd4000]);
+                    state <= FC_MAC2;
+                end
 
+                FC_MAC2: begin
+                    fc_acc[2] <= fc_acc[2]
+                        + $signed(fc_y) * $signed(fc_weights[fc_idx + 14'd8000]);
+                    state <= FC_MAC3;
+                end
 
-    // --------------------------------------------------------
-    // 3. Fully Connected MAC
-    // --------------------------------------------------------
-    fc_acc[0] <= fc_acc[0]
-        + $signed(Y_conv_centered)
-        * $signed(fc_weights[flat_idx]);
-
-    fc_acc[1] <= fc_acc[1]
-        + $signed(Y_conv_centered)
-        * $signed(fc_weights[4000 + flat_idx]);
-
-    fc_acc[2] <= fc_acc[2]
-        + $signed(Y_conv_centered)
-        * $signed(fc_weights[8000 + flat_idx]);
-
-    fc_acc[3] <= fc_acc[3]
-        + $signed(Y_conv_centered)
-        * $signed(fc_weights[12000 + flat_idx]);
+                // Son asama: sayac guncellemeleri burada yapilir.
+                // t_out / f_out / d_out boru hatti boyunca sabit kalmali,
+                // cunku fc_idx ve dw_multiplier onlara bagli.
+                FC_MAC3: begin
+                    fc_acc[3] <= fc_acc[3]
+                        + $signed(fc_y) * $signed(fc_weights[fc_idx + 14'd12000]);
 
                     if (d_out == 7) begin
-                        d_out <= '0;
-                        conv_acc <= dw_bias[0]; // Sıradaki koordinat için kanal 0 biası yükle
-                    if (f_out == 19) begin
-                        f_out <= '0;
+                        d_out    <= '0;
+                        conv_acc <= dw_bias[0];
 
-                        if (t_out == 24) begin
-                            t_out    <= '0;
-                            fc_q_idx <= 2'd0;
-                            state    <= FC_REQUANT;
-                        end else begin
-                            t_out <= t_out + 1;
-                            state <= CONV_READ_REQ;
-                        end
+                        if (f_out == 19) begin
+                            f_out <= '0;
+
+                            if (t_out == 24) begin
+                                t_out    <= '0;
+                                fc_q_idx <= 2'd0;
+                                state    <= FC_REQUANT;
+                            end else begin
+                                t_out <= t_out + 1;
+                                state <= CONV_READ_REQ;
+                            end
                         end else begin
                             f_out <= f_out + 1;
                             state <= CONV_READ_REQ;
                         end
                     end else begin
-                        d_out <= d_out + 1;
-                        conv_acc <= dw_bias[d_out + 1]; // Bir sonraki kanal biasını yükle
-                        state <= CONV_READ_REQ;
+                        d_out    <= d_out + 1;
+                        conv_acc <= dw_bias[d_out + 1];
+                        state    <= CONV_READ_REQ;
                     end
                 end
+
                 FC_REQUANT: begin
 
                     logic signed [31:0] scaled_fc;
@@ -584,35 +652,36 @@ CONV_ReLU_FC: begin
                     // output zero-point = 14
                     // --------------------------------------------------------
 
-                   scaled_fc = multiply_quantized(
-                       fc_acc[fc_q_idx],
-                       32'sd1932201080,
-                       11
-                   );
+                    scaled_fc = multiply_quantized(
+                        fc_acc[fc_q_idx],
+                        32'sd1932201080,
+                        11
+                    );
 
-                   // TFLite output zero-point ekle
-                   quant_fc = scaled_fc + 32'sd14;
+                    // TFLite output zero-point ekle
+                    quant_fc = scaled_fc + 32'sd14;
 
-                   // INT8 saturation
-                   if (quant_fc > 32'sd127)
-                       fc_logits[fc_q_idx] <= 8'sd127;
+                    // INT8 saturation
+                    if (quant_fc > 32'sd127)
+                        fc_logits[fc_q_idx] <= 8'sd127;
 
-                   else if (quant_fc < -32'sd128)
-                       fc_logits[fc_q_idx] <= -8'sd128;
+                    else if (quant_fc < -32'sd128)
+                        fc_logits[fc_q_idx] <= -8'sd128;
 
-                   else
-                       fc_logits[fc_q_idx] <= quant_fc[7:0];
+                    else
+                        fc_logits[fc_q_idx] <= quant_fc[7:0];
 
 
-                   // Dört sınıfı sırayla işle
-                   if (fc_q_idx == 2'd3) begin
-                       fc_q_idx <= 2'd0;
-                       state    <= SOFTMAX_INIT;
-                   end
-                   else begin
-                       fc_q_idx <= fc_q_idx + 2'd1;
-                   end
+                    // Dört sınıfı sırayla işle
+                    if (fc_q_idx == 2'd3) begin
+                        fc_q_idx <= 2'd0;
+                        state    <= SOFTMAX_INIT;
+                    end
+                    else begin
+                        fc_q_idx <= fc_q_idx + 2'd1;
+                    end
                 end
+
                 SOFTMAX_INIT: begin
 
                     // FC requantization sonrası gerçek INT8 logits kullanılır.
@@ -675,7 +744,7 @@ CONV_ReLU_FC: begin
 
                     end
                     else if (($signed(fc_logits[1]) >= $signed(fc_logits[2])) &&
-                    ($signed(fc_logits[1]) >= $signed(fc_logits[3]))) begin
+                             ($signed(fc_logits[1]) >= $signed(fc_logits[3]))) begin
 
                         class_o <= 2'd1; // UNKNOWN
 
