@@ -31,3 +31,7 @@ webtalk/
 # OS files
 .DS_Store
 Thumbs.db
+*.xpr
+!tb/FPGA_Reports/*.rpt
+!asic/reports/**/*.rpt
+!asic/reports/**/*.log
