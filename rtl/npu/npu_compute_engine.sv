@@ -361,10 +361,13 @@ endfunction
             sum_exp     <= '0;
             
             for (int i = 0; i < 4; i++) begin
-                fc_acc[i]  <= '0;
-                probs[i]   <= '0;
-                exp_val[i] <= '0;
+                fc_acc[i]    <= '0;
+                fc_logits[i] <= '0;
+                probs[i]     <= '0;
+                exp_val[i]   <= '0;
             end
+
+            fc_q_idx <= '0;
         end else if (npu_reset_i) begin
             state       <= IDLE;
             busy_o      <= 1'b0;
