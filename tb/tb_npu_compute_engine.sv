@@ -54,6 +54,7 @@ module tb_npu_compute_engine;
         .mem_addr_b  (mem_addr_b),
         .mem_wdata_b (mem_wdata_b),
         .mem_rdata_b (mem_rdata_b)
+        );
     // --- SystemVerilog Functional Coverage (Kapsama) Tanımları ---
     covergroup cg_npu_inference @(posedge clk);
         option.per_instance = 1;

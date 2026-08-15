@@ -79,6 +79,7 @@ module tb_soc_top;
         .jtag_tdi     (jtag_tdi),
         .jtag_tdo     (jtag_tdo),
         .jtag_trst_n  (jtag_trst_n)
+        );
     // --- SystemVerilog Functional Coverage (Kapsama) Tanımları ---
     covergroup cg_soc_verification @(posedge clk);
         option.per_instance = 1;
@@ -96,16 +97,16 @@ module tb_soc_top;
         }
 
         // AXI-Lite el sıkışma (handshake) kapsaması
-        cov_axi_aw: coverpoint (uut.u_npu_axi_ctrl.mem_awvalid && uut.u_npu_axi_ctrl.mem_awready) {
+        cov_axi_aw: coverpoint (uut.u_npu.u_npu_axi_ctrl.mem_awvalid && uut.u_npu.u_npu_axi_ctrl.mem_awready) {
             bins hit = {1'b1};
         }
-        cov_axi_w: coverpoint (uut.u_npu_axi_ctrl.mem_wvalid && uut.u_npu_axi_ctrl.mem_wready) {
+        cov_axi_w: coverpoint (uut.u_npu.u_npu_axi_ctrl.mem_wvalid && uut.u_npu.u_npu_axi_ctrl.mem_wready) {
             bins hit = {1'b1};
         }
-        cov_axi_ar: coverpoint (uut.u_npu_axi_ctrl.mem_arvalid && uut.u_npu_axi_ctrl.mem_arready) {
+        cov_axi_ar: coverpoint (uut.u_npu.u_npu_axi_ctrl.mem_arvalid && uut.u_npu.u_npu_axi_ctrl.mem_arready) {
             bins hit = {1'b1};
         }
-        cov_axi_r: coverpoint (uut.u_npu_axi_ctrl.mem_rvalid && uut.u_npu_axi_ctrl.mem_rready) {
+        cov_axi_r: coverpoint (uut.u_npu.u_npu_axi_ctrl.mem_rvalid && uut.u_npu.u_npu_axi_ctrl.mem_rready) {
             bins hit = {1'b1};
         }
     endgroup
