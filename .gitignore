@@ -39,3 +39,6 @@ Thumbs.db
 # Kanit paketi: log ve rapor dosyalari surum kontrolunde tutulur
 !evidence/
 !evidence/**
+
+# LibreLane kosum ciktilari (yuzlerce MB ara dosya)
+asic/*/runs/

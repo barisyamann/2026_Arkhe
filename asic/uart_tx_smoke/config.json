@@ -1,0 +1,10 @@
+{
+  "DESIGN_NAME": "uart_tx",
+  "VERILOG_FILES": ["dir::src/uart_pkg.sv", "dir::src/uart_tx.sv"],
+  "USE_SLANG": true,
+  "CLOCK_PORT": "clk",
+  "CLOCK_PERIOD": 20,
+  "FP_CORE_UTIL": 40,
+  "PL_TARGET_DENSITY_PCT": 50,
+  "PDK": "sky130A"
+}
