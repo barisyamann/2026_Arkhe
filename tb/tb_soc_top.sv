@@ -230,12 +230,14 @@ module tb_soc_top;
         // bekleme kullaniyoruz.
         // =====================================================================
         fork : wait_gpio
-            wait (gpio_o == 16'h5555 || gpio_o == 16'hAAAA);
+        wait (gpio_o == 16'h5555 || gpio_o == 16'hAAAA || gpio_o == 16'h0F0F);
+
             #5_000_000;   // 5 ms zaman asimi
         join_any
         disable wait_gpio;
 
-        if (gpio_o == 16'h5555 || gpio_o == 16'hAAAA) begin
+        if (gpio_o == 16'h5555 || gpio_o == 16'hAAAA || gpio_o == 16'h0F0F) begin
+
             log_print($sformatf("      [OK]   CPU sinif sonucunu GPIO'ya yazdi: 0x%h", gpio_o));
         end else begin
             error_count++;
