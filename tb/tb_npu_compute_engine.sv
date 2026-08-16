@@ -123,7 +123,11 @@ module tb_npu_compute_engine;
         // -------------------------------------------------------------
         // Senaryo 3: SILENCE Girdisi Testi (Directed Silence Test)
         // -------------------------------------------------------------
-        run_scenario("SENARYO 3 (SILENCE)", 32'h00000000);
+                // TFLite girdi zero-point = -128, yani gercek deger 0'a karsilik
+        // gelen nicemlenmis bayt 0x80'dir. 0x00 sessizlik degil, buyuk
+        // pozitif sinyal demektir.
+        run_scenario("SENARYO 3 (SILENCE)", 32'h80808080);
+
 
         log_print("================================================================");
         log_print(" TÜM BLOK SEVİYESİ TESTLER BAŞARIYLA TAMAMLANDI!");
@@ -144,8 +148,13 @@ module tb_npu_compute_engine;
             tcm_mem[i] = 32'h00000000;
         end
         
-        // Giriş spektrogram verisinin ilk kelimesine deseni yaz
-        tcm_mem[0] = input_pattern;
+        // Giris spektrogramin TAMAMINI (1960 bayt = 490 kelime) desenle doldur.
+        // Onceden yalnizca ilk kelime yaziliyordu; uc senaryo birbirinin
+        // %99,8 aynisi oluyordu ve hepsi ayni sinifi veriyordu.
+        for (int i = 0; i < 490; i = i + 1) begin
+            tcm_mem[i] = input_pattern;
+        end
+
 
         // NPU'yu tetikle
         @ (posedge clk);
