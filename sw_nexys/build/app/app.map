@@ -1,0 +1,77 @@
+
+There are no discarded input sections
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+IRAM             0x01000000         0x00002000         xr
+RAM              0x20000000         0x00002000         xrw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
+LOAD C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o
+
+.text           0x01000000      0x388
+                0x01000000                        . = ALIGN (0x4)
+ *(.init)
+ *(.text.start)
+ .text.start    0x01000000       0x52 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o
+                0x01000000                _start
+ *(.text*)
+ .text          0x01000052       0xb0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
+                0x01000052                uart_init
+                0x01000066                uart_putc
+                0x01000082                uart_print
+                0x010000b0                uart_print_dec
+ .text.startup  0x01000102      0x1d4 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
+                0x01000102                main
+ .text          0x010002d6        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o
+ *(.rodata*)
+ *fill*         0x010002d6        0x2 
+ .rodata.str1.4
+                0x010002d8       0xad C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
+                                 0xb1 (size before relaxing)
+                0x01000388                        . = ALIGN (0x4)
+ *fill*         0x01000385        0x3 
+
+.rela.dyn       0x01000388        0x0
+ .rela.text.start
+                0x01000388        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
+
+.data           0x20000000        0x0 load address 0x01000388
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __data_start = .
+ *(.data*)
+ .data          0x20000000        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
+ .data          0x20000000        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __data_end = .
+                0x01000388                        __data_load_start = LOADADDR (.data)
+
+.bss            0x20000000        0x0 load address 0x01000388
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __bss_start = .
+ *(.bss*)
+ .bss           0x20000000        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
+ .bss           0x20000000        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o
+ *(COMMON)
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __bss_end = .
+
+.stack          0x20000000        0x0 load address 0x01000388
+                0x20000000                        . = ALIGN (0x10)
+                0x20002000                        __stack_top = (ORIGIN (RAM) + LENGTH (RAM))
+OUTPUT(C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\app.elf elf32-littleriscv)
+
+.comment        0x00000000       0x33
+ .comment       0x00000000       0x33 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
+                                 0x34 (size before relaxing)
+
+.riscv.attributes
+                0x00000000       0x2f
+ .riscv.attributes
+                0x00000000       0x2f C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
+ .riscv.attributes
+                0x0000002f       0x2d C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o

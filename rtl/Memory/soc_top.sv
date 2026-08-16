@@ -615,7 +615,10 @@ module soc_top (
     // AXI-Lite Write responder for Boot ROM (Read-only)
     assign rom_s_awready   = 1'b1;
     assign rom_s_wready    = 1'b1;
-    assign rom_s_bresp     = 2'b00;
+    // Boot ROM salt okunurdur. Yazma istegi kabul edilir (kanal tikanmasin)
+    // ancak SLVERR ile reddedilir; sessizce yutulmaz.
+    assign rom_s_bresp     = 2'b10;  // SLVERR
+
 
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin
@@ -774,7 +777,9 @@ module soc_top (
     // =========================================================================
     // YAPAY ZEKA HIZLANDIRICI (NPU) ENTEGRASYONU
     // =========================================================================
-    npu_accelerator u_npu (
+    npu_accelerator #(
+        .TCM_WORDS (7680)   // FPGA: 30 kB. ASIC varyantinda degistirilecek.
+    ) u_npu (
         .clk         (clk_i),
         .rst_n       (rst_ni),
         // AXI Slave - CSR (s9)

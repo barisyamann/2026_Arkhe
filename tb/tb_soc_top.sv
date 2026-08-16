@@ -83,6 +83,20 @@ module tb_soc_top;
         .jtag_tdo     (jtag_tdo),
         .jtag_trst_n  (jtag_trst_n)
         );
+    // --- QSPI Flash Modeli ---
+    // Sartname s.16: sistem QSPI flash'tan boot olur. Yukleyici (boot.hex)
+    // uygulamayi (app.hex) buradan okuyup I-RAM'e yazar.
+    spi_flash_model #(
+        .INIT_FILE  ("app.hex"),
+        .WORD_COUNT (2048)
+    ) u_flash (
+        .sck   (qspi_sck),
+        .cs_n  (qspi_cs_n),
+        .io0   (qspi_io0),
+        .io1   (qspi_io1),
+        .io2   (qspi_io2),
+        .io3   (qspi_io3)
+    );
 
     // --- SystemVerilog Functional Coverage (Kapsama) Tanımları ---
     covergroup cg_soc_verification @(posedge clk);
@@ -90,9 +104,13 @@ module tb_soc_top;
 
         // GPIO çıkışlarının fonksiyonel kapsaması
         cov_gpio: coverpoint gpio_o {
-            bins idle    = {16'h0000};
-            bins success = {16'h5555};
+            bins idle     = {16'h0000};
+            bins cls_yes  = {16'h5555};
+            bins cls_no   = {16'hAAAA};
+            bins cls_sil  = {16'h0F0F};
+            bins cls_unk  = {16'hFFFF};
         }
+
 
         // JTAG TMS pininin geçişleri
         cov_jtag_tms: coverpoint jtag_tms {
@@ -186,31 +204,7 @@ module tb_soc_top;
         end
 
         // QSPI RX FIFO ön yüklemesi - 24 Kelimelik Yapay Zeka Hızlandırıcı Test Programı
-        uut.u_qspi.rx_fifo[0]  = 32'h40000537; // lui  a0, 0x40000     (GPIO Base)
-        uut.u_qspi.rx_fifo[1]  = 32'h400605b7; // lui  a1, 0x40060     (NPU CSR Base)
-        uut.u_qspi.rx_fifo[2]  = 32'h20010637; // lui  a2, 0x20010     (NPU Memory Base)
-        uut.u_qspi.rx_fifo[3]  = 32'h555556b7; // lui  a3, 0x55555
-        uut.u_qspi.rx_fifo[4]  = 32'h55568693; // addi a3, a3, 0x555   (a3 = 0x55555555)
-        uut.u_qspi.rx_fifo[5]  = 32'haaaab737; // lui  a4, 0xAAAAB
-        uut.u_qspi.rx_fifo[6]  = 32'haaa70713; // addi a4, a4, -1366   (a4 = 0xAAAAAAAA)
-        uut.u_qspi.rx_fifo[7]  = 32'h00d52423; // sw   a3, 8(a0)       (GPIO_MODE)
-        uut.u_qspi.rx_fifo[8]  = 32'h00d62023; // sw   a3, 0(a2)       (TCM[0] = 0x55555555)
-        uut.u_qspi.rx_fifo[9]  = 32'h00100793; // addi a5, zero, 1
-        uut.u_qspi.rx_fifo[10] = 32'h00f5a023; // sw   a5, 0(a1)       (NPU START)
-        uut.u_qspi.rx_fifo[11] = 32'h0045a783; // lw   a5, 4(a1)       (REG_STATUS)
-        uut.u_qspi.rx_fifo[12] = 32'h0027f793; // andi a5, a5, 2       (Done biti)
-        uut.u_qspi.rx_fifo[13] = 32'hfe078ce3; // beq  a5, zero, -8    (bekle)
-        uut.u_qspi.rx_fifo[14] = 32'h0105a783; // lw   a5, 16(a1)      (REG_CLASS_OUT)
-        uut.u_qspi.rx_fifo[15] = 32'h00200e13; // addi t3, zero, 2
-        uut.u_qspi.rx_fifo[16] = 32'h01c78863; // beq  a5, t3, 16      (sinif 2 -> 0x5555)
-        uut.u_qspi.rx_fifo[17] = 32'h00300e13; // addi t3, zero, 3
-        uut.u_qspi.rx_fifo[18] = 32'h01c78863; // beq  a5, t3, 16      (sinif 3 -> 0xAAAA)
-        uut.u_qspi.rx_fifo[19] = 32'h0100006f; // jal  zero, 16
-        uut.u_qspi.rx_fifo[20] = 32'h00d52223; // sw   a3, 4(a0)       (GPIO_ODR = 0x5555)
-        uut.u_qspi.rx_fifo[21] = 32'h0080006f; // jal  zero, 8
-        uut.u_qspi.rx_fifo[22] = 32'h00e52223; // sw   a4, 4(a0)       (GPIO_ODR = 0xAAAA)
-        uut.u_qspi.rx_fifo[23] = 32'h0000006f; // jal  zero, 0         (sonsuz dongu)
-        uut.u_qspi.rx_wr_ptr   = 7'd24;
+
 
         log_print($sformatf("[%0t] Reset kaldırıldı. İşlemci çalışıyor...", $time));
 

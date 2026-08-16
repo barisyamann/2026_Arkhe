@@ -1,0 +1,39 @@
+
+There are no discarded input sections
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+BOOTROM          0x00000000         0x00000400         xr
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
+
+.text           0x00000000       0x4c
+                0x00000000                        . = ALIGN (0x4)
+ *(.text.start)
+ .text.start    0x00000000       0x4c C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
+                0x00000000                _start
+ *(.text*)
+ .text          0x0000004c        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
+ *(.rodata*)
+                0x0000004c                        . = ALIGN (0x4)
+
+.data           0x0000004c        0x0
+ .data          0x0000004c        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
+
+.bss            0x0000004c        0x0
+ .bss           0x0000004c        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
+
+/DISCARD/
+ *(.comment)
+ *(.note*)
+ *(.eh_frame*)
+OUTPUT(C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.elf elf32-littleriscv)
+
+.riscv.attributes
+                0x00000000       0x2d
+ .riscv.attributes
+                0x00000000       0x2d C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o

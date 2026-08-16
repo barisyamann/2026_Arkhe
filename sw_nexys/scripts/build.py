@@ -6,21 +6,19 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = ROOT / "src"
+LINK_DIR = ROOT / "link"
 BUILD_DIR = ROOT / "build"
 CONFIG_FILE = ROOT / ".." / "teknotest" / "user_files" / "rv_toolchain.conf"
-LINKER_SCRIPT = ROOT / ".." / "teknotest" / "user_files" / "bootrom.ld"
 USER_FILES_DIR = ROOT / ".." / "teknotest" / "user_files"
+
+# 1. asama: yukleyici -> Boot ROM (1 kB)
 BOOT_HEX_DEST = ROOT / ".." / "rtl" / "boot" / "boot.hex"
+BOOT_ROM_BYTES = 1024
 
-PROJECT_NAME = "fpga_test"
-
-C_SOURCES = [
-    SRC_DIR / "main.c",
-]
-
-ASM_SOURCES = [
-    SRC_DIR / "crt0.S",
-]
+# 2. asama: uygulama -> QSPI flash imaji, yukleyici I-RAM'e kopyalar
+APP_HEX_DEST = ROOT / "build" / "app.hex"
+APP_BIN_DEST = ROOT / "build" / "app.bin"
+APP_IMAGE_BYTES = 8192
 
 INCLUDE_DIRS = [
     SRC_DIR,
@@ -41,9 +39,7 @@ COMMON_CFLAGS = [
     "-Wextra",
 ]
 
-ASM_FLAGS = [
-    "-x", "assembler-with-cpp",
-]
+ASM_FLAGS = ["-x", "assembler-with-cpp"]
 
 LINK_FLAGS = [
     "-nostartfiles",
@@ -78,10 +74,7 @@ def resolve_toolchain_prefix():
 
 
 def resolve_executable(prefix, suffix):
-    candidates = [
-        f"{prefix}-{suffix}",
-        f"{prefix}-{suffix}.exe",
-    ]
+    candidates = [f"{prefix}-{suffix}", f"{prefix}-{suffix}.exe"]
     for candidate in candidates:
         if shutil.which(candidate) or Path(candidate).exists():
             return str(Path(candidate))
@@ -96,20 +89,74 @@ def compile_source(gcc, source_file, output_file, extra_flags=None):
     if extra_flags:
         cmd += extra_flags
     cmd += ["-c", str(source_file), "-o", str(output_file)]
-    print(f">> Executing: {' '.join(cmd)}")
+    print(f">> {' '.join(cmd)}")
     subprocess.check_call(cmd)
 
 
-def link_objects(gcc, object_files, elf_file, map_file):
+def link_objects(gcc, object_files, linker_script, elf_file, map_file):
     cmd = [gcc] + ARCH_FLAGS + LINK_FLAGS
     cmd += [str(obj) for obj in object_files]
     cmd += [
-        f"-Wl,-T,{LINKER_SCRIPT}",
+        f"-Wl,-T,{linker_script}",
         f"-Wl,-Map={map_file}",
         "-o", str(elf_file),
     ]
-    print(f">> Executing: {' '.join(cmd)}")
+    print(f">> {' '.join(cmd)}")
     subprocess.check_call(cmd)
+
+
+def to_hex_words(data, total_bytes):
+    """Ham ikili veriyi $readmemh uyumlu 32-bit little-endian kelimelere cevirir."""
+    if len(data) > total_bytes:
+        raise ValueError(
+            f"Imaj {len(data)} bayt, sinir {total_bytes} bayt. Tasma var."
+        )
+    padded = data + b"\x00" * (total_bytes - len(data))
+    words = []
+    for i in range(0, total_bytes, 4):
+        val = int.from_bytes(padded[i:i + 4], byteorder="little", signed=False)
+        words.append(f"{val:08x}")
+    return words
+
+
+def build_image(gcc, objcopy, size, name, c_sources, asm_sources,
+                linker_script, image_bytes, hex_dest, bin_dest=None):
+    print(f"\n=== {name} ===")
+    obj_dir = BUILD_DIR / name
+    obj_dir.mkdir(parents=True, exist_ok=True)
+
+    object_files = []
+    for src in c_sources:
+        obj = obj_dir / (src.stem + ".o")
+        compile_source(gcc, src, obj)
+        object_files.append(obj)
+    for src in asm_sources:
+        obj = obj_dir / (src.stem + ".o")
+        compile_source(gcc, src, obj, ASM_FLAGS)
+        object_files.append(obj)
+
+    elf_file = obj_dir / f"{name}.elf"
+    map_file = obj_dir / f"{name}.map"
+    tmp_bin = obj_dir / f"{name}.bin"
+
+    link_objects(gcc, object_files, linker_script, elf_file, map_file)
+    subprocess.check_call([size, str(elf_file)])
+    subprocess.check_call([objcopy, "-O", "binary", str(elf_file), str(tmp_bin)])
+
+    data = tmp_bin.read_bytes()
+    print(f"Ham ikili boyut: {len(data)} bayt  (sinir {image_bytes})")
+
+    words = to_hex_words(data, image_bytes)
+    hex_dest.parent.mkdir(parents=True, exist_ok=True)
+    hex_dest.write_text("\n".join(words) + "\n", encoding="ascii")
+    print(f"Yazildi: {hex_dest}")
+
+    if bin_dest is not None:
+        bin_dest.parent.mkdir(parents=True, exist_ok=True)
+        bin_dest.write_bytes(data + b"\x00" * (image_bytes - len(data)))
+        print(f"Yazildi: {bin_dest}")
+
+    return len(data)
 
 
 def main():
@@ -120,55 +167,37 @@ def main():
 
     BUILD_DIR.mkdir(parents=True, exist_ok=True)
 
-    object_files = []
-    for c_src in C_SOURCES:
-        obj = BUILD_DIR / (c_src.stem + ".o")
-        compile_source(gcc, c_src, obj)
-        object_files.append(obj)
+    # --- 1. asama: yukleyici (Boot ROM'da kalir, degistirilemez) ---
+    boot_size = build_image(
+        gcc, objcopy, size,
+        name="bootloader",
+        c_sources=[],
+        asm_sources=[SRC_DIR / "bootloader.S"],
+        linker_script=LINK_DIR / "bootloader.ld",
+        image_bytes=BOOT_ROM_BYTES,
+        hex_dest=BOOT_HEX_DEST,
+    )
 
-    for asm_src in ASM_SOURCES:
-        obj = BUILD_DIR / (asm_src.stem + ".o")
-        compile_source(gcc, asm_src, obj, ASM_FLAGS)
-        object_files.append(obj)
+    # --- 2. asama: uygulama (QSPI flash'ta durur, I-RAM'e yuklenir) ---
+    app_size = build_image(
+        gcc, objcopy, size,
+        name="app",
+        c_sources=[SRC_DIR / "main.c"],
+        asm_sources=[SRC_DIR / "crt0.S"],
+        linker_script=LINK_DIR / "app.ld",
+        image_bytes=APP_IMAGE_BYTES,
+        hex_dest=APP_HEX_DEST,
+        bin_dest=APP_BIN_DEST,
+    )
 
-    elf_file = BUILD_DIR / f"{PROJECT_NAME}.elf"
-    map_file = BUILD_DIR / f"{PROJECT_NAME}.map"
-    bin_file = BUILD_DIR / f"{PROJECT_NAME}.bin"
-
-    link_objects(gcc, object_files, elf_file, map_file)
-
-    # Print sizes
-    subprocess.check_call([size, str(elf_file)])
-
-    # Extract raw binary
-    cmd_copy = [objcopy, "-O", "binary", str(elf_file), str(bin_file)]
-    print(f">> Executing: {' '.join(cmd_copy)}")
-    subprocess.check_call(cmd_copy)
-
-    # Read binary and pad to exactly 1024 bytes (256 words)
-    data = bin_file.read_bytes()
-    bin_size = len(data)
-    print(f"Raw binary size: {bin_size} bytes")
-    if bin_size > 1024:
-        raise ValueError(f"Error: Program size {bin_size} bytes exceeds Boot ROM size of 1024 bytes!")
-
-    padded_data = data + b"\x00" * (1024 - bin_size)
-
-    # Write formatted hex output for $readmemh (little-endian 32-bit words)
-    words = []
-    for i in range(0, 1024, 4):
-        chunk = padded_data[i:i+4]
-        # format as little-endian 32-bit hex word
-        val = int.from_bytes(chunk, byteorder="little", signed=False)
-        words.append(f"{val:08x}")
-
-    BOOT_HEX_DEST.write_text("\n".join(words) + "\n", encoding="ascii")
-    print(f"Successfully wrote padded Boot ROM image to: {BOOT_HEX_DEST}")
+    print("\n=== OZET ===")
+    print(f"Yukleyici : {boot_size:5d} / {BOOT_ROM_BYTES} bayt  -> {BOOT_HEX_DEST.name}")
+    print(f"Uygulama  : {app_size:5d} / {APP_IMAGE_BYTES} bayt  -> {APP_HEX_DEST.name}")
 
 
 if __name__ == "__main__":
     try:
         main()
     except Exception as exc:
-        print(f"\nERROR: {exc}")
+        print(f"\nHATA: {exc}")
         sys.exit(1)
