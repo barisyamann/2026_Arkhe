@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
 -------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
-| Date             : Sun Aug 16 01:23:59 2026
+| Date             : Sun Aug 16 13:10:40 2026
 | Host             : baris running 64-bit major release  (build 9200)
 | Command          : report_power -file C:/Users/ybari/2026_Arkhe/evidence/fpga/power_v3.rpt
 | Design           : nexys_top
@@ -54,7 +54,7 @@ Table of Contents
 +--------------------------+-----------+----------+-----------+-----------------+
 | Clocks                   |     0.008 |        4 |       --- |             --- |
 | Slice Logic              |     0.007 |    30159 |       --- |             --- |
-|   LUT as Logic           |     0.007 |    17436 |     63400 |           27.50 |
+|   LUT as Logic           |     0.007 |    16741 |     63400 |           26.41 |
 |   CARRY4                 |    <0.001 |      578 |     15850 |            3.65 |
 |   Register               |    <0.001 |     5136 |    126800 |            4.05 |
 |   F7/F8 Muxes            |    <0.001 |     5455 |     63400 |            8.60 |
