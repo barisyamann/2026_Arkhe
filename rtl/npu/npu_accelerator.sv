@@ -6,7 +6,9 @@
 //              2) 30 kB Local Memory Port (MEM_AXI)
 //              And one Interrupt Output port (irq_o).
 
-module npu_accelerator (
+module npu_accelerator #(
+    parameter int unsigned TCM_WORDS = 7680
+)(
     input  logic        clk,
     input  logic        rst_n,
 
@@ -153,7 +155,9 @@ module npu_accelerator (
     // =========================================================================
     // NPU Yerel Belleği (TCM SRAM)
     // =========================================================================
-    npu_tcm_sram u_npu_sram (
+    npu_tcm_sram #(
+        .TCM_WORDS (TCM_WORDS)
+    ) u_npu_sram (
         .clk            (clk),
         
         // Port A (AXI Slave Access)

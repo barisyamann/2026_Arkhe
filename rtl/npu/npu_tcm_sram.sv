@@ -5,7 +5,12 @@
 //              Port B is for internal Compute Engine access.
 //              Includes boundary protection logic.
 
-module npu_tcm_sram (
+module npu_tcm_sram #(
+    // Kelime sayisi. FPGA: 7680 (30 kB). ASIC'te SRAM makro
+    // boyutuna gore kucultulebilir. Adres portu 13 bit oldugu
+    // icin ust sinir 8192'dir.
+    parameter int unsigned TCM_WORDS = 7680
+)(
     input  logic        clk,
     
     // --- Port A (AXI Slave Access) ---
@@ -24,11 +29,11 @@ module npu_tcm_sram (
 );
 
     // 7680 words * 4 bytes = 30720 bytes = 30 kB
-    logic [31:0] ram [0:7679];
+     logic [31:0] ram [0:TCM_WORDS-1];
 
     // Simülasyonda tanımsız (X) değerlerin önlenmesi için yerel bellek sıfırlaması
     initial begin
-        for (int i = 0; i < 7680; i = i + 1) begin
+                for (int i = 0; i < TCM_WORDS; i = i + 1) begin
             ram[i] = 32'h0;
         end
     end
@@ -36,7 +41,7 @@ module npu_tcm_sram (
     // Port A Read/Write with boundary checks
     always_ff @(posedge clk) begin
         if (en_a) begin
-            if (addr_a < 13'd7680) begin
+            if (addr_a < TCM_WORDS) begin
                 if (we_a[0]) ram[addr_a][7:0]   <= wdata_a[7:0];
                 if (we_a[1]) ram[addr_a][15:8]  <= wdata_a[15:8];
                 if (we_a[2]) ram[addr_a][23:16] <= wdata_a[23:16];
@@ -51,7 +56,7 @@ module npu_tcm_sram (
     // Port B Read/Write with boundary checks
     always_ff @(posedge clk) begin
         if (en_b) begin
-            if (addr_b < 13'd7680) begin
+            if (addr_b < TCM_WORDS) begin
                 if (we_b[0]) ram[addr_b][7:0]   <= wdata_b[7:0];
                 if (we_b[1]) ram[addr_b][15:8]  <= wdata_b[15:8];
                 if (we_b[2]) ram[addr_b][23:16] <= wdata_b[23:16];
