@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
-| Date         : Sun Aug 16 01:23:38 2026
+| Date         : Sun Aug 16 13:10:25 2026
 | Host         : baris running 64-bit major release  (build 9200)
 | Command      : report_utilization -file C:/Users/ybari/2026_Arkhe/evidence/fpga/utilization_v3.rpt
 | Design       : nexys_top
