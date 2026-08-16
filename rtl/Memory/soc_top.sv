@@ -99,7 +99,7 @@ module soc_top (
     cv32e40p_core #(
         .COREV_PULP      (0),
         .COREV_CLUSTER   (0),
-        .FPU             (1),
+        .FPU             (0),
         .NUM_MHPMCOUNTERS(1)
     ) u_core (
         .clk_i                  (clk_i),
