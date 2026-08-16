@@ -138,7 +138,9 @@ module npu_csr (
                 s_axi_bvalid <= 1'b1;
                 s_axi_bresp  <= 2'b00;
 
-                $display("[%0t] [NPU_CSR WRITE] addr=0x%h, data=0x%h", $time, aw_addr_lat, w_data_lat);
+`               ifdef DEBUG_CSR
+                         $display("[%0t] [NPU_CSR WRITE] addr=0x%h, data=0x%h", $time, aw_addr_lat, w_data_lat);
+                `endif
 
                 case (aw_addr_lat[4:0])
                     REG_CTRL: begin
@@ -196,7 +198,9 @@ module npu_csr (
                     default:       s_axi_rdata <= 32'b0;
                 endcase
 
-                $display("[%0t] [NPU_CSR READ] addr=0x%h, status=0x%h", $time, ar_addr_lat, reg_status);
+`               ifdef DEBUG_CSR
+                    $display("[%0t] [NPU_CSR READ] addr=0x%h, status=0x%h", $time, ar_addr_lat, reg_status);
+                `endif
             end
 
             if (s_axi_rvalid && s_axi_rready) begin

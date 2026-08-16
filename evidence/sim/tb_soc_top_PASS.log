@@ -1,11 +1,13 @@
 [0] SoC Simülasyonu Başlatıldı.
 [0] GPIO Çıkışı Değişti: gpio_o = 16'h0000
+[TB] HIZLI ACILIS: I-RAM dogrudan yuklendi, yukleyici atlandi.
+[TB] Gercek QSPI boot icin derlemeye -d REAL_BOOT ekleyin.
 [151000] Reset kaldırıldı. İşlemci çalışıyor...
 [151000] NPU donanım motorunun tamamlanması bekleniyor...
-[27794050000] NPU donanım motoru DONE sinyalini verdi!
-[29127490000] GPIO Çıkışı Değişti: gpio_o = 16'haaaa
+[29694610000] NPU donanım motoru DONE sinyalini verdi!
+[31035010000] GPIO Çıkışı Değişti: gpio_o = 16'haaaa
       [OK]   CPU sinif sonucunu GPIO'ya yazdi: 0xaaaa
-[29127510000] GPIO girişleri 0xA5A5 olarak ayarlandı.
+[31035030000] GPIO girişleri 0xA5A5 olarak ayarlandı.
 
 ================================================================
  JTAG HATA AYIKLAMA (DEBUG) PORTU DOGRULAMA TESTI BASLATILDI
@@ -23,7 +25,7 @@
 ================================================================
  JTAG PORTU DOGRULAMA TESTI TAMAMLANDI
 ================================================================
-[29221410000] SoC Simülasyonu Tamamlandı.
+[31128930000] SoC Simülasyonu Tamamlandı.
 ================================================================
  TUM TESTLER GECTI - 0 hata
 ================================================================

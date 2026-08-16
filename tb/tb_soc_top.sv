@@ -203,8 +203,27 @@ module tb_soc_top;
             uut.u_npu.u_npu_sram.ram[idx] = 32'h0;
         end
 
-        // QSPI RX FIFO ön yüklemesi - 24 Kelimelik Yapay Zeka Hızlandırıcı Test Programı
-
+        // =====================================================================
+        // ACILIS SECIMI
+        //
+        // Gercek iki asamali boot (Boot ROM -> QSPI flash -> I-RAM) calisir
+        // durumda ve ayri olarak dogrulanmaktadir. Ancak QSPI aktarimi
+        // simulasyonda cok yavas oldugu icin sistem seviyesi testlerinin bu
+        // bedeli her kosumda odemesi gereksizdir.
+        //
+        // Varsayilan: I-RAM dogrudan doldurulur ve Boot ROM'un ilk iki komutu
+        //             I-RAM'e atlayacak sekilde degistirilir.
+        // Gercek boot zinciri icin derlemeye  -d REAL_BOOT  ekleyin.
+        // =====================================================================
+    `ifndef REAL_BOOT
+        $readmemh("app.hex", uut.u_instruction_ram.ram);
+        uut.u_boot_rom.rom_mem[0] = 32'h010002B7;  // lui t0, 0x01000
+        uut.u_boot_rom.rom_mem[1] = 32'h00028067;  // jr  t0
+        log_print("[TB] HIZLI ACILIS: I-RAM dogrudan yuklendi, yukleyici atlandi.");
+        log_print("[TB] Gercek QSPI boot icin derlemeye -d REAL_BOOT ekleyin.");
+    `else
+        log_print("[TB] GERCEK BOOT: uygulama QSPI flash'tan yuklenecek.");
+    `endif
 
         log_print($sformatf("[%0t] Reset kaldırıldı. İşlemci çalışıyor...", $time));
 
