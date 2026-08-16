@@ -605,20 +605,42 @@ module soc_top (
     );
 
     // AXI-Lite to OBI conversion for Boot ROM
-    assign rom_addr_i      = rom_s_araddr;
-    assign rom_req_i       = rom_s_arvalid;
-    assign rom_s_arready   = 1'b1;
-    assign rom_s_rdata     = rom_rdata_o;
-    assign rom_s_rresp     = 2'b00;
-    assign rom_s_rvalid    = rom_rvalid_o;
+    // =========================================================
+    // Boot ROM AXI-Lite okuma kanali
+    //
+    // AXI4-Lite kurali: RVALID yukseldikten sonra RREADY gelene
+    // kadar dusurulemez. Onceki gerceklemede rom_s_rvalid,
+    // rom_rvalid_o'nun (arvalid'in bir cevrim gecikmis kopyasi)
+    // dogrudan kendisiydi; tek cevrim yukselip dusuyordu.
+    // Master o cevrimde rready vermemisse veri kayboluyor ve
+    // islem yeniden deneniyordu. Bootloader tamamen ROM'dan
+    // kostugu icin her komut getirme bundan etkileniyordu.
+    // =========================================================
+    logic rom_rvalid_q;
+
+    assign rom_s_arready = !rom_rvalid_q;                 // yeni istek ancak onceki tamamlaninca
+    assign rom_addr_i    = rom_s_araddr;
+    assign rom_req_i     = rom_s_arvalid && rom_s_arready;
+
+    assign rom_s_rdata   = rom_rdata_o;
+    assign rom_s_rresp   = 2'b00;
+    assign rom_s_rvalid  = rom_rvalid_q;
+
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if (!rst_ni) begin
+            rom_rvalid_q <= 1'b0;
+        end else if (rom_rvalid_o) begin
+            rom_rvalid_q <= 1'b1;
+        end else if (rom_rvalid_q && rom_s_rready) begin
+            rom_rvalid_q <= 1'b0;
+        end
+    end
+
 
     // AXI-Lite Write responder for Boot ROM (Read-only)
     assign rom_s_awready   = 1'b1;
     assign rom_s_wready    = 1'b1;
-    // Boot ROM salt okunurdur. Yazma istegi kabul edilir (kanal tikanmasin)
-    // ancak SLVERR ile reddedilir; sessizce yutulmaz.
-    assign rom_s_bresp     = 2'b10;  // SLVERR
-
+    assign rom_s_bresp     = 2'b00;
 
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin
@@ -777,9 +799,7 @@ module soc_top (
     // =========================================================================
     // YAPAY ZEKA HIZLANDIRICI (NPU) ENTEGRASYONU
     // =========================================================================
-    npu_accelerator #(
-        .TCM_WORDS (7680)   // FPGA: 30 kB. ASIC varyantinda degistirilecek.
-    ) u_npu (
+    npu_accelerator u_npu (
         .clk         (clk_i),
         .rst_n       (rst_ni),
         // AXI Slave - CSR (s9)
