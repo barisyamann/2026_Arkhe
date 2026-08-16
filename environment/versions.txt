@@ -1,0 +1,20 @@
+Arkhe SoC - Arac ve ortam surumleri
+Guncelleme: 16 Agustos 2026
+
+LibreLane      3.0.10 (Classic flow)
+Yosys          0.62
+Verilator      5.044
+PDK            sky130A
+PDK commit     8afc8346a57fe1ab7934ba5a6056ea8b43078e71
+Std cell lib   sky130_fd_sc_hd
+PVT koseler    tt_025C_1v80 / ss_100C_1v60 / ff_n40C_1v95
+Vivado         2025.2
+FPGA hedef     xc7a100tcsg324-1 (Nexys A7-100T)
+CPU            CV32E40P, FPU=0
+
+ONEMLI - SystemVerilog ayristirma
+Yosys'in yerlesik ayristiricisi modul basligindaki
+"import pkg::*;" yazimini okuyamiyor. Cozum: config.json
+icinde USE_SLANG=true. Proje genelinde 34 dosya bu yazimi
+kullaniyor (4 tanesi kendi RTL'imiz, 30 tanesi CV32E40P).
+Hicbir kaynak dosya degistirilmedi.
