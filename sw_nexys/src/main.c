@@ -86,13 +86,31 @@ int main() {
         }
 
         // Alternating input template (YES on odd runs, NO on even runs)
-        if (run_count % 2 == 1) {
-            NPU_TCM_BASE[0] = 0x55555555;
-            uart_print("In: YES\n");
+        // Giris tensoru 1960 bayt = 490 kelime. TAMAMI doldurulmalidir;
+        // yalnizca ilk kelimeyi yazmak girdinin binde ikisini degistirir
+        // ve butun senaryolar ayni sinifi verir.
+        //
+        // TFLite girdi zero-point = -128. Gercek deger 0'a karsilik gelen
+        // nicemlenmis bayt 0x80'dir; 0x00 sessizlik degil, buyuk pozitif
+        // sinyal demektir.
+        unsigned int pattern;
+        int mode = run_count % 3;
+
+        if (mode == 1) {
+            pattern = 0x55555555;
+            uart_print("In: PATTERN A\n");
+        } else if (mode == 2) {
+            pattern = 0xAAAAAAAA;
+            uart_print("In: PATTERN B\n");
         } else {
-            NPU_TCM_BASE[0] = 0xAAAAAAAA;
-            uart_print("In: NO\n");
+            pattern = 0x80808080;
+            uart_print("In: SILENCE\n");
         }
+
+        for (int i = 0; i < 490; i++) {
+            NPU_TCM_BASE[i] = pattern;
+        }
+
 
         // Reset and start NPU
         *NPU_REG_CTRL = 2; // Reset
@@ -117,7 +135,10 @@ int main() {
             uart_print("Class: ");
             uart_print_dec(decision);
             
-            if (decision == 2) {
+            if (decision == 0) {
+                uart_print(" (SILENCE)\n");
+                *GPIO_ODR = 0x0F0F; // SILENCE Pattern
+            } else if (decision == 2) {
                 uart_print(" (YES)\n");
                 *GPIO_ODR = 0x5555; // YES Pattern
             } else if (decision == 3) {
