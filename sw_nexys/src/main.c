@@ -57,6 +57,12 @@ volatile int timer_flag = 0;
 #define UARTS_RDR32_ADDR (UARTS_BASE + 0x20)
 
 // --- DMA yazmaclari ---
+// JTAG/Debug CSR - veri yolu hata yazmaclari da burada
+#define JTAG_BASE        0x40080000
+#define JTAG_FAULT_ST    ((volatile unsigned int *)(JTAG_BASE + 0x14))
+#define JTAG_FAULT_ADDR  ((volatile unsigned int *)(JTAG_BASE + 0x18))
+#define JTAG_FAULT_CLR   ((volatile unsigned int *)(JTAG_BASE + 0x1C))
+
 #define DMA_BASE         0x40070000
 #define DMA_CTRL    ((volatile unsigned int *)(DMA_BASE + 0x00))
 #define DMA_STATUS  ((volatile unsigned int *)(DMA_BASE + 0x04))
@@ -70,6 +76,7 @@ volatile int timer_flag = 0;
 #define DMA_CTRL_DST_FIXED  (1u << 3)   // hedef adresi artmaz
 
 #define DMA_IRQ_BIT      24
+#define BUSFAULT_IRQ_BIT 20
 
 volatile int dma_flag = 0;
 
@@ -81,6 +88,10 @@ volatile int dma_flag = 0;
 // volatile: derleyici onbellege almasin, her seferinde bellekten okusun.
 volatile int          npu_done_flag = 0;
 volatile unsigned int npu_class     = 0;
+
+volatile int          bus_fault_flag = 0;
+volatile unsigned int bus_fault_addr = 0;
+volatile unsigned int bus_fault_st   = 0;
 
 
 // =============================================================================
@@ -130,6 +141,14 @@ void uart_print_hex8(unsigned int val) {
     const char *digits = "0123456789ABCDEF";
     uart_putc(digits[(val >> 4) & 0xF]);
     uart_putc(digits[val & 0xF]);
+}
+
+// 32-bit degeri sekiz haneli onaltilik olarak yazar.
+void uart_print_hex32(unsigned int val) {
+    const char *digits = "0123456789ABCDEF";
+    for (int i = 28; i >= 0; i -= 4) {
+        uart_putc(digits[(val >> i) & 0xF]);
+    }
 }
 
 
@@ -191,6 +210,30 @@ void __attribute__((interrupt("machine"), aligned(256))) trap_handler(void)
         *DMA_CTRL = 0;                // reset seviyesini birak
     }
 
+    // --- Veri yolu hatasi ---
+    //
+    // Bir AXI kolesi OKAY disinda yanit dondurdugunde OBI->AXI koprusu
+    // darbe uretir, jtag_debug bunu yakalar ve kesmeye cevirir.
+    //
+    // Kaynak seviye degil DARBE oldugu icin bayrak temizlendikten sonra
+    // kendiliginden geri gelmez; NPU'da yasadigimiz sonsuz kesme dongusu
+    // burada mumkun degil.
+    if ((cause & 0x80000000u) && ((cause & 0x1Fu) == BUSFAULT_IRQ_BIT)) {
+        bus_fault_addr = *JTAG_FAULT_ADDR;
+        bus_fault_st   = *JTAG_FAULT_ST;
+        bus_fault_flag = 1;
+
+        // ISR'DA YAZDIRMA YOK.
+        //
+        // Ilk surumde hata adresi burada UART'a yaziliyordu. 115200 baud'da
+        // 28 karakterlik bir satir 2,4 ms surer; timer her milisaniyede hata
+        // urettigi icin ISR'lar ust uste bindi ve simulasyon 9 kat yavasladi
+        // (57 ms icin 1:16 iken, 23 ms icin 11:28).
+        //
+        // 2,4 ms suren bir kesme rutini kart uzerinde de kabul edilemez.
+        // Kesme rutini yalnizca durumu kaydeder; yazdirmayi ana dongu yapar.
+        *JTAG_FAULT_CLR = 1;
+    }
 }
 
 
@@ -204,7 +247,8 @@ static void irq_init(void)
     __asm__ volatile ("csrw mtvec, %0" :: "r"(t));
 
     // mie: yalnizca NPU kesmesini etkinlestir
-    t = (1u << NPU_IRQ_BIT) | (1u << TIMER_IRQ_BIT) | (1u << DMA_IRQ_BIT);
+    t = (1u << NPU_IRQ_BIT) | (1u << TIMER_IRQ_BIT) | (1u << DMA_IRQ_BIT) |
+        (1u << BUSFAULT_IRQ_BIT);
 
     __asm__ volatile ("csrw mie, %0" :: "r"(t));
 
@@ -254,6 +298,39 @@ int main(void)
     uart_print("Timer test\n");
     timer_wait_ms(2);
     uart_print("Timer OK\n");
+
+    // =========================================================================
+    // Veri yolu hata kesmesi oz testi
+    //
+    // Boot ROM salt-okunurdur ve yazma denemesine SLVERR doner. Eskiden
+    // OBI->AXI koprusu yaniti hic okumuyordu; hatali erisim SESSIZCE
+    // basarili sayiliyordu. Artik kopru darbe uretiyor, jtag_debug
+    // yakaliyor ve kesme geliyor.
+    //
+    // Kasitli bir hata uretmek, hata yolunu dogrulamanin tek durust yolu:
+    // "hicbir zaman tetiklenmeyen" bir onlem, calistigi kanitlanmamis
+    // onlemdir.
+    // =========================================================================
+    // ADRES SIFIR OLMAMALI: 0x0 uzerinden yazma GCC icin null pointer
+    // dereference'tir, tanimsiz davranis sayilir ve -Os o noktadan
+    // sonrasini erisilemez kabul edip main'in kalanini SILER. Ilk
+    // denemede tam olarak bu oldu; ikili 1728 -> 1328 bayta dustu ve
+    // "Stream ready" dahil her sey kayboldu. Boot ROM 1 kB oldugu icin
+    // 0x100 de ayni sekilde salt-okunur.
+    uart_print("Bus fault test\n");
+    bus_fault_flag = 0;
+    *(volatile unsigned int *)0x00000100 = 0xDEADBEEF;   // Boot ROM -> SLVERR
+
+    // Zaman asimli bekleme: kesme hic gelmezse sonsuz dongude kalmayalim,
+    // testin hatayi bildirebilmesi icin devam etsin.
+    for (volatile int guard = 0; guard < 100000 && !bus_fault_flag; guard++) { }
+
+    // Yazdirmayi ana dongu yapiyor - ISR yalnizca kaydediyor.
+    uart_print("Bus fault @ 0x");
+    uart_print_hex32(bus_fault_addr);
+    uart_print(" ST=0x");
+    uart_print_hex8(bus_fault_st & 0xFF);
+    uart_print("\n");
 
     // GPIO'nun tum pinlerini cikis moduna al
     *GPIO_MODE = 0x55555555;

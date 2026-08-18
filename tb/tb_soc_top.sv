@@ -275,8 +275,23 @@ module tb_soc_top;
 
         // NPU donanım motorunun hesaplamayı bitirmesini dinamik olarak bekle
         log_print($sformatf("[%0t] NPU donanım motorunun tamamlanması bekleniyor...", $time));
-        wait (uut.u_npu.u_npu_engine.done_o == 1'b1);
-        log_print($sformatf("[%0t] NPU donanım motoru DONE sinyalini verdi!", $time));
+
+        // Zaman asimi sart: bu bekleme eskiden cipsizdi ve NPU hic
+        // baslamazsa simulasyon sonsuza kadar asili kaliyordu. 18 Agustos'ta
+        // tam olarak bu oldu, kosum elle durdurulmak zorunda kalindi.
+        // NPU hesaplamasi ~20 ms surer, 60 ms rahat bir ust sinir.
+        fork : wait_npu
+            wait (uut.u_npu.u_npu_engine.done_o == 1'b1);
+            #60_000_000;
+        join_any
+        disable wait_npu;
+
+        if (uut.u_npu.u_npu_engine.done_o !== 1'b1) begin
+            error_count++;
+            log_print("      [HATA] NPU zaman asimi - DONE sinyali 60 ms icinde gelmedi");
+        end else begin
+            log_print($sformatf("[%0t] NPU donanım motoru DONE sinyalini verdi!", $time));
+        end
 
         // =====================================================================
         // KONTROL 1: CPU sinif sonucunu okuyup GPIO'ya yazdi mi?
@@ -312,6 +327,16 @@ module tb_soc_top;
         end else begin
             error_count++;
             log_print("      [HATA] DMA tamamlanmadi - UART-stream veri yolu calismiyor");
+        end
+
+        // Veri yolu hata kesmesi (R8): Boot ROM'a yapilan kasitli yazma
+        // SLVERR dondurdu mu, kopru yakaladi mi, ISR dogru adresi gordu mu?
+        if (uart_fault_line == "Bus fault @ 0x00000100 ST=0x05") begin
+            log_print("      [OK]   Veri yolu hatasi yakalandi, adres ve kaynak dogru");
+        end else begin
+            error_count++;
+            log_print($sformatf("      [HATA] Veri yolu hata kesmesi yanlis - beklenen \"Bus fault @ 0x00000100 ST=0x05\", gelen \"%s\"",
+                                uart_fault_line));
         end
 
         // UART_RDR bayt yolu: gonderilen dort bayt aynen okundu mu?
@@ -422,6 +447,7 @@ module tb_soc_top;
     bit    uart_saw_stream_ready = 1'b0;
     bit    uart_saw_dma_done     = 1'b0;
     string uart_rdr_line         = "";
+    string uart_fault_line       = "";
 
     task automatic uart_monitor();
         logic [7:0] ch;
@@ -446,6 +472,8 @@ module tb_soc_top;
                     uart_saw_dma_done = 1'b1;
                 if (uart_line.len() >= 5 && uart_line.substr(0,4) == "RDR: ")
                     uart_rdr_line = uart_line;
+                if (uart_line.len() >= 14 && uart_line.substr(0,13) == "Bus fault @ 0x")
+                    uart_fault_line = uart_line;
                 uart_line = "";
             end else if (ch != 8'h0D) begin     // \r yoksay
                 uart_line = {uart_line, ch};

@@ -141,6 +141,16 @@ module timer_peripheral # (
                     ADDR_TIM_ARE: reg_tim_are <= s_axi_wdata;
                     ADDR_TIM_ENA: reg_tim_ena <= s_axi_wdata[0];
                     ADDR_TIM_MOD: reg_tim_mod <= s_axi_wdata[0];
+                    // TIM_CLR ve TIM_EVC yan etkili yazma yazmaclaridir; asil
+                    // islerini yukaridaki ayri bloklar yapar. Burada yalnizca
+                    // GECERLI adres olarak taninmalari gerekiyor - aksi halde
+                    // default dalina dusup SLVERR donuyorlardi.
+                    //
+                    // Islev dogru calisiyordu, yalnizca yanit kodu yanlisti;
+                    // kimse yaniti okumadigi icin aylarca fark edilmedi.
+                    // Veri yolu hata kesmesi (R8) eklendigi gun ortaya cikti.
+                    ADDR_TIM_CLR: ;
+                    ADDR_TIM_EVC: ;
                     default:      s_axi_bresp <= 2'b10; // SLVERR
                 endcase
             end else if (s_axi_bvalid && s_axi_bready) begin
