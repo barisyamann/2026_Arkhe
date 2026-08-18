@@ -77,11 +77,11 @@ module i2c_peripheral #(
     // drenajdir: hat ya asagi cekilir ya birakilir, asla yukari surulmez.
     // Bu yuzden *_o daima 0'dir ve tum bilgi *_oe'dedir.
     // -------------------------------------------------------------------------
-    output wire         sda_o,
-    output wire         sda_oe,
+    output logic        sda_o,
+    output logic        sda_oe,
     input  wire         sda_i,
-    output wire         scl_o,
-    output wire         scl_oe,
+    output logic        scl_o,
+    output logic        scl_oe,
     input  wire         scl_i,
 
     // ----------------------------------------------------------------
@@ -142,16 +142,18 @@ module i2c_peripheral #(
         wr_val = (old_v & ~wr_mask) | (s_axi_wdata & wr_mask);
     endfunction
 
+
+    logic [31:0] reg_adr;           // 0x04
+    logic [31:0] reg_rdr;           // 0x08
+    logic [31:0] reg_tdr;           // 0x0C
+    logic [3:0]  reg_cfg;           // 0x10  (only bits [3:0] used)
+
     // I2C_CFG icin birlesik deger. Tum kontrol bitleri bayt 0'dadir; bayt 0
     // etkin degilse eski deger korunur ve asagidaki mantik hicbir sey
     // degistirmez.
     logic [31:0] cfg_wr;
     assign cfg_wr = ({28'd0, reg_cfg} & ~wr_mask) | (s_axi_wdata & wr_mask);
 
-    logic [31:0] reg_adr;           // 0x04
-    logic [31:0] reg_rdr;           // 0x08
-    logic [31:0] reg_tdr;           // 0x0C
-    logic [3:0]  reg_cfg;           // 0x10  (only bits [3:0] used)
 
     // -- I2C FSM --
     state_t      state;
@@ -174,8 +176,10 @@ module i2c_peripheral #(
     logic          sample;          // Pulse: SDA sample point (mid SCL-high)
 
     // -- I2C bus control --
-    logic          sda_oe;          // 1 = drive SDA low, 0 = release
-    logic          scl_oe;          // 1 = drive SCL low, 0 = release
+    // sda_oe / scl_oe artik MODUL PORTUDUR (tri-state ayrimi sonrasi);
+    // burada yeniden bildirilmemeli. Tam proje derlemesi bunu yalnizca
+    // uyari veriyordu, tek basina derlemede ise HATA:
+    //   [VRFC 10-9336] redeclaration of ANSI port 'sda_oe' is not allowed
     logic          sda_in;          // SDA bus read-back
 
     // -- AXI internal --
