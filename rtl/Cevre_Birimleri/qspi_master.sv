@@ -28,10 +28,21 @@ module qspi_master #(
 
     output logic        qspi_sck,
     output logic        qspi_cs_n,
-    inout  logic        qspi_io0,
-    inout  logic        qspi_io1,
-    inout  logic        qspi_io2,
-    inout  logic        qspi_io3,
+
+    // -------------------------------------------------------------------------
+    // QSPI veri hatlari - AYRIK yon sinyalleri (tri-state modul icinde DEGIL)
+    //
+    // ASIC akisinda tri-state yalnizca pad halkasinda bulunabilir; sentez
+    // araclari modul icindeki 'z surumunu esleyemez. Bu yuzden arayuz
+    // cikis / cikis-etkin / giris uclusune ayrildi. Gercek ucdurumlu surucu
+    // FPGA'de nexys_top'ta, simulasyonda testbench'te kuruluyor.
+    //
+    // qspi_io_oe hat basinadir: tek hatli modda yalnizca io0 surulur, ikili
+    // modda io0-io1, dortlu modda dordu birden.
+    // -------------------------------------------------------------------------
+    output logic [3:0]  qspi_io_o,
+    output logic [3:0]  qspi_io_oe,
+    input  logic [3:0]  qspi_io_i,
 
     output logic        irq
 );
@@ -346,15 +357,14 @@ logic        io_oe;
 logic [3:0]  io_out;
 logic [3:0]  io_in;
 
-assign qspi_io0 = io_oe ? io_out[0] : 1'bz;
-assign qspi_io1 = (io_oe && ccr_data_mode[1]) ? io_out[1] : 1'bz;
-assign qspi_io2 = (io_oe && ccr_data_mode == 2'b11) ? io_out[2] : 1'bz;
-assign qspi_io3 = (io_oe && ccr_data_mode == 2'b11) ? io_out[3] : 1'bz;
+assign qspi_io_o = io_out;
 
-assign io_in[0] = qspi_io0;
-assign io_in[1] = qspi_io1;
-assign io_in[2] = qspi_io2;
-assign io_in[3] = qspi_io3;
+assign qspi_io_oe[0] = io_oe;
+assign qspi_io_oe[1] = io_oe && ccr_data_mode[1];
+assign qspi_io_oe[2] = io_oe && (ccr_data_mode == 2'b11);
+assign qspi_io_oe[3] = io_oe && (ccr_data_mode == 2'b11);
+
+assign io_in = qspi_io_i;
 
 typedef enum logic [3:0] {
     IDLE        = 4'd0,

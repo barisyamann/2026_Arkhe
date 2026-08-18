@@ -70,8 +70,19 @@ module i2c_peripheral #(
     // ----------------------------------------------------------------
     // I2C Physical Interface (active-low open-drain)
     // ----------------------------------------------------------------
-    inout  wire         sda,
-    inout  wire         scl,
+    // -------------------------------------------------------------------------
+    // I2C hatlari - AYRIK yon sinyalleri (tri-state modul icinde DEGIL)
+    //
+    // ASIC akisinda tri-state yalnizca pad halkasinda olabilir. I2C acik
+    // drenajdir: hat ya asagi cekilir ya birakilir, asla yukari surulmez.
+    // Bu yuzden *_o daima 0'dir ve tum bilgi *_oe'dedir.
+    // -------------------------------------------------------------------------
+    output wire         sda_o,
+    output wire         sda_oe,
+    input  wire         sda_i,
+    output wire         scl_o,
+    output wire         scl_oe,
+    input  wire         scl_i,
 
     // ----------------------------------------------------------------
     // Interrupt Output (TX_DONE veya RX_DONE olduğunda aktif)
@@ -175,9 +186,10 @@ module i2c_peripheral #(
     // ================================================================
     //  Open-Drain Bus Assignments
     // ================================================================
-    assign sda    = sda_oe ? 1'b0 : 1'bz;   // Drive low or release
-    assign scl    = scl_oe ? 1'b0 : 1'bz;   // Drive low or release
-    assign sda_in = sda;                     // Read-back (external pull-up)
+    // Acik drenaj: cikis degeri daima 0, surulup surulmedigini *_oe belirler
+    assign sda_o = 1'b0;
+    assign scl_o = 1'b0;
+    assign sda_in = sda_i;                   // Read-back (harici pull-up)
 
     // Interrupt: TX_DONE veya RX_DONE olduğunda aktif
     assign i2c_irq = reg_cfg[1] | reg_cfg[3];

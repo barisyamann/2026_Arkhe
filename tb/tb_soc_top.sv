@@ -52,6 +52,28 @@ module tb_soc_top;
     assign (weak1, weak0) qspi_io2 = 1'b1;
     assign (weak1, weak0) qspi_io3 = 1'b1;
 
+    // =========================================================================
+    // Ucdurumlu surucu halkasi
+    //
+    // soc_top artik cift yonlu pin icermiyor (ASIC akisinda tri-state yalnizca
+    // pad halkasinda olabilir); cikis / cikis-etkin / giris uclusu veriyor.
+    // Kart uzerinde bu isi nexys_top yapiyor, burada testbench yapiyor.
+    // =========================================================================
+    wire       i2c_sda_o_w, i2c_sda_oe_w;
+    wire       i2c_scl_o_w, i2c_scl_oe_w;
+    wire [3:0] qspi_io_o_w, qspi_io_oe_w;
+    wire [3:0] qspi_io_w;
+
+    assign i2c_sda = i2c_sda_oe_w ? i2c_sda_o_w : 1'bz;
+    assign i2c_scl = i2c_scl_oe_w ? i2c_scl_o_w : 1'bz;
+
+    assign qspi_io_w = {qspi_io3, qspi_io2, qspi_io1, qspi_io0};
+
+    assign qspi_io0 = qspi_io_oe_w[0] ? qspi_io_o_w[0] : 1'bz;
+    assign qspi_io1 = qspi_io_oe_w[1] ? qspi_io_o_w[1] : 1'bz;
+    assign qspi_io2 = qspi_io_oe_w[2] ? qspi_io_o_w[2] : 1'bz;
+    assign qspi_io3 = qspi_io_oe_w[3] ? qspi_io_o_w[3] : 1'bz;
+
     // --- UUT (Unit Under Test) ---
     soc_top uut (
         .clk_i        (clk),
@@ -67,15 +89,18 @@ module tb_soc_top;
         .uart2_rxd    (uart2_rxd),
         .uart2_txd    (uart2_txd),
 
-        .i2c_sda      (i2c_sda),
-        .i2c_scl      (i2c_scl),
+        .i2c_sda_o    (i2c_sda_o_w),
+        .i2c_sda_oe   (i2c_sda_oe_w),
+        .i2c_sda_i    (i2c_sda),
+        .i2c_scl_o    (i2c_scl_o_w),
+        .i2c_scl_oe   (i2c_scl_oe_w),
+        .i2c_scl_i    (i2c_scl),
 
         .qspi_sck     (qspi_sck),
         .qspi_cs_n    (qspi_cs_n),
-        .qspi_io0     (qspi_io0),
-        .qspi_io1     (qspi_io1),
-        .qspi_io2     (qspi_io2),
-        .qspi_io3     (qspi_io3),
+        .qspi_io_o    (qspi_io_o_w),
+        .qspi_io_oe   (qspi_io_oe_w),
+        .qspi_io_i    (qspi_io_w),
 
         .jtag_tms     (jtag_tms),
         .jtag_tck     (jtag_tck),
