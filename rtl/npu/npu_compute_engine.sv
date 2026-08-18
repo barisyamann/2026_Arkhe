@@ -90,6 +90,29 @@ module npu_compute_engine (
     // birbirinden bagimsiz; bu yuzden sonuclar bit-birebir ayni kalmali.
     // -------------------------------------------------------------------------
     logic signed [31:0] conv_acc [0:7];
+
+    // -------------------------------------------------------------------------
+    // R4 asama 2 - Okuma boru hatti
+    //
+    // TCM okuma cikisi KAYITLIDIR: adres verildikten bir cevrim sonra veri
+    // gecerli olur. Eski FSM bunu READ_REQ -> READ_WAIT -> MAC seklinde uc
+    // cevrime yayiyordu.
+    //
+    // Artik iki asamali boru hatti var:
+    //   kh/kw      = bu cevrim ADRESI verilen tap  (okuma isaretcisi)
+    //   mac_kh/kw  = bu cevrim VERISI hazir olan tap (bir cevrim gecikmeli)
+    //
+    // Her cevrimde hem bir okuma baslatilir hem de onceki okumanin verisi
+    // islenir. Tap basina 3 cevrim -> 1 cevrim.
+    //
+    // in_bounds ve byte_offset de gecikmeli kopyalanir; cunku bunlar
+    // TUKETILEN tap'a ait olmali, adresi verilene degil.
+    // -------------------------------------------------------------------------
+    logic [3:0] mac_kh;
+    logic [3:0] mac_kw;
+    logic [1:0] mac_bo;      // gecikmeli byte_offset
+    logic       mac_ib;      // gecikmeli in_bounds
+    logic       mac_valid;   // mem_rdata_b gecerli bir tap tasiyor mu
     logic signed [31:0] fc_acc [0:3];
 
     // TFLite FC katmanının quantized INT8 çıkışları
@@ -397,6 +420,11 @@ endfunction
             kh          <= '0;
             kw          <= '0;
             for (int i = 0; i < 8; i++) conv_acc[i] <= '0;
+            mac_kh      <= '0;
+            mac_kw      <= '0;
+            mac_bo      <= '0;
+            mac_ib      <= 1'b0;
+            mac_valid   <= 1'b0;
             div_start   <= 1'b0;
             div_num     <= '0;
             div_den     <= '0;
@@ -434,6 +462,11 @@ endfunction
             kw          <= '0;
 
             for (int i = 0; i < 8; i++) conv_acc[i] <= '0;
+            mac_kh      <= '0;
+            mac_kw      <= '0;
+            mac_bo      <= '0;
+            mac_ib      <= 1'b0;
+            mac_valid   <= 1'b0;
 
             div_start   <= 1'b0;
             div_num     <= '0;
@@ -489,24 +522,30 @@ endfunction
                     state <= CONV_READ_REQ;
                 end
 
+                // Boru hattini doldur: tap 0'in adresi bu cevrim veriliyor,
+                // verisi bir sonraki cevrimde gelecek. Okuma isaretcisi
+                // tap 1'e ilerletilir.
                 CONV_READ_REQ: begin
-                    state <= CONV_READ_WAIT;
-                end
+                    mac_kh    <= kh;
+                    mac_kw    <= kw;
+                    mac_bo    <= byte_offset;
+                    mac_ib    <= in_bounds;
+                    mac_valid <= 1'b1;
 
-                CONV_READ_WAIT: begin
+                    kw    <= 4'd1;      // tap 1 (kh zaten 0)
                     state <= CONV_MAC;
                 end
 
                 CONV_MAC: begin
                     logic signed [8:0] x_centered;
 
-                    if (in_bounds) begin
+                    if (mac_ib) begin
                         logic [7:0] raw_byte;
 
-                        raw_byte = (byte_offset == 2'd0) ? mem_rdata_b[7:0]   :
-                                   (byte_offset == 2'd1) ? mem_rdata_b[15:8]  :
-                                   (byte_offset == 2'd2) ? mem_rdata_b[23:16] :
-                                                           mem_rdata_b[31:24];
+                        raw_byte = (mac_bo == 2'd0) ? mem_rdata_b[7:0]   :
+                                   (mac_bo == 2'd1) ? mem_rdata_b[15:8]  :
+                                   (mac_bo == 2'd2) ? mem_rdata_b[23:16] :
+                                                      mem_rdata_b[31:24];
 
                         // TFLite input zero-point = -128
                         // x_centered = x_q - (-128) = x_q + 128
@@ -523,22 +562,32 @@ endfunction
                     // yani sekiz agirlik bitisik bir blokta duruyor.
                     for (int d = 0; d < 8; d++) begin
                         conv_acc[d] <= conv_acc[d] +
-                            x_centered * $signed(dw_weights[int'(kh) * 64 + int'(kw) * 8 + d]);
+                            x_centered * $signed(dw_weights[int'(mac_kh) * 64 + int'(mac_kw) * 8 + d]);
                     end
 
-                    if (kw == 7) begin
-                        kw <= '0;
-                        if (kh == 9) begin
-                            kh    <= '0;
-                            d_out <= '0;          // requant/FC turu kanal 0'dan baslar
-                            state <= CONV_ReLU_FC;
-                        end else begin
-                            kh    <= kh + 1;
-                            state <= CONV_READ_REQ;
-                        end
+                    // Cikis kosulu TUKETILEN tap'a bakar (mac_*), adresi
+                    // verilene degil.
+                    if (mac_kh == 9 && mac_kw == 7) begin
+                        // Son tap islendi: boru hatti bosaltildi
+                        mac_valid <= 1'b0;
+                        kh        <= '0;
+                        kw        <= '0;
+                        d_out     <= '0;      // requant/FC turu kanal 0'dan baslar
+                        state     <= CONV_ReLU_FC;
                     end else begin
-                        kw    <= kw + 1;
-                        state <= CONV_READ_REQ;
+                        // Bu cevrim adresi verilen tap'i boru hattina al
+                        mac_kh <= kh;
+                        mac_kw <= kw;
+                        mac_bo <= byte_offset;
+                        mac_ib <= in_bounds;
+
+                        // Okuma isaretcisini ilerlet
+                        if (kw == 7) begin
+                            kw <= '0;
+                            kh <= kh + 1;
+                        end else begin
+                            kw <= kw + 1;
+                        end
                     end
                 end
 
@@ -816,8 +865,14 @@ endfunction
         mem_wdata_b = 32'b0;
 
         case (state)
-            CONV_READ_REQ: begin
-                if (in_bounds) begin
+            // Boru hatti: hem doldurma (READ_REQ) hem akis (MAC) sirasinda
+            // her cevrim bir okuma baslatilir.
+            //
+            // kh == 10 kosulu: son tap'in adresi verildikten sonra okuma
+            // isaretcisi tasar. O cevrimde tuketim hala surer ama yeni
+            // okuma baslatilmamalidir.
+            CONV_READ_REQ, CONV_MAC: begin
+                if (in_bounds && kh <= 4'd9) begin
                     mem_en_b   = 1'b1;
                     mem_addr_b = in_addr_i + word_offset;
                 end
