@@ -108,8 +108,11 @@ Paketleyicide tek bayt kaymasi olsaydi sonuc degisirdi. Yol dogru.
     Teorik alt sinir        : 1960 x 10 bit x 1 us = 19,600 ms
     -> Darbogaz UART hatti; DMA gecikme eklemiyor.
 
-    DMA kesmesi -> ISR temizledi : ~3,7 us (186 cevrim)
-    Toplam sistem testi          : 56,04 ms sim / 50 s gercek / 0 hata
+    DMA kesmesi ayakta           : 32,15107 ms -> 32,15481 ms = 3,74 us
+                                   (ISR'in kesmeye cevap verip temizlemesi)
+    Toplam sistem testi          : 56,04 ms sim / 69 s gercek / 0 hata
+
+Kosum logu: evidence/sim/tb_soc_top_PASS.log (50 satir)
 
 ## Testbench'e eklenenler
 
