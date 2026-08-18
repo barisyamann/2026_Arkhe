@@ -34,6 +34,6 @@ LOAD C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
 OUTPUT(C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.elf elf32-littleriscv)
 
 .riscv.attributes
-                0x00000000       0x2d
+                0x00000000       0x36
  .riscv.attributes
-                0x00000000       0x2d C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
+                0x00000000       0x36 C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o

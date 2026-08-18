@@ -640,7 +640,7 @@ module soc_top (
     // AXI-Lite Write responder for Boot ROM (Read-only)
     assign rom_s_awready   = 1'b1;
     assign rom_s_wready    = 1'b1;
-    assign rom_s_bresp     = 2'b00;
+    assign rom_s_bresp     = 2'b10;
 
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin

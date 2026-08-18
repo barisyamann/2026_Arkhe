@@ -23,7 +23,7 @@
 
 # QSPI islem basina en fazla 256 bayt okunabilir (CCR[23:16] 8 bit).
 # 8 kB uygulama icin 32 islem gerekir.
-.equ CHUNK_COUNT,     4
+.equ CHUNK_COUNT,     8
 .equ WORDS_PER_CHUNK, 64
 .equ CHUNK_BYTES,     256
 
