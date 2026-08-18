@@ -20,6 +20,29 @@ Cevrim sayisi:
   Tur 2 sonrasi     : 992.083  (FC requant ayrildi)
   Toplam artis      : +28.012  (%2,9)
 
+## Sonuc - 18 Agustos 2026, R4 verim optimizasyonu sonrasi
+
+PASS
+
+fc_acc      = [-566992, 149030, 156762, 216460]
+fc_logits   = [-128, 79, 83, 109]
+probs Q0.12 = [0, 225, 326, 3543]
+class       = 3
+
+DEGERLER BOR U HATTI ONCESIYLE VE 16 AGUSTOS OLCUMUYLE BIREBIR AYNI.
+
+Cevrim sayisi:
+  R4 oncesi         : 992.083
+  Asama 1 (kanal paylasimi) : 152.083
+  Asama 2 (okuma boru hatti): 72.583
+  Toplam hizlanma   : 13,67x
+
+R4 konvolusyon dongusunu tamamen yeniden yazdi (sekiz kanal paralel,
+iki asamali okuma boru hatti). Golden testin gecmesi, bu yeniden
+yazimin aritmetigi bozmadiginin BAGIMSIZ kanitidir: girdi deseni
+sistem testinden farkli (sozde-rastgele) ve beklenen degerler ayri
+bir Python modelinden geliyor.
+
 ## Onemli
 
 Boru hatti ayrimi SAF bir yeniden zamanlamadir; aritmetige
