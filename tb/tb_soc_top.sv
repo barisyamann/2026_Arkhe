@@ -227,6 +227,28 @@ module tb_soc_top;
 
         log_print($sformatf("[%0t] Reset kaldırıldı. İşlemci çalışıyor...", $time));
 
+        // =====================================================================
+        // UART-STREAM VERI YOLU (Sartname EK-1 s.21)
+        //
+        // CPU, UART2'yi 1 Mbps'e ayarlayip DMA'yi kurduktan sonra UART1'den
+        // "Stream ready" yazar. Senkronizasyon gercek arayuz uzerinden
+        // kuruluyor - stream FIFO'su 256 bayt oldugu icin erken gonderim
+        // tasmaya yol acardi.
+        // =====================================================================
+        fork : wait_stream_ready
+            wait (uart_saw_stream_ready);
+            #20_000_000;   // 20 ms zaman asimi
+        join_any
+        disable wait_stream_ready;
+
+        if (!uart_saw_stream_ready) begin
+            error_count++;
+            log_print("      [HATA] CPU 'Stream ready' yazmadi - UART-stream/DMA kurulumu basarisiz");
+        end else begin
+            log_print("      [OK]   CPU UART-stream ve DMA'yi kurdu");
+            uart2_send_tensor(8'h55);
+        end
+
         // NPU donanım motorunun hesaplamayı bitirmesini dinamik olarak bekle
         log_print($sformatf("[%0t] NPU donanım motorunun tamamlanması bekleniyor...", $time));
         wait (uut.u_npu.u_npu_engine.done_o == 1'b1);
@@ -258,6 +280,16 @@ module tb_soc_top;
         end
                 // ISR gercekten calisip UART'tan yazdirdi mi?
         // Sartname s.16: "... sonuclari UART arayuzu uzerinden yazdirmalidir."
+        // DMA, UART-stream'den TCM'e tasimayi tamamladi mi?
+        // Sartname EK-1 s.21: veri UART-stream uzerinden hizlandirici
+        // bellegine yazilmali.
+        if (uart_saw_dma_done) begin
+            log_print("      [OK]   DMA UART-stream verisini TCM'e tasidi");
+        end else begin
+            error_count++;
+            log_print("      [HATA] DMA tamamlanmadi - UART-stream veri yolu calismiyor");
+        end
+
         if (uart_saw_irq) begin
             log_print("      [OK]   ISR sonucu UART'tan yazdirdi");
         end else begin
@@ -354,6 +386,8 @@ module tb_soc_top;
 
     string uart_line   = "";
     bit    uart_saw_irq = 1'b0;
+    bit    uart_saw_stream_ready = 1'b0;
+    bit    uart_saw_dma_done     = 1'b0;
 
     task automatic uart_monitor();
         logic [7:0] ch;
@@ -372,6 +406,10 @@ module tb_soc_top;
                 log_print($sformatf("[UART] %s", uart_line));
                 if (uart_line.len() >= 5 && uart_line.substr(0,4) == "[IRQ]")
                     uart_saw_irq = 1'b1;
+                if (uart_line == "Stream ready")
+                    uart_saw_stream_ready = 1'b1;
+                if (uart_line == "DMA done")
+                    uart_saw_dma_done = 1'b1;
                 uart_line = "";
             end else if (ch != 8'h0D) begin     // \r yoksay
                 uart_line = {uart_line, ch};
@@ -385,17 +423,62 @@ module tb_soc_top;
         uart_monitor();
     end
 
-    // DMA Interrupt Monitoring
-    always @(posedge clk) begin
-        if (rst_n && uut.dma_irq) begin
-            log_print($sformatf("[%0t] *** DMA Transfer Tamamlandı - IRQ aktif ***", $time));
-        end
-    end
+    // =========================================================================
+    // UART-stream gonderici
+    //
+    // Sartname EK-1 s.21: "UART-stream cevresel birimi cikarim yapilacak
+    // veriyi iletecek ve bu veri istenilen hizlandirici bellek adresine
+    // yazilacaktir."
+    //
+    // 1 Mbps, 8N1. main.c UART2'yi CPB = 50 ile yapilandiriyor
+    // (50 MHz / 1 Mbps), yani bit suresi 50 x 20 ns = 1000 ns.
+    // Genel UART 115200'de kaldigi icin "en az iki farkli baud hizi"
+    // isteri de karsilanmis olur (EK-2 s.22).
+    // =========================================================================
+    localparam int UART2_BIT_NS = 1000;
 
-    // I2C Interrupt Monitoring
-    always @(posedge clk) begin
-        if (rst_n && uut.i2c_irq) begin
-            log_print($sformatf("[%0t] *** I2C İşlemi Tamamlandı - IRQ aktif ***", $time));
+    task automatic uart2_send_byte(input logic [7:0] b);
+        uart2_rxd = 1'b0;                 // start biti
+        #(UART2_BIT_NS);
+        for (int i = 0; i < 8; i++) begin
+            uart2_rxd = b[i];             // LSB once
+            #(UART2_BIT_NS);
+        end
+        uart2_rxd = 1'b1;                 // stop biti
+        #(UART2_BIT_NS);
+    endtask
+
+    task automatic uart2_send_tensor(input logic [7:0] pattern);
+        log_print($sformatf("[TB] UART-stream'den 1960 bayt gonderiliyor (0x%02h)", pattern));
+        for (int i = 0; i < 1960; i++) begin
+            uart2_send_byte(pattern);
+        end
+        log_print("[TB] UART-stream gonderimi tamamlandi");
+    endtask
+
+    // Kesme izleyicileri - KENAR tetikli.
+    //
+    // Seviye tetikli olsalardi kesme hatti yuksek kaldigi her cevrimde
+    // satir basarlardi: DMA kesmesi ISR onu temizleyene kadar ~190 cevrim
+    // ayakta kaldi ve log okunamaz hale geldi. Yalnizca yukselen kenari
+    // bildirmek hem dogru bilgiyi verir hem de kesmenin gercekten
+    // temizlendigini gormeyi saglar.
+    logic dma_irq_d, i2c_irq_d;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            dma_irq_d <= 1'b0;
+            i2c_irq_d <= 1'b0;
+        end else begin
+            dma_irq_d <= uut.dma_irq;
+            i2c_irq_d <= uut.i2c_irq;
+
+            if (uut.dma_irq && !dma_irq_d)
+                log_print($sformatf("[%0t] *** DMA Transfer Tamamlandı - IRQ aktif ***", $time));
+            if (!uut.dma_irq && dma_irq_d)
+                log_print($sformatf("[%0t] *** DMA kesmesi temizlendi ***", $time));
+
+            if (uut.i2c_irq && !i2c_irq_d)
+                log_print($sformatf("[%0t] *** I2C İşlemi Tamamlandı - IRQ aktif ***", $time));
         end
     end
 

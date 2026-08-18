@@ -43,6 +43,38 @@ typedef struct {
 
 volatile int timer_flag = 0;
 
+// --- UART-stream (UART2) yazmaclari ---
+// Sartname EK-1 s.21: cikarim verisi bu birim uzerinden gelir.
+#define UARTS_BASE       0x40030000
+#define UARTS_CPB   ((volatile unsigned int *)(UARTS_BASE + 0x00))
+#define UARTS_STP   ((volatile unsigned int *)(UARTS_BASE + 0x04))
+#define UARTS_CFG   ((volatile unsigned int *)(UARTS_BASE + 0x10))
+#define UARTS_LEVEL ((volatile unsigned int *)(UARTS_BASE + 0x14))
+#define UARTS_CLR   ((volatile unsigned int *)(UARTS_BASE + 0x18))
+// Paketli FIFO okuma yazmaci: her okumada FIFO'dan dort bayt cekip
+// tek kelimede paketler. DMA'nin sabit kaynak adresi bu.
+#define UARTS_RDR32_ADDR (UARTS_BASE + 0x20)
+
+// --- DMA yazmaclari ---
+#define DMA_BASE         0x40070000
+#define DMA_CTRL    ((volatile unsigned int *)(DMA_BASE + 0x00))
+#define DMA_STATUS  ((volatile unsigned int *)(DMA_BASE + 0x04))
+#define DMA_SRC     ((volatile unsigned int *)(DMA_BASE + 0x08))
+#define DMA_DST     ((volatile unsigned int *)(DMA_BASE + 0x0C))
+#define DMA_LEN     ((volatile unsigned int *)(DMA_BASE + 0x10))
+
+#define DMA_CTRL_START      (1u << 0)
+#define DMA_CTRL_RESET      (1u << 1)
+#define DMA_CTRL_SRC_FIXED  (1u << 2)   // kaynak adresi artmaz
+#define DMA_CTRL_DST_FIXED  (1u << 3)   // hedef adresi artmaz
+
+#define DMA_IRQ_BIT      24
+
+volatile int dma_flag = 0;
+
+// Girdi tensoru: 1960 bayt = 490 kelime
+#define TENSOR_WORDS     490
+
 
 // ISR ile ana dongu arasinda paylasilan durum.
 // volatile: derleyici onbellege almasin, her seferinde bellekten okusun.
@@ -142,6 +174,15 @@ void __attribute__((interrupt("machine"), aligned(256))) trap_handler(void)
         *TIM_EVC = 1;   // olay bayragini temizle -> timer_irq duser
     }
 
+    // --- DMA kesmesi ---
+    // irq_o = dma_done. dma_done yalnizca reset, dma_reset (CTRL[1])
+    // veya yeni bir start ile temizlenir. Burada reset darbesi gonderiyoruz.
+    if ((cause & 0x80000000u) && ((cause & 0x1Fu) == DMA_IRQ_BIT)) {
+        dma_flag  = 1;
+        *DMA_CTRL = DMA_CTRL_RESET;   // dma_done temizlenir -> irq duser
+        *DMA_CTRL = 0;                // reset seviyesini birak
+    }
+
 }
 
 
@@ -155,7 +196,7 @@ static void irq_init(void)
     __asm__ volatile ("csrw mtvec, %0" :: "r"(t));
 
     // mie: yalnizca NPU kesmesini etkinlestir
-    t = (1u << NPU_IRQ_BIT) | (1u << TIMER_IRQ_BIT);
+    t = (1u << NPU_IRQ_BIT) | (1u << TIMER_IRQ_BIT) | (1u << DMA_IRQ_BIT);
 
     __asm__ volatile ("csrw mie, %0" :: "r"(t));
 
@@ -224,30 +265,50 @@ int main(void)
             NPU_TCM_BASE[i] = 0;
         }
 
-        // Giris tensoru 1960 bayt = 490 kelime. TAMAMI doldurulmalidir;
-        // yalnizca ilk kelimeyi yazmak girdinin binde ikisini degistirir
-        // ve butun senaryolar ayni sinifi verir.
+        // =================================================================
+        // Girdi tensorunu UART-stream uzerinden al ve DMA ile TCM'e tasi
         //
-        // TFLite girdi zero-point = -128. Gercek deger 0'a karsilik gelen
-        // nicemlenmis bayt 0x80'dir; 0x00 sessizlik degil, buyuk pozitif
-        // sinyal demektir.
-        unsigned int pattern;
-        int mode = run_count % 3;
+        // Sartname EK-1 s.21:
+        //   "UART-stream cevresel birimi cikarim yapilacak veriyi iletecek
+        //    ve bu veri istenilen hizlandirici bellek adresine yazilacaktir."
+        //
+        // Akis:  UART2 RX -> stream FIFO -> UARTS_RDR32 (4 bayt paketli)
+        //        -> DMA -> TCM (0x20010000) -> NPU
+        //
+        // CPU veriyi tasimaz; yalnizca konfigurasyonu yazip uyur.
+        // =================================================================
 
-        if (mode == 1) {
-            pattern = 0x55555555;
-            uart_print("In: PATTERN A\n");
-        } else if (mode == 2) {
-            pattern = 0xAAAAAAAA;
-            uart_print("In: PATTERN B\n");
-        } else {
-            pattern = 0x80808080;
-            uart_print("In: SILENCE\n");
-        }
+        // UART-stream'i 1 Mbps'e ayarla (EK-2 s.22: 1 Mbps destegi zorunlu).
+        // Genel UART 115200'de kalir - iki farkli baud hizi boylece gosterilir.
+        *UARTS_CPB = 50;          // 50 MHz / 1 Mbps
+        *UARTS_STP = 0;           // 1 stop biti
+        *UARTS_CLR = 1;           // FIFO'yu temizle
 
-        for (int i = 0; i < 490; i++) {
-            NPU_TCM_BASE[i] = pattern;
+        // DMA: kaynak sabit (paketli FIFO yazmaci), hedef artan (TCM)
+        *DMA_SRC = (unsigned int)UARTS_RDR32_ADDR;
+        *DMA_DST = (unsigned int)NPU_TCM_BASE;
+        *DMA_LEN = TENSOR_WORDS;
+        dma_flag = 0;
+
+        // Testbench bu satiri gorunce veri gondermeye baslar.
+        //
+        // SIRA ONEMLI: bu mesaj DMA baslatilmadan ONCE yazilmali. DMA
+        // basladiktan sonra bos FIFO'yu beklerken veri yolunu tutar ve
+        // CPU'nun UART yazmasi tikanir - o durumda testbench "Stream ready"
+        // satirini hic gormez ve sistem kilitlenir.
+        //
+        // FIFO 256 bayt; DMA mikrosaniyeler icinde basladigi icin erken
+        // gelen baytlar kaybolmaz.
+        uart_print("Stream ready\n");
+
+        *DMA_CTRL = DMA_CTRL_SRC_FIXED | DMA_CTRL_START;
+        *DMA_CTRL = DMA_CTRL_SRC_FIXED;   // start seviyesini birak
+
+        // DMA bitene kadar uyu
+        while (!dma_flag) {
+            __asm__ volatile ("wfi");
         }
+        uart_print("DMA done\n");
 
         // --- NPU'yu sifirla ---
         *NPU_REG_CTRL = NPU_CTRL_RESET;

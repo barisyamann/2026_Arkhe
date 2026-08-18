@@ -54,7 +54,8 @@ module dma_controller (
     // =========================================================================
     // CSR Yazmaç Ofsetleri
     // =========================================================================
-    localparam logic [4:0] REG_DMA_CTRL     = 5'h00; // [0] Start, [1] Reset
+    localparam logic [4:0] REG_DMA_CTRL     = 5'h00; // [0] Start, [1] Reset,
+                                                     // [2] SRC_FIXED, [3] DST_FIXED
     localparam logic [4:0] REG_DMA_STATUS   = 5'h04; // [0] Busy, [1] Done, [2] Error
     localparam logic [4:0] REG_DMA_SRC_ADDR = 5'h08; // Kaynak adresi
     localparam logic [4:0] REG_DMA_DST_ADDR = 5'h0C; // Hedef adresi
@@ -198,9 +199,17 @@ module dma_controller (
                         if (m_axi_bresp != 2'b00) begin
                             dma_error <= 1'b1;
                         end
-                        // Adres güncelle ve sonraki kelimeye geç
-                        src_addr_q <= src_addr_q + 32'd4;
-                        dst_addr_q <= dst_addr_q + 32'd4;
+                        // Adres güncelle ve sonraki kelimeye geç.
+                        //
+                        // REG_DMA_CTRL[2] = SRC_FIXED : kaynak adresi sabit kalir
+                        // REG_DMA_CTRL[3] = DST_FIXED : hedef adresi sabit kalir
+                        //
+                        // Sabit adres, bir cevre birimi veri yazmacindan akis
+                        // okumak icin gerekli. Ornek: UART-stream'in paketli FIFO
+                        // yazmaci tek bir adrestir ve her okumada FIFO ilerler;
+                        // adres artarsa ikinci okuma yanlis yazmaca gider.
+                        src_addr_q <= reg_ctrl[2] ? src_addr_q : (src_addr_q + 32'd4);
+                        dst_addr_q <= reg_ctrl[3] ? dst_addr_q : (dst_addr_q + 32'd4);
                         if (xfer_cnt <= 13'd1) begin
                             dma_state <= DMA_DONE;
                         end else begin

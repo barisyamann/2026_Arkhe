@@ -283,12 +283,79 @@ module uart_stream_peripheral
     end
 
     // =========================================================================
+    // Paketli FIFO okuma yazmaci - UARTS_RDR32 (offset 0x20)
+    //
+    // DMA'nin akis okumasi icin eklendi. Sartname EK-1 s.21, verinin
+    // UART-stream uzerinden hizlandirici bellegine yazilmasini istiyor.
+    // DMA 32-bit kelime tasir; UART_RDR ise bayt dondurur. Bu yazmac
+    // FIFO'dan DORT bayt cekip tek kelimede paketler (ilk gelen bayt
+    // en dusuk bayta gider) - NPU girdi tensorunun bekledigi duzen budur.
+    //
+    // Akis kontrolu donanimda: kelime hazir degilse AXI okumasi
+    // tamamlanmaz. DMA veri gelene kadar bekler, bos FIFO'dan cop okumaz.
+    //
+    // NOT: sync_fifo'nun okuma cikisi YAZMACLIDIR; i_rd_en'den bir cevrim
+    // sonra veri gecerli olur. Toplayici bunu pack_rd_d ile hesaba katiyor.
+    // =========================================================================
+    localparam logic [7:0] UARTS_RDR32_OFFSET = 8'h20;
+
+    logic [31:0] pack_data_r;
+    logic [2:0]  pack_cnt_r;
+    logic        pack_valid_r;
+    logic        pack_rd_en;
+    logic        pack_rd_d;
+    logic        pack_take;
+    logic        addr_is_rdr32;
+    logic        fifo_rd_en_byte;
+
+    assign addr_is_rdr32 = (s_axil_araddr[7:0] == UARTS_RDR32_OFFSET);
+
+    // Kelime tamamlanana kadar FIFO'yu bosalt
+    // !pack_rd_d kosulu sart: sync_fifo cikisi kayitli oldugu icin pack_cnt_r
+    // ancak okumadan BIR CEVRIM SONRA artar. Bu kosul olmadan sayac 3'teyken
+    // besinci okuma da baslatilir ve o bayt pack_data_r'ye kayarak kelimeyi
+    // bozar. Ayni anda tek okuma birakiyoruz: bayt basina 2 cevrim, 1 Mbps'te
+    // bayt basina 50 cevrim var, hiz sorun degil.
+    assign pack_rd_en = !pack_valid_r && !fifo_empty_w && !pack_rd_d &&
+                        (pack_cnt_r < 3'd4);
+
+    // AXI okumasi paketi tuketiyor
+    assign pack_take = s_axil_arvalid && !s_axil_rvalid && addr_is_rdr32 && pack_valid_r;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            pack_data_r  <= 32'b0;
+            pack_cnt_r   <= 3'd0;
+            pack_valid_r <= 1'b0;
+            pack_rd_d    <= 1'b0;
+        end else begin
+            pack_rd_d <= pack_rd_en;
+
+            if (pack_take) begin
+                pack_valid_r <= 1'b0;
+                pack_cnt_r   <= 3'd0;
+            end else if (pack_rd_d) begin
+                // fifo_rd_data bu cevrimde gecerli
+                pack_data_r <= {fifo_rd_data, pack_data_r[31:8]};
+                if (pack_cnt_r == 3'd3) begin
+                    pack_valid_r <= 1'b1;
+                    pack_cnt_r   <= 3'd4;
+                end else begin
+                    pack_cnt_r <= pack_cnt_r + 3'd1;
+                end
+            end
+        end
+    end
+
+    // =========================================================================
     // AXI4-Lite Slave - Okuma Kanalı
     // =========================================================================
     // UART_RDR okunduğunda FIFO'dan bir bayt al
-    assign fifo_rd_en = s_axil_arvalid && !s_axil_rvalid &&
-                        (s_axil_araddr[7:0] == UART_RDR_OFFSET) &&
-                        !fifo_empty_w;
+    assign fifo_rd_en_byte = s_axil_arvalid && !s_axil_rvalid &&
+                             (s_axil_araddr[7:0] == UART_RDR_OFFSET) &&
+                             !fifo_empty_w;
+
+    assign fifo_rd_en = fifo_rd_en_byte | pack_rd_en;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -297,7 +364,10 @@ module uart_stream_peripheral
             s_axil_rdata   <= '0;
             s_axil_rresp   <= AXI_RESP_OKAY;
         end else begin
-            if (s_axil_arvalid && !s_axil_rvalid) begin
+            // RDR32 okumasi ancak paket hazir oldugunda tamamlanir;
+            // diger adresler her zaman aninda cevaplanir.
+            if (s_axil_arvalid && !s_axil_rvalid &&
+                (!addr_is_rdr32 || pack_valid_r)) begin
                 s_axil_arready <= 1'b1;
                 s_axil_rvalid  <= 1'b1;
                 s_axil_rresp   <= AXI_RESP_OKAY;
@@ -311,6 +381,7 @@ module uart_stream_peripheral
                     UARTS_FIFO_LEVEL_OFFSET: s_axil_rdata <= {{(32-FIFO_PTR_W-1){1'b0}},
                                                                fifo_level};
                     UARTS_IRQ_EN_OFFSET:     s_axil_rdata <= reg_irq_en_r;
+                    UARTS_RDR32_OFFSET:      s_axil_rdata <= pack_data_r;
                     default: begin
                         s_axil_rdata <= '0;
                         s_axil_rresp <= AXI_RESP_SLVERR;
