@@ -9,30 +9,34 @@
 [UART] Timer OK
 [UART] Bus fault test
 [UART] Bus fault @ 0x00000100 ST=0x05
+[UART] I2C test
+[11562810000] *** I2C İşlemi Tamamlandı - IRQ aktif ***
+[UART] I2C CFG=0x02
 [UART] 
 [UART] Run: 1
 [UART] Clear TCM
 [UART] Stream ready
       [OK]   CPU UART-stream ve DMA'yi kurdu
 [TB] UART-stream'den 1960 bayt gonderiliyor (0x55)
-[35127730000] *** DMA Transfer Tamamlandı - IRQ aktif ***
+[38593110000] *** DMA Transfer Tamamlandı - IRQ aktif ***
 [TB] UART-stream gonderimi tamamlandi
-[35130850000] *** DMA kesmesi temizlendi ***
+[38596850000] *** DMA kesmesi temizlendi ***
 [UART] DMA done
 [TB] UART_RDR testi: A1 B2 C3 D4 gonderiliyor
-[36051410000] NPU donanım motorunun tamamlanması bekleniyor...
+[39522670000] NPU donanım motorunun tamamlanması bekleniyor...
 [UART] RDR: A1B2C3D4
 [UART] Start NPU
-[39824790000] NPU donanım motoru DONE sinyalini verdi!
+[43316970000] NPU donanım motoru DONE sinyalini verdi!
 [UART] [IRQ] Class: 3
 [UART] -> NO
-[41867010000] GPIO Çıkışı Değişti: gpio_o = 16'haaaa
+[45372810000] GPIO Çıkışı Değişti: gpio_o = 16'haaaa
       [OK]   CPU sinif sonucunu GPIO'ya yazdi: 0xaaaa
       [OK]   DMA UART-stream verisini TCM'e tasidi
       [OK]   Veri yolu hatasi yakalandi, adres ve kaynak dogru
+      [OK]   I2C protokol motoru NACK ile dogru sonlandi
       [OK]   UART_RDR bayt okuma dogru: A1B2C3D4
       [OK]   ISR sonucu UART'tan yazdirdi
-[41867030000] GPIO girişleri 0xA5A5 olarak ayarlandı.
+[45372830000] GPIO girişleri 0xA5A5 olarak ayarlandı.
 
 ================================================================
  JTAG HATA AYIKLAMA (DEBUG) PORTU DOGRULAMA TESTI BASLATILDI
@@ -50,7 +54,7 @@
 ================================================================
  JTAG PORTU DOGRULAMA TESTI TAMAMLANDI
 ================================================================
-[41960930000] SoC Simülasyonu Tamamlandı.
+[45466730000] SoC Simülasyonu Tamamlandı.
 ================================================================
  TUM TESTLER GECTI - 0 hata
 ================================================================

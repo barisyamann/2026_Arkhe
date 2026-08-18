@@ -57,6 +57,14 @@ volatile int timer_flag = 0;
 #define UARTS_RDR32_ADDR (UARTS_BASE + 0x20)
 
 // --- DMA yazmaclari ---
+// I2C Master (EK-2 yazmac haritasi)
+#define I2C_BASE         0x40040000
+#define I2C_NBY     ((volatile unsigned int *)(I2C_BASE + 0x00))
+#define I2C_ADR     ((volatile unsigned int *)(I2C_BASE + 0x04))
+#define I2C_RDR     ((volatile unsigned int *)(I2C_BASE + 0x08))
+#define I2C_TDR     ((volatile unsigned int *)(I2C_BASE + 0x0C))
+#define I2C_CFG     ((volatile unsigned int *)(I2C_BASE + 0x10))
+
 // JTAG/Debug CSR - veri yolu hata yazmaclari da burada
 #define JTAG_BASE        0x40080000
 #define JTAG_FAULT_ST    ((volatile unsigned int *)(JTAG_BASE + 0x14))
@@ -331,6 +339,38 @@ int main(void)
     uart_print(" ST=0x");
     uart_print_hex8(bus_fault_st & 0xFF);
     uart_print("\n");
+
+    // =========================================================================
+    // I2C oz testi
+    //
+    // Kartta I2C kolesi YOK. Amac protokol motorunu uctan uca calistirmak:
+    // START -> 7 bit adres + R/W -> ACK bekle -> NACK gorulur -> STOP.
+    //
+    // Denetim R3'te kapsamanin dusuk olmasini "kullanilmayan bloklar" diye
+    // savunmayi hakli olarak elestiriyordu: I2C sartnamenin ZORUNLU tuttugu
+    // bir cevre birimi ve bugune kadar hicbir test onu uyarmiyordu.
+    //
+    // Kole olmadigi icin pull-up SDA'yi yuksek tutar, motor NACK gorur ve
+    // kendini STOP ile sonlandirir - kilitlenme yok. NACK'te de TX_DONE
+    // kurulur, yani sonuc yazilimdan gozlenebilir.
+    //
+    // I2C 400 kHz: islem yaklasik 30 us surer.
+    // =========================================================================
+    uart_print("I2C test\n");
+
+    *I2C_NBY = 1;          // 1 bayt
+    *I2C_ADR = 0x50;       // ornek kole adresi
+    *I2C_TDR = 0xA5;       // gonderilecek veri
+    *I2C_CFG = 1;          // TX_EN
+
+    // Sinirli bekleme: TX_DONE (bit 1)
+    for (volatile int g = 0; g < 200000 && !(*I2C_CFG & 2); g++) { }
+
+    uart_print("I2C CFG=0x");
+    uart_print_hex8(*I2C_CFG & 0xFF);
+    uart_print("\n");
+
+    *I2C_CFG = 0;          // tamamlanma bayraklarini temizle
 
     // GPIO'nun tum pinlerini cikis moduna al
     *GPIO_MODE = 0x55555555;

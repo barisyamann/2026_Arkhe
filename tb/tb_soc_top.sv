@@ -156,6 +156,72 @@ module tb_soc_top;
         cov_axi_r: coverpoint (uut.u_npu.u_npu_axi_ctrl.mem_rvalid && uut.u_npu.u_npu_axi_ctrl.mem_rready) {
             bins hit = {1'b1};
         }
+
+        // =====================================================================
+        // R3 - Islevsel kapsama genisletmesi
+        //
+        // Denetimdeki oranlar (statement %46,6 / branch %30,1 / toggle %21,5)
+        // DMA, UART-stream ve kesmeler hic calismazken olculmustu. Bugun
+        // hepsi gercek veriyle uyariliyor; asagidaki noktalar bunu OLCULEBILIR
+        // hale getiriyor.
+        //
+        // Denetimin hakli elestirisi soyleydi: dusuk kapsami "kullanilmayan
+        // bloklar" diye savunmak yanlis, cunku o bloklar sartnamenin zorunlu
+        // tuttugu cevre birimleri. Dolayisiyla kapsama noktalari zorunlu
+        // birimlerin GERCEKTEN calistigini gostermeli.
+        // =====================================================================
+
+        // Her kesme kaynagi en az bir kez tetiklendi mi?
+        cov_irq_npu:   coverpoint uut.npu_irq        { bins fired = {1'b1}; }
+        cov_irq_timer: coverpoint uut.timer_irq      { bins fired = {1'b1}; }
+        cov_irq_dma:   coverpoint uut.dma_irq        { bins fired = {1'b1}; }
+        cov_irq_fault: coverpoint uut.bus_fault_irq  { bins fired = {1'b1}; }
+
+        // DMA durum makinesinin tum durumlari gezildi mi?
+        cov_dma_state: coverpoint uut.u_dma.dma_state {
+            bins idle       = {3'd0};
+            bins read_req   = {3'd1};
+            bins read_wait  = {3'd2};
+            bins write_req  = {3'd3};
+            bins write_wait = {3'd4};
+            bins done       = {3'd5};
+        }
+
+        // UART-stream FIFO doluluk bolgeleri - akis kontrolunun
+        // gercekten calistigini gosterir
+        cov_uart2_fifo: coverpoint uut.u_uart2.fifo_level {
+            bins bos     = {0};
+            bins az      = {[1:63]};
+            bins orta    = {[64:191]};
+            bins cok     = {[192:255]};
+            bins dolu    = {256};
+        }
+
+        // NPU sinif cikisi
+        cov_npu_class: coverpoint uut.u_npu.class_sig {
+            bins silence = {2'd0};
+            bins unknown = {2'd1};
+            bins yes     = {2'd2};
+            bins no      = {2'd3};
+        }
+
+        // Veri yolu hata kaynagi - hangi kopru bildirdi
+        cov_fault_src: coverpoint {uut.instr_bus_err, uut.data_bus_err} {
+            bins yok        = {2'b00};
+            bins veri_kopru = {2'b01};
+            bins buyruk_kopru = {2'b10};
+        }
+
+        // AXI yanit kodlari - SLVERR bilerek uretiliyor (Boot ROM yazmasi)
+        cov_axi_resp: coverpoint uut.u_data_bridge.axil_bresp_i
+            iff (uut.u_data_bridge.axil_bvalid_i) {
+            bins okay   = {2'b00};
+            bins slverr = {2'b10};
+            bins decerr = {2'b11};
+        }
+
+        // Kesme x sinif caprazi: dogru sinif dogru kesmeyle mi bildirildi
+        cross cov_irq_npu, cov_npu_class;
     endgroup
 
     cg_soc_verification cg_inst = new();
@@ -364,6 +430,16 @@ module tb_soc_top;
                                 uart_fault_line));
         end
 
+        // I2C: kole yokken protokol motoru NACK gorup kendini sonlandirdi mi?
+        // Beklenen CFG = 0x02  -> TX_EN dustu (bit0=0), TX_DONE kuruldu (bit1=1)
+        if (uart_i2c_line == "I2C CFG=0x02") begin
+            log_print("      [OK]   I2C protokol motoru NACK ile dogru sonlandi");
+        end else begin
+            error_count++;
+            log_print($sformatf("      [HATA] I2C yanlis - beklenen \"I2C CFG=0x02\", gelen \"%s\"",
+                                uart_i2c_line));
+        end
+
         // UART_RDR bayt yolu: gonderilen dort bayt aynen okundu mu?
         if (uart_rdr_line == "RDR: A1B2C3D4") begin
             log_print("      [OK]   UART_RDR bayt okuma dogru: A1B2C3D4");
@@ -473,6 +549,7 @@ module tb_soc_top;
     bit    uart_saw_dma_done     = 1'b0;
     string uart_rdr_line         = "";
     string uart_fault_line       = "";
+    string uart_i2c_line         = "";
 
     task automatic uart_monitor();
         logic [7:0] ch;
@@ -499,6 +576,11 @@ module tb_soc_top;
                     uart_rdr_line = uart_line;
                 if (uart_line.len() >= 14 && uart_line.substr(0,13) == "Bus fault @ 0x")
                     uart_fault_line = uart_line;
+                // substr(a,b) SystemVerilog'da HER IKI UCU da kapsar: substr(0,6) yedi
+                // karakter dondurur. Onceki surumde substr(0,7) yazilmisti ve
+                // sekiz karakterle ("I2C CFG=") karsilastirdigi icin hic eslesmedi.
+                if (uart_line.len() >= 7 && uart_line.substr(0,6) == "I2C CFG")
+                    uart_i2c_line = uart_line;
                 uart_line = "";
             end else if (ch != 8'h0D) begin     // \r yoksay
                 uart_line = {uart_line, ch};
