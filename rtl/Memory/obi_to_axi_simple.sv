@@ -125,6 +125,21 @@ module obi_to_axi_simple (
         bus_err_addr_o = addr_q;   // hatayi doguran erisimin adresi
 
         case (state_q)
+            // -----------------------------------------------------------------
+            // R10 - islem basina bir cevrim kazanimi
+            //
+            // Eski surumde ST_IDLE yalnizca adresi mandalliyor, AXI'ye hicbir
+            // sey surmuyordu; adres fazi bir sonraki cevrimde basliyordu.
+            // Her islemde bir cevrim bosa gidiyordu.
+            //
+            // Artik istek geldigi cevrimde AR (veya AW+W) DOGRUDAN suruluyor.
+            // Kole hazirsa el sikisma ayni cevrimde tamamlanir ve dogrudan
+            // veri/yanit fazina gecilir.
+            //
+            // AXI uyumu korunur: kole hazir degilse VALID yuksek kalarak
+            // ST_READ_ADDR / ST_WRITE_ADDR_DATA'ya gecilir ve adres addr_q'dan
+            // surulur - ayni deger, kararli.
+            // -----------------------------------------------------------------
             ST_IDLE: begin
                 aw_accepted_d = 1'b0;
                 w_accepted_d  = 1'b0;
@@ -132,10 +147,35 @@ module obi_to_axi_simple (
                     addr_d  = obi_addr_i;
                     wdata_d = obi_wdata_i;
                     be_d    = obi_be_i;
+
                     if (obi_we_i) begin
-                        state_d = ST_WRITE_ADDR_DATA;
+                        // Yazma: AW ve W ayni cevrimde surulur
+                        axil_awaddr_o  = obi_addr_i;
+                        axil_awvalid_o = 1'b1;
+                        axil_wdata_o   = obi_wdata_i;
+                        axil_wstrb_o   = obi_be_i;
+                        axil_wvalid_o  = 1'b1;
+
+                        aw_accepted_d = axil_awready_i;
+                        w_accepted_d  = axil_wready_i;
+
+                        if (axil_awready_i && axil_wready_i) begin
+                            obi_gnt_o = 1'b1;
+                            state_d   = ST_WRITE_RESP;
+                        end else begin
+                            state_d = ST_WRITE_ADDR_DATA;
+                        end
                     end else begin
-                        state_d = ST_READ_ADDR;
+                        // Okuma: AR ayni cevrimde surulur
+                        axil_araddr_o  = obi_addr_i;
+                        axil_arvalid_o = 1'b1;
+
+                        if (axil_arready_i) begin
+                            obi_gnt_o = 1'b1;
+                            state_d   = ST_READ_DATA;
+                        end else begin
+                            state_d = ST_READ_ADDR;
+                        end
                     end
                 end
             end
