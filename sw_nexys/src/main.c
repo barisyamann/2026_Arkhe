@@ -49,6 +49,7 @@ volatile int timer_flag = 0;
 #define UARTS_CPB   ((volatile unsigned int *)(UARTS_BASE + 0x00))
 #define UARTS_STP   ((volatile unsigned int *)(UARTS_BASE + 0x04))
 #define UARTS_CFG   ((volatile unsigned int *)(UARTS_BASE + 0x10))
+#define UARTS_RDR   ((volatile unsigned int *)(UARTS_BASE + 0x08))
 #define UARTS_LEVEL ((volatile unsigned int *)(UARTS_BASE + 0x14))
 #define UARTS_CLR   ((volatile unsigned int *)(UARTS_BASE + 0x18))
 // Paketli FIFO okuma yazmaci: her okumada FIFO'dan dort bayt cekip
@@ -122,6 +123,13 @@ void uart_print_dec(unsigned int val) {
     for (int i = idx - 1; i >= 0; i--) {
         uart_putc(buf[i]);
     }
+}
+
+// Tek bayti iki haneli buyuk harf onaltilik olarak yazar.
+void uart_print_hex8(unsigned int val) {
+    const char *digits = "0123456789ABCDEF";
+    uart_putc(digits[(val >> 4) & 0xF]);
+    uart_putc(digits[val & 0xF]);
 }
 
 
@@ -309,6 +317,25 @@ int main(void)
             __asm__ volatile ("wfi");
         }
         uart_print("DMA done\n");
+
+        // =================================================================
+        // UART_RDR bayt okuma yolu dogrulamasi
+        //
+        // EK-2 UART_RDR'i tek bayt alim yazmaci olarak tanimlar. DMA yolu
+        // UARTS_RDR32'yi kullandigi icin bu yazmac sistem testinde hic
+        // uyarilmiyordu - sartnameyi okuyup buradan okumaya calisan biri
+        // hatayla karsilasirdi. Dort bayt okuyup yazdirarak kapsama alindi.
+        //
+        // Ayni zamanda UARTS_RDR32 toplayicisinin bayt CALMADIGINI da
+        // dogrular: toplayici hala kosulsuz ceksin, bu baytlar kaybolurdu.
+        // =================================================================
+        while ((*UARTS_LEVEL & 0x1FF) < 4) { }
+
+        uart_print("RDR: ");
+        for (int i = 0; i < 4; i++) {
+            uart_print_hex8(*UARTS_RDR & 0xFF);
+        }
+        uart_print("\n");
 
         // --- NPU'yu sifirla ---
         *NPU_REG_CTRL = NPU_CTRL_RESET;

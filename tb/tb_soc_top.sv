@@ -249,6 +249,30 @@ module tb_soc_top;
             uart2_send_tensor(8'h55);
         end
 
+        // =====================================================================
+        // UART_RDR bayt okuma yolu (EK-2, offset 0x08)
+        //
+        // DMA yolu UARTS_RDR32'yi kullandigi icin bayt yazmaci sistem
+        // testinde hic uyarilmiyordu. CPU, DMA bittikten sonra dort bayt
+        // okuyup "RDR: A1B2C3D4" yaziyor. Bu ayni anda iki seyi dogrular:
+        //   - FIFO okuma gecikmesi dogru ele aliniyor (eskiden bir onceki
+        //     bayt donuyordu)
+        //   - UARTS_RDR32 toplayicisi artik bayt calmiyor
+        // =====================================================================
+        fork : wait_dma_done
+            wait (uart_saw_dma_done);
+            #2_000_000;
+        join_any
+        disable wait_dma_done;
+
+        if (uart_saw_dma_done) begin
+            log_print("[TB] UART_RDR testi: A1 B2 C3 D4 gonderiliyor");
+            uart2_send_byte(8'hA1);
+            uart2_send_byte(8'hB2);
+            uart2_send_byte(8'hC3);
+            uart2_send_byte(8'hD4);
+        end
+
         // NPU donanım motorunun hesaplamayı bitirmesini dinamik olarak bekle
         log_print($sformatf("[%0t] NPU donanım motorunun tamamlanması bekleniyor...", $time));
         wait (uut.u_npu.u_npu_engine.done_o == 1'b1);
@@ -288,6 +312,15 @@ module tb_soc_top;
         end else begin
             error_count++;
             log_print("      [HATA] DMA tamamlanmadi - UART-stream veri yolu calismiyor");
+        end
+
+        // UART_RDR bayt yolu: gonderilen dort bayt aynen okundu mu?
+        if (uart_rdr_line == "RDR: A1B2C3D4") begin
+            log_print("      [OK]   UART_RDR bayt okuma dogru: A1B2C3D4");
+        end else begin
+            error_count++;
+            log_print($sformatf("      [HATA] UART_RDR yanlis - beklenen \"RDR: A1B2C3D4\", gelen \"%s\"",
+                                uart_rdr_line));
         end
 
         if (uart_saw_irq) begin
@@ -388,6 +421,7 @@ module tb_soc_top;
     bit    uart_saw_irq = 1'b0;
     bit    uart_saw_stream_ready = 1'b0;
     bit    uart_saw_dma_done     = 1'b0;
+    string uart_rdr_line         = "";
 
     task automatic uart_monitor();
         logic [7:0] ch;
@@ -410,6 +444,8 @@ module tb_soc_top;
                     uart_saw_stream_ready = 1'b1;
                 if (uart_line == "DMA done")
                     uart_saw_dma_done = 1'b1;
+                if (uart_line.len() >= 5 && uart_line.substr(0,4) == "RDR: ")
+                    uart_rdr_line = uart_line;
                 uart_line = "";
             end else if (ch != 8'h0D) begin     // \r yoksay
                 uart_line = {uart_line, ch};
