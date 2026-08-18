@@ -23,16 +23,16 @@
 [36744030000] NPU donanım motorunun tamamlanması bekleniyor...
 [UART] RDR: A1B2C3D4
 [UART] Start NPU
-[58928390000] NPU donanım motoru DONE sinyalini verdi!
+[42128390000] NPU donanım motoru DONE sinyalini verdi!
 [UART] [IRQ] Class: 3
 [UART] -> NO
-[60984230000] GPIO Çıkışı Değişti: gpio_o = 16'haaaa
+[44184230000] GPIO Çıkışı Değişti: gpio_o = 16'haaaa
       [OK]   CPU sinif sonucunu GPIO'ya yazdi: 0xaaaa
       [OK]   DMA UART-stream verisini TCM'e tasidi
       [OK]   Veri yolu hatasi yakalandi, adres ve kaynak dogru
       [OK]   UART_RDR bayt okuma dogru: A1B2C3D4
       [OK]   ISR sonucu UART'tan yazdirdi
-[60984250000] GPIO girişleri 0xA5A5 olarak ayarlandı.
+[44184250000] GPIO girişleri 0xA5A5 olarak ayarlandı.
 
 ================================================================
  JTAG HATA AYIKLAMA (DEBUG) PORTU DOGRULAMA TESTI BASLATILDI
@@ -50,7 +50,7 @@
 ================================================================
  JTAG PORTU DOGRULAMA TESTI TAMAMLANDI
 ================================================================
-[61078150000] SoC Simülasyonu Tamamlandı.
+[44278150000] SoC Simülasyonu Tamamlandı.
 ================================================================
  TUM TESTLER GECTI - 0 hata
 ================================================================
