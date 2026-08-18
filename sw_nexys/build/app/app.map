@@ -13,7 +13,7 @@ Linker script and memory map
 LOAD C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
 LOAD C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o
 
-.text           0x01000000      0x754
+.text           0x01000000      0x7dc
                 0x01000000                        . = ALIGN (0x4)
  *(.init)
  *(.text.start)
@@ -29,22 +29,22 @@ LOAD C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o
                 0x01000200                trap_handler
                 0x0100030a                uart_print_hex8
                 0x0100033c                uart_print_hex32
- .text.startup  0x010003ce      0x28c C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
+ .text.startup  0x010003ce      0x2fc C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
                 0x010003ce                main
- .text          0x0100065a        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o
+ .text          0x010006ca        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o
  *(.rodata*)
- *fill*         0x0100065a        0x2 
+ *fill*         0x010006ca        0x2 
  .rodata.str1.4
-                0x0100065c       0xf5 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
-                                 0xf9 (size before relaxing)
-                0x01000754                        . = ALIGN (0x4)
- *fill*         0x01000751        0x3 
+                0x010006cc      0x10d C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
+                                0x111 (size before relaxing)
+                0x010007dc                        . = ALIGN (0x4)
+ *fill*         0x010007d9        0x3 
 
-.rela.dyn       0x01000754        0x0
+.rela.dyn       0x010007dc        0x0
  .rela.text.start
-                0x01000754        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
+                0x010007dc        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
 
-.data           0x20000000        0x0 load address 0x01000754
+.data           0x20000000        0x0 load address 0x010007dc
                 0x20000000                        . = ALIGN (0x4)
                 0x20000000                        __data_start = .
  *(.data*)
@@ -52,9 +52,9 @@ LOAD C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o
  .data          0x20000000        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o
                 0x20000000                        . = ALIGN (0x4)
                 0x20000000                        __data_end = .
-                0x01000754                        __data_load_start = LOADADDR (.data)
+                0x010007dc                        __data_load_start = LOADADDR (.data)
 
-.bss            0x20000000        0x0 load address 0x01000754
+.bss            0x20000000        0x0 load address 0x010007dc
                 0x20000000                        . = ALIGN (0x4)
                 0x20000000                        __bss_start = .
  *(.bss*)
@@ -64,7 +64,7 @@ LOAD C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o
                 0x20000000                        . = ALIGN (0x4)
                 0x20000000                        __bss_end = .
 
-.sbss           0x20000000       0x1c load address 0x01000754
+.sbss           0x20000000       0x1c load address 0x010007dc
  .sbss          0x20000000       0x1c C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\main.o
                 0x20000000                bus_fault_st
                 0x20000004                bus_fault_addr
@@ -74,7 +74,7 @@ LOAD C:\Users\ybari\2026_Arkhe\sw_nexys\build\app\crt0.o
                 0x20000014                dma_flag
                 0x20000018                timer_flag
 
-.stack          0x2000001c        0x4 load address 0x01000754
+.stack          0x2000001c        0x4 load address 0x010007dc
                 0x20000020                        . = ALIGN (0x10)
  *fill*         0x2000001c        0x4 
                 0x20002000                        __stack_top = (ORIGIN (RAM) + LENGTH (RAM))
