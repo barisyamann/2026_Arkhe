@@ -17,6 +17,24 @@ module obi_to_axi_simple (
     output logic [31:0] obi_rdata_o,
     output logic        obi_rvalid_o,
 
+    // -------------------------------------------------------------------------
+    // Veri yolu hata bildirimi
+    //
+    // AXI4-Lite kolesi SLVERR/DECERR dondurdugunde bir cevrim yuksek olur;
+    // bus_err_addr_o hatayi doguran adresi tasir.
+    //
+    // CV32E40P'nin OBI arayuzunde hata girisi yoktur, dolayisiyla hata
+    // hassas bir istisna (load/store access fault) olarak bildirilmez.
+    // Bunun yerine jtag_debug icindeki hata yazmaclarina yakalanip
+    // KESME olarak sunuluyor - yazilim hatanin adresini gorebiliyor.
+    //
+    // bus_err_o bir DARBEDIR, seviye degil. npu_csr'da yasadigimiz sonsuz
+    // kesme dongusu (seviye kaynakli yapiskan bayrak yazilimca
+    // temizlenemiyordu) bu yuzden burada yapisal olarak imkansiz.
+    // -------------------------------------------------------------------------
+    output logic        bus_err_o,
+    output logic [31:0] bus_err_addr_o,
+
     // AXI4-Lite Master Tarafı
     // Yazma Adresi Kanalı
     output logic [31:0] axil_awaddr_o,
@@ -102,6 +120,10 @@ module obi_to_axi_simple (
         obi_rvalid_o = 1'b0;
         obi_rdata_o  = '0;
 
+        // Hata bildirimi - yalnizca yanit kabul edildigi cevrimde
+        bus_err_o      = 1'b0;
+        bus_err_addr_o = addr_q;   // hatayi doguran erisimin adresi
+
         case (state_q)
             ST_IDLE: begin
                 aw_accepted_d = 1'b0;
@@ -141,6 +163,8 @@ module obi_to_axi_simple (
                 axil_bready_o = 1'b1;
                 if (axil_bvalid_i) begin
                     obi_rvalid_o = 1'b1;
+                    // OKAY disindaki her yanit hata: SLVERR (10), DECERR (11)
+                    bus_err_o    = (axil_bresp_i != 2'b00);
                     state_d      = ST_IDLE;
                 end
             end
@@ -158,6 +182,7 @@ module obi_to_axi_simple (
                 if (axil_rvalid_i) begin
                     obi_rdata_o  = axil_rdata_i;
                     obi_rvalid_o = 1'b1;
+                    bus_err_o    = (axil_rresp_i != 2'b00);
                     state_d      = ST_IDLE;
                 end
             end

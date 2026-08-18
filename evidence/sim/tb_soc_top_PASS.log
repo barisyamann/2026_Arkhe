@@ -7,29 +7,32 @@
 [UART] *** ARKHE FPGA TEST ***
 [UART] Timer test
 [UART] Timer OK
+[UART] Bus fault test
+[UART] Bus fault @ 0x00000100 ST=0x05
 [UART] 
 [UART] Run: 1
 [UART] Clear TCM
 [UART] Stream ready
       [OK]   CPU UART-stream ve DMA'yi kurdu
 [TB] UART-stream'den 1960 bayt gonderiliyor (0x55)
-[32150990000] *** DMA Transfer Tamamlandı - IRQ aktif ***
+[35814470000] *** DMA Transfer Tamamlandı - IRQ aktif ***
 [TB] UART-stream gonderimi tamamlandi
-[32154730000] *** DMA kesmesi temizlendi ***
+[35818210000] *** DMA kesmesi temizlendi ***
 [UART] DMA done
 [TB] UART_RDR testi: A1 B2 C3 D4 gonderiliyor
-[33080550000] NPU donanım motorunun tamamlanması bekleniyor...
+[36744030000] NPU donanım motorunun tamamlanması bekleniyor...
 [UART] RDR: A1B2C3D4
 [UART] Start NPU
-[55264850000] NPU donanım motoru DONE sinyalini verdi!
+[58928390000] NPU donanım motoru DONE sinyalini verdi!
 [UART] [IRQ] Class: 3
 [UART] -> NO
-[57320610000] GPIO Çıkışı Değişti: gpio_o = 16'haaaa
+[60984230000] GPIO Çıkışı Değişti: gpio_o = 16'haaaa
       [OK]   CPU sinif sonucunu GPIO'ya yazdi: 0xaaaa
       [OK]   DMA UART-stream verisini TCM'e tasidi
+      [OK]   Veri yolu hatasi yakalandi, adres ve kaynak dogru
       [OK]   UART_RDR bayt okuma dogru: A1B2C3D4
       [OK]   ISR sonucu UART'tan yazdirdi
-[57320630000] GPIO girişleri 0xA5A5 olarak ayarlandı.
+[60984250000] GPIO girişleri 0xA5A5 olarak ayarlandı.
 
 ================================================================
  JTAG HATA AYIKLAMA (DEBUG) PORTU DOGRULAMA TESTI BASLATILDI
@@ -47,7 +50,7 @@
 ================================================================
  JTAG PORTU DOGRULAMA TESTI TAMAMLANDI
 ================================================================
-[57414530000] SoC Simülasyonu Tamamlandı.
+[61078150000] SoC Simülasyonu Tamamlandı.
 ================================================================
  TUM TESTLER GECTI - 0 hata
 ================================================================

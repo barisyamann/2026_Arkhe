@@ -21,6 +21,24 @@ module jtag_debug (
     // --- CPU Debug Kontrol ---
     output logic        debug_req_o,    // CPU halt isteği
 
+    // -------------------------------------------------------------------------
+    // Veri yolu hata yakalama (OBI -> AXI koprulerinden)
+    //
+    // Bir AXI kolesi OKAY disinda yanit dondurdugunde ilgili kopru bir
+    // cevrimlik darbe uretir. Burada yakalanip yapiskan hale getiriliyor
+    // ve kesme olarak sunuluyor; yazilim hangi adresin ve hangi koprunun
+    // hata verdigini okuyabiliyor.
+    //
+    // Hata teshis kapsamina girdigi icin debug bloguna yerlestirildi -
+    // ayri bir AXI kolesi eklemek 13 koleli ara baglantida ~60 noktaya
+    // dokunmayi gerektirirdi.
+    // -------------------------------------------------------------------------
+    input  logic        instr_bus_err_i,
+    input  logic [31:0] instr_bus_err_addr_i,
+    input  logic        data_bus_err_i,
+    input  logic [31:0] data_bus_err_addr_i,
+    output logic        bus_fault_irq_o,
+
     // --- AXI4-Lite Slave - CSR (0x4008_0000) ---
     input  logic [31:0] s_axi_awaddr,
     input  logic        s_axi_awvalid,
@@ -68,6 +86,12 @@ module jtag_debug (
     localparam logic [4:0] REG_DBG_ADDR   = 5'h08; // Hedef bellek adresi
     localparam logic [4:0] REG_DBG_DATA   = 5'h0C; // Okuma/yazma verisi
     localparam logic [4:0] REG_DBG_CMD    = 5'h10; // [0] Read, [1] Write
+
+    // Veri yolu hata yazmaclari
+    localparam logic [4:0] REG_FAULT_ST   = 5'h14; // [0] Hata var, [1] Buyruk kopru,
+                                                   // [2] Veri kopru (RO)
+    localparam logic [4:0] REG_FAULT_ADDR = 5'h18; // Hatayi doguran adres (RO)
+    localparam logic [4:0] REG_FAULT_CLR  = 5'h1C; // 1 yazilinca temizlenir (WO)
 
     // =========================================================================
     // İç Yazmaçlar
@@ -450,6 +474,51 @@ module jtag_debug (
     end
 
     // =========================================================================
+    // Veri Yolu Hata Yakalama
+    //
+    // Kopruler bir cevrimlik DARBE uretir; burada yapiskan hale getirilir.
+    // Kaynak darbe oldugu icin yazilim bayragi temizledikten sonra bayrak
+    // kendiliginden geri gelmez - npu_csr'da yasadigimiz sonsuz kesme
+    // dongusu burada yapisal olarak imkansiz.
+    //
+    // ILK hata saklanir; temizlenene kadar sonrakiler uzerine yazilmaz.
+    // Bir hatanin ardindan gelen ikincil hatalar genellikle birincinin
+    // sonucudur, asil bilgi ilk adrestir.
+    // =========================================================================
+    logic        fault_valid_r;
+    logic        fault_instr_r;
+    logic        fault_data_r;
+    logic [31:0] fault_addr_r;
+    logic        fault_clr_w;
+
+    assign fault_clr_w = csr_do_write &&
+                         (csr_aw_addr_lat[4:0] == REG_FAULT_CLR) &&
+                         csr_w_data_lat[0];
+
+    assign bus_fault_irq_o = fault_valid_r;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            fault_valid_r <= 1'b0;
+            fault_instr_r <= 1'b0;
+            fault_data_r  <= 1'b0;
+            fault_addr_r  <= 32'b0;
+        end else if (!fault_valid_r && (instr_bus_err_i || data_bus_err_i)) begin
+            // Yeni hata - temizleme ile ayni cevrimde gelirse hata kazanir,
+            // boylece hicbir hata kaybolmaz.
+            fault_valid_r <= 1'b1;
+            fault_instr_r <= instr_bus_err_i;
+            fault_data_r  <= data_bus_err_i && !instr_bus_err_i;
+            fault_addr_r  <= instr_bus_err_i ? instr_bus_err_addr_i
+                                             : data_bus_err_addr_i;
+        end else if (fault_clr_w) begin
+            fault_valid_r <= 1'b0;
+            fault_instr_r <= 1'b0;
+            fault_data_r  <= 1'b0;
+        end
+    end
+
+    // =========================================================================
     // AXI4-Lite Slave - CSR Okuma Kanalı
     // =========================================================================
     logic [31:0] csr_ar_addr_lat;
@@ -485,6 +554,9 @@ module jtag_debug (
                     REG_DBG_ADDR:   s_axi_rdata <= reg_addr;
                     REG_DBG_DATA:   s_axi_rdata <= bus_done ? bus_rdata_result : reg_data;
                     REG_DBG_CMD:    s_axi_rdata <= reg_cmd;
+                    REG_FAULT_ST:   s_axi_rdata <= {29'b0, fault_data_r,
+                                                    fault_instr_r, fault_valid_r};
+                    REG_FAULT_ADDR: s_axi_rdata <= fault_addr_r;
                     default:        s_axi_rdata <= 32'b0;
                 endcase
             end

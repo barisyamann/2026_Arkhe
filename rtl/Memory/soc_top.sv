@@ -79,13 +79,20 @@ module soc_top (
     logic        core_sleep;
     logic        debug_req;
 
+    // Veri yolu hata bildirimi (OBI -> AXI kopruleri -> jtag_debug -> kesme)
+    logic        instr_bus_err;
+    logic [31:0] instr_bus_err_addr;
+    logic        data_bus_err;
+    logic [31:0] data_bus_err_addr;
+    logic        bus_fault_irq;
+
     assign irq_vector = {
         7'b0,
         dma_irq,
         i2c_irq,
         npu_irq,
         qspi_irq,
-        1'b0,
+        bus_fault_irq,   // bit 20 - veri yolu hatasi (AXI SLVERR/DECERR)
         uart2_irq,
         uart1_irq,
         timer_irq,
@@ -177,6 +184,8 @@ module soc_top (
         .obi_wdata_i    (32'b0),
         .obi_rdata_o    (instr_rdata),
         .obi_rvalid_o   (instr_rvalid),
+        .bus_err_o      (instr_bus_err),
+        .bus_err_addr_o (instr_bus_err_addr),
         // AXI4-Lite Master
         .axil_awaddr_o  (),
         .axil_awvalid_o (),
@@ -228,6 +237,8 @@ module soc_top (
         .obi_wdata_i    (data_wdata),
         .obi_rdata_o    (data_rdata),
         .obi_rvalid_o   (data_rvalid),
+        .bus_err_o      (data_bus_err),
+        .bus_err_addr_o (data_bus_err_addr),
         // AXI4-Lite Master
         .axil_awaddr_o  (data_axil_awaddr),
         .axil_awvalid_o (data_axil_awvalid),
@@ -854,6 +865,12 @@ module soc_top (
         .jtag_trst_n    (jtag_trst_n),
         // CPU Debug Kontrol
         .debug_req_o    (debug_req),
+        // Veri yolu hata yakalama
+        .instr_bus_err_i      (instr_bus_err),
+        .instr_bus_err_addr_i (instr_bus_err_addr),
+        .data_bus_err_i       (data_bus_err),
+        .data_bus_err_addr_i  (data_bus_err_addr),
+        .bus_fault_irq_o      (bus_fault_irq),
         // AXI Slave - CSR (s12)
         .s_axi_awaddr   (s12_awaddr),  .s_axi_awvalid (s12_awvalid),  .s_axi_awready (s12_awready),
         .s_axi_wdata    (s12_wdata),   .s_axi_wstrb   (s12_wstrb),   .s_axi_wvalid  (s12_wvalid),  .s_axi_wready  (s12_wready),
