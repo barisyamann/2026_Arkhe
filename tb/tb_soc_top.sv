@@ -245,6 +245,21 @@ module tb_soc_top;
     endfunction
 
     // =========================================================================
+    // Zaman asimi payi - acilis moduna gore
+    //
+    // GERCEK BOOT'ta yukleyici 8 kB uygulamayi QSPI flash'tan okur.
+    // Prescaler 4'te SCK = 50 MHz / (2 x 5) = 5 MHz, yani
+    //   8192 bayt x 8 bit / 5 MHz ~ 13 ms
+    // Hizli acilista bu sure yok. Sabit zaman asimlari gercek boot'ta
+    // yaniltici "basarisiz" uretiyordu - islev dogruydu, sure yetmiyordu.
+    // =========================================================================
+`ifdef REAL_BOOT
+    localparam int BOOT_PAYI_NS = 40_000_000;   // 40 ms
+`else
+    localparam int BOOT_PAYI_NS = 0;
+`endif
+
+    // =========================================================================
     // Self-checking altyapisi
     // =========================================================================
     int error_count = 0;
@@ -328,7 +343,7 @@ module tb_soc_top;
         // =====================================================================
         fork : wait_stream_ready
             wait (uart_saw_stream_ready);
-            #20_000_000;   // 20 ms zaman asimi
+            #(20_000_000 + BOOT_PAYI_NS);   // 20 ms + boot payi
         join_any
         disable wait_stream_ready;
 
@@ -352,7 +367,7 @@ module tb_soc_top;
         // =====================================================================
         fork : wait_dma_done
             wait (uart_saw_dma_done);
-            #2_000_000;
+            #(2_000_000 + BOOT_PAYI_NS);
         join_any
         disable wait_dma_done;
 
@@ -373,7 +388,7 @@ module tb_soc_top;
         // NPU hesaplamasi ~20 ms surer, 60 ms rahat bir ust sinir.
         fork : wait_npu
             wait (uut.u_npu.u_npu_engine.done_o == 1'b1);
-            #60_000_000;
+            #(60_000_000 + BOOT_PAYI_NS);
         join_any
         disable wait_npu;
 
@@ -397,7 +412,7 @@ module tb_soc_top;
         fork : wait_gpio
         wait (gpio_o == 16'h5555 || gpio_o == 16'hAAAA || gpio_o == 16'h0F0F);
 
-            #5_000_000;   // 5 ms zaman asimi
+            #(5_000_000 + BOOT_PAYI_NS);   // 5 ms + boot payi
         join_any
         disable wait_gpio;
 
