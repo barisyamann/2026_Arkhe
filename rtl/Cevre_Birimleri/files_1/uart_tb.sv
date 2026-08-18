@@ -322,10 +322,25 @@ module uart_tb;
         $display("  SONUÇ: %0d PASS, %0d FAIL", test_pass, test_fail);
         $display("=======================================================");
 
-        if (test_fail == 0)
-            $display("  TÜM TESTLER BAŞARILI");
-        else
-            $display("  BAZI TESTLER BAŞARISIZ - Lütfen kontrol edin");
+        // =====================================================================
+        // Sartname s.615: testler manuel inceleme gerektirmeden kendi kendini
+        // kontrol etmelidir.
+        //
+        // Eski surum hata durumunda "Lutfen kontrol edin" yazip $finish ile
+        // NORMAL cikiyordu - yani otomasyon acisindan basarili sayiliyordu.
+        // Bu dosyanin basliginda "manuel inceleme gerektirmez" yazmasina
+        // ragmen tam olarak manuel inceleme istiyordu.
+        // =====================================================================
+        if (test_fail != 0) begin
+            $display("  UART TESTI BASARISIZ - %0d hata", test_fail);
+            $display("=======================================================");
+            $fatal(1, "UART dogrulamasi basarisiz");
+        end else if (test_pass == 0) begin
+            $fatal(1, "UART testi hic denetim calistirmadi - testbench bozuk");
+        end else begin
+            $display("  UART TESTI GECTI - %0d denetim, 0 hata", test_pass);
+            $display("=======================================================");
+        end
 
         $finish;
     end
@@ -335,8 +350,11 @@ module uart_tb;
     // =========================================================================
     initial begin
         #20_000_000; // 20 ms
-        $display("[ERROR] Global zaman aşımı! Simülasyon zorla sonlandırılıyor.");
-        $finish;
+        $display("[HATA] Global zaman asimi - simulasyon tamamlanmadi.");
+        $display("  Son durum: %0d PASS, %0d FAIL", test_pass, test_fail);
+        // Asili kalan bir test de basarisizdir; $finish ile normal cikmak
+        // otomasyonda "gecti" gorunmesine yol acardi.
+        $fatal(1, "UART testbench zaman asimi");
     end
 
     // =========================================================================

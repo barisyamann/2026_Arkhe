@@ -1,0 +1,51 @@
+#-----------------------------------------------------------
+# xsim v2025.2 (64-bit)
+# SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+# IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+# SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+# Start of session at: Tue Aug 18 19:52:50 2026
+# Process ID         : 16996
+# Current directory  : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb
+# Command line       : xsim.exe -log j_sim.log -mode tcl -source {xsim.dir/j_snap/xsim_script.tcl}
+# Log file           : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb/j_sim.log
+# Journal file       : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb\xsim.jou
+# Running On         : baris
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 26200
+# Processor Detail   : AMD Ryzen 5 6600H with Radeon Graphics         
+# CPU Frequency      : 3294 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 16310 MB
+# Swap memory        : 16106 MB
+# Total Virtual      : 32416 MB
+# Available Virtual  : 10781 MB
+#-----------------------------------------------------------
+source xsim.dir/j_snap/xsim_script.tcl
+# xsim {j_snap} -autoloadwcfg -tclbatch {run.tcl}
+Time resolution is 1 ps
+source run.tcl
+## run all
+================================================================
+ JTAG/DEBUG BLOK TESTI
+================================================================
+      [OK]   REG_DBG_ADDR geri okuma = 0x20010000
+      [OK]   REG_DBG_DATA geri okuma = 0xdeadbeef
+      [OK]   Halt -> debug_req_o = 0x00000001
+      [OK]   Resume -> debug_req_o = 0x00000000
+      [OK]   Baslangicta hata bayragi bos = 0x00000000
+      [OK]   Veri hatasi -> kesme = 0x00000001
+      [OK]   FAULT_ST = veri koprusu (bit0+bit2) = 0x00000005
+      [OK]   FAULT_ADDR = 0x40010008
+      [OK]   Temizleme sonrasi kesme dustu = 0x00000000
+      [OK]   Temizleme sonrasi FAULT_ST = 0x00000000
+      [OK]   FAULT_ST = buyruk koprusu (bit0+bit1) = 0x00000003
+      [OK]   FAULT_ADDR (buyruk) = 0x00000200
+      [OK]   Ilk hata korundu (uzerine yazilmadi) = 0x00000200
+      [OK]   Ilk hata kaynagi korundu = 0x00000003
+================================================================
+ JTAG BLOK TESTI GECTI - 14 denetim, 0 hata
+================================================================
+$finish called at time : 2290 ns : File "C:/Users/ybari/2026_Arkhe/tb/T3.1_jtag_debug/tb_jtag_debug.sv" Line 234
+## quit
+INFO: [Common 17-206] Exiting xsim at Tue Aug 18 19:52:52 2026...
