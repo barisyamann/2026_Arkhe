@@ -42,3 +42,6 @@ Thumbs.db
 
 # LibreLane kosum ciktilari (yuzlerce MB ara dosya)
 asic/*/runs/
+
+# Regresyon calisma dizini (her kosumda yeniden uretilir)
+build/regression/
