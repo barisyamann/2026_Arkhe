@@ -76,7 +76,20 @@ module npu_compute_engine (
     logic [3:0] kh;      // 0 .. 9  (Kernel Yükseklik)
     logic [3:0] kw;      // 0 .. 7  (Kernel Genişlik)
 
-    logic signed [31:0] conv_acc;
+    // -------------------------------------------------------------------------
+    // R4 - Kanal paylasimi
+    //
+    // Girdi adresi yalnizca (t_out, f_out, kh, kw)'ya baglidir; d_out ADRESE
+    // GIRMEZ. Yani sekiz kanalin hepsi tam olarak ayni girdi piksellerini
+    // okuyordu ve ayni 10x8 pencere sekiz kez taraniyordu.
+    //
+    // Artik pencere BIR KEZ okunuyor, okunan deger sekiz kanala paralel
+    // dagitiliyor. Her kanalin kendi biriktiricisi var.
+    //
+    // Toplama sirasi kanal ICINDE degismedi (kh, kw duzeni ayni) ve kanallar
+    // birbirinden bagimsiz; bu yuzden sonuclar bit-birebir ayni kalmali.
+    // -------------------------------------------------------------------------
+    logic signed [31:0] conv_acc [0:7];
     logic signed [31:0] fc_acc [0:3];
 
     // TFLite FC katmanının quantized INT8 çıkışları
@@ -383,7 +396,7 @@ endfunction
             d_out       <= '0;
             kh          <= '0;
             kw          <= '0;
-            conv_acc    <= '0;
+            for (int i = 0; i < 8; i++) conv_acc[i] <= '0;
             div_start   <= 1'b0;
             div_num     <= '0;
             div_den     <= '0;
@@ -420,7 +433,7 @@ endfunction
             kh          <= '0;
             kw          <= '0;
 
-            conv_acc    <= '0;
+            for (int i = 0; i < 8; i++) conv_acc[i] <= '0;
 
             div_start   <= 1'b0;
             div_num     <= '0;
@@ -471,8 +484,9 @@ endfunction
 
                     fc_q_idx <= 2'd0;
 
-                    conv_acc <= dw_bias[0];
-                    state    <= CONV_READ_REQ;
+                    // Sekiz kanalin biriktiricisi ayni anda baslatilir
+                    for (int i = 0; i < 8; i++) conv_acc[i] <= dw_bias[i];
+                    state <= CONV_READ_REQ;
                 end
 
                 CONV_READ_REQ: begin
@@ -485,7 +499,6 @@ endfunction
 
                 CONV_MAC: begin
                     logic signed [8:0] x_centered;
-                    logic signed [7:0] w_val;
 
                     if (in_bounds) begin
                         logic [7:0] raw_byte;
@@ -505,15 +518,19 @@ endfunction
                         x_centered = 9'sd0;
                     end
 
-                    // Depthwise weight zero-point = 0
-                    w_val = dw_weights[int'(kh) * 64 + int'(kw) * 8 + int'(d_out)];
-
-                    conv_acc <= conv_acc + x_centered * w_val;
+                    // Okunan tek piksel sekiz kanala paralel dagitilir.
+                    // dw_weights indisleri d icin ARDISIKTIR (kh*64+kw*8+d),
+                    // yani sekiz agirlik bitisik bir blokta duruyor.
+                    for (int d = 0; d < 8; d++) begin
+                        conv_acc[d] <= conv_acc[d] +
+                            x_centered * $signed(dw_weights[int'(kh) * 64 + int'(kw) * 8 + d]);
+                    end
 
                     if (kw == 7) begin
                         kw <= '0;
                         if (kh == 9) begin
                             kh    <= '0;
+                            d_out <= '0;          // requant/FC turu kanal 0'dan baslar
                             state <= CONV_ReLU_FC;
                         end else begin
                             kh    <= kh + 1;
@@ -532,8 +549,8 @@ endfunction
                     logic signed [31:0] m;
 
                     m        = get_dw_multiplier(d_out[2:0]);
-                    rq_ab    <= $signed(conv_acc) * $signed(m);
-                    rq_ovf   <= (conv_acc == 32'sh80000000) && (m == 32'sh80000000);
+                    rq_ab    <= $signed(conv_acc[d_out[2:0]]) * $signed(m);
+                    rq_ovf   <= (conv_acc[d_out[2:0]] == 32'sh80000000) && (m == 32'sh80000000);
                     rq_shift <= get_dw_rshift(d_out[2:0]);
                     state    <= CONV_RQ_NUDGE;
                 end
@@ -603,9 +620,17 @@ endfunction
                     fc_acc[3] <= fc_acc[3]
                         + $signed(fc_y) * $signed(fc_weights[fc_idx + 14'd12000]);
 
+                    // R4 sonrasi dongu duzeni:
+                    //   konvolusyon (kh,kw) SEKIZ KANAL ICIN BIR KEZ kosar,
+                    //   ardindan burada kanal kanal requant + FC yapilir.
+                    //
+                    // Bu yuzden d_out < 7 iken CONV_READ_REQ'e DEGIL,
+                    // CONV_ReLU_FC'ye donuyoruz - girdi zaten okundu.
                     if (d_out == 7) begin
-                        d_out    <= '0;
-                        conv_acc <= dw_bias[0];
+                        d_out <= '0;
+
+                        // Sonraki piksel icin sekiz biriktirici birden yenilenir
+                        for (int i = 0; i < 8; i++) conv_acc[i] <= dw_bias[i];
 
                         if (f_out == 19) begin
                             f_out <= '0;
@@ -623,9 +648,8 @@ endfunction
                             state <= CONV_READ_REQ;
                         end
                     end else begin
-                        d_out    <= d_out + 1;
-                        conv_acc <= dw_bias[d_out + 1];
-                        state    <= CONV_READ_REQ;
+                        d_out <= d_out + 1;
+                        state <= CONV_ReLU_FC;   // ayni pikselin sonraki kanali
                     end
                 end
 
