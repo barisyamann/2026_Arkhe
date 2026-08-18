@@ -237,6 +237,19 @@ module dma_controller (
     logic [31:0] aw_addr_lat;
     logic        aw_valid_lat;
     logic [31:0] w_data_lat;
+
+    // -------------------------------------------------------------------------
+    // AXI4-Lite WSTRB destegi
+    //
+    // Yazma verisiyle birlikte bayt strobe'u da mandallanir; yazmac atamasi
+    // sirasinda etkin olmayan baytlar korunur.
+    //
+    // Eskiden wstrb tamamen goz ardi ediliyordu: sb/sh ile bir yazmaca bayt
+    // yazmak TUM kelimeyi eziyordu. Yazilim hep kelime erisimi yaptigi icin
+    // patlamiyordu ama AXI4-Lite ihlaliydi.
+    // -------------------------------------------------------------------------
+    logic [31:0] w_mask_lat;
+
     logic        w_valid_lat;
     logic        do_write;
 
@@ -252,6 +265,7 @@ module dma_controller (
             w_valid_lat   <= 1'b0;
             aw_addr_lat   <= '0;
             w_data_lat    <= '0;
+            w_mask_lat    <= '0;
             reg_ctrl      <= 32'b0;
             reg_src_addr  <= 32'b0;
             reg_dst_addr  <= 32'b0;
@@ -273,6 +287,8 @@ module dma_controller (
             if (s_axi_wvalid && !w_valid_lat) begin
                 s_axi_wready <= 1'b1;
                 w_data_lat   <= s_axi_wdata;
+                w_mask_lat   <= {{8{s_axi_wstrb[3]}}, {8{s_axi_wstrb[2]}},
+                                 {8{s_axi_wstrb[1]}}, {8{s_axi_wstrb[0]}}};
                 w_valid_lat  <= 1'b1;
             end else begin
                 s_axi_wready <= 1'b0;
@@ -286,10 +302,10 @@ module dma_controller (
                 s_axi_bresp  <= 2'b00;
 
                 case (aw_addr_lat[4:0])
-                    REG_DMA_CTRL:     reg_ctrl     <= w_data_lat;
-                    REG_DMA_SRC_ADDR: reg_src_addr <= w_data_lat;
-                    REG_DMA_DST_ADDR: reg_dst_addr <= w_data_lat;
-                    REG_DMA_XFER_LEN: reg_xfer_len <= w_data_lat;
+                    REG_DMA_CTRL:     reg_ctrl     <= (reg_ctrl     & ~w_mask_lat) | (w_data_lat & w_mask_lat);
+                    REG_DMA_SRC_ADDR: reg_src_addr <= (reg_src_addr & ~w_mask_lat) | (w_data_lat & w_mask_lat);
+                    REG_DMA_DST_ADDR: reg_dst_addr <= (reg_dst_addr & ~w_mask_lat) | (w_data_lat & w_mask_lat);
+                    REG_DMA_XFER_LEN: reg_xfer_len <= (reg_xfer_len & ~w_mask_lat) | (w_data_lat & w_mask_lat);
                     default: ;
                 endcase
             end
