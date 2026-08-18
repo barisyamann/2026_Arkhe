@@ -29,17 +29,75 @@ module i2c_peripheral_tb;
     pullup(scl);
     pullup(sda);
 
+    // =========================================================================
+    // Ucdurumlu surucu halkasi
+    //
+    // i2c_peripheral artik cift yonlu pin ICERMIYOR: ASIC akisinda tri-state
+    // yalnizca pad halkasinda olabildigi icin arayuz cikis/cikis-etkin/giris
+    // uclusune ayrildi. Gercek 'z surumu burada, testbench tarafinda.
+    //
+    // Acik drenaj: *_o daima 0, tum bilgi *_oe'de.
+    // =========================================================================
+    wire dut_sda_o, dut_sda_oe, dut_scl_o, dut_scl_oe;
+
+    assign sda = dut_sda_oe ? dut_sda_o : 1'bz;
+    assign scl = dut_scl_oe ? dut_scl_o : 1'bz;
+
     int pass_count = 0, fail_count = 0;
 
     // DUT (Test Edilecek Tasarım)
+    // NOT: (.*) kullanilamaz - fiziksel pinler artik ayrik sinyaller.
     i2c_peripheral #(
         .SYS_CLK_FREQ(48_000_000), 
         .I2C_FREQ(400_000)
-    ) dut (.*);
+    ) dut (
+        .clk            (clk),
+        .rst_n          (rst_n),
+        .sda_o          (dut_sda_o),
+        .sda_oe         (dut_sda_oe),
+        .sda_i          (sda),
+        .scl_o          (dut_scl_o),
+        .scl_oe         (dut_scl_oe),
+        .scl_i          (scl),
+        .i2c_irq        (),
+
+        // NOT: modul portlari s_axi_*, testbench sinyalleri s_axil_*.
+        // Eski surumde (.*) kullaniliyordu ve bu adlar ESLESMEDIGI icin
+        // AXI portlarinin hicbiri baglanmiyordu - testbench sinyalleri
+        // bosluga suruyor, hicbir sey dogrulamiyordu.
+        .s_axi_awaddr   (s_axil_awaddr),  .s_axi_awprot  (3'b000),
+        .s_axi_awvalid  (s_axil_awvalid), .s_axi_awready (s_axil_awready),
+        .s_axi_wdata    (s_axil_wdata),   .s_axi_wstrb   (s_axil_wstrb),
+        .s_axi_wvalid   (s_axil_wvalid),  .s_axi_wready  (s_axil_wready),
+        .s_axi_bresp    (s_axil_bresp),   .s_axi_bvalid  (s_axil_bvalid),  .s_axi_bready (s_axil_bready),
+        .s_axi_araddr   (s_axil_araddr),  .s_axi_arprot  (3'b000),
+        .s_axi_arvalid  (s_axil_arvalid), .s_axi_arready (s_axil_arready),
+        .s_axi_rdata    (s_axil_rdata),   .s_axi_rresp   (s_axil_rresp),
+        .s_axi_rvalid   (s_axil_rvalid),  .s_axi_rready  (s_axil_rready)
+    );
 
     // Saat Sinyali
     initial clk = 0;
     always #(CLK_PERIOD/2) clk = ~clk;
+
+    // =========================================================================
+    // GOZCU (watchdog)
+    //
+    // Sartname s.615: testler manuel inceleme gerektirmeden kendi kendini
+    // kontrol etmelidir. Asili kalan bir test bu sarti saglamaz - birinin
+    // gelip fark etmesi gerekir.
+    //
+    // I2C 400 kHz'de iki islem (2 bayt yazma + 2 bayt okuma) toplam ~200 us
+    // surer. 2 ms fazlasiyla yeterli bir ust sinir.
+    // =========================================================================
+    initial begin
+        #2_000_000;   // 2 ms
+        $display("================================================================");
+        $display(" I2C TESTI ZAMAN ASIMI - 2 ms icinde tamamlanmadi");
+        $display(" Son durum: %0d PASS, %0d FAIL", pass_count, fail_count);
+        $display("================================================================");
+        $fatal(1, "I2C testbench zaman asimi");
+    end
 
     // =========================================================================
     // AXI-Lite Görevleri
@@ -85,14 +143,56 @@ module i2c_peripheral_tb;
         sda_drv = 1'bz; // Hattı serbest bırak
     endtask
 
-    task tx_byte(input logic [7:0] data);
+    // Sanal kole -> master veri gonderimi.
+    //
+    // IKI DUZELTME:
+    //
+    // 1) Eski surumde sonda FAZLADAN bir @(negedge scl) vardi. Son bayttan
+    //    sonra master NACK verip STOP'a gecer ve SCL bir daha dusmez; bu
+    //    yuzden testbench orada sonsuza kadar asili kaliyordu.
+    //
+    // 2) Sira yanlisti: once kenar bekleniyor, sonra bit suruluyordu.
+    //    rx_byte_and_ack ACK'i bitiren dusen kenari zaten tuketiyor,
+    //    dolayisiyla ilk veri biti BIR BIT PERIYODU GEC suruluyordu ve
+    //    master bostaki '1'i orneklerdi:
+    //        gonderilen 0x12 -> okunan 0x89   (bir bit saga kayma)
+    //        gonderilen 0x34 -> okunan 0x9A
+    //    Dogrusu: once sur, sonra o bitin sonunu bekle.
+    //
+    // 3) ACK bitinin sonu beklenmiyordu; ikinci bayt ACK periyodu icinde
+    //    surulmeye baslayip BIR BIT SOLA kayiyordu (0x34 -> 0x69).
+    //    Son bayt haric ACK sonu da beklenmeli.
+    task tx_byte(input logic [7:0] data, input bit is_last);
         for(int i=7; i>=0; i--) begin
-            @(negedge scl);
-            sda_drv = data[i];
+            sda_drv = data[i];   // once sur
+            @(negedge scl);      // sonra bu bitin sonunu bekle
         end
-        @(negedge scl);
-        sda_drv = 1'bz; // Master ACK/NACK basacak
-        @(negedge scl); // Bir saykıl bekle
+        sda_drv = 1'bz;          // 9. bit: master ACK/NACK basacak
+
+        // ACK bitinin sonunu bekle ki sonraki bayt dogru hizalansin.
+        // SON baytta beklenmez: master NACK verip STOP'a gecer ve SCL bir
+        // daha dusmez - beklenirse testbench asili kalir.
+        if (!is_last) @(negedge scl);
+    endtask
+
+    // Bayragin kurulmasini SINIRLI sure bekler.
+    //
+    // Anlik okuma yarisa aciktir: wait_stop() STOP kenarinda tetiklenir ama
+    // TX_DONE/RX_DONE bayragi ST_STOP'un SONUNDA (bit_done) kurulur.
+    // Yazilim tarafi zaten dongude yokluyor; testbench de oyle yapmali.
+    task wait_flag(input logic [7:0] addr, input int bit_idx, input int max_us);
+        logic [31:0] v;
+        int          waited;
+        begin
+            waited = 0;
+            forever begin
+                axil_read(addr, v);
+                if (v[bit_idx]) break;
+                if (waited >= max_us) break;
+                #1000;                 // 1 us
+                waited = waited + 1;
+            end
+        end
     endtask
 
     task check(input string name, input logic [31:0] got, input logic [31:0] exp);
@@ -138,7 +238,8 @@ module i2c_peripheral_tb;
             wait_stop();
         end
 
-        // HW Flag Kontrolü
+        // HW Flag Kontrolü - yoklayarak (yaris onlenir)
+        wait_flag(8'h10, 1, 200);
         axil_read(8'h10, rdata);
         check("TX_DONE (CFG[1]) HW Set", rdata[1], 1'b1);
         axil_write(8'h10, 32'h00); // Interrupt temizle
@@ -157,12 +258,13 @@ module i2c_peripheral_tb;
             rx_byte_and_ack(rbyte);
             check("RX Slave Addr + R", rbyte, (8'h5A << 1) | 8'h01); // 0xB5 beklenir
             
-            tx_byte(8'h12); // Master'a 0x12 gönder
-            tx_byte(8'h34); // Master'a 0x34 gönder
+            tx_byte(8'h12, 1'b0); // Master'a 0x12 gonder
+            tx_byte(8'h34, 1'b1); // Master'a 0x34 gonder (son bayt)
             wait_stop();
         end
 
-        // HW Flag Kontrolü ve Veri Doğrulama
+        // HW Flag Kontrolü ve Veri Doğrulama - yoklayarak
+        wait_flag(8'h10, 3, 200);
         axil_read(8'h10, rdata);
         check("RX_DONE (CFG[3]) HW Set", rdata[3], 1'b1);
         
@@ -171,7 +273,25 @@ module i2c_peripheral_tb;
         
         axil_write(8'h10, 32'h00); // Interrupt temizle
 
-        $display("--- ÖZET: %0d PASS, %0d FAIL ---", pass_count, fail_count);
+        // =====================================================================
+        // Sartname s.615: testler manuel inceleme gerektirmeden kendi kendini
+        // kontrol etmelidir. Ozet yazdirmak yetmez - hata varsa kosum
+        // BASARISIZ bitmelidir.
+        // =====================================================================
+        $display("--- OZET: %0d PASS, %0d FAIL ---", pass_count, fail_count);
+
+        if (fail_count != 0) begin
+            $display("================================================================");
+            $display(" I2C TESTI BASARISIZ - %0d hata", fail_count);
+            $display("================================================================");
+            $fatal(1, "I2C dogrulamasi basarisiz");
+        end else if (pass_count == 0) begin
+            $fatal(1, "I2C testi hic denetim calistirmadi - testbench bozuk");
+        end else begin
+            $display("================================================================");
+            $display(" I2C TESTI GECTI - %0d denetim, 0 hata", pass_count);
+            $display("================================================================");
+        end
         $finish;
     end
 endmodule
