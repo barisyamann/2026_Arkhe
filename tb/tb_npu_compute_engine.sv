@@ -25,6 +25,51 @@ module tb_npu_compute_engine;
     logic [31:0] mem_wdata_b;
     logic [31:0] mem_rdata_b;
 
+    // =========================================================================
+    // Self-checking altyapisi
+    //
+    // Sartname s.615: testler manuel inceleme gerektirmeden kendi kendini
+    // kontrol etmelidir. Bu testbench'in basliginda "Self-Checking" yaziyordu
+    // ama yalnizca sonuclari YAZDIRIYORDU; gecti mi kaldi mi soylemiyordu.
+    //
+    // SABIT BEKLENEN DEGER KULLANILMADI. Bunun yerine, agirliklardan bagimsiz
+    // DEGISMEZLER denetleniyor:
+    //   - softmax olasiliklari Q0.12'de ~4096'ya toplanmali
+    //   - class_o, olasiliklarin argmax'i olmali
+    //   - farkli girdiler farkli olasilik vektoru uretmeli
+    //
+    // Sonuncusu dogrudan B4 bulgusunu koruyor: SILENCE ve NO senaryolari
+    // eskiden BIREBIR AYNI vektoru uretiyor, donanim iki sinifi ayirt
+    // edemiyordu ve rapor bunu "dogru karar" diye isaretlemisti.
+    //
+    // Deger-tam dogrulama ayri bir testte yapiliyor: tb/npu_golden
+    // (bagimsiz Python modeli, kanal kanal ara sonuclar dahil).
+    // =========================================================================
+    int error_count = 0;
+    int check_count = 0;
+
+    // Senaryo sonuclari - senaryolar arasi karsilastirma icin saklanir
+    int  sc_probs [0:2][0:3];
+    int  sc_class [0:2];
+    int  sc_idx = 0;
+
+    task automatic check(input string ad, input bit kosul, input string detay);
+        check_count++;
+        if (kosul) begin
+            log_print($sformatf("      [OK]   %s", ad));
+        end else begin
+            error_count++;
+            log_print($sformatf("      [HATA] %s - %s", ad, detay));
+        end
+    endtask
+
+    // Gozcu: test hicbir kosulda asili kalmamali
+    initial begin
+        #40_000_000;   // 40 ms (uc senaryo x ~1,5 ms + pay)
+        log_print("      [HATA] ZAMAN ASIMI - test 40 ms icinde bitmedi");
+        $fatal(1, "NPU blok testi zaman asimi");
+    end
+
     // --- Mock TCM SRAM Bellek (7680 kelime) ---
     logic [31:0] tcm_mem [0:7679];
 
@@ -129,10 +174,40 @@ module tb_npu_compute_engine;
         run_scenario("SENARYO 3 (SILENCE)", 32'h80808080);
 
 
+        // =====================================================================
+        // Senaryolar birbirinden ayirt edilebiliyor mu? (B4 koruma denetimi)
+        //
+        // Denetim B4: SILENCE ve NO senaryolari BIREBIR AYNI olasilik
+        // vektorunu uretiyordu (412/412/412/2858) - donanim iki sinifi
+        // ayirt edemiyordu. Bu denetim o durumun geri gelmesini engeller.
+        // =====================================================================
+        for (int a = 0; a < 3; a++) begin
+            for (int b = a + 1; b < 3; b++) begin
+                bit ayni;
+                ayni = 1'b1;
+                for (int k = 0; k < 4; k++)
+                    if (sc_probs[a][k] != sc_probs[b][k]) ayni = 1'b0;
+
+                check($sformatf("Senaryo %0d ve %0d farkli sonuc uretti", a+1, b+1),
+                      !ayni,
+                      $sformatf("iki senaryo BIREBIR AYNI vektor uretti: %0d/%0d/%0d/%0d",
+                                sc_probs[a][0], sc_probs[a][1],
+                                sc_probs[a][2], sc_probs[a][3]));
+            end
+        end
+
         log_print("================================================================");
-        log_print(" TÜM BLOK SEVİYESİ TESTLER BAŞARIYLA TAMAMLANDI!");
-        log_print("================================================================");
-        
+        if (error_count != 0) begin
+            log_print($sformatf(" NPU BLOK TESTI BASARISIZ - %0d hata / %0d denetim",
+                                error_count, check_count));
+            log_print("================================================================");
+            if (log_file != 0) $fclose(log_file);
+            $fatal(1, "NPU blok dogrulamasi basarisiz");
+        end else begin
+            log_print($sformatf(" NPU BLOK TESTI GECTI - %0d denetim, 0 hata", check_count));
+            log_print("================================================================");
+        end
+
         if (log_file != 0) begin
             $fclose(log_file);
         end
@@ -162,7 +237,7 @@ module tb_npu_compute_engine;
         @ (posedge clk);
         start_i = 1'b0;
 
-        // DONE sinyalini bekle
+        // DONE sinyalini bekle (gozcu asili kalmayi engelliyor)
         wait(done_o == 1'b1);
         @ (posedge clk);
 
@@ -173,6 +248,39 @@ module tb_npu_compute_engine;
         log_print($sformatf("       Class 1 (Unknown): %0d", tcm_mem[7597]));
         log_print($sformatf("       Class 2 (Yes)    : %0d", tcm_mem[7598]));
         log_print($sformatf("       Class 3 (No)     : %0d", tcm_mem[7599]));
+
+        // =====================================================================
+        // DEGISMEZ DENETIMLERI
+        // =====================================================================
+        begin
+            int p0, p1, p2, p3, toplam, enbuyuk, argmax;
+
+            p0 = int'(tcm_mem[7596]);  p1 = int'(tcm_mem[7597]);
+            p2 = int'(tcm_mem[7598]);  p3 = int'(tcm_mem[7599]);
+            toplam = p0 + p1 + p2 + p3;
+
+            // 1) Softmax Q0.12: olasiliklar 4096'ya toplanmali.
+            //    Yuvarlama nedeniyle birkac birim sapma normaldir.
+            check($sformatf("%s: softmax toplami ~4096 (gelen %0d)", name, toplam),
+                  (toplam >= 4080 && toplam <= 4112),
+                  $sformatf("Q0.12 softmax bozuk: %0d+%0d+%0d+%0d=%0d", p0,p1,p2,p3,toplam));
+
+            // 2) class_o gercekten argmax mi?
+            enbuyuk = p0; argmax = 0;
+            if (p1 > enbuyuk) begin enbuyuk = p1; argmax = 1; end
+            if (p2 > enbuyuk) begin enbuyuk = p2; argmax = 2; end
+            if (p3 > enbuyuk) begin enbuyuk = p3; argmax = 3; end
+
+            check($sformatf("%s: class_o argmax ile tutarli", name),
+                  (int'(class_o) == argmax),
+                  $sformatf("class_o=%0d ama argmax=%0d", class_o, argmax));
+
+            // Senaryolar arasi karsilastirma icin sakla
+            sc_probs[sc_idx][0] = p0;  sc_probs[sc_idx][1] = p1;
+            sc_probs[sc_idx][2] = p2;  sc_probs[sc_idx][3] = p3;
+            sc_class[sc_idx]    = int'(class_o);
+            sc_idx++;
+        end
 
         // NPU'yu sıfırla
         npu_reset_i = 1'b1;
