@@ -513,10 +513,24 @@ always_ff @(posedge clk or negedge rst_n) begin
                 if (sck_edge_fall) begin
                     if (bit_cnt == 3'h0) begin
                         addr_byte_cnt <= addr_byte_cnt + 1;
-                        if (addr_byte_cnt == 3'd1) begin
+                        // KARSILASTIRMA BIR KAYMISTI (18 Agustos 2026 bulgusu)
+                        //
+                        // addr_byte_cnt bloklamayan atamayla artar; ilk adres
+                        // baytinin SONUNDA hala 0 okunur. Eski kod 1 ve 2 ile
+                        // karsilastirdigi icin hicbir dala uymuyor, dogrudan
+                        // else'e dusup veri fazina geciyordu:
+                        // master 3 adres bayti yerine YALNIZCA 1 tane
+                        // gonderiyordu.
+                        //
+                        // Flash 24 bit adres bekledigi icin iki bayt boyunca
+                        // hala adres aliyor, master ise bu sirada bos hatti
+                        // (0xFF) okuyordu. Sistem testi bunu goremezdi cunku
+                        // varsayilan akis hizli acilis kullaniyor ve QSPI
+                        // yolunu hic calistirmiyor.
+                        if (addr_byte_cnt == 3'd0) begin
                             shift_out <= reg_adr[15:8];
                             bit_cnt   <= 3'd7;
-                        end else if (addr_byte_cnt == 3'd2) begin
+                        end else if (addr_byte_cnt == 3'd1) begin
                             shift_out <= reg_adr[7:0];
                             bit_cnt   <= 3'd7;
                         end else begin
