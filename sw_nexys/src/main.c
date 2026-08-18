@@ -30,6 +30,19 @@ typedef struct {
 // --- Kesme vektorundeki bit konumu (soc_top.sv irq_vector) ---
 //     24 dma · 23 i2c · 22 NPU · 21 qspi · 19 uart2 · 18 uart1 · 17 timer · 16 gpio
 #define NPU_IRQ_BIT      22
+// --- Timer yazmaclari (EK-2 s.21) ---
+#define TIMER_BASE       0x40010000
+#define TIM_PRE   ((volatile unsigned int *)(TIMER_BASE + 0x00))
+#define TIM_ARE   ((volatile unsigned int *)(TIMER_BASE + 0x04))
+#define TIM_CLR   ((volatile unsigned int *)(TIMER_BASE + 0x08))
+#define TIM_ENA   ((volatile unsigned int *)(TIMER_BASE + 0x0C))
+#define TIM_MOD   ((volatile unsigned int *)(TIMER_BASE + 0x10))
+#define TIM_EVC   ((volatile unsigned int *)(TIMER_BASE + 0x1C))
+
+#define TIMER_IRQ_BIT    17
+
+volatile int timer_flag = 0;
+
 
 // ISR ile ana dongu arasinda paylasilan durum.
 // volatile: derleyici onbellege almasin, her seferinde bellekten okusun.
@@ -122,6 +135,13 @@ void __attribute__((interrupt("machine"), aligned(256))) trap_handler(void)
         // Ana dongu, bir sonraki calistirmadan once yeniden aciyor.
         *NPU_REG_CTRL = NPU_CTRL_IRQ_CLEAR;
     }
+        // --- Timer kesmesi ---
+    if ((cause & 0x80000000u) && ((cause & 0x1Fu) == TIMER_IRQ_BIT)) {
+        timer_flag = 1;
+        *TIM_ENA = 0;   // sayaci durdur
+        *TIM_EVC = 1;   // olay bayragini temizle -> timer_irq duser
+    }
+
 }
 
 
@@ -135,7 +155,8 @@ static void irq_init(void)
     __asm__ volatile ("csrw mtvec, %0" :: "r"(t));
 
     // mie: yalnizca NPU kesmesini etkinlestir
-    t = (1u << NPU_IRQ_BIT);
+    t = (1u << NPU_IRQ_BIT) | (1u << TIMER_IRQ_BIT);
+
     __asm__ volatile ("csrw mie, %0" :: "r"(t));
 
     // mstatus.MIE (bit 3): global kesme izni.
@@ -147,6 +168,25 @@ static void irq_init(void)
     __asm__ volatile ("csrr %0, mstatus" : "=r"(t));
     t |= (1u << 3);
     __asm__ volatile ("csrw mstatus, %0" :: "r"(t));
+}
+// Timer kesmesiyle bekleme. Islemci bu sure boyunca uyur;
+// mesgul bekleme dongusunun aksine bos yere calismaz.
+static void timer_wait_ms(unsigned int ms)
+{
+    if (ms == 0) return;
+
+    *TIM_ENA = 0;         // durdur
+    *TIM_CLR = 1;         // sayaci sifirla
+    *TIM_EVC = 1;         // eski olaylari temizle
+    *TIM_MOD = 1;         // yukari say
+    *TIM_PRE = 49999;     // 50000 cevrim = 1 ms @ 50 MHz
+    *TIM_ARE = ms - 1;    // ms adet tik sonra olay
+    timer_flag = 0;
+    *TIM_ENA = 1;         // baslat
+
+    while (!timer_flag) {
+        __asm__ volatile ("wfi");
+    }
 }
 
 
@@ -160,6 +200,11 @@ int main(void)
     irq_init();
 
     uart_print("\n*** ARKHE FPGA TEST ***\n");
+        // Timer kesmesi oz testi - simulasyonda deterministik olarak
+    // dogrulanabilsin diye kisa tutuldu
+    uart_print("Timer test\n");
+    timer_wait_ms(2);
+    uart_print("Timer OK\n");
 
     // GPIO'nun tum pinlerini cikis moduna al
     *GPIO_MODE = 0x55555555;
@@ -242,8 +287,11 @@ int main(void)
         }
 
         // Yaklasik 3 saniye bekle
+        // 3 saniye bekle. Islemci timer kesmesini bekleyerek uyur;
+        // eskiden 12 milyon iterasyonluk mesgul bekleme vardi.
         uart_print("Wait 3s\n");
-        for (volatile int delay = 0; delay < 12000000; delay++) { }
+        timer_wait_ms(3000);
+
     }
 
     return 0;

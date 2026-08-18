@@ -91,8 +91,37 @@ iki kez basiliyordu. UART gorunur olmasaydi fark edilmezdi.
   R1 (kesme ayagi)     - NPU kesmesi + ISR + UART sonuc yazimi
   OTR'deki WFI iddiasi - artik gercekten kullaniliyor
 
+## Timer kesmesi de eklendi
+
+Sartname kesmeyi yalnizca YZ hizlandirici icin istiyor (belge
+"kesme/interrupt" icin tarandi; yalnizca s.16 ve s.21'de geciyor,
+ikisi de NPU'yu anlatiyor). EK-2'deki cevre birimi yazmaclari
+yoklama modeline gore tanimlanmis: GPIO'da yalnizca IDR/ODR var,
+Timer'da TIM_EVN bir olay SAYACI, UART'ta tamamlanma bayraklari.
+
+Yine de Timer kesmesi eklendi, cunku iki isi birden gordu:
+
+  1. Kesme altyapisinin tek bir kaynaga ozel olmadigini gosterir
+  2. main.c'deki 12 milyon iterasyonluk mesgul bekleme dongusunu
+     kaldirdi
+
+    // eskiden:
+    for (volatile int delay = 0; delay < 12000000; delay++) { }
+    // simdi:
+    timer_wait_ms(3000);   // islemci timer kesmesini bekleyerek uyur
+
+Timer yapilandirmasi: TIM_PRE = 49999 (50000 cevrim = 1 ms @ 50 MHz),
+TIM_ARE = ms-1, yukari sayma modu. Kesme timer_irq = (TIM_EVN != 0)
+kosuluyla geliyor, ISR TIM_EVC'ye 1 yazarak temizliyor.
+
+main() basinda 2 ms'lik bir oz test var; simulasyonda timer
+kesmesinin deterministik olarak dogrulanmasini sagliyor:
+
+    [UART] Timer test
+    [UART] Timer OK
+
 ## Acik kalan
 
-mie yazmacinda yalnizca bit 22 (NPU) etkin. Diger kesme kaynaklari
-(timer, gpio, uart1, uart2, qspi, i2c, dma) donanimda bagli ama
-hicbir testte tetiklenmedi.
+mie yazmacinda bit 22 (NPU) ve bit 17 (timer) etkin. Diger kesme
+kaynaklari (gpio, uart1, uart2, qspi, i2c, dma) donanimda bagli ama
+tetiklenmedi. Sartname bunlari istemedigi icin oncelikli degil.
