@@ -20,6 +20,9 @@ APP_HEX_DEST = ROOT / "build" / "app.hex"
 APP_BIN_DEST = ROOT / "build" / "app.bin"
 APP_IMAGE_BYTES = 8192
 
+# Vivado simulasyon dizinleri - derleme sonunda app.hex buraya kopyalanir
+SIM_DIRS_ROOT = ROOT / ".." / "vivado" / "vivado_nexys_project"
+
 INCLUDE_DIRS = [
     SRC_DIR,
     USER_FILES_DIR,
@@ -162,6 +165,32 @@ def build_image(gcc, objcopy, size, name, c_sources, asm_sources,
     return len(data)
 
 
+def deploy_to_sim(hex_file):
+    """app.hex'i Vivado'nun simulasyon dizinlerine kopyalar.
+
+    Testbench $readmemh("app.hex", ...) cagirir ve Vivado bunu xsim
+    calisma dizinine gore cozer. Bu adim atlanirsa simulasyon sessizce
+    ESKI yazilimi kosar - 18 Agustos'ta tam olarak bu oldu ve hatanin
+    RTL'de sanilmasina yol acti. Log'daki tek ipucu, kaynak kodda artik
+    bulunmayan bir yazdirma satiriydi.
+
+    Hedef dizin yoksa atlanir (proje henuz simule edilmemis olabilir).
+    """
+    targets = [
+        SIM_DIRS_ROOT / p for p in (
+            Path("Arkhe_SoC_Nexys.sim") / "sim_1" / "behav" / "xsim",
+            Path("Arkhe_SoC_Nexys.ip_user_files") / "mem_init_files",
+        )
+    ]
+
+    copied = 0
+    for target in targets:
+        if target.is_dir():
+            shutil.copy2(hex_file, target / hex_file.name)
+            copied += 1
+    return copied
+
+
 def main():
     prefix = resolve_toolchain_prefix()
     gcc = resolve_executable(prefix, "gcc")
@@ -193,9 +222,15 @@ def main():
         bin_dest=APP_BIN_DEST,
     )
 
+    copied = deploy_to_sim(APP_HEX_DEST)
+
     print("\n=== OZET ===")
     print(f"Yukleyici : {boot_size:5d} / {BOOT_ROM_BYTES} bayt  -> {BOOT_HEX_DEST.name}")
     print(f"Uygulama  : {app_size:5d} / {APP_IMAGE_BYTES} bayt  -> {APP_HEX_DEST.name}")
+    if copied:
+        print(f"Simulasyon dizinlerine kopyalandi ({copied} adet)")
+    else:
+        print("UYARI: simulasyon dizini bulunamadi, app.hex kopyalanmadi.")
 
 
 if __name__ == "__main__":
