@@ -256,6 +256,14 @@ module tb_soc_top;
             error_count++;
             log_print($sformatf("      [HATA] GPIO 5 ms icinde beklenen desende yazilmadi: 0x%h", gpio_o));
         end
+                // ISR gercekten calisip UART'tan yazdirdi mi?
+        // Sartname s.16: "... sonuclari UART arayuzu uzerinden yazdirmalidir."
+        if (uart_saw_irq) begin
+            log_print("      [OK]   ISR sonucu UART'tan yazdirdi");
+        end else begin
+            error_count++;
+            log_print("      [HATA] ISR'in UART ciktisi gorulmedi");
+        end
 
         // GPIO Pinlerini Değiştirip Test Etme
         @ (posedge clk);
@@ -329,6 +337,52 @@ module tb_soc_top;
 
     always @(gpio_o) begin
         log_print($sformatf("[%0t] GPIO Çıkışı Değişti: gpio_o = 16'h%h", $time, gpio_o));
+    end
+        // =========================================================================
+    // UART TX izleyici
+    //
+    // Islemcinin uart1_txd hattina bastigi bitleri cozup karakterlere
+    // cevirir ve satir satir loga yazar. Iki ise yariyor:
+    //   1) ISR'in urettigi cikti gorunur olur
+    //   2) UART TX yolu ilk kez dogrulanmis olur - bugune kadar hicbir
+    //      test bu hatti okumuyordu
+    //
+    // 115200 baud, 8N1. main.c'de CPB = 434, sistem saati 50 MHz:
+    //   bit suresi = 434 x 20 ns = 8680 ns
+    // =========================================================================
+    localparam int UART_BIT_NS = 8680;
+
+    string uart_line   = "";
+    bit    uart_saw_irq = 1'b0;
+
+    task automatic uart_monitor();
+        logic [7:0] ch;
+        forever begin
+            @(negedge uart1_txd);               // start biti
+            #(UART_BIT_NS / 2);                 // bit ortasina git
+            if (uart1_txd !== 1'b0) continue;   // gecersiz start, yoksay
+
+            for (int i = 0; i < 8; i++) begin   // 8 veri biti, LSB once
+                #(UART_BIT_NS);
+                ch[i] = uart1_txd;
+            end
+            #(UART_BIT_NS);                     // stop biti
+
+            if (ch == 8'h0A) begin              // satir sonu
+                log_print($sformatf("[UART] %s", uart_line));
+                if (uart_line.len() >= 5 && uart_line.substr(0,4) == "[IRQ]")
+                    uart_saw_irq = 1'b1;
+                uart_line = "";
+            end else if (ch != 8'h0D) begin     // \r yoksay
+                uart_line = {uart_line, ch};
+            end
+        end
+    endtask
+
+    initial begin
+        wait (rst_n === 1'b1);
+        #1000;
+        uart_monitor();
     end
 
     // DMA Interrupt Monitoring

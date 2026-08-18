@@ -26,7 +26,10 @@ INCLUDE_DIRS = [
 ]
 
 ARCH_FLAGS = [
-    "-march=rv32imc",
+    # zicsr: kontrol/durum yazmaci komutlari (csrr, csrw, csrsi).
+    # GCC 12'den itibaren temel 'i' uzantisindan ayrildi ve acikca
+    # belirtilmesi gerekiyor. Kesme kurulumu bu komutlari kullaniyor.
+    "-march=rv32imc_zicsr",
     "-mabi=ilp32",
     "-mcmodel=medlow",
 ]
