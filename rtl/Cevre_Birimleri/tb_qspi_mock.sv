@@ -32,7 +32,7 @@ module tb_qspi_mock;
     // Flash modeli kelimeleri little-endian bayt dizisine aciyor.
     // -------------------------------------------------------------------------
     localparam int TEST_WORDS = 8;
-    localparam string INIT_FILE = "qspi_test_pattern.hex";
+    localparam string INIT_FILE = "qspi_test_pattern.hex";  // tb/ altinda sabit dosya
 
     logic clk = 0;
     logic rst_n = 0;
@@ -122,15 +122,13 @@ module tb_qspi_mock;
     int          waited;
 
     initial begin
-        // Bilinen desenli flash icerigi uret
-        begin
-            int fd;
-            fd = $fopen(INIT_FILE, "w");
-            if (fd == 0) $fatal(1, "%s olusturulamadi", INIT_FILE);
-            for (int i = 0; i < TEST_WORDS; i++)
-                $fdisplay(fd, "%08h", 32'hA5A5_0000 + i);
-            $fclose(fd);
-        end
+        // NOT: Flash icerigi tb/qspi_test_pattern.hex dosyasindan gelir.
+        //
+        // Eskiden bu dosya testbench icinde $fopen ile URETILIYORDU ve bu
+        // bir YARIS yaratiyordu: spi_flash_model da kendi initial blogunda
+        // $readmemh yapiyor, SystemVerilog ise initial bloklarinin sirasini
+        // garanti etmiyor. Dosya onceki kosumdan kalmissa test geciyor,
+        // temiz dizinde ise flash sifir okuyordu.
 
         awvalid = 0; wvalid = 0; bready = 0; arvalid = 0; rready = 0;
         rst_n = 0;
