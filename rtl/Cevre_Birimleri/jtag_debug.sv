@@ -137,6 +137,11 @@ module jtag_debug (
     logic [63:0] dr_reg;         // Data register (addr + data)
     logic [5:0]  shift_cnt;      // Shift counter
 
+    // AXI master okuma sonucu. Bildirimi buraya alindi: asagidaki TAP
+    // blogu (CAPTURE_DR) bu sinyali kullaniyor ve eskiden bildiriminden
+    // once geciyordu - Vivado [Synth 8-6901] uyariyordu.
+    logic [31:0] bus_rdata_result;
+
     // JTAG Instruction Codes
     localparam IR_BYPASS   = 4'hF;
     localparam IR_IDCODE   = 4'h1;
@@ -275,7 +280,7 @@ module jtag_debug (
     logic [31:0] bus_addr;
     logic [31:0] bus_wdata;
     logic        bus_is_write;
-    logic [31:0] bus_rdata_result;
+    // bus_rdata_result yukarida, TAP bloklarindan once bildirildi
 
     // AXI Master Kontrol
     always_comb begin
@@ -411,6 +416,9 @@ module jtag_debug (
     logic        csr_w_valid_lat;
     logic        csr_do_write;
 
+    // AXI4-Lite WSTRB: yazma verisiyle birlikte bayt strobe'u da mandallanir
+    logic [31:0] csr_w_mask_lat;
+
     assign csr_do_write = csr_aw_valid_lat && csr_w_valid_lat;
 
     always_ff @(posedge clk or negedge rst_n) begin
@@ -423,6 +431,7 @@ module jtag_debug (
             csr_w_valid_lat <= 1'b0;
             csr_aw_addr_lat <= '0;
             csr_w_data_lat  <= '0;
+            csr_w_mask_lat  <= '0;
             reg_ctrl        <= 32'b0;
             reg_addr        <= 32'b0;
             reg_data        <= 32'b0;
@@ -444,6 +453,8 @@ module jtag_debug (
             if (s_axi_wvalid && !csr_w_valid_lat) begin
                 s_axi_wready    <= 1'b1;
                 csr_w_data_lat  <= s_axi_wdata;
+                csr_w_mask_lat  <= {{8{s_axi_wstrb[3]}}, {8{s_axi_wstrb[2]}},
+                                    {8{s_axi_wstrb[1]}}, {8{s_axi_wstrb[0]}}};
                 csr_w_valid_lat <= 1'b1;
             end else begin
                 s_axi_wready    <= 1'b0;
@@ -460,9 +471,9 @@ module jtag_debug (
                     REG_DBG_CTRL: begin
                         // dbg_halted is updated in a separate dedicated block to avoid multi-driver conflicts
                     end
-                    REG_DBG_ADDR: reg_addr <= csr_w_data_lat;
-                    REG_DBG_DATA: reg_data <= csr_w_data_lat;
-                    REG_DBG_CMD:  reg_cmd  <= csr_w_data_lat;
+                    REG_DBG_ADDR: reg_addr <= (reg_addr & ~csr_w_mask_lat) | (csr_w_data_lat & csr_w_mask_lat);
+                    REG_DBG_DATA: reg_data <= (reg_data & ~csr_w_mask_lat) | (csr_w_data_lat & csr_w_mask_lat);
+                    REG_DBG_CMD:  reg_cmd  <= (reg_cmd  & ~csr_w_mask_lat) | (csr_w_data_lat & csr_w_mask_lat);
                     default: ;
                 endcase
             end
@@ -493,7 +504,7 @@ module jtag_debug (
 
     assign fault_clr_w = csr_do_write &&
                          (csr_aw_addr_lat[4:0] == REG_FAULT_CLR) &&
-                         csr_w_data_lat[0];
+                         csr_w_data_lat[0] && csr_w_mask_lat[0];
 
     assign bus_fault_irq_o = fault_valid_r;
 

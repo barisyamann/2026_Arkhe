@@ -100,6 +100,19 @@ assign rx_empty = (rx_wr_ptr == rx_rd_ptr);
 logic [AXI_AW-1:0] aw_addr_lat;
 logic              aw_valid_lat;
 logic [AXI_DW-1:0] w_data_lat;
+
+    // -------------------------------------------------------------------------
+    // AXI4-Lite WSTRB destegi
+    //
+    // Yazma verisiyle birlikte bayt strobe'u da mandallanir; yazmac atamasi
+    // sirasinda etkin olmayan baytlar korunur.
+    //
+    // Eskiden wstrb tamamen goz ardi ediliyordu: sb/sh ile bir yazmaca bayt
+    // yazmak TUM kelimeyi eziyordu. Yazilim hep kelime erisimi yaptigi icin
+    // patlamiyordu ama AXI4-Lite ihlaliydi.
+    // -------------------------------------------------------------------------
+    logic [31:0] w_mask_lat;
+
 logic              w_valid_lat;
 logic              do_write;
 logic              ccr_written;
@@ -116,6 +129,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         w_valid_lat   <= 1'b0;
         aw_addr_lat   <= '0;
         w_data_lat    <= '0;
+        w_mask_lat    <= '0;
         ccr_written   <= 1'b0;
         reg_ccr       <= 32'h0;
         reg_adr       <= 32'h0;
@@ -137,6 +151,8 @@ always_ff @(posedge clk or negedge rst_n) begin
         if (s_axi_wvalid && !w_valid_lat) begin
             s_axi_wready <= 1'b1;
             w_data_lat   <= s_axi_wdata;
+            w_mask_lat   <= {{8{s_axi_wstrb[3]}}, {8{s_axi_wstrb[2]}},
+                             {8{s_axi_wstrb[1]}}, {8{s_axi_wstrb[0]}}};
             w_valid_lat  <= 1'b1;
         end else begin
             s_axi_wready <= 1'b0;
@@ -148,15 +164,15 @@ always_ff @(posedge clk or negedge rst_n) begin
             s_axi_bresp  <= 2'b00;
             case (aw_addr_lat[4:0])
                 ADDR_QSPI_CCR: begin
-                    reg_ccr <= w_data_lat;
+                    reg_ccr <= (reg_ccr & ~w_mask_lat) | (w_data_lat & w_mask_lat);
                     ccr_written <= 1'b1;
                 end
-                ADDR_QSPI_ADR: reg_adr <= w_data_lat;
+                ADDR_QSPI_ADR: reg_adr <= (reg_adr & ~w_mask_lat) | (w_data_lat & w_mask_lat);
                 ADDR_QSPI_DR: begin
                 end
                 ADDR_QSPI_FCR: begin
-                    if (w_data_lat[0]) rx_flush <= 1'b1;
-                    if (w_data_lat[1]) tx_flush <= 1'b1;
+                    if (w_mask_lat[0] && w_data_lat[0]) rx_flush <= 1'b1;
+                    if (w_mask_lat[1] && w_data_lat[1]) tx_flush <= 1'b1;
                 end
                 default:;
             endcase

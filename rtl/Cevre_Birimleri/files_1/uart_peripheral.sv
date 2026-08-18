@@ -70,6 +70,21 @@ module uart_peripheral
     // Yazmaç tanımları
     // =========================================================================
     logic [31:0] reg_cpb_r;   // UART_CPB
+
+    // -------------------------------------------------------------------------
+    // AXI4-Lite WSTRB destegi
+    //
+    // wr_mask etkin baytlari isaretler, wr_data yalnizca o baytlari tasir.
+    // Eskiden wstrb goz ardi ediliyordu ve sb/sh ile bir yazmaca bayt yazmak
+    // TUM kelimeyi eziyordu - AXI4-Lite ihlali.
+    // -------------------------------------------------------------------------
+    logic [31:0] wr_mask;
+    logic [31:0] wr_data;
+
+    assign wr_mask = {{8{s_axil_wstrb[3]}}, {8{s_axil_wstrb[2]}},
+                      {8{s_axil_wstrb[1]}}, {8{s_axil_wstrb[0]}}};
+    assign wr_data = s_axil_wdata & wr_mask;
+
     logic [31:0] reg_stp_r;   // UART_STP  (yalnızca [1:0] geçerli)
     logic [7:0]  reg_rdr_r;   // UART_RDR  (RO, HW tarafından yazılır)
     logic [7:0]  reg_tdr_r;   // UART_TDR
@@ -209,9 +224,9 @@ module uart_peripheral
 
                 // Yazmaç seçimi
                 unique case (aw_addr_r[7:0])
-                    UART_CPB_OFFSET: reg_cpb_r <= s_axil_wdata;
-                    UART_STP_OFFSET: reg_stp_r <= s_axil_wdata;
-                    UART_TDR_OFFSET: reg_tdr_r <= s_axil_wdata[7:0];
+                    UART_CPB_OFFSET: reg_cpb_r <= (reg_cpb_r & ~wr_mask) | wr_data;
+                    UART_STP_OFFSET: reg_stp_r <= (reg_stp_r & ~wr_mask) | wr_data;
+                    UART_TDR_OFFSET: if (s_axil_wstrb[0]) reg_tdr_r <= s_axil_wdata[7:0];
                     UART_CFG_OFFSET: begin
                         // TX_EN: yazılan değeri al
                         if (s_axil_wdata[CFG_TX_EN])

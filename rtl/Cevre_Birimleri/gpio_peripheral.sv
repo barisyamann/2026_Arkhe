@@ -100,6 +100,30 @@ module gpio_peripheral #(
     // --- AXI4-Lite Yazma Kanalı Lojiki ---
     logic [AXI_ADDR_W-1:0] write_addr;
 
+    // -------------------------------------------------------------------------
+    // AXI4-Lite WSTRB destegi
+    //
+    // wr_mask: etkin baytlar icin 1. wr_data: yalnizca etkin baytlari tasiyan
+    // yazma verisi (digerleri sifir).
+    //
+    // Bu ikisiyle her yazma turu dogru ifade edilebiliyor:
+    //   duz yazma : (eski & ~wr_mask) | wr_data
+    //   SET       : eski |  wr_data
+    //   CLEAR     : eski & ~wr_data
+    //   TOGGLE    : eski ^  wr_data
+    //   W1C durum : eski & ~wr_data
+    //
+    // Eskiden wstrb tamamen goz ardi ediliyordu: sb/sh ile bir yazmaca bayt
+    // yazmak TUM kelimeyi eziyordu. Yazilimimiz hep kelime erisimi yaptigi
+    // icin patlamiyordu, ama AXI4-Lite ihlaliydi.
+    // -------------------------------------------------------------------------
+    logic [AXI_DATA_W-1:0] wr_mask;
+    logic [AXI_DATA_W-1:0] wr_data;
+
+    assign wr_mask = {{8{s_axil_wstrb[3]}}, {8{s_axil_wstrb[2]}},
+                      {8{s_axil_wstrb[1]}}, {8{s_axil_wstrb[0]}}};
+    assign wr_data = s_axil_wdata & wr_mask;
+
     assign s_axil_awready = ~s_axil_bvalid && s_axil_awvalid && s_axil_wvalid;
     assign s_axil_wready  = ~s_axil_bvalid && s_axil_awvalid && s_axil_wvalid;
 
@@ -129,20 +153,26 @@ module gpio_peripheral #(
                 write_addr    = s_axil_awaddr;
 
                 unique case (write_addr[7:0])
-                    ADDR_GPIO_ODR:           reg_odr                <= s_axil_wdata[15:0];
-                    ADDR_GPIO_MODE:          reg_mode_expanded      <= s_axil_wdata;
-                    ADDR_GPIO_SET:           reg_odr                <= reg_odr | s_axil_wdata[15:0];
-                    ADDR_GPIO_CLEAR:         reg_odr                <= reg_odr & ~s_axil_wdata[15:0];
-                    ADDR_GPIO_TOGGLE:        reg_odr                <= reg_odr ^ s_axil_wdata[15:0];
-                    ADDR_INTRPT_RISE_EN:     reg_intrpt_rise_en     <= s_axil_wdata[15:0];
-                    ADDR_INTRPT_FALL_EN:     reg_intrpt_fall_en     <= s_axil_wdata[15:0];
-                    ADDR_INTRPT_LVL_HIGH_EN: reg_intrpt_lvl_high_en <= s_axil_wdata[15:0];
-                    ADDR_INTRPT_LVL_LOW_EN:  reg_intrpt_lvl_low_en  <= s_axil_wdata[15:0];
+                    ADDR_GPIO_ODR:           reg_odr                <= (reg_odr & ~wr_mask[15:0]) |
+                                                                       wr_data[15:0];
+                    ADDR_GPIO_MODE:          reg_mode_expanded      <= (reg_mode_expanded & ~wr_mask) |
+                                                                       wr_data;
+                    ADDR_GPIO_SET:           reg_odr                <= reg_odr | wr_data[15:0];
+                    ADDR_GPIO_CLEAR:         reg_odr                <= reg_odr & ~wr_data[15:0];
+                    ADDR_GPIO_TOGGLE:        reg_odr                <= reg_odr ^ wr_data[15:0];
+                    ADDR_INTRPT_RISE_EN:     reg_intrpt_rise_en     <= (reg_intrpt_rise_en & ~wr_mask[15:0]) |
+                                                                       wr_data[15:0];
+                    ADDR_INTRPT_FALL_EN:     reg_intrpt_fall_en     <= (reg_intrpt_fall_en & ~wr_mask[15:0]) |
+                                                                       wr_data[15:0];
+                    ADDR_INTRPT_LVL_HIGH_EN: reg_intrpt_lvl_high_en <= (reg_intrpt_lvl_high_en & ~wr_mask[15:0]) |
+                                                                       wr_data[15:0];
+                    ADDR_INTRPT_LVL_LOW_EN:  reg_intrpt_lvl_low_en  <= (reg_intrpt_lvl_low_en & ~wr_mask[15:0]) |
+                                                                       wr_data[15:0];
                     ADDR_INTRPT_STATUS: begin
-                        status_rise     <= (status_rise     | s_gpio_rise_intrpt)     & ~s_axil_wdata[15:0];
-                        status_fall     <= (status_fall     | s_gpio_fall_intrpt)     & ~s_axil_wdata[15:0];
-                        status_lvl_high <= (status_lvl_high | s_gpio_high_intrpt)     & ~s_axil_wdata[15:0];
-                        status_lvl_low  <= (status_lvl_low  | s_gpio_low_intrpt)      & ~s_axil_wdata[15:0];
+                        status_rise     <= (status_rise     | s_gpio_rise_intrpt)     & ~wr_data[15:0];
+                        status_fall     <= (status_fall     | s_gpio_fall_intrpt)     & ~wr_data[15:0];
+                        status_lvl_high <= (status_lvl_high | s_gpio_high_intrpt)     & ~wr_data[15:0];
+                        status_lvl_low  <= (status_lvl_low  | s_gpio_low_intrpt)      & ~wr_data[15:0];
                     end
                     default: s_axil_bresp <= RESP_SLVERR;
                 endcase

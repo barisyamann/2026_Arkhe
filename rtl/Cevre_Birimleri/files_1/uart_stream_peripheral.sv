@@ -75,6 +75,21 @@ module uart_stream_peripheral
     // Yazmaç tanımları
     // =========================================================================
     logic [31:0]          reg_cpb_r;
+
+    // -------------------------------------------------------------------------
+    // AXI4-Lite WSTRB destegi
+    //
+    // wr_mask etkin baytlari isaretler, wr_data yalnizca o baytlari tasir.
+    // Eskiden wstrb goz ardi ediliyordu ve sb/sh ile bir yazmaca bayt yazmak
+    // TUM kelimeyi eziyordu - AXI4-Lite ihlali.
+    // -------------------------------------------------------------------------
+    logic [31:0] wr_mask;
+    logic [31:0] wr_data;
+
+    assign wr_mask = {{8{s_axil_wstrb[3]}}, {8{s_axil_wstrb[2]}},
+                      {8{s_axil_wstrb[1]}}, {8{s_axil_wstrb[0]}}};
+    assign wr_data = s_axil_wdata & wr_mask;
+
     logic [31:0]          reg_stp_r;
     logic [7:0]           reg_tdr_r;
     logic [2:0]           reg_cfg_r;
@@ -250,11 +265,11 @@ module uart_stream_peripheral
                 s_axil_bresp  <= AXI_RESP_OKAY;
 
                 unique case (aw_addr_r[7:0])
-                    UART_CPB_OFFSET: reg_cpb_r <= s_axil_wdata;
+                    UART_CPB_OFFSET: reg_cpb_r <= (reg_cpb_r & ~wr_mask) | wr_data;
 
-                    UART_STP_OFFSET: reg_stp_r <= s_axil_wdata;
+                    UART_STP_OFFSET: reg_stp_r <= (reg_stp_r & ~wr_mask) | wr_data;
 
-                    UART_TDR_OFFSET: reg_tdr_r <= s_axil_wdata[7:0];
+                    UART_TDR_OFFSET: if (s_axil_wstrb[0]) reg_tdr_r <= s_axil_wdata[7:0];
 
                     UART_CFG_OFFSET: begin
                         if (s_axil_wdata[CFG_TX_EN])
@@ -271,7 +286,7 @@ module uart_stream_peripheral
                         if (s_axil_wdata[0]) fifo_clr_r <= 1'b1;
                     end
 
-                    UARTS_IRQ_EN_OFFSET: reg_irq_en_r <= s_axil_wdata;
+                    UARTS_IRQ_EN_OFFSET: reg_irq_en_r <= (reg_irq_en_r & ~wr_mask) | wr_data;
 
                     default: s_axil_bresp <= AXI_RESP_SLVERR;
                 endcase

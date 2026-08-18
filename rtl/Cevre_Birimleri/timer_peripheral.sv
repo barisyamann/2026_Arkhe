@@ -50,6 +50,21 @@ module timer_peripheral # (
     localparam logic [11:0] ADDR_TIM_EVC = 12'h01C;
 
     // Dahili Yazmaçlar
+    // -------------------------------------------------------------------------
+    // AXI4-Lite WSTRB destegi
+    //
+    // wr_mask etkin baytlari isaretler, wr_data yalnizca o baytlari tasir.
+    // Eskiden wstrb goz ardi ediliyordu: sb/sh ile bayt yazmak TUM kelimeyi
+    // eziyordu. AXI4-Lite ihlaliydi; yazilim hep kelime erisimi yaptigi icin
+    // gorunmuyordu.
+    // -------------------------------------------------------------------------
+    logic [31:0] wr_mask;
+    logic [31:0] wr_data;
+
+    assign wr_mask = {{8{s_axi_wstrb[3]}}, {8{s_axi_wstrb[2]}},
+                      {8{s_axi_wstrb[1]}}, {8{s_axi_wstrb[0]}}};
+    assign wr_data = s_axi_wdata & wr_mask;
+
     logic [31:0] reg_tim_pre;
     logic [31:0] reg_tim_are;
     logic        reg_tim_ena;
@@ -92,7 +107,7 @@ module timer_peripheral # (
             reg_tim_evn <= '0;
         end else begin
             // Sayaç Temizleme
-            if (s_axi_awvalid && s_axi_awready && s_axi_wvalid && s_axi_wready && (s_axi_awaddr[11:0] == ADDR_TIM_CLR) && s_axi_wdata[0]) begin
+            if (s_axi_awvalid && s_axi_awready && s_axi_wvalid && s_axi_wready && (s_axi_awaddr[11:0] == ADDR_TIM_CLR) && wr_data[0]) begin
                 reg_tim_cnt <= '0;
             end else if (timer_tick) begin
                 if (reg_tim_mod) begin // Yukarı
@@ -113,7 +128,7 @@ module timer_peripheral # (
             end
 
             // Event ve Interrupt Temizleme
-            if (s_axi_awvalid && s_axi_awready && s_axi_wvalid && s_axi_wready && (s_axi_awaddr[11:0] == ADDR_TIM_EVC) && s_axi_wdata[0]) begin
+            if (s_axi_awvalid && s_axi_awready && s_axi_wvalid && s_axi_wready && (s_axi_awaddr[11:0] == ADDR_TIM_EVC) && wr_data[0]) begin
                 reg_tim_evn <= '0; // Event sıfırlanınca timer_irq anında LOW olur
             end
         end
@@ -137,10 +152,10 @@ module timer_peripheral # (
                 s_axi_bvalid <= 1'b1;
                 s_axi_bresp  <= 2'b00;
                 case (s_axi_awaddr[11:0])
-                    ADDR_TIM_PRE: reg_tim_pre <= s_axi_wdata;
-                    ADDR_TIM_ARE: reg_tim_are <= s_axi_wdata;
-                    ADDR_TIM_ENA: reg_tim_ena <= s_axi_wdata[0];
-                    ADDR_TIM_MOD: reg_tim_mod <= s_axi_wdata[0];
+                    ADDR_TIM_PRE: reg_tim_pre <= (reg_tim_pre & ~wr_mask) | wr_data;
+                    ADDR_TIM_ARE: reg_tim_are <= (reg_tim_are & ~wr_mask) | wr_data;
+                    ADDR_TIM_ENA: if (s_axi_wstrb[0]) reg_tim_ena <= s_axi_wdata[0];
+                    ADDR_TIM_MOD: if (s_axi_wstrb[0]) reg_tim_mod <= s_axi_wdata[0];
                     // TIM_CLR ve TIM_EVC yan etkili yazma yazmaclaridir; asil
                     // islerini yukaridaki ayri bloklar yapar. Burada yalnizca
                     // GECERLI adres olarak taninmalari gerekiyor - aksi halde

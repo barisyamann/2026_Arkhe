@@ -109,6 +109,34 @@ module i2c_peripheral #(
 
     // -- Peripheral registers --
     logic [31:0] reg_nby;           // 0x00
+
+    // -------------------------------------------------------------------------
+    // AXI4-Lite WSTRB destegi
+    //
+    // wr_val: etkin olmayan baytlarda YAZMACIN ESKI degerini tasiyan birlesik
+    // yazma verisi. Bu birimin yazmaclari uzerinde karsilastirma (clamp) ve
+    // bit bazli mantik oldugu icin maske yerine birlesik deger kullanmak daha
+    // dogru: kodun geri kalani degismeden calisir.
+    //
+    // Eskiden wstrb goz ardi ediliyordu; sb/sh ile bayt yazmak TUM kelimeyi
+    // eziyordu - AXI4-Lite ihlali.
+    // -------------------------------------------------------------------------
+    logic [31:0] wr_mask;
+
+    assign wr_mask = {{8{s_axi_wstrb[3]}}, {8{s_axi_wstrb[2]}},
+                      {8{s_axi_wstrb[1]}}, {8{s_axi_wstrb[0]}}};
+
+    // Hedef yazmaca gore birlesik deger uretir
+    function automatic logic [31:0] wr_val(input logic [31:0] old_v);
+        wr_val = (old_v & ~wr_mask) | (s_axi_wdata & wr_mask);
+    endfunction
+
+    // I2C_CFG icin birlesik deger. Tum kontrol bitleri bayt 0'dadir; bayt 0
+    // etkin degilse eski deger korunur ve asagidaki mantik hicbir sey
+    // degistirmez.
+    logic [31:0] cfg_wr;
+    assign cfg_wr = ({28'd0, reg_cfg} & ~wr_mask) | (s_axi_wdata & wr_mask);
+
     logic [31:0] reg_adr;           // 0x04
     logic [31:0] reg_rdr;           // 0x08
     logic [31:0] reg_tdr;           // 0x0C
@@ -383,37 +411,38 @@ module i2c_peripheral #(
                 case (s_axi_awaddr[4:2])
                     // 0x00 - I2C_NBY : clamp to [1,4]
                     3'd0: begin
-                        if (s_axi_wdata == 32'd0)
+                        if (wr_val(reg_nby) == 32'd0)
                             reg_nby <= 32'd1;
-                        else if (s_axi_wdata > 32'd4)
+                        else if (wr_val(reg_nby) > 32'd4)
                             reg_nby <= 32'd4;
                         else
-                            reg_nby <= s_axi_wdata;
+                            reg_nby <= wr_val(reg_nby);
                     end
 
                     // 0x04 - I2C_ADR : store only [6:0]
-                    3'd1: reg_adr <= {25'd0, s_axi_wdata[6:0]};
+                    3'd1: if (s_axi_wstrb[0]) reg_adr <= {25'd0, s_axi_wdata[6:0]};
 
                     // 0x08 - I2C_RDR : read-only, ignore
                     3'd2: ; // no-op
 
                     // 0x0C - I2C_TDR
-                    3'd3: reg_tdr <= s_axi_wdata;
+                    3'd3: reg_tdr <= wr_val(reg_tdr);
 
                     // 0x10 - I2C_CFG
+                    // cfg_wr: wstrb uygulanmis birlesik deger (tum bitler bayt 0'da)
                     3'd4: begin
                         // -- Enable bits [0],[2]: race-condition guard --
-                        if (s_axi_wdata[0] && s_axi_wdata[2]) begin
+                        if (cfg_wr[0] && cfg_wr[2]) begin
                             // Both requested -> prioritise TX, ignore RX
                             reg_cfg[0] <= 1'b1;
                             reg_cfg[2] <= 1'b0;
                         end else begin
-                            reg_cfg[0] <= s_axi_wdata[0];
-                            reg_cfg[2] <= s_axi_wdata[2];
+                            reg_cfg[0] <= cfg_wr[0];
+                            reg_cfg[2] <= cfg_wr[2];
                         end
                         // -- Completion bits [1],[3]: SW can only CLEAR --
-                        if (!s_axi_wdata[1]) reg_cfg[1] <= 1'b0;
-                        if (!s_axi_wdata[3]) reg_cfg[3] <= 1'b0;
+                        if (!cfg_wr[1]) reg_cfg[1] <= 1'b0;
+                        if (!cfg_wr[3]) reg_cfg[3] <= 1'b0;
                     end
 
                     default: ; // undefined address - ignored

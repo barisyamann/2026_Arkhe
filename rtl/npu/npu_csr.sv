@@ -86,6 +86,19 @@ module npu_csr (
     logic [31:0] aw_addr_lat;
     logic        aw_valid_lat;
     logic [31:0] w_data_lat;
+
+    // -------------------------------------------------------------------------
+    // AXI4-Lite WSTRB destegi
+    //
+    // Yazma verisiyle birlikte bayt strobe'u da mandallanir; yazmac atamasi
+    // sirasinda etkin olmayan baytlar korunur.
+    //
+    // Eskiden wstrb tamamen goz ardi ediliyordu: sb/sh ile bir yazmaca bayt
+    // yazmak TUM kelimeyi eziyordu. Yazilim hep kelime erisimi yaptigi icin
+    // patlamiyordu ama AXI4-Lite ihlaliydi.
+    // -------------------------------------------------------------------------
+    logic [31:0] w_mask_lat;
+
     logic        w_valid_lat;
     logic        do_write;
 
@@ -101,6 +114,7 @@ module npu_csr (
             w_valid_lat     <= 1'b0;
             aw_addr_lat     <= '0;
             w_data_lat      <= '0;
+            w_mask_lat      <= '0;
             reg_start       <= 1'b0;
             reg_npu_reset   <= 1'b0;
             reg_irq_enable  <= 1'b0;
@@ -126,6 +140,8 @@ module npu_csr (
             if (s_axi_wvalid && !w_valid_lat) begin
                 s_axi_wready <= 1'b1;
                 w_data_lat   <= s_axi_wdata;
+                w_mask_lat   <= {{8{s_axi_wstrb[3]}}, {8{s_axi_wstrb[2]}},
+                                 {8{s_axi_wstrb[1]}}, {8{s_axi_wstrb[0]}}};
                 w_valid_lat  <= 1'b1;
             end else begin
                 s_axi_wready <= 1'b0;
@@ -144,13 +160,16 @@ module npu_csr (
 
                 case (aw_addr_lat[4:0])
                     REG_CTRL: begin
-                        reg_start       <= w_data_lat[0];
-                        reg_npu_reset   <= w_data_lat[1];
-                        irq_clear_pulse <= w_data_lat[2];
-                        reg_irq_enable  <= w_data_lat[3];
+                        // Kontrol bitlerinin hepsi bayt 0'da
+                        if (w_mask_lat[0]) begin
+                            reg_start       <= w_data_lat[0];
+                            reg_npu_reset   <= w_data_lat[1];
+                            irq_clear_pulse <= w_data_lat[2];
+                            reg_irq_enable  <= w_data_lat[3];
+                        end
                     end
-                    REG_IN_ADDR:  reg_in_addr  <= w_data_lat;
-                    REG_OUT_ADDR: reg_out_addr <= w_data_lat;
+                    REG_IN_ADDR:  reg_in_addr  <= (reg_in_addr  & ~w_mask_lat) | (w_data_lat & w_mask_lat);
+                    REG_OUT_ADDR: reg_out_addr <= (reg_out_addr & ~w_mask_lat) | (w_data_lat & w_mask_lat);
                     default:;
                 endcase
             end
