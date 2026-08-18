@@ -306,9 +306,24 @@ module uart_stream_peripheral
     logic        pack_rd_d;
     logic        pack_take;
     logic        addr_is_rdr32;
+    logic        pack_arm;
     logic        fifo_rd_en_byte;
 
     assign addr_is_rdr32 = (s_axil_araddr[7:0] == UARTS_RDR32_OFFSET);
+
+    // Toplayici YALNIZCA bekleyen bir RDR32 okumasi varken FIFO'dan ceker.
+    //
+    // Bu kosul olmadan toplayici FIFO bos olmadigi surece surekli bayt
+    // yutar; yazilim UART_RDR'den (EK-2'nin tanimladigi bayt yazmaci)
+    // okumaya calissa bile baytlar toplayiciya gider ve UART_RDR yolu
+    // calismaz. Iki yazmac ayni FIFO'yu paylastigi icin hangisinin
+    // tuketecegi niyete gore belirlenmeli.
+    //
+    // DMA okuma boyunca arvalid'i yuksek tutar (arready'yi kelime hazir
+    // olana kadar vermiyoruz), dolayisiyla pack_arm dolum suresince aktif
+    // kalir. Ilk kelime icin 8 cevrim gecikme eklenir; 1 Mbps'te dort bayt
+    // zaten 40 us'de gelir, olculemez.
+    assign pack_arm = s_axil_arvalid && !s_axil_rvalid && addr_is_rdr32;
 
     // Kelime tamamlanana kadar FIFO'yu bosalt
     // !pack_rd_d kosulu sart: sync_fifo cikisi kayitli oldugu icin pack_cnt_r
@@ -316,7 +331,7 @@ module uart_stream_peripheral
     // besinci okuma da baslatilir ve o bayt pack_data_r'ye kayarak kelimeyi
     // bozar. Ayni anda tek okuma birakiyoruz: bayt basina 2 cevrim, 1 Mbps'te
     // bayt basina 50 cevrim var, hiz sorun degil.
-    assign pack_rd_en = !pack_valid_r && !fifo_empty_w && !pack_rd_d &&
+    assign pack_rd_en = pack_arm && !pack_valid_r && !fifo_empty_w && !pack_rd_d &&
                         (pack_cnt_r < 3'd4);
 
     // AXI okumasi paketi tuketiyor
@@ -350,10 +365,55 @@ module uart_stream_peripheral
     // =========================================================================
     // AXI4-Lite Slave - Okuma Kanalı
     // =========================================================================
-    // UART_RDR okunduğunda FIFO'dan bir bayt al
-    assign fifo_rd_en_byte = s_axil_arvalid && !s_axil_rvalid &&
-                             (s_axil_araddr[7:0] == UART_RDR_OFFSET) &&
-                             !fifo_empty_w;
+    // -------------------------------------------------------------------------
+    // UART_RDR (0x08) - tek bayt okuma, IKI ASAMALI
+    //
+    // sync_fifo'nun okuma cikisi yazmaclidir: o_rd_data ancak i_rd_en'den
+    // BIR CEVRIM SONRA gecerli olur. Eski surum AXI okumasini ayni cevrimde
+    // tamamladigi icin her zaman bir ONCEKI bayti donduruyordu; ilk okuma
+    // cop, son bayt ise hic okunamiyordu.
+    //
+    // Simdi okuma iki asamali: once FIFO'dan cek (rdr_fetch_r), sonraki
+    // cevrimde yakalanan bayti dondur.
+    //
+    // FIFO bossa okuma BLOKLAMAZ - sifir dondurur. Bloklamak, durum
+    // yazmacina bakmadan okuyan bir yazilimi kilitlerdi.
+    // -------------------------------------------------------------------------
+    logic       addr_is_rdr;
+    logic       rdr_fetch_r;   // FIFO okumasi baslatildi, veri yolda
+    logic       rdr_valid_r;   // bayt hazir
+    logic [7:0] rdr_data_r;
+    logic       rdr_take;
+    logic       rdr_can_resp;
+
+    assign addr_is_rdr = (s_axil_araddr[7:0] == UART_RDR_OFFSET);
+
+    assign fifo_rd_en_byte = s_axil_arvalid && !s_axil_rvalid && addr_is_rdr &&
+                             !rdr_valid_r && !rdr_fetch_r && !fifo_empty_w;
+
+    assign rdr_take     = s_axil_arvalid && !s_axil_rvalid && addr_is_rdr &&
+                          rdr_valid_r;
+    // Bayt hazir, ya da cekilecek bir sey yok (FIFO bos ve bekleyen cekme yok)
+    assign rdr_can_resp = rdr_valid_r || (fifo_empty_w && !rdr_fetch_r);
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            rdr_fetch_r <= 1'b0;
+            rdr_valid_r <= 1'b0;
+            rdr_data_r  <= 8'b0;
+        end else begin
+            rdr_fetch_r <= fifo_rd_en_byte;
+
+            // rdr_fetch_r yalnizca !rdr_valid_r iken kurulur, rdr_take ise
+            // yalnizca rdr_valid_r iken olusur; ikisi ayni cevrimde cakismaz.
+            if (rdr_fetch_r) begin
+                rdr_data_r  <= fifo_rd_data;
+                rdr_valid_r <= 1'b1;
+            end else if (rdr_take) begin
+                rdr_valid_r <= 1'b0;
+            end
+        end
+    end
 
     assign fifo_rd_en = fifo_rd_en_byte | pack_rd_en;
 
@@ -364,10 +424,11 @@ module uart_stream_peripheral
             s_axil_rdata   <= '0;
             s_axil_rresp   <= AXI_RESP_OKAY;
         end else begin
-            // RDR32 okumasi ancak paket hazir oldugunda tamamlanir;
-            // diger adresler her zaman aninda cevaplanir.
+            // RDR32 okumasi paket hazir olana, RDR okumasi bayt FIFO'dan
+            // cekilene kadar tamamlanmaz; diger adresler aninda cevaplanir.
             if (s_axil_arvalid && !s_axil_rvalid &&
-                (!addr_is_rdr32 || pack_valid_r)) begin
+                (addr_is_rdr32 ? pack_valid_r :
+                 addr_is_rdr   ? rdr_can_resp : 1'b1)) begin
                 s_axil_arready <= 1'b1;
                 s_axil_rvalid  <= 1'b1;
                 s_axil_rresp   <= AXI_RESP_OKAY;
@@ -375,7 +436,9 @@ module uart_stream_peripheral
                 unique case (s_axil_araddr[7:0])
                     UART_CPB_OFFSET:         s_axil_rdata <= reg_cpb_r;
                     UART_STP_OFFSET:         s_axil_rdata <= reg_stp_r;
-                    UART_RDR_OFFSET:         s_axil_rdata <= {24'b0, fifo_rd_data};
+                    // rdr_valid_r yoksa FIFO bostur -> sifir dondur
+                    UART_RDR_OFFSET:         s_axil_rdata <= rdr_valid_r ?
+                                                             {24'b0, rdr_data_r} : 32'b0;
                     UART_TDR_OFFSET:         s_axil_rdata <= {24'b0, reg_tdr_r};
                     UART_CFG_OFFSET:         s_axil_rdata <= {29'b0, reg_cfg_r};
                     UARTS_FIFO_LEVEL_OFFSET: s_axil_rdata <= {{(32-FIFO_PTR_W-1){1'b0}},
