@@ -282,7 +282,32 @@ logic        sck_int;
 logic        sck_edge_rise, sck_edge_fall;
 logic [5:0]  sck_half_period;
 
-assign sck_half_period = (ccr_prescaler == 6'h0) ? 6'h0 : ccr_prescaler;
+// =============================================================================
+// SCK yarim periyodu - EN AZ 1 (yani 2 cevrim)
+//
+// KOK NEDEN (16 Agustos'ta prescaler 4 ile gecici olarak ortulen hata):
+//
+// io_out kayitlidir ve shift_out'u BIR CEVRIM gecikmeyle takip eder:
+//     io_out[0] <= shift_out[7];
+// shift_out ise sck_edge_fall'da guncellenir. Yani yeni bit, dusen kenardan
+// bir cevrim SONRA pine cikar.
+//
+// Prescaler 0 iken yarim periyot da tam bir cevrimdi. Bu durumda dusen
+// kenardan sonraki YUKSELEN kenar, io_out henuz guncellenmeden geliyordu ve
+// kole ayni biti IKI KEZ orneklerdi. Belirti: gonderilen 0x03 komutu
+// 0x01 olarak okunuyordu.
+//
+//     0x03 = 0,0,0,0,0,0,1,1  (b7..b0)
+//     b7 tekrarlaninca -> 0,0,0,0,0,0,0,1 = 0x01   (birebir eslesti)
+//
+// Yarim periyot >= 2 cevrim oldugunda kayitlı ciktinin bir cevrimlik
+// gecikmesi soguruluyor ve veri, orneklendigi yukselen kenarda kararli
+// oluyor. Bu yuzden prescaler 4 sorunu "cozmus" gibi gorunuyordu - asil
+// duzeltme, sifir yarim periyoda hic izin vermemek.
+//
+// Ust sinir: 50 MHz / (2 x 2) = 12,5 MHz SCK. Boot icin fazlasiyla yeterli.
+// =============================================================================
+assign sck_half_period = (ccr_prescaler == 6'h0) ? 6'h1 : ccr_prescaler;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin

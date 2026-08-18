@@ -20,11 +20,18 @@ module npu_tcm_sram #(
     input  logic [31:0] wdata_a,
     output logic [31:0] rdata_a,
     
-    // --- Port B (Internal Compute Engine) ---
+    // -------------------------------------------------------------------------
+    // Port B (Internal Compute Engine) - SALT OKUNUR
+    //
+    // sky130 SRAM makrolari 1RW + 1R yapisindadir; yalnizca bir port yazabilir.
+    // Bu yuzden Port B'nin yazma yolu kaldirildi ve motorun sonuc yazimlari
+    // npu_accelerator icinde Port A'ya yonlendirildi (bkz. tcm_en_a coklayici).
+    //
+    // Boylece modul dogrudan bir 1RW+1R makroya eslenebiliyor: Port A -> RW,
+    // Port B -> R.
+    // -------------------------------------------------------------------------
     input  logic        en_b,
-    input  logic [3:0]  we_b,
     input  logic [12:0] addr_b,
-    input  logic [31:0] wdata_b,
     output logic [31:0] rdata_b
 );
 
@@ -53,14 +60,10 @@ module npu_tcm_sram #(
         end
     end
 
-    // Port B Read/Write with boundary checks
+    // Port B - yalnizca okuma (1RW+1R makronun R portu)
     always_ff @(posedge clk) begin
         if (en_b) begin
             if (addr_b < TCM_WORDS) begin
-                if (we_b[0]) ram[addr_b][7:0]   <= wdata_b[7:0];
-                if (we_b[1]) ram[addr_b][15:8]  <= wdata_b[15:8];
-                if (we_b[2]) ram[addr_b][23:16] <= wdata_b[23:16];
-                if (we_b[3]) ram[addr_b][31:24] <= wdata_b[31:24];
                 rdata_b <= ram[addr_b];
             end else begin
                 rdata_b <= 32'h0; // Sınır dışı okuma durumunda güvenli sıfır dön

@@ -78,6 +78,39 @@ module npu_accelerator #(
     logic [31:0] ram_wdata_b;
     logic [31:0] ram_rdata_b;
 
+    // =========================================================================
+    // TCM Port A cokluyucusu - B2 (ASIC SRAM makro uyumlulugu)
+    //
+    // sky130 SRAM makrolari 1RW + 1R yapisindadir: yalnizca BIR port yazabilir.
+    // Onceki tasarimda iki port da yaziyordu (Port A: AXI, Port B: hesaplama
+    // motorunun softmax sonuclari) ve bu yapi ASIC'te dogrudan makroya
+    // eslenemezdi.
+    //
+    // Cozum: motorun sonuc yazimlari da Port A'ya yonlendirildi. Motor yalnizca
+    // WRITE_OUT_0..3 durumlarinda, toplam DORT kelime yaziyor; geri kalan tum
+    // erisimi okuma. Port B artik salt-okunur.
+    //
+    // Cakisma: oncelik motordadir (sonucun kaybolmasi sessiz bir hesap hatasi
+    // olurdu), AXI tarafi ise stall_i ile geri bastirilir - erisim dusurulmez,
+    // yalnizca dort cevrim ertelenir.
+    //
+    // "NPU mesgulken CPU zaten wfi'da bekliyor" argumanina DAYANILMADI: bu bir
+    // yazilim davranisidir ve donanim garantisi yerine gecmez.
+    // =========================================================================
+    logic        eng_wr_req;     // motor sonuc yazmak istiyor
+    logic        tcm_en_a;
+    logic [3:0]  tcm_we_a;
+    logic [12:0] tcm_addr_a;
+    logic [31:0] tcm_wdata_a;
+
+    assign eng_wr_req = ram_en_b && (ram_we_b != 4'b0);
+
+    assign tcm_en_a    = eng_wr_req ? 1'b1        : ram_en_a;
+    assign tcm_we_a    = eng_wr_req ? ram_we_b    : ram_we_a;
+    assign tcm_addr_a  = eng_wr_req ? ram_addr_b  : ram_addr_a;
+    assign tcm_wdata_a = eng_wr_req ? ram_wdata_b : ram_wdata_a;
+
+
     // Kesme Çıkışı bağlantısı
     assign irq_o = irq_sig;
 
@@ -149,7 +182,10 @@ module npu_accelerator #(
         .ram_we_o       (ram_we_a),
         .ram_addr_o     (ram_addr_a),
         .ram_wdata_o    (ram_wdata_a),
-        .ram_rdata_i    (ram_rdata_a)
+        .ram_rdata_i    (ram_rdata_a),
+
+        // Motor sonuc yazarken Port A onundur; AXI tarafi geri bastirilir
+        .stall_i        (eng_wr_req)
     );
 
     // =========================================================================
@@ -159,19 +195,17 @@ module npu_accelerator #(
         .TCM_WORDS (TCM_WORDS)
     ) u_npu_sram (
         .clk            (clk),
-        
-        // Port A (AXI Slave Access)
-        .en_a           (ram_en_a),
-        .we_a           (ram_we_a),
-        .addr_a         (ram_addr_a),
-        .wdata_a        (ram_wdata_a),
+
+        // Port A - TEK YAZAN PORT (AXI erisimleri + motor sonuc yazimlari)
+        .en_a           (tcm_en_a),
+        .we_a           (tcm_we_a),
+        .addr_a         (tcm_addr_a),
+        .wdata_a        (tcm_wdata_a),
         .rdata_a        (ram_rdata_a),
-        
-        // Port B (Compute Engine Access)
+
+        // Port B - SALT OKUNUR (motorun veri/agirlik okumalari)
         .en_b           (ram_en_b),
-        .we_b           (ram_we_b),
         .addr_b         (ram_addr_b),
-        .wdata_b        (ram_wdata_b),
         .rdata_b        (ram_rdata_b)
     );
 

@@ -30,7 +30,20 @@ module npu_axi_controller (
     output logic [3:0]  ram_we_o,
     output logic [12:0] ram_addr_o,
     output logic [31:0] ram_wdata_o,
-    input  logic [31:0] ram_rdata_i
+    input  logic [31:0] ram_rdata_i,
+
+    // -------------------------------------------------------------------------
+    // TCM Port A mesgul (B2 - ASIC SRAM makro uyumlulugu)
+    //
+    // sky130 makrolari 1RW+1R oldugu icin hesaplama motorunun sonuc yazimlari
+    // da Port A'yi kullaniyor. O dort cevrimde bu denetleyici SRAM'e
+    // dokunmamali: erisim bastirilir ve FSM oldugu yerde bekler.
+    //
+    // Yazilim davranisina ("NPU mesgulken CPU wfi'da") guvenmek yerine
+    // donanimda garanti ediliyor - AXI geri bastirmasi zaten protokolun
+    // dogru kullanimi.
+    // -------------------------------------------------------------------------
+    input  logic        stall_i
 );
 
     // --- AXI write/read channels internal signals ---
@@ -54,8 +67,8 @@ module npu_axi_controller (
     rstate_t rstate;
 
     // RAM Control Sinyalleri
-    assign ram_en_o    = mem_do_write || (rstate == R_MEM);
-    assign ram_we_o    = mem_do_write ? mem_wstrb_lat : 4'b0000;
+    assign ram_en_o    = !stall_i && (mem_do_write || (rstate == R_MEM));
+    assign ram_we_o    = (!stall_i && mem_do_write) ? mem_wstrb_lat : 4'b0000;
     assign ram_wdata_o = mem_w_data_lat;
 
     // Adres dilimleme ve sınır güvenliği
@@ -98,8 +111,9 @@ module npu_axi_controller (
                 mem_wready      <= 1'b0;
             end
 
-            // B Channel
-            if (mem_do_write) begin
+            // B Channel - stall sirasinda yazma SRAM'e gitmedigi icin
+            // tamamlanma da ertelenir; aksi halde yazma sessizce kaybolurdu.
+            if (mem_do_write && !stall_i) begin
                 mem_aw_valid_lat <= 1'b0;
                 mem_w_valid_lat  <= 1'b0;
                 mem_bvalid       <= 1'b1;
@@ -132,7 +146,9 @@ module npu_axi_controller (
                     end
                 end
                 R_MEM: begin
-                    rstate          <= R_CAPTURE;
+                    // stall sirasinda SRAM erisimi bastirildi; veri gecerli
+                    // olmadigi icin yakalama asamasina gecilmez.
+                    if (!stall_i) rstate <= R_CAPTURE;
                 end
                 R_CAPTURE: begin
                     mem_rdata  <= ram_rdata_i;
