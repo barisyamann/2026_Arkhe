@@ -24,16 +24,28 @@ module soc_top (
     output logic        uart2_txd,
 
     // --- I2C Master Arayüzü ---
-    inout  wire         i2c_sda,
-    inout  wire         i2c_scl,
+    // -------------------------------------------------------------------------
+    // Cift yonlu pinler AYRIK yon sinyalleri olarak disari veriliyor.
+    //
+    // soc_top, ASIC akisinda sertlestirilecek moduldur; tri-state yalnizca pad
+    // halkasinda bulunabilecegi icin 'z surumu bu sinirin disinda kalmali.
+    // Gercek ucdurumlu surucu FPGA'de nexys_top'ta, simulasyonda testbench'te.
+    //
+    // I2C acik drenajdir: *_o daima 0, tum bilgi *_oe'dedir.
+    // -------------------------------------------------------------------------
+    output wire         i2c_sda_o,
+    output wire         i2c_sda_oe,
+    input  wire         i2c_sda_i,
+    output wire         i2c_scl_o,
+    output wire         i2c_scl_oe,
+    input  wire         i2c_scl_i,
 
     // --- QSPI Master Arayüzü ---
     output logic        qspi_sck,
     output logic        qspi_cs_n,
-    inout  wire         qspi_io0,
-    inout  wire         qspi_io1,
-    inout  wire         qspi_io2,
-    inout  wire         qspi_io3,
+    output wire [3:0]   qspi_io_o,
+    output wire [3:0]   qspi_io_oe,
+    input  wire [3:0]   qspi_io_i,
 
     // --- JTAG Debug Arayüzü ---
     input  logic        jtag_tms,
@@ -775,8 +787,12 @@ module soc_top (
     ) u_i2c (
         .clk            (clk_i),
         .rst_n          (rst_ni),
-        .sda            (i2c_sda),
-        .scl            (i2c_scl),
+        .sda_o          (i2c_sda_o),
+        .sda_oe         (i2c_sda_oe),
+        .sda_i          (i2c_sda_i),
+        .scl_o          (i2c_scl_o),
+        .scl_oe         (i2c_scl_oe),
+        .scl_i          (i2c_scl_i),
         .i2c_irq        (i2c_irq),
         .s_axi_awaddr   (s7_awaddr[7:0]),  .s_axi_awprot (3'b000),  .s_axi_awvalid (s7_awvalid),  .s_axi_awready (s7_awready),
         .s_axi_wdata    (s7_wdata),   .s_axi_wstrb  (s7_wstrb),  .s_axi_wvalid (s7_wvalid),  .s_axi_wready (s7_wready),
@@ -795,10 +811,9 @@ module soc_top (
         .rst_n          (rst_ni),
         .qspi_sck       (qspi_sck),
         .qspi_cs_n      (qspi_cs_n),
-        .qspi_io0       (qspi_io0),
-        .qspi_io1       (qspi_io1),
-        .qspi_io2       (qspi_io2),
-        .qspi_io3       (qspi_io3),
+        .qspi_io_o      (qspi_io_o),
+        .qspi_io_oe     (qspi_io_oe),
+        .qspi_io_i      (qspi_io_i),
         .irq            (qspi_irq),
         .s_axi_awaddr   (s8_awaddr),  .s_axi_awvalid (s8_awvalid),  .s_axi_awready (s8_awready),
         .s_axi_wdata    (s8_wdata),   .s_axi_wstrb   (s8_wstrb),   .s_axi_wvalid  (s8_wvalid),  .s_axi_wready  (s8_wready),

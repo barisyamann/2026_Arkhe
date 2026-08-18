@@ -44,13 +44,34 @@ module nexys_top (
         end
     end
 
-    // Kullanılmayan Tri-state pinler için boş tanımlamalar
-    wire i2c_sda_io;
-    wire i2c_scl_io;
-    wire qspi_io0_io;
-    wire qspi_io1_io;
-    wire qspi_io2_io;
-    wire qspi_io3_io;
+    // =========================================================================
+    // Ucdurumlu (tri-state) surucu halkasi
+    //
+    // soc_top artik cift yonlu pin ICERMEZ; cikis / cikis-etkin / giris
+    // uclusu verir. Gercek 'z surumu burada, en ust seviyede yapiliyor -
+    // ASIC akisinda bu katmanin yerini pad halkasi alir.
+    //
+    // Bu kartta I2C ve QSPI kullanilmiyor; hatlar yine de dogru sekilde
+    // modellendi ki soc_top arayuzu FPGA ile ASIC arasinda ayni kalsin.
+    // =========================================================================
+    wire       i2c_sda_io;
+    wire       i2c_scl_io;
+    wire [3:0] qspi_io_io;
+
+    wire       i2c_sda_o_w, i2c_sda_oe_w;
+    wire       i2c_scl_o_w, i2c_scl_oe_w;
+    wire [3:0] qspi_io_o_w, qspi_io_oe_w;
+
+    // I2C acik drenaj: yalnizca asagi cekilir, asla yukari surulmez
+    assign i2c_sda_io = i2c_sda_oe_w ? i2c_sda_o_w : 1'bz;
+    assign i2c_scl_io = i2c_scl_oe_w ? i2c_scl_o_w : 1'bz;
+
+    genvar gi;
+    generate
+        for (gi = 0; gi < 4; gi = gi + 1) begin : g_qspi_io
+            assign qspi_io_io[gi] = qspi_io_oe_w[gi] ? qspi_io_o_w[gi] : 1'bz;
+        end
+    endgenerate
 
     // SoC Ana Modülünün Çağrılması
     soc_top u_soc (
@@ -71,16 +92,19 @@ module nexys_top (
         .uart2_txd      (),
 
         // I2C (Kullanılmıyor)
-        .i2c_sda        (i2c_sda_io),
-        .i2c_scl        (i2c_scl_io),
+        .i2c_sda_o      (i2c_sda_o_w),
+        .i2c_sda_oe     (i2c_sda_oe_w),
+        .i2c_sda_i      (i2c_sda_io),
+        .i2c_scl_o      (i2c_scl_o_w),
+        .i2c_scl_oe     (i2c_scl_oe_w),
+        .i2c_scl_i      (i2c_scl_io),
 
         // QSPI NOR Flash (Kullanılmıyor)
         .qspi_sck       (),
         .qspi_cs_n      (),
-        .qspi_io0       (qspi_io0_io),
-        .qspi_io1       (qspi_io1_io),
-        .qspi_io2       (qspi_io2_io),
-        .qspi_io3       (qspi_io3_io),
+        .qspi_io_o      (qspi_io_o_w),
+        .qspi_io_oe     (qspi_io_oe_w),
+        .qspi_io_i      (qspi_io_io),
 
         // JTAG (Kullanılmıyor - Kararsız çalışmayı önlemek için güvenli durumlara çekildi)
         .jtag_tms       (1'b1),
