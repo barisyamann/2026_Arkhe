@@ -74,7 +74,7 @@ EXTRA_LEFS:
 EXTRA_LIBS:
   - macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib
 
-EXTRA_GDS_FILES:
+EXTRA_GDS:
   - macros/sky130_sram_2kbyte_1rw1r_32x512_8/gds/sky130_sram_2kbyte_1rw1r_32x512_8.gds
 
 EXTRA_SPICE_MODELS:
@@ -94,9 +94,10 @@ EXTRA_SPICE_MODELS:
 FP_SIZING: relative
 FP_CORE_UTIL: 25            # makro yogun tasarim - dusuk doluluk gerekir
 
-# Makro yerlestirmesi icin kanal payi (um)
-MACRO_PLACE_HALO: [30, 30]
-PL_TARGET_DENSITY_PCT: 35
+# NOT: Makro yerlestirme payi (halo) ve yerlestirme yogunlugu ayarlari
+# floorplan/placement asamasinda gerekiyor; degisken adlari LibreLane
+# surumune gore degisiyor (MACRO_PLACE_HALO bu surumde YOK). Sentez
+# adimini gectikten sonra dogru adlar tespit edilip eklenecek.
 
 # -----------------------------------------------------------------------------
 # Sentez

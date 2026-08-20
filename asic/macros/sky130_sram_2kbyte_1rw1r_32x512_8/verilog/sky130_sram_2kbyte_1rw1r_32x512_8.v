@@ -1,3 +1,16 @@
+/// sta-blackbox
+//
+// ARKHE DEGISIKLIGI: OpenSTA icin kara kutu isareti
+//
+// OpenSTA bu dosyayi gate-level netlist sanip okumaya calisiyor ve
+// davranissal RTL oldugu icin satir 20'de sozdizimi hatasi veriyordu:
+//   "Make sure that this a gate-level netlist and not an RTL file,
+//    otherwise, you can add the following comment '/// sta-blackbox'"
+//
+// Bu isaret yalnizca OpenSTA'yi ilgilendirir; zamanlama bilgisi zaten
+// .lib dosyasindan geliyor. Simulasyon araclari icin sadece bir yorum
+// satiridir, davranissal model oldugu gibi kullanilmaya devam eder.
+//
 // OpenRAM SRAM model
 // Words: 512
 // Word size: 32
@@ -20,7 +33,13 @@ module sky130_sram_2kbyte_1rw1r_32x512_8(
   parameter RAM_DEPTH = 1 << ADDR_WIDTH;
   // FIXME: This delay is arbitrary.
   parameter DELAY = 3 ;
-  parameter VERBOSE = 1 ; //Set to 0 to only display warnings
+  // ARKHE DEGISIKLIGI: varsayilan 1 -> 0
+  // Ozgun deger 1'di ve model HER okuma/yazmada $display yapiyordu.
+  // 23 makro ile simulasyon logu kullanilamaz hale geliyordu.
+  // Ornekleme sirasinda parametre gecersiz kilmak yerine varsayilan
+  // degistirildi; boylece Verilator lint blackbox'ta olmayan bir
+  // parametreyi aramiyor.
+  parameter VERBOSE = 0 ; //Set to 0 to only display warnings
   parameter T_HOLD = 1 ; //Delay to hold dout value after posedge. Value is arbitrary
 
 `ifdef USE_POWER_PINS
