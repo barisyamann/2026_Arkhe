@@ -346,7 +346,7 @@ Yarışma komitesinin (DDK) DTR değerlendirme kuralları gereğince, hazırlana
 2.  **TCL Konsolunu Kullanın:** Vivado'nun alt kısmında bulunan **Tcl Console** sekmesine gelerek şu komutları sırasıyla yazıp çalıştırın (dosya yolunu kendi yerel dizin yapınıza göre güncelleyebilirsiniz):
     ```tcl
     # Proje dizinine geçiş yapın
-    cd C:/Arkhe_2026/dtr_demo
+    cd <depo_koku>/dtr_demo
     # Vivado simülasyon projesini otomatik oluşturun
     source ./scripts/create_vivado_proj.tcl
     # Simülasyonu başlatın
@@ -356,7 +356,7 @@ Yarışma komitesinin (DDK) DTR değerlendirme kuralları gereğince, hazırlana
     ```
 
 #### Yöntem B: Vivado GUI Arayüzü ile Adım Adım Çalıştırma
-1.  **Projeyi Oluşturun:** Vivado TCL konsolunda `cd C:/Arkhe_2026/dtr_demo` ve `source ./scripts/create_vivado_proj.tcl` komutlarını çalıştırarak projenin kurulmasını sağlayın. Bu işlem tamamlandığında proje otomatik olarak açılacaktır.
+1.  **Projeyi Oluşturun:** Vivado TCL konsolunda `cd <depo_koku>/dtr_demo` ve `source ./scripts/create_vivado_proj.tcl` komutlarını çalıştırarak projenin kurulmasını sağlayın. Bu işlem tamamlandığında proje otomatik olarak açılacaktır.
 2.  **Dosya Kontrolü:** Proje açıldığında en üst simülasyon modülü (Top Module) otomatik olarak **`teknotest_tb`** olarak ayarlanacaktır.
 3.  **Simülasyonu Başlatın:** Sol menüdeki (Flow Navigator) **Run Simulation -> Run Behavioral Simulation** seçeneğine tıklayın.
 4.  **Dalga Şekillerini (Waveform) İnceleme:** Simülasyon ekranı açıldıktan sonra üst paneldeki **Run All (F5)** butonuna basarak simülasyonu bitene kadar yürütün.
@@ -378,7 +378,7 @@ Bitstream dosyasını (`.bit`) Vivado ortamında üretmek için şu adımlar tak
 1.  **Projenin Kurulması:**
     TCL konsolu üzerinden Nexys 4 DDR projesi otomatik kurulur:
     ```tcl
-    cd C:/Arkhe_2026
+    cd <depo_koku>
     source ./scripts/create_nexys_project.tcl
     ```
     Bu işlem sonucunda ana modülü `nexys_top` olan ve `nexys4ddr.xdc` kısıtlarını içeren Vivado projesi oluşturulacaktır.
@@ -432,7 +432,7 @@ Nexys 4 DDR (XC7A100TCSG324-1) çipi üzerinde elde edilen fiziksel donanım kay
 
 | Parametre | Tanım | Ölçülen Değer (ns) | Durum |
 | :--- | :--- | :---: | :---: |
-| **WNS (Worst Negative Slack)** | En Kötü Kurulum Zamanı (Setup) Payı | **`+1.710`** | **MET** 🏆 |
+| **WNS (Worst Negative Slack)** | En Kötü Kurulum Zamanı (Setup) Payı | **`+1.811`** | **MET** 🏆 |
 | **TNS (Total Negative Slack)** | Toplam Kurulum Zamanı İhlali | **`0.000`** | **MET** 🏆 |
 | **WHS (Worst Hold Slack)** | En Kötü Tutma Zamanı (Hold) Payı | **`+0.034`** | **MET** 🏆 |
 | **THS (Total Hold Slack)** | Toplam Tutma Zamanı İhlali | **`0.000`** | **MET** 🏆 |

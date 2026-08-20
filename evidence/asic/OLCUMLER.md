@@ -115,6 +115,125 @@ kusurlardi.
 
 ---
 
+## a2 - Yerlesim duzlemi denemeleri (20 Agustos 2026)
+
+23 makro 4 sutun x 6 satir dizildi. Makrolar arasindaki KANAL genisligi
+uc kez arttirildi; her denemede global yonlendirme adimina kadar kosuldu.
+
+| Deneme | Kanal | Kenar payi | Die (um) | Alan | Makro doluluk | Global yonlendirme |
+|---|---|---|---|---|---|---|
+| 1 | 100 um | 200 um | 3432,4 x 3399,24 | 11,67 mm2 | %56,1 | tamamlanmadi |
+| 2 | 150 um | 200 um | 3582,40 x 3649,24 | 13,07 mm2 | %50,1 | 57 dk sonra hala kosuyordu, durduruldu |
+| 3 | **200 um** | **250 um** | **3832,40 x 3999,24** | **15,33 mm2** | **%42,7** | **4 dk 36 sn, 0 overflow** |
+
+Ucuncu denemede yonlendirici sikismadi. Kullanim orani yalnizca %14,4
+olduguna gore alan fazla verilmis olabilir; teslim sonrasi die kucultmek
+icin olculmus bir pay var demektir.
+
+Die buyutmenin zamanlamayi bozmadigi olculdu:
+
+    11,67 mm2 -> setup +4,225 ns
+    13,07 mm2 -> setup +4,276 ns
+    15,33 mm2 -> setup +4,271 ns
+
+Fark 5 ps mertebesinde. Kritik yol makro arasi mesafeye degil, NPU ic
+mantigina bagli.
+
+### Dosya sistemi etkisi
+
+Akis once /mnt/c uzerinden kosuyordu. WSL'in kendi diskine tasindiginda
+ayni adima varis suresi 50 dakikadan **19 dakikaya** dusru - yaklasik 3x.
+OpenROAD yogun dosya G/C yapiyor ve /mnt/c bunda yavas. Depo /mnt/c'de
+kalmaya devam ediyor; yalnizca kosum dizini WSL diskinde.
+
+---
+
+## a3 - Zamanlama ilerlemesi
+
+Ayni kose (nom_tt_025C_1v80), 50 MHz hedef (20 ns).
+
+| Adim | Setup payi | Hold payi | Ihlal |
+|---|---|---|---|
+| 31 - yerlesim sonrasi STA | - | - | 0 |
+| 38 - CTS sonrasi STA | +4,271 ns | +0,276 ns | **0** |
+| 43 - global yonlendirme sonrasi STA | **+2,719 ns** | **+0,246 ns** | **0** |
+
+Setup payi 1,55 ns eridi. Beklenen bir dusus: yonlendirme sonrasi analiz
+artik gercek tel parazitiklerini kullaniyor, tahmini degil. Buna ragmen
+ihlal yok ve %13,6 marj kaldi.
+
+Saat capraskligi (clock skew): setup icin 0,681 ns, hold icin -0,746 ns.
+
+### Elektriksel kural ihlalleri - ACIK
+
+Yonlendirme sonrasi STA'da:
+
+    design__max_slew_violation__count  : 544
+    design__max_cap_violation__count   :  14
+    design__max_fanout_violation__count:   0
+
+Bunlar zamanlama hatasi degildir - sinyal gecis suresi ve yuk
+kapasitansi kutuphane sinirini asiyor. Signoff kalitesi icin
+temizlenmelidir. Akisin ilerleyen resizer adimlarinda dusebilir;
+dusmezse ayrica ele alinacak.
+
+---
+
+## a4 - Guc analizi
+
+CTS sonrasi, nom_tt_025C_1v80, 50 MHz.
+
+| Bilesen | Guc | Pay |
+|---|---|---|
+| **Makro (23 SRAM)** | 63,9 mW | **%61,5** |
+| Sirali (flip-flop + saat agaci) | 21,9 mW | %21,1 |
+| Kombinasyonel | 0,34 mW | %0,3 |
+| Sizinti ve diger | ~17,7 mW | %17,1 |
+| **Toplam** | **103,9 mW** | |
+
+Yonlendirme sonrasi toplam 104,8 mW.
+
+Gucun ucte ikisini bellek yiyor. Standart hucrelerin kombinasyonel payi
+%0,3 - tasarim yogun mantik degil, kayit ve coklayici agirlikli.
+
+FPGA'de olculen 137 mW ile ayni buyukluk sinifinda olmasi tutarlilik
+gostergesidir (farkli teknoloji, farkli olcum yontemi).
+
+**Cikarim: ASIC'te guc butcesini bellek belirliyor.** Guc dusurmek
+gerekirse ilk bakilacak yer makro sayisi ve erisim sikligidir, mantik
+optimizasyonu degil.
+
+---
+
+## a5 - Global yonlendirme (adim 39, 4 dk 36 sn)
+
+| Katman | Kaynak | Talep | Kullanim | Overflow |
+|---|---|---|---|---|
+| li1 | 0 | 0 | %0,00 | 0 |
+| met1 | 1.849.016 | 310.788 | %16,81 | 0 |
+| met2 | 1.768.700 | 314.822 | %17,80 | 0 |
+| met3 | 1.255.625 | 143.899 | %11,46 | 0 |
+| met4 | 799.893 | 63.075 | %7,89 | 0 |
+| met5 | 178.803 | 12.372 | %6,92 | 0 |
+| **Toplam** | 5.852.037 | 844.956 | **%14,44** | **0** |
+
+    Toplam tel uzunlugu : 7.260.490 um
+    Yonlendirilen ag    : 63.293
+    Via                 : 526.245
+
+li1 kullanilmiyor - sky130'da li1 yerel baglantı katmanidir ve
+yonlendirici onu global asamada saymaz.
+
+### Adim sureleri
+
+    39 - global yonlendirme     : 00:04:36
+    40 - anten denetimi         : 00:01:49
+    41 - portlara diyot         : 00:00:00
+    42 - anten onarimi          : 00:09:34
+    43 - STA                    : 00:00:31
+
+---
+
 ## Acik maddeler
 
 - **PVT koseleri**: akis uc kosede (tt/ff/ss) zamanlama yapiyor ama
@@ -122,5 +241,6 @@ kusurlardi.
 - **Saat kapisi**: `cv32e40p_sim_clock_gate.sv` simulasyon modelidir,
   PDK hucresiyle degistirilmelidir.
 - **810 lint uyarisi** incelenmedi.
-- **Dosya sistemi**: akis `/mnt/c` uzerinden kosuyor; yerlestirme ve
-  yonlendirme icin WSL'in kendi diskine tasinmasi gerekebilir.
+- **Max slew / max cap**: 544 + 14 elektriksel kural ihlali (bkz. a3).
+- **Dosya sistemi**: COZULDU - akis WSL'in kendi diskine tasindi, 3x
+  hizlandi (bkz. a2).

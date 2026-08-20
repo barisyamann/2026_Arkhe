@@ -73,7 +73,7 @@ SystemVerilog `covergroup` yapıları ile doğrulanan durumlar:
 Tasarımın fiziksel olarak **Nexys 4 DDR / Nexys A7 (Artix-7 XC7A100T-1CSG324C)** FPGA geliştirme kartı üzerinde doğrulanması süreci ve elde edilen sonuçlar aşağıda detaylandırılmıştır.
 
 ### A. FPGA'da İşlemci Üzerinde Yazılım Koşturuldu mu?
-**Evet.** RV32IMFC komut setine sahip CV32E40P işlemcisi üzerinde otonom test yazılımı çalıştırılmıştır. İşlemci, Boot ROM'da yer alan programı yürüterek NPU hızlandırıcısını yönetmiş, girdi verilerini TCM belleğe aktarmış ve çevre birimlerini kontrol etmiştir.
+**Evet.** RV32IMC komut setiyle yapilandirilmis CV32E40P (FPU=0; bkz. evidence/fpga/fpu_karar_olcumu.md) işlemcisi üzerinde otonom test yazılımı çalıştırılmıştır. İşlemci, Boot ROM'da yer alan programı yürüterek NPU hızlandırıcısını yönetmiş, girdi verilerini TCM belleğe aktarmış ve çevre birimlerini kontrol etmiştir.
 
 ### B. Yazılımlarla Çevre Birimleri Test Edildi mi?
 **Evet.** Yazılım tarafından MMIO (Memory Mapped I/O) kullanılarak şu çevre birimleri doğrudan test edilmiştir:
@@ -100,9 +100,9 @@ FPGA prototipleme sürecinde karşılaşılan kritik problemler ve uyguladığı
 Vivado 2025.2 ortamında tamamlanan sentez ve yerleştirme metrikleri:
 *   **Kaynak Kullanımı:** Slice LUTs: `8,118` (%12.80), Slice Registers: `4,839` (%3.82), BRAM Tile: `13.0` (%9.63), DSPs: `5` (%2.08). *(Tasarım Artix-7 kapasitesinin çok altında kalarak yüksek verimlilik sunmuştur)*
 *   **Zamanlama Analizi (Timing Summary):**
-    *   Setup Payı (WNS): **`+1.710 ns`** (İhlal Yok, MET)
+    *   Setup Payı (WNS): **`+1.811 ns`** (İhlal Yok, MET)
     *   Hold Payı (WHS): **`+0.034 ns`** (İhlal Yok, MET)
-*   **Güç Analizi:** Toplam güç tüketimi **`0.129 W` (129 mW)** olarak ölçülmüştür. NPU dinamik gücün %51.6'sını, CPU ise %22.5'ini tüketmektedir.
+*   **Güç Analizi:** Toplam güç tüketimi **`0.137 W` (137 mW)** olarak ölçülmüştür. NPU dinamik gücün %51.6'sını, CPU ise %22.5'ini tüketmektedir.
 
 ---
 

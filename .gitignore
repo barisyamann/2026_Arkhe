@@ -48,3 +48,5 @@ build/regression/
 
 # ASIC akisi gecici calisma alani (yeniden uretilir)
 asic/run/
+__pycache__/
+*.pyc
