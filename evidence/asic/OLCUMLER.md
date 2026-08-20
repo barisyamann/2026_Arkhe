@@ -313,6 +313,109 @@ hata icermedigi ve dogrulanmis oldugu icin teslim engelleyicisi degildir.
 
 ---
 
+## a7 - Kosum gecmisi ve DRC-temiz yonlendirme (20 Agustos 2026)
+
+Bes kosum yapildi. Her biri bir onceki kosumun urettigi OLCUME dayanarak
+degistirildi; hicbiri tahminle ayarlanmadi.
+
+| # | Degisiklik | Global yonl. | Detayli yonl. | Sonuc |
+|---|---|---|---|---|
+| 1 | kanal 100 um, /mnt/c diski | bitmedi | - | durduruldu |
+| 2 | kanal 150 um, WSL diski | 57 dk, bitmedi | - | durduruldu |
+| 3 | kanal **200 um**, kenar 250 | **4:36, 0 overflow** | 63 turda 23 ihlal | DRT-1231 |
+| 4 | **makro guc + halo 25 um** | **1:30, 0 overflow** | **12 turda 0 ihlal** | DRT-1231 |
+| 5 | **atlama teli + halo 30 um** | kosuyor | kosuyor | - |
+
+### 4. kosum: DRC-TEMIZ YONLENDIRME
+
+Detayli yonlendirmenin ilk gecisi **sifir ihlalle** kapandi:
+
+    tur 0 : 46.722        tur 6 :  57
+    tur 1 : 26.571        tur 7 :  37
+    tur 2 : 24.277        tur 8 :   8
+    tur 3 :  3.239        tur 9 :   8
+    tur 4 :    527        tur 10:   3
+    tur 5 :    128        tur 11:   0   <-- TEMIZ
+    [INFO DRT-0198] Complete detail routing.
+
+Uretilen `soc_top.drc` dosyasi **bos** (0 satir).
+
+3. kosumla karsilastirma carpici:
+
+    3. kosum: 63 tur -> 23 ihlal   (1 sa 10 dk)
+    4. kosum: 12 tur ->  0 ihlal   (1 dk 35 sn)
+
+Tek fark makro halosunun 10'dan 25 um'ye cikarilmasidir. Yonlendiricinin
+zorlandigi yer kanallar degil, **makro pinlerinin cevresiydi.**
+
+### Neden yine de dustu
+
+Yonlendirme temiz bitti, sonra anten denetimi devreye girdi:
+
+    [INFO ANT-0002] Found 235 net violations.
+    [INFO ANT-0001] Found 290 pin violations.
+    [INFO GRT-0015] Inserted 545 diodes.
+    ...
+    [ERROR DRT-1231] Pin u_data_ram.g_sram[3].u_macro/din0[6]
+                     does not have access point
+
+545 diyot yerlestirildi, biri makro kenarina dusup pin erisimini kapatti.
+3. kosumda ayni sey 586 diyotla ve **ayni makronun** baska bir pininde
+(`addr1[7]`) olmustu. Ayni makro iki kez: hata rastgele degil, sistematik.
+
+Halo 25 um diyotlari yeterince uzak tutamadi.
+
+### 5. kosum: hata mekanizmasini ortadan kaldirmak
+
+Daha buyuk halo denemek yerine kok neden hedeflendi:
+
+    GRT_ANTENNA_REPAIR_JUMPER_ONLY: true
+
+Anten ihlalleri diyot yerine **metal atlama teliyle** giderilir. Atlama
+teli yeni hucre yerlestirmez - mevcut agi ust katmana tasir. Yerlesim
+kalabaligi olusmadigi icin makro pininin kapanmasi **yapisal olarak
+imkansiz** hale gelir.
+
+Maliyeti yonlendirme kaynagidir; bizde bol: kullanim %14,4-17,9, overflow 0.
+
+Halo da 30 um'ye cikarildi (son kosum oldugu icin iki onlem birden).
+
+### 4. kosumda dogrulanan: makro guc baglantisi
+
+3. kosumda gozden kacan 46 uyari vardi:
+
+    [PDN-0231] u_data_ram.g_sram[0].u_macro is not connected to any
+               power/ground nets.
+
+23 makro x 2 pin. Bu haliyle makrolarin fiziksel tasarimda gucu yoktur ve
+LVS gecmez. `PDN_CONNECT_MACROS_TO_GRID` zaten `true` idi ama tek basina
+yetmiyor - hangi makro pininin hangi ust seviye aga baglanacagi acikca
+verilmelidir.
+
+Ag adlari olcumle bulundu: ust seviye aglar DEF'in SPECIALNETS
+bolumunden (`VPWR`/`VGND`), makro pinleri LEF'ten (`vccd1`/`vssd1`).
+
+    PDN_MACRO_CONNECTIONS:
+      - ".*u_macro VPWR VGND vccd1 vssd1"
+
+4. kosumda dogrulandi:
+
+    46 x ".*u_macro matched with u_..._ram.g_sram[N].u_macro"
+    PDN-0231 uyarisi: 0
+    PDN-0189 uyarisi: 0
+
+### Zamanlama karsilastirmasi
+
+| Kosum | Setup payi | Hold payi | Ihlal |
+|---|---|---|---|
+| 3 | +2,719 ns | +0,246 ns | 0 |
+| **4** | **+3,138 ns** | **+0,284 ns** | **0** |
+
+Halo yerlestirmeyi de rahatlatti: setup payi 0,42 ns iyilesti.
+Marj %15,7 (hedef periyot 20 ns).
+
+---
+
 ## Acik maddeler
 
 - **PVT koseleri**: akis uc kosede (tt/ff/ss) zamanlama yapiyor ama
