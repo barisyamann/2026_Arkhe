@@ -1,0 +1,50 @@
+# =============================================================================
+#  versions.txt - ASIC akisinda kullanilan arac ve PDK surumleri
+#  TEKNOFEST 2026 - Takim ARKHE
+# =============================================================================
+#
+#  DURUM: KISMEN DOLDURULDU
+#
+#  Asagida [DOLDURULACAK] yazan satirlar, ilk basarili akis kosumundan sonra
+#  gercek degerlerle degistirilecektir. Tahmini deger YAZILMAMISTIR - bu
+#  dosya degerlendirmede kullanildigi icin yalnizca olculmus degerler
+#  girilmelidir.
+#
+#  Degerleri uretmek icin (WSL, Nix ortami icinde):
+#
+#      librelane --version
+#      nix --version
+#      echo $PDK_ROOT
+#      cat $PDK_ROOT/sky130A/SOURCES        2>/dev/null
+#      cat $PDK_ROOT/sky130A/.volare/*.json 2>/dev/null
+#
+#  Alternatif olarak: python3 scripts/gen_versions.py > environment/versions.txt
+# =============================================================================
+
+[Ortam]
+Isletim sistemi        : Windows 11 + WSL2 (Ubuntu)
+Nix                    : 2.35.2
+Nix profili            : ~/.nix-profile/bin/librelane
+
+[LibreLane]
+Surum                  : [DOLDURULACAK]   # librelane --version
+Akis                   : Classic
+Kaynak                 : github:librelane/librelane
+
+[PDK]
+PDK adi                : sky130A
+PDK kok dizini         : [DOLDURULACAK]   # echo $PDK_ROOT
+PDK surumu / commit    : [DOLDURULACAK]   # volare veya SOURCES dosyasindan
+Standart hucre kutup.  : sky130_fd_sc_hd
+
+[OpenRAM / SRAM]
+Kullanilan makro       : [DOLDURULACAK]   # henuz secilmedi
+Makro kaynagi          : [DOLDURULACAK]
+Veri genisligi         : [DOLDURULACAK]
+Kelime sayisi          : [DOLDURULACAK]
+OpenRAM surumu         : [DOLDURULACAK]   # hazir makro kullanilirsa: yok
+
+[Tasarim]
+Ust modul              : soc_top
+Hedef saat             : 50 MHz (20 ns)
+Cekirdek               : CV32E40P, RV32IMC (FPU = 0)
