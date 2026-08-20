@@ -234,13 +234,94 @@ yonlendirici onu global asamada saymaz.
 
 ---
 
+## a6 - Saat kapisi (clock gating) durumu
+
+CV32E40P guc tasarrufu icin saat kapisi kullanir. Kullandigimiz model
+dosyasi `rtl/cv32e40p-master/bhv/cv32e40p_sim_clock_gate.sv` olup kendi
+basliginda sunu yazar:
+
+    // !!! cv32e40p_sim_clock_gate file is meant for simulation only !!!
+    // !!! It must not be used for ASIC synthesis                    !!!
+    // !!! It must not be used for FPGA synthesis                    !!!
+
+Dosya bu haliyle ASIC filelist'inde bulunuyor (`asic/filelist.f:43`).
+Ne oldugu olculdu.
+
+### Ne uretildi
+
+Modulun iki dali var:
+
+    `ifdef SYNTHESIS
+        assign clk_o = clk_i;              // kapi YOK, saat dogrudan gecer
+    `else
+        always_latch ...                   // latch tabanli kapi
+        assign clk_o = clk_i & clk_en;
+    `endif
+
+Sentez netlisti uc noktadan denetlendi:
+
+| Denetim | Sonuc |
+|---|---|
+| Latch hucresi (`sky130_fd_sc_hd__dl*`) | **0 adet** |
+| `clock_gate` ornegi | **0 adet** |
+| Flip-flop saat baglantilari | 10.855 x `.CLK(clk_i)` · 154 x `.CLK(jtag_tck)` |
+
+Butun flip-floplar dogrudan ana saate bagli. **SYNTHESIS dali alinmis,
+saat kapisi devre disi.** Latch uretilmemis - ki bu iyi haber, latch
+tabanli kapi standart hucrelerden kurulsaydi glitch ve STA riski
+getirirdi.
+
+### Degerlendirme
+
+**Islevsel olarak dogru.** Saat kapisi bir guc optimizasyonudur; olmamasi
+yanlis sonuc uretmez, yalnizca kullanilmayan boru hatti asamalari da
+saat alir.
+
+**Dogrulama acisindan avantajli:** FPGA tarafinda da ayni dal aliniyor
+(kod yorumu bunu acikca soyluyor). Yani FPGA ve ASIC ayni saat yapisini
+kullaniyor; FPGA'de dogrulanan davranis ASIC'e birebir tasiniyor.
+Farkli olsalardi dogrulama sonuclari aktarilamazdi.
+
+**SDC ile tutarli:** kisitlar iki saat tanimliyor (`clk_i`, `jtag_tck`)
+ve netlist tam olarak bu ikisini gosteriyor. Uretilmis bir kapi saati
+olsaydi SDC eksik kalirdi.
+
+### Kazanc ne olurdu
+
+Guc dagilimina (a4) bakildiginda:
+
+    Makro (SRAM)   %61,5   <- saat kapisi bunu ETKILEMEZ
+    Sirali         %21,1   <- saat kapisinin hedefi bu
+    Kombinasyonel   %0,3
+    Sizinti/diger  %17,1
+
+Saat kapisi en iyi durumda sirali gucun bir kismini kirpardi - toplam
+gucun onda biri mertebesi. Oysa **gucun ucte ikisi bellekte.** Guc
+dusurmek asil hedefse dogru yer makro erisim sikligidir, saat kapisi
+degil.
+
+### Yapilmasi gereken
+
+Duzgun cozum, davranissal modeli PDK'nin butunlesik saat kapisi
+hucresiyle degistirmektir:
+
+    sky130_fd_sc_hd__dlclkp_1     (integrated clock gating cell)
+
+Bu bir RTL degisikligidir ve akisin bastan kosulmasini gerektirir.
+**GDSII alindiktan sonra degerlendirilecek.** Su anki hali islevsel
+hata icermedigi ve dogrulanmis oldugu icin teslim engelleyicisi degildir.
+
+---
+
 ## Acik maddeler
 
 - **PVT koseleri**: akis uc kosede (tt/ff/ss) zamanlama yapiyor ama
   makronun yalnizca TT modeli var; uc kosede de ayni model okunuyor.
-- **Saat kapisi**: `cv32e40p_sim_clock_gate.sv` simulasyon modelidir,
-  PDK hucresiyle degistirilmelidir.
-- **810 lint uyarisi** incelenmedi.
+- **Saat kapisi**: INCELENDI (bkz. a6). SYNTHESIS dali aliniyor, saat
+  dogrudan geciyor, latch uretilmiyor. Islevsel hata yok; PDK'nin
+  `dlclkp_1` hucresiyle degistirmek GDSII sonrasina birakildi.
+- **810 lint uyarisi**: INCELENDI, islevsel hata yok.
+  Ayrinti: `evidence/lint/LINT_INCELEMESI.md`
 - **Max slew / max cap**: 544 + 14 elektriksel kural ihlali (bkz. a3).
 - **Dosya sistemi**: COZULDU - akis WSL'in kendi diskine tasindi, 3x
   hizlandi (bkz. a2).
