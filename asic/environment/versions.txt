@@ -3,48 +3,76 @@
 #  TEKNOFEST 2026 - Takim ARKHE
 # =============================================================================
 #
-#  DURUM: KISMEN DOLDURULDU
+#  DURUM: DOLDURULDU - 20 Agustos 2026
 #
-#  Asagida [DOLDURULACAK] yazan satirlar, ilk basarili akis kosumundan sonra
-#  gercek degerlerle degistirilecektir. Tahmini deger YAZILMAMISTIR - bu
-#  dosya degerlendirmede kullanildigi icin yalnizca olculmus degerler
-#  girilmelidir.
-#
-#  Degerleri uretmek icin (WSL, Nix ortami icinde):
-#
-#      librelane --version
-#      nix --version
-#      echo $PDK_ROOT
-#      cat $PDK_ROOT/sky130A/SOURCES        2>/dev/null
-#      cat $PDK_ROOT/sky130A/.volare/*.json 2>/dev/null
-#
-#  Alternatif olarak: python3 scripts/gen_versions.py > environment/versions.txt
+#  Butun degerler calisan akistan olculmustur; tahmin yoktur.
+#  Uretim yontemleri her satirin yaninda # ile belirtilmistir.
 # =============================================================================
 
 [Ortam]
-Isletim sistemi        : Windows 11 + WSL2 (Ubuntu)
-Nix                    : 2.35.2
+Isletim sistemi        : Windows 11 Pro 26200 + WSL2 (Ubuntu)
+Nix                    : 2.35.2                      # nix --version
 Nix profili            : ~/.nix-profile/bin/librelane
+Kosum dizini           : ~/arkhe/asic  (WSL yerel diski)
+                       # Depo /mnt/c'de; akis /mnt/c uzerinden 3x yavas
+                       # kosuyordu, kosum dizini WSL diskine tasindi.
 
 [LibreLane]
-Surum                  : [DOLDURULACAK]   # librelane --version
+Surum                  : v3.0.10                     # librelane --version
 Akis                   : Classic
 Kaynak                 : github:librelane/librelane
 
 [PDK]
 PDK adi                : sky130A
-PDK kok dizini         : [DOLDURULACAK]   # echo $PDK_ROOT
-PDK surumu / commit    : [DOLDURULACAK]   # volare veya SOURCES dosyasindan
+PDK yoneticisi         : ciel
+PDK kok dizini         : ~/.ciel/ciel/sky130/versions/
+                         8afc8346a57fe1ab7934ba5a6056ea8b43078e71
+PDK surumu / commit    : 8afc8346a57fe1ab7934ba5a6056ea8b43078e71
+                       # run/arkhe/01-verilator-lint/config.json icindeki
+                       # PDK_ROOT alanindan alindi
 Standart hucre kutup.  : sky130_fd_sc_hd
+Zamanlama koseleri     : nom_tt_025C_1v80 (birincil)
+                         nom_ff_n40C_1v95
+                         nom_ss_100C_1v60
 
-[OpenRAM / SRAM]
-Kullanilan makro       : [DOLDURULACAK]   # henuz secilmedi
-Makro kaynagi          : [DOLDURULACAK]
-Veri genisligi         : [DOLDURULACAK]
-Kelime sayisi          : [DOLDURULACAK]
-OpenRAM surumu         : [DOLDURULACAK]   # hazir makro kullanilirsa: yok
+[Akis araclari]
+Yosys                  : 0.62                        # sentez logu
+Verilator              : 5.044                       # lint logu
+OpenROAD               : 2026-02-17 yapisi           # nix store
+                         commit dcf36133a369abc8f3c5e5738cd4d82e4903c0e0
+OpenSTA                : LibreLane ile gelen surum (opensta-dev)
+Magic                  : 8.3.623                     # DRC
+Netgen                 : 1.5.316                     # LVS
+KLayout                : 0.30.7                      # GDS / DRC
+
+[SRAM makrosu]
+Kullanilan makro       : sky130_sram_2kbyte_1rw1r_32x512_8
+Makro kaynagi          : SKY130A PDK, libs.ref/sky130_sram_macros/
+                       # Hazir makro kullanildi; OpenRAM calistirilmadi.
+Veri genisligi         : 32 bit
+Kelime sayisi          : 512  (2 kB)
+Port yapisi            : 1RW + 1R
+Fiziksel boyut         : 683,1 x 416,54 um = 0,285 mm2
+Zamanlama modeli       : TT_1p8V_25C
+                       # UYARI: makronun yalnizca TT kosesi vardir.
+                       # ff ve ss koselerinde de ayni model okunuyor.
+OpenRAM surumu         : yok - hazir makro kullanildi
+Toplam makro sayisi    : 23  (NPU TCM 15 + I-RAM 4 + D-RAM 4)
+
+[Makro model degisiklikleri]
+# Saticidan gelen Verilog modelinde uc degisiklik yapildi, hepsi
+# dosya icinde yorumla isaretlidir:
+#   1. 'mem' bildirimi kullanimdan once gelecek sekilde yukari tasindi
+#   2. VERBOSE varsayilani 1 -> 0  (simulasyon logunu bogmamasi icin)
+#   3. '/// sta-blackbox' isareti eklendi  (OpenSTA modeli netlist
+#      saniyordu)
 
 [Tasarim]
 Ust modul              : soc_top
 Hedef saat             : 50 MHz (20 ns)
 Cekirdek               : CV32E40P, RV32IMC (FPU = 0)
+                       # ÖTR/DTR'de RV32IMFC yaziyor; sapma gerekcesi
+                       # evidence/fpga/fpu_karar_olcumu.md dosyasindadir.
+Die alani              : 3832,40 x 3999,24 um = 15,33 mm2
+Standart hucre         : 47.926
+Flip-flop              : 10.908

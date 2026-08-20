@@ -65,39 +65,135 @@ SIGNOFF_SDC_FILE: constraints/design.sdc
 VERILOG_DEFINES:
   - USE_SRAM_MACRO
 
+# Makronun Verilog modeli - lint ve sentez icin KARA KUTU tanimi.
+#
+# MACROS yapisi fiziksel gorunumleri (gds/lef/lib/spice) ve yerlesimi
+# tasir ama Verilog modelini VERMEZ. MACROS'a gecerken bu satiri
+# kaldirmistim ve Verilator modulu bulamadi:
+#   %Error-MODMISSING: Cannot find file containing module:
+#                      'sky130_sram_2kbyte_1rw1r_32x512_8'
+#
+# Ikisi birlikte gerekiyor: MACROS -> nereye konacak,
+#                           EXTRA_VERILOG_MODELS -> arayuzu ne.
 EXTRA_VERILOG_MODELS:
   - macros/sky130_sram_2kbyte_1rw1r_32x512_8/verilog/sky130_sram_2kbyte_1rw1r_32x512_8.v
 
-EXTRA_LEFS:
-  - macros/sky130_sram_2kbyte_1rw1r_32x512_8/lef/sky130_sram_2kbyte_1rw1r_32x512_8.lef
 
-EXTRA_LIBS:
-  - macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib
-
-EXTRA_GDS:
-  - macros/sky130_sram_2kbyte_1rw1r_32x512_8/gds/sky130_sram_2kbyte_1rw1r_32x512_8.gds
-
-EXTRA_SPICE_MODELS:
-  - macros/sky130_sram_2kbyte_1rw1r_32x512_8/spice/sky130_sram_2kbyte_1rw1r_32x512_8.spice
+# -----------------------------------------------------------------------------
+# MAKRO TANIMLARI VE YERLESIMI
+#
+# EXTRA_LEFS/EXTRA_GDS makronun GORUNUMLERINI verir ama NEREYE konacagini
+# soylemez. Ilk denemede akis PDN adiminda durdu:
+#     [PDN-0235] Design has unplaced macros.
+#
+# MACROS yapisi hem gorunumleri hem her instance'in konumunu tasir.
+#
+# YERLESIM PLANI  -  4 sutun x 6 satir izgara
+#   makro       : 683.1 x 416.5 um
+#   kanal       : 200 um  (makrolar arasi yonlendirme icin)
+#   kenar payi  : 250 um
+#   die         : 3832.4 x 3999.2 um = 15.33 mm2
+#   makro doluluk: %42.7
+#
+# Sira: once 15 TCM makrosu, sonra 4 I-RAM, sonra 4 D-RAM. Ayni bellege
+# ait makrolar bitisik kalsin diye satir-oncelikli dizildi; boylece adres
+# kod cozucu ve okuma coklayicisi kisa tellerle baglanir.
+# -----------------------------------------------------------------------------
+MACROS:
+  sky130_sram_2kbyte_1rw1r_32x512_8:
+    gds:
+      - macros/sky130_sram_2kbyte_1rw1r_32x512_8/gds/sky130_sram_2kbyte_1rw1r_32x512_8.gds
+    lef:
+      - macros/sky130_sram_2kbyte_1rw1r_32x512_8/lef/sky130_sram_2kbyte_1rw1r_32x512_8.lef
+    lib:
+      # NOT: kose anahtarinin degeri LISTE olmali, tek dize degil:
+      #   "Refusing to automatically convert string at ...lib.* to list"
+      # "*" tum zamanlama koselerini kapsar. Makronun yalnizca TT modeli
+      # oldugu icin uc kosede de ayni dosya okunur (bkz. THIRD_PARTY.md).
+      "*":
+        - macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib
+    spice:
+      - macros/sky130_sram_2kbyte_1rw1r_32x512_8/spice/sky130_sram_2kbyte_1rw1r_32x512_8.spice
+    instances:
+      'u_npu.u_npu_sram.g_sram[0].u_macro':
+        location: [250.00, 250.00]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[1].u_macro':
+        location: [1133.10, 250.00]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[2].u_macro':
+        location: [2016.20, 250.00]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[3].u_macro':
+        location: [2899.30, 250.00]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[4].u_macro':
+        location: [250.00, 866.54]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[5].u_macro':
+        location: [1133.10, 866.54]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[6].u_macro':
+        location: [2016.20, 866.54]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[7].u_macro':
+        location: [2899.30, 866.54]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[8].u_macro':
+        location: [250.00, 1483.08]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[9].u_macro':
+        location: [1133.10, 1483.08]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[10].u_macro':
+        location: [2016.20, 1483.08]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[11].u_macro':
+        location: [2899.30, 1483.08]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[12].u_macro':
+        location: [250.00, 2099.62]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[13].u_macro':
+        location: [1133.10, 2099.62]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[14].u_macro':
+        location: [2016.20, 2099.62]
+        orientation: N
+      'u_instruction_ram.g_sram[0].u_macro':
+        location: [2899.30, 2099.62]
+        orientation: N
+      'u_instruction_ram.g_sram[1].u_macro':
+        location: [250.00, 2716.16]
+        orientation: N
+      'u_instruction_ram.g_sram[2].u_macro':
+        location: [1133.10, 2716.16]
+        orientation: N
+      'u_instruction_ram.g_sram[3].u_macro':
+        location: [2016.20, 2716.16]
+        orientation: N
+      'u_data_ram.g_sram[0].u_macro':
+        location: [2899.30, 2716.16]
+        orientation: N
+      'u_data_ram.g_sram[1].u_macro':
+        location: [250.00, 3332.70]
+        orientation: N
+      'u_data_ram.g_sram[2].u_macro':
+        location: [1133.10, 3332.70]
+        orientation: N
+      'u_data_ram.g_sram[3].u_macro':
+        location: [2016.20, 3332.70]
+        orientation: N
 
 # -----------------------------------------------------------------------------
 # Floorplan
 #
-# ILK KOSUM ICIN GECICI: alan hedefi henuz olculmedi. Once sentez kosulup
-# hucre alani ogrenilecek, sonra DIE_AREA buna gore belirlenecek.
-# FP_SIZING relative + CORE_UTIL ile araca birakmak ilk denemede daha guvenli.
+# DIE_AREA makro izgarasindan HESAPLANDI (yukaridaki yerlesim planina bakin).
+# Otomatik boyutlandirma (FP_SIZING: relative) makrolarin sigacagi alani
+# garanti etmiyor; acik deger veriyoruz.
 # -----------------------------------------------------------------------------
-# 23 makro x 0,285 mm2 = 6,54 mm2 yalnizca bellek.
-# Makrolar tipik olarak die alaninin %50-65'ini kaplar; kalani mantik ve
-# yonlendirme kanallari. Ilk denemede araca birakiliyor, floorplan
-# raporundan sonra DIE_AREA acikca verilecek.
-FP_SIZING: relative
-FP_CORE_UTIL: 25            # makro yogun tasarim - dusuk doluluk gerekir
-
-# NOT: Makro yerlestirme payi (halo) ve yerlestirme yogunlugu ayarlari
-# floorplan/placement asamasinda gerekiyor; degisken adlari LibreLane
-# surumune gore degisiyor (MACRO_PLACE_HALO bu surumde YOK). Sentez
-# adimini gectikten sonra dogru adlar tespit edilip eklenecek.
+FP_SIZING: absolute
+DIE_AREA: [0, 0, 3832.40, 3999.24]
 
 # -----------------------------------------------------------------------------
 # Sentez

@@ -93,10 +93,11 @@ R10 acik birakildi (denetimde "Risk" seviyesi, engelleyici degil).
 ## Gecerli referans
 
 WNS +1,811 ns · WHS +0,060 ns
-18.596 LUT (%29,33) · 5.478 FF (%4,32) · 13 BRAM (%9,63) · 9 DSP (%3,75)
+18.587 LUT (%29,32) · 5.478 FF (%4,32) · 13 BRAM (%9,63) · 9 DSP (%3,75)
 
 Hedef periyot 20 ns (50 MHz) -> %9,1 zamanlama marji.
 NPU cikarimi: 1,45 ms (72.583 cevrim) - 689 cikarim/saniye.
 
-NOT: README'de yazan 8.114 LUT / %12,80 degeri sahte agirliklar
-donemine aittir ve gecersizdir.
+NOT: README'de bir donem 8.114 LUT / %12,80 yaziyordu. O deger sahte
+agirliklar donemine aitti ve gecersizdi; 20 Agustos 2026'da README
+yukaridaki olculmus degerlerle duzeltildi.
