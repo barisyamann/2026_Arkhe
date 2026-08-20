@@ -164,13 +164,28 @@ bu makinede mevcut degil, komutlar oldugu gibi calistirilamazdi.
 kaldirilmamali; nihai gate level netlist, DEF ve GDSII ciktilarinda
 bulunmalidir."
 
-**Sentez netlistinde dogrulandi:**
+**Uc cikti dosyasinda ayri ayri sayildi:**
 
-    grep -c "sky130_sram_2kbyte_1rw1r_32x512_8" soc_top.nl.v
-    23
+| Cikti | Dosya | Makro |
+|---|---|---|
+| Sentez netlisti | `results/netlist/soc_top.nl.v` | **23** |
+| Yerlesim sonrasi netlist | `results/netlist/soc_top.pnl.v` | **23** |
+| DEF | `results/def/soc_top.def` | **23** |
+| GDSII | akis devam ediyor | bekleniyor |
 
-DEF ve GDSII dogrulamasi akis tamamlandiginda yapilacak ve bu belgeye
-eklenecektir.
+DEF'te makrolarin hepsi `+ FIXED` olarak, config.yaml'da verdigimiz
+koordinatlarda duruyor:
+
+    - u_data_ram.g_sram[0].u_macro sky130_sram_... + FIXED ( 2899300 2716160 ) N ;
+    - u_data_ram.g_sram[1].u_macro sky130_sram_... + FIXED (  250000 3332700 ) N ;
+    - u_data_ram.g_sram[2].u_macro sky130_sram_... + FIXED ( 1133100 3332700 ) N ;
+
+DEF birimi nanometredir; 250000 = 250 um, 1133100 = 1133,1 um. Ikisi
+arasindaki fark 883,1 um - bu tam olarak makro genisligi (683,1) arti
+kanal genisligidir (200). Yerlesim tasarlandigi gibi.
+
+**Sentez optimizasyonu makrolari kaldirmadi.** Sartname sartinin netlist
+ve DEF ayaklari karsilandi; GDSII ayagi akis tamamlaninca eklenecek.
 
 ---
 
