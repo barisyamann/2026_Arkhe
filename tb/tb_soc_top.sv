@@ -253,8 +253,14 @@ module tb_soc_top;
     // Hizli acilista bu sure yok. Sabit zaman asimlari gercek boot'ta
     // yaniltici "basarisiz" uretiyordu - islev dogruydu, sure yetmiyordu.
     // =========================================================================
+// USE_SRAM_MACRO kipi de gercek boot kullanir (I-RAM makrolara dagilmis
+// oldugu icin dogrudan $readmemh yapilamaz), dolayisiyla ayni payi alir.
+// Ilk makro kosumunda bu atlanmisti: "Stream ready" ASLINDA yazdirilmisti
+// ama 20 ms'lik zaman asimi ondan once dolmustu - islev dogru, sure yetersiz.
 `ifdef REAL_BOOT
     localparam int BOOT_PAYI_NS = 40_000_000;   // 40 ms
+`elsif USE_SRAM_MACRO
+    localparam int BOOT_PAYI_NS = 40_000_000;   // 40 ms - makro kipi gercek boot
 `else
     localparam int BOOT_PAYI_NS = 0;
 `endif
@@ -304,10 +310,21 @@ module tb_soc_top;
         rst_n = 1'b1;
 
         #1;
-        // NPU Yerel Belleğini (TCM SRAM) sıfırlayarak simülasyon X/U belirsizliğini önleme
+        // ---------------------------------------------------------------------
+        // Bellekleri sifirla - simulasyonda X/U belirsizligini onler
+        //
+        // Iki gerceklemede bellek FARKLI yerde duruyor:
+        //   varsayilan       -> u_npu_sram.ram[]          (cikarimsal dizi)
+        //   USE_SRAM_MACRO   -> g_sram[i].u_macro.mem[]   (15 makro)
+        // ---------------------------------------------------------------------
+`ifndef USE_SRAM_MACRO
         for (int idx = 0; idx < 7680; idx = idx + 1) begin
             uut.u_npu.u_npu_sram.ram[idx] = 32'h0;
         end
+`endif
+        // Makro kipinde sifirlama modullerin KENDI icinde yapiliyor
+        // (npu_tcm_sram / sram_module, generate blogu icinde). Testbench'ten
+        // g_sram[m].u_macro yoluna degisken indisle erismek cozumlenmiyor.
 
         // =====================================================================
         // ACILIS SECIMI
@@ -320,15 +337,29 @@ module tb_soc_top;
         // Varsayilan: I-RAM dogrudan doldurulur ve Boot ROM'un ilk iki komutu
         //             I-RAM'e atlayacak sekilde degistirilir.
         // Gercek boot zinciri icin derlemeye  -d REAL_BOOT  ekleyin.
+        //
+        // MAKRO KIPINDE HIZLI ACILIS YAPILAMAZ:
+        // USE_SRAM_MACRO tanimliyken I-RAM tek bir dizi degil, dort ayri SRAM
+        // makrosudur. Dogrudan $readmemh yapilacak bir 'ram' dizisi yoktur.
+        // Bu yuzden makro kipi gercek QSPI boot zincirini kullanir - ki bu
+        // aslinda daha guclu bir dogrulamadir: veri gercekten flash'tan
+        // okunup makrolara YAZILIR.
         // =====================================================================
-    `ifndef REAL_BOOT
+    // NOT: Vivado on-isleyicisi `if !defined(...) sozdizimini desteklemiyor;
+    // ic ice `ifdef kullaniliyor.
+    `ifdef USE_SRAM_MACRO
+        log_print("[TB] GERCEK BOOT: uygulama QSPI flash'tan yuklenecek.");
+        log_print("[TB] SRAM MAKRO KIPI: bellekler 23 adet sky130 makrosu.");
+    `else
+      `ifndef REAL_BOOT
         $readmemh("app.hex", uut.u_instruction_ram.ram);
         uut.u_boot_rom.rom_mem[0] = 32'h010002B7;  // lui t0, 0x01000
         uut.u_boot_rom.rom_mem[1] = 32'h00028067;  // jr  t0
         log_print("[TB] HIZLI ACILIS: I-RAM dogrudan yuklendi, yukleyici atlandi.");
         log_print("[TB] Gercek QSPI boot icin derlemeye -d REAL_BOOT ekleyin.");
-    `else
+      `else
         log_print("[TB] GERCEK BOOT: uygulama QSPI flash'tan yuklenecek.");
+      `endif
     `endif
 
         log_print($sformatf("[%0t] Reset kaldırıldı. İşlemci çalışıyor...", $time));

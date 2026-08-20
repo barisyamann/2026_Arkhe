@@ -154,7 +154,7 @@ module npu_csr (
                 s_axi_bvalid <= 1'b1;
                 s_axi_bresp  <= 2'b00;
 
-`               ifdef DEBUG_CSR
+                `ifdef DEBUG_CSR
                          $display("[%0t] [NPU_CSR WRITE] addr=0x%h, data=0x%h", $time, aw_addr_lat, w_data_lat);
                 `endif
 
@@ -217,7 +217,7 @@ module npu_csr (
                     default:       s_axi_rdata <= 32'b0;
                 endcase
 
-`               ifdef DEBUG_CSR
+                `ifdef DEBUG_CSR
                     $display("[%0t] [NPU_CSR READ] addr=0x%h, status=0x%h", $time, ar_addr_lat, reg_status);
                 `endif
             end

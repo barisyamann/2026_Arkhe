@@ -390,7 +390,6 @@ endfunction
     // --- FSM Kontrol Mantığı ---
     logic signed [31:0] max_score;
     logic [12:0]        exp_val [0:3];
-    logic [15:0]        sum_exp;
     logic [1:0]         c_div;
 
     always_comb begin
@@ -429,7 +428,6 @@ endfunction
             div_num     <= '0;
             div_den     <= '0;
             c_div       <= '0;
-            sum_exp     <= '0;
 
             // Requantization boru hatti yazmaclari
             rq_ab       <= '0;
@@ -472,7 +470,6 @@ endfunction
             div_num     <= '0;
             div_den     <= '0;
             c_div       <= '0;
-            sum_exp     <= '0;
 
             fc_q_idx    <= '0;
 
@@ -772,6 +769,21 @@ endfunction
                 end
 
                 SOFTMAX_DIV_REQ: begin
+                    // sum_exp YEREL bir gecicidir: ayni cevrimde hesaplanip
+                    // hemen asagida kullanilir, kayit gerekmez.
+                    //
+                    // Eskiden modul seviyesinde bildirilmis ve reset'te
+                    // <= ile sifirlaniyordu; burada ise = ile atanıyordu.
+                    // Ayni degiskende bloklayan ve bloklamayan atamayi
+                    // karistirmak gecersizdir. Vivado hos gormustu, slang
+                    // (ASIC akisi) reddetti:
+                    //   "blocking assignment to variable 'sum_exp' is not
+                    //    supported after previous non-blocking assignment"
+                    //
+                    // Yerel yapilinca hem hata kalkiyor hem de hic okunmayan
+                    // olu kayit ortadan kalkiyor. Davranis degismiyor.
+                    logic [15:0] sum_exp;
+
                     // Toplam payda hesabı
                     sum_exp   = exp_val[0] + exp_val[1] + exp_val[2] + exp_val[3];
                     div_num   <= exp_val[c_div];

@@ -1,0 +1,176 @@
+# =============================================================================
+#  config.yaml - LibreLane Classic akisi ana yapilandirmasi
+#  TEKNOFEST 2026 - Takim Arkhe / Arkhe SoC
+# =============================================================================
+
+DESIGN_NAME: soc_top
+
+# -----------------------------------------------------------------------------
+# RTL kaynaklari
+#
+# LibreLane dosya-listesi dosyasini dogrudan kabul etmiyor; yalnizca
+# VERILOG_FILES adinda bir liste bekliyor. TEK DOGRULUK KAYNAGI filelist.f'tir;
+# asagidaki blok ondan URETILIR:
+#
+#     make sources     bloku yeniden uret
+#     make check       filelist.f ile tutarliligi denetle
+#
+# Sartname bu donusumu ongoruyor: "Gerekli donusum veya yapilandirma
+# islemleri asic/Makefile ya da asic/scripts/ altindaki betiklerle
+# yapilmalidir."
+# -----------------------------------------------------------------------------
+
+# SystemVerilog paket import'lari modul basliklarinda kullanildigi icin
+# Yosys'in varsayilan on-isleyicisi yetersiz kaliyor; slang gerekiyor.
+#   (ornek: module uart_stream_peripheral import uart_pkg::*; #(...))
+USE_SLANG: true
+
+VERILOG_INCLUDE_DIRS:
+  - ../rtl/cv32e40p-master/rtl/include
+  - ../rtl/Memory
+  - ../rtl/Cevre_Birimleri/files_1
+
+# -----------------------------------------------------------------------------
+# Saat
+# -----------------------------------------------------------------------------
+CLOCK_PORT: clk_i
+CLOCK_NET: clk_i
+CLOCK_PERIOD: 20.0          # 50 MHz - FPGA ile ayni hedef
+
+# -----------------------------------------------------------------------------
+# Kisitlar
+# -----------------------------------------------------------------------------
+PNR_SDC_FILE: constraints/design.sdc
+SIGNOFF_SDC_FILE: constraints/design.sdc
+
+# -----------------------------------------------------------------------------
+# SRAM MAKROLARI
+#
+# Makro : sky130_sram_2kbyte_1rw1r_32x512_8
+#         512 kelime x 32 bit = 2 kB, bayt granuler yazma maskesi
+#         Port 0 (RW) + Port 1 (R)  -> tasarimin port yapisiyla birebir
+#         Fiziksel boyut: 683,1 x 416,54 um  = 0,285 mm2
+#
+# Kullanim (23 ornekleme):
+#     u_soc/u_npu/u_npu_sram   NPU TCM   30 kB  -> 15 makro
+#     u_soc/u_iram             I-RAM      8 kB  ->  4 makro
+#     u_soc/u_dram             D-RAM      8 kB  ->  4 makro
+#
+# USE_SRAM_MACRO tanimi RTL'deki kosullu yolu acar; tanimsizken cikarimsal
+# dizi kullanilir (FPGA Block RAM cikarimi icin).
+#
+# Sartname: makro sentezde optimize edilip KALDIRILMAMALI, nihai netlist,
+# DEF ve GDSII ciktilarinda bulunmalidir.
+# -----------------------------------------------------------------------------
+VERILOG_DEFINES:
+  - USE_SRAM_MACRO
+
+EXTRA_VERILOG_MODELS:
+  - macros/sky130_sram_2kbyte_1rw1r_32x512_8/verilog/sky130_sram_2kbyte_1rw1r_32x512_8.v
+
+EXTRA_LEFS:
+  - macros/sky130_sram_2kbyte_1rw1r_32x512_8/lef/sky130_sram_2kbyte_1rw1r_32x512_8.lef
+
+EXTRA_LIBS:
+  - macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib
+
+EXTRA_GDS_FILES:
+  - macros/sky130_sram_2kbyte_1rw1r_32x512_8/gds/sky130_sram_2kbyte_1rw1r_32x512_8.gds
+
+EXTRA_SPICE_MODELS:
+  - macros/sky130_sram_2kbyte_1rw1r_32x512_8/spice/sky130_sram_2kbyte_1rw1r_32x512_8.spice
+
+# -----------------------------------------------------------------------------
+# Floorplan
+#
+# ILK KOSUM ICIN GECICI: alan hedefi henuz olculmedi. Once sentez kosulup
+# hucre alani ogrenilecek, sonra DIE_AREA buna gore belirlenecek.
+# FP_SIZING relative + CORE_UTIL ile araca birakmak ilk denemede daha guvenli.
+# -----------------------------------------------------------------------------
+# 23 makro x 0,285 mm2 = 6,54 mm2 yalnizca bellek.
+# Makrolar tipik olarak die alaninin %50-65'ini kaplar; kalani mantik ve
+# yonlendirme kanallari. Ilk denemede araca birakiliyor, floorplan
+# raporundan sonra DIE_AREA acikca verilecek.
+FP_SIZING: relative
+FP_CORE_UTIL: 25            # makro yogun tasarim - dusuk doluluk gerekir
+
+# Makro yerlestirmesi icin kanal payi (um)
+MACRO_PLACE_HALO: [30, 30]
+PL_TARGET_DENSITY_PCT: 35
+
+# -----------------------------------------------------------------------------
+# Sentez
+# -----------------------------------------------------------------------------
+SYNTH_STRATEGY: "AREA 0"
+
+# -----------------------------------------------------------------------------
+# Lint
+#
+# Sartname reports/lint/ altinda Verilator lint ciktisi istiyor.
+# -----------------------------------------------------------------------------
+RUN_LINTER: true
+LINTER_RELATIVE_INCLUDES: true
+
+# -----------------------------------------------------------------------------
+# PDK
+# -----------------------------------------------------------------------------
+PDK: sky130A
+STD_CELL_LIBRARY: sky130_fd_sc_hd
+
+# >>> URETILEN BLOK - gen_sources.py ile uretilir, ELLE DUZENLEMEYIN >>>
+# Kaynak: filelist.f  (53 dosya)
+VERILOG_FILES:
+  - ../rtl/Cevre_Birimleri/files_1/uart_pkg.sv
+  - ../rtl/Memory/memory_map_pck.sv
+  - ../rtl/cv32e40p-master/rtl/include/cv32e40p_apu_core_pkg.sv
+  - ../rtl/cv32e40p-master/rtl/include/cv32e40p_fpu_pkg.sv
+  - ../rtl/cv32e40p-master/rtl/include/cv32e40p_pkg.sv
+  - ../rtl/Cevre_Birimleri/dma_controller.sv
+  - ../rtl/Cevre_Birimleri/files_1/sync_fifo.sv
+  - ../rtl/Cevre_Birimleri/files_1/uart_peripheral.sv
+  - ../rtl/Cevre_Birimleri/files_1/uart_rx.sv
+  - ../rtl/Cevre_Birimleri/files_1/uart_stream_peripheral.sv
+  - ../rtl/Cevre_Birimleri/files_1/uart_tx.sv
+  - ../rtl/Cevre_Birimleri/gpio_peripheral.sv
+  - ../rtl/Cevre_Birimleri/i2c_peripheral.sv
+  - ../rtl/Cevre_Birimleri/jtag_debug.sv
+  - ../rtl/Cevre_Birimleri/qspi_master.sv
+  - ../rtl/Cevre_Birimleri/timer_peripheral.sv
+  - ../rtl/Memory/axi_lite_interconnect.sv
+  - ../rtl/Memory/axil_arbiter_2to1.sv
+  - ../rtl/Memory/axil_arbiter_3to1.sv
+  - ../rtl/Memory/obi_to_axi_simple.sv
+  - ../rtl/Memory/sram_module.sv
+  - ../rtl/boot/boot_rom.sv
+  - ../rtl/cv32e40p-master/bhv/cv32e40p_sim_clock_gate.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_aligner.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_alu.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_alu_div.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_apu_disp.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_compressed_decoder.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_controller.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_core.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_cs_registers.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_fifo.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_hwloop_regs.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_id_stage.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_if_stage.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_int_controller.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_mult.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_obi_interface.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_popcnt.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_prefetch_buffer.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_prefetch_controller.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_register_file_ff.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_sleep_unit.sv
+  - ../rtl/npu/npu_accelerator.sv
+  - ../rtl/npu/npu_axi_controller.sv
+  - ../rtl/npu/npu_compute_engine.sv
+  - ../rtl/npu/npu_csr.sv
+  - ../rtl/npu/npu_tcm_sram.sv
+  - ../rtl/Memory/soc_top.sv
+# <<< URETILEN BLOK SONU <<<

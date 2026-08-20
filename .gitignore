@@ -45,3 +45,6 @@ asic/*/runs/
 
 # Regresyon calisma dizini (her kosumda yeniden uretilir)
 build/regression/
+
+# ASIC akisi gecici calisma alani (yeniden uretilir)
+asic/run/
