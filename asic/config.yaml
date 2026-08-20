@@ -241,10 +241,10 @@ PDN_MACRO_CONNECTIONS:
 # ortada 150 um kullanilabilir serit kaliyor. Global yonlendirme kullanimi
 # zaten %14,4 idi - yer bol.
 # -----------------------------------------------------------------------------
-FP_MACRO_HORIZONTAL_HALO: 25
-FP_MACRO_VERTICAL_HALO: 25
-PDN_HORIZONTAL_HALO: 25
-PDN_VERTICAL_HALO: 25
+FP_MACRO_HORIZONTAL_HALO: 30
+FP_MACRO_VERTICAL_HALO: 30
+PDN_HORIZONTAL_HALO: 30
+PDN_VERTICAL_HALO: 30
 
 # -----------------------------------------------------------------------------
 # Sentez
@@ -322,3 +322,22 @@ VERILOG_FILES:
   - ../rtl/npu/npu_tcm_sram.sv
   - ../rtl/Memory/soc_top.sv
 # <<< URETILEN BLOK SONU <<<
+
+# -----------------------------------------------------------------------------
+# ANTEN ONARIMI - YALNIZCA ATLAMA TELI  (5. kosumda eklendi)
+#
+# 3. kosum su hatayla dustu:
+#     [ERROR DRT-1231] Pin u_data_ram.g_sram[3].u_macro/addr1[7]
+#                      does not have access point
+#
+# Kok neden: anten onarimi 586 diyot ekledi, biri makro kenarina dusup
+# pin erisimini kapatti. 4. kosumda halo 25 um'ye cikarildi; yetmedi.
+#
+# Bu ayar diyot yerlestirmesini tamamen devreden cikarir. Anten ihlalleri
+# metal atlama teliyle giderilir - yeni hucre yerlesmez, yerlesim
+# kalabaligi olusmaz, makro pini kapanamaz.
+#
+# Maliyet yonlendirme kaynagidir. Bizde bol: global yonlendirme kullanimi
+# %14,4, overflow 0.
+# -----------------------------------------------------------------------------
+GRT_ANTENNA_REPAIR_JUMPER_ONLY: true
