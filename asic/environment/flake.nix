@@ -20,9 +20,15 @@
 {
   description = "Arkhe SoC - ASIC fiziksel tasarim ortami (LibreLane + sky130A)";
 
+  # LibreLane nixpkgs'i dogrudan bir girdi olarak disari acmiyor;
+  # nix-eda uzerinden tasiyor. Bu yuzden
+  #     nixpkgs.follows = "librelane/nixpkgs"
+  # yazilamaz - "input 'nixpkgs' follows a non-existent input" hatasi verir.
+  # Dogru yol nix-eda zincirini takip etmektir; boylece LibreLane'in
+  # kendi araclarini derledigi nixpkgs ile BIREBIR AYNI surum kullanilir.
   inputs = {
     librelane.url = "github:librelane/librelane";
-    nixpkgs.follows = "librelane/nixpkgs";
+    nixpkgs.follows = "librelane/nix-eda/nixpkgs";
   };
 
   outputs = { self, librelane, nixpkgs }:
