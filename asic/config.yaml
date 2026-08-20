@@ -196,6 +196,57 @@ FP_SIZING: absolute
 DIE_AREA: [0, 0, 3832.40, 3999.24]
 
 # -----------------------------------------------------------------------------
+# MAKRO GUC BAGLANTISI
+#
+# Ilk kosumda PDN adimi 46 uyari verdi (23 makro x 2 pin):
+#     [PDN-0231] u_data_ram.g_sram[0].u_macro is not connected to any
+#                power/ground nets.
+#     [PDN-0189] Supply pin ...u_macro/vccd1 is not connected to any net.
+#
+# PDN_CONNECT_MACROS_TO_GRID varsayilan olarak true, ama tek basina
+# yetmiyor: OpenROAD makronun HANGI pininin hangi ust seviye aga
+# baglanacagini bilmiyor. Esleme acikca verilmelidir.
+#
+# Bicim:  <ornek_adi_regex> <vdd_agi> <gnd_agi> <vdd_pini> <gnd_pini>
+#
+#   ust seviye aglar : VPWR / VGND   (DEF SPECIALNETS bolumunden okundu)
+#   makro pinleri    : vccd1 / vssd1 (makro LEF'inden)
+#
+# Bu baglanti olmadan makrolarin fiziksel tasarimda GUCU YOKTUR ve LVS
+# gecmez. RTL'de guc pinlerinin bagli olmamasi dogrudur (sabite baglamak
+# elektriksel kisa devre olurdu); baglanti tam da burada yapilir.
+# -----------------------------------------------------------------------------
+PDN_CONNECT_MACROS_TO_GRID: true
+PDN_MACRO_CONNECTIONS:
+  - ".*u_macro VPWR VGND vccd1 vssd1"
+
+# -----------------------------------------------------------------------------
+# MAKRO HALO (kenar bosluk payi)
+#
+# Ilk kosumda detayli yonlendirme SU HATAYLA durdu:
+#     [ERROR DRT-1231] Pin u_data_ram.g_sram[3].u_macro/addr1[7]
+#                      does not have access point
+#
+# Zincir soyle isledi:
+#   1. Ana yonlendirme BASARILI bitti - 63 turda 55.347 -> 23 ihlal.
+#   2. Anten denetimi 282 ag + 343 pin ihlali buldu.
+#   3. Onarim 586 DIYOT ekledi.
+#   4. Diyotlar makro kenarina yerlesince o pinin erisim noktasi kapandi.
+#
+# Varsayilan halo 10 um idi. 25 um'ye cikariliyor: makro kenarinda
+# standart hucre ve diyot yerlesemeyecek bir serit birakilir, yonlendirici
+# pinlere ulasacak yeri korur.
+#
+# Alan maliyeti yok: kanallar 200 um, halo her iki yandan 25 um alsa bile
+# ortada 150 um kullanilabilir serit kaliyor. Global yonlendirme kullanimi
+# zaten %14,4 idi - yer bol.
+# -----------------------------------------------------------------------------
+FP_MACRO_HORIZONTAL_HALO: 25
+FP_MACRO_VERTICAL_HALO: 25
+PDN_HORIZONTAL_HALO: 25
+PDN_VERTICAL_HALO: 25
+
+# -----------------------------------------------------------------------------
 # Sentez
 # -----------------------------------------------------------------------------
 SYNTH_STRATEGY: "AREA 0"
