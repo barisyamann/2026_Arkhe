@@ -161,6 +161,39 @@ gecerli olur. Coklayici anlik secim sinyaliyle surulurse yanlis makronun
 cikisi alinir. Her iki modulde de secim sinyali bir cevrim geciktirilerek
 kullanilmaktadir.
 
+### Satici dosyasinda yapilan degisiklikler
+
+Makronun Verilog modelinde UC degisiklik yapildi. Hicbiri davranisi,
+boyutu veya zamanlamayi etkilemez:
+
+| # | Degisiklik | Neden |
+|---|---|---|
+| 1 | `mem` bildirimi yukari tasindi | Vivado xvlog "identifier 'mem' is used before its declaration" hatasi veriyordu; ozgun dosyada `$display` satirlari bildirimden once mem'i kullaniyordu |
+| 2 | `VERBOSE` varsayilani 1 -> 0 | Model her okuma/yazmada `$display` yapiyordu; 23 makro ile simulasyon logu kullanilamaz hale geliyordu. Ornekleme sirasinda parametre gecersiz kilmak Verilator lint'te blackbox oldugu icin cozumlenemiyordu |
+| 3 | Basa `/// sta-blackbox` eklendi | OpenSTA dosyayi gate-level netlist sanip okumaya calisiyor ve satir 20'de sozdizimi hatasi veriyordu. Aracin kendi onerdigi cozum; zamanlama bilgisi zaten `.lib` dosyasindan geliyor |
+
+Fiziksel gorunumler (gds, lef, lib, spice) **degistirilmemistir**.
+
+### PVT koseleri - bilinen sinir
+
+LibreLane akisi uc kosede zamanlama analizi yapiyor:
+
+    nom_tt_025C_1v80    tipik
+    nom_ff_n40C_1v95    hizli  (-40 C, 1,95 V)
+    nom_ss_100C_1v60    yavas  (100 C, 1,60 V)
+
+Standart hucre kutuphanesinin ucu icin de modeli var. Ancak kullandigimiz
+SRAM makrosunun YALNIZCA `TT_1p8V_25C` modeli mevcut; akis uc kosede de
+ayni tipik modeli okuyor.
+
+Bu, makronun hizli ve yavas kosedeki davranisinin gercekci
+modellenmedigi anlamina gelir. Alternatif `sram_1rw1r_32_256_8_sky130`
+makrosunda FF/SS koseleri var, ancak 1 kB oldugu icin 46 kB toplam icin
+46 ornekleme gerekirdi (23 yerine).
+
+Karar: akis tamamlanana kadar tek koseyle devam; cok koseli imzalama
+zorunlu tutulursa makro degisimi degerlendirilecek.
+
 ### `config/` dizini bos
 
 Hazir PDK makrosu kullanildigi icin OpenRAM uretim yapilandirmasi

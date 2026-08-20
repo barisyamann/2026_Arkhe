@@ -95,13 +95,23 @@ module npu_tcm_sram #(
             assign sec_a = en_a && inr_a && (sel_a == gi[3:0]);
             assign sec_b = en_b && inr_b && (sel_b == gi[3:0]);
 
-            // VERBOSE=0: model her okuma/yazmada $display yapiyor.
-            // 23 makro ile simulasyon logu kullanilamaz hale gelirdi.
-            sky130_sram_2kbyte_1rw1r_32x512_8 #(.VERBOSE(0)) u_macro (
-`ifdef USE_POWER_PINS
-                .vccd1  (1'b1),
-                .vssd1  (1'b0),
-`endif
+            // NOT: VERBOSE varsayilani makro modelimizde 0 yapildi;
+            // burada parametre gecersiz kilinmiyor cunku Verilator
+            // lint sirasinda makro BLACKBOX'tir ve parametresi
+            // cozumlenemez.
+            sky130_sram_2kbyte_1rw1r_32x512_8 u_macro (
+                // GUC PINLERI BAGLANMIYOR.
+                //
+                // vccd1/vssd1 makro modelinde 'inout' tipindedir. Sabit deger
+                // baglamak elektriksel kisa devredir; Verilator bunu dogru
+                // sekilde hata sayiyor:
+                //   %Error-PORTSHORT: Output port is connected to a constant pin
+                //   %Error-UNSUPPORTED: Unsupported tristate port expression
+                //
+                // ASIC akisinda makro guc baglantisi RTL'de degil, PDN
+                // (Power Distribution Network) adiminda fiziksel olarak
+                // yapilir. Simulasyonda ise USE_POWER_PINS tanimsiz oldugu
+                // icin bu portlar zaten yoktur.
                 // Port 0 - okuma + yazma
                 .clk0   (clk),
                 .csb0   (~sec_a),
@@ -119,14 +129,17 @@ module npu_tcm_sram #(
             );
 
             // Simulasyonda X/U onlemek icin makro bellegini sifirla.
-            // Referans YEREL ve sabit oldugu icin testbench'ten yapilan
-            // degisken indisli erisim sorunu burada yok.
-            // synthesis translate_off
+            //
+            // SIM_MACRO_INIT ile korunuyor: bu blok makronun IC yapisina
+            // (u_macro.mem) erisiyor. ASIC akisinda ve Verilator lint'te
+            // makro BLACKBOX'tir, ici gorunmez ve bu referans cozumlenemez.
+            // Yalnizca simulasyonda tanimlanir.
+`ifdef SIM_MACRO_INIT
             initial begin
                 for (int i = 0; i < MACRO_WORDS; i = i + 1)
                     u_macro.mem[i] = 32'h0;
             end
-            // synthesis translate_on
+`endif
         end
     endgenerate
 
