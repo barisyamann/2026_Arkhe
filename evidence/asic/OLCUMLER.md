@@ -418,6 +418,15 @@ Marj %15,7 (hedef periyot 20 ns).
 
 ## Acik maddeler
 
+- **ENGELLEYICI - ROM icerikleri netlist'te yok**: alti `$readmemh`
+  dosyasinin hicbiri ASIC akisinda yuklenmiyor; bootloader ve NPU
+  agirliklari (17,7 kB) sentezde silindi. Ayrinti ve cozum secenekleri:
+  `evidence/asic/READMEMH_BULGUSU.md`
+- **5. kosum da DRT-1231 ile dustu** (`u_data_ram.g_sram[2]`).
+  Uc hatanin ucu de ust sira makrolarinda (y = 3332,7). Ust kenar payi
+  250 -> 500 um onerisi. `GRT_ANTENNA_REPAIR_JUMPER_ONLY` denendi,
+  ISE YARAMADI - ayar uygulandi ama OpenROAD yine 1813 diyot koydu.
+
 - **PVT koseleri**: akis uc kosede (tt/ff/ss) zamanlama yapiyor ama
   makronun yalnizca TT modeli var; uc kosede de ayni model okunuyor.
 - **Saat kapisi**: INCELENDI (bkz. a6). SYNTHESIS dali aliniyor, saat
