@@ -32,7 +32,15 @@ CONFIG   = os.path.join(ASIC, "config.yaml")
 # asic/ altinda tutulmaz). Makro Verilog modelleri istisnadir - onlar
 # macros/<ad>/verilog/ altinda durur ve fiziksel makronun parcasidir.
 YASAK_UZANTI = (".sv", ".v", ".vhd", ".vhdl")
-ISTISNA_DIZIN = ("macros",)
+# asic/ altinda RTL aranirken ATLANACAK dizinler.
+#
+#   macros/   saticidan gelen makro modelleri - bizim RTL'imiz degil
+#   results/  AKIS CIKTISI. results/netlist/soc_top.nl.v bir gate-level
+#             netlist'tir, RTL kaynagi degildir; ustelik sartname onu tam
+#             da orada istiyor. Denetime dahil edilirse teslim edilecek
+#             dosyayi ihlal sayar.
+#   run/      gecici calisma alani (asagida ayrica ele aliniyor)
+ISTISNA_DIZIN = ("macros", "results")
 
 # Listede olmamasi gerekenler
 TESTBENCH_DESEN = re.compile(r"(^|/)(tb_|.*_tb\.)", re.I)
