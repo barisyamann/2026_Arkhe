@@ -18,7 +18,7 @@ CONFIG    ?= config.yaml
 RUN_DIR   ?= run
 TAG       ?= arkhe
 
-.PHONY: asic_run lint synth sources collect check clean distclean help
+.PHONY: asic_run asic_verify asic_clean lint synth sources collect check clean distclean help
 
 # -----------------------------------------------------------------------------
 # ZORUNLU HEDEF - tam akis
@@ -74,6 +74,22 @@ collect:
 	@python3 scripts/collect_outputs.py $(RUN_DIR)/$(TAG)
 
 # -----------------------------------------------------------------------------
+# ONERILEN HEDEFLER  (Final Ciktilar s.34)
+#
+#   asic_verify : teslim edilen rapor ve ciktilarin varligini denetler,
+#                 temel sonuclari ozetler
+#   asic_clean  : run/ altindaki yeniden uretilebilir dosyalari temizler
+# -----------------------------------------------------------------------------
+asic_verify:
+	python3 scripts/check_teslim.py
+
+asic_clean:
+	rm -rf $(RUN_DIR)/*
+	@mkdir -p $(RUN_DIR)
+	@touch $(RUN_DIR)/.gitkeep
+	@echo "run/ temizlendi (.gitkeep birakildi)"
+
+# -----------------------------------------------------------------------------
 # Temizlik
 # -----------------------------------------------------------------------------
 clean:
@@ -91,3 +107,5 @@ help:
 	@echo "  make sources    config.yaml kaynak listesini filelist.f'ten uret"
 	@echo "  make check      filelist tutarlilik denetimi"
 	@echo "  make clean      gecici calisma alanini sil"
+	@echo "  make asic_verify teslim denetimi (onerilen)"
+	@echo "  make asic_clean  run/ temizle (onerilen)"
