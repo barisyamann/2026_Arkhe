@@ -1,0 +1,10 @@
+06-yosys-synthesis 00:04:51.512
+28-openroad-globalplacement 00:03:03.935
+32-openroad-repairdesignpostgpl 00:08:02.252
+35-openroad-cts 00:02:27.213
+39-openroad-globalrouting 00:01:26.390
+44-openroad-detailedrouting 00:44:51.182
+54-openroad-rcx 00:01:11.630
+55-openroad-stapostpnr 00:53:42.260
+56-openroad-irdropreport 00:05:09.704
+57-magic-streamout 00:01:52.293

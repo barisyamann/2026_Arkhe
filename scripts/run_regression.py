@@ -88,6 +88,24 @@ TESTLER = [
         # agirlik degildir - kopyalanmaya devam ediyor.
         mem=["test_input_pattern.mem"],
     ),
+    # -------------------------------------------------------------------------
+    # TAM SISTEM TESTI
+    #
+    # 21 Agustos 2026'da fark edildi: regresyon YALNIZCA blok testlerini
+    # kapsiyordu, tb_soc_top hic kosmuyordu. Yani bootloader'in calistigi,
+    # QSPI -> I-RAM aktariminin dogrulugu ve uctan uca akis regresyonla
+    # dogrulanmiyordu. Blok testleri gectigi icin "dogrulandi" saniliyordu.
+    #
+    # Kaynak listesi asic/filelist.f'ten okunur (bkz. filelist_rtl).
+    # -------------------------------------------------------------------------
+    dict(
+        ad="sistem",
+        top="tb_soc_top",
+        kaynak=None,                      # filelist_rtl() ile doldurulur
+        ek_kaynak=[TB/"spi_flash_model.sv", TB/"tb_soc_top.sv"],
+        mem=["app.hex", "boot.hex"],
+        mem_zorunlu=False,                # bulunamazsa test atlanir, cokmez
+    ),
 ]
 
 MEM_KAYNAKLARI = [
@@ -116,7 +134,39 @@ def komut(args, cwd, log_yolu):
     return p.returncode, (p.stdout or "")
 
 
+# -----------------------------------------------------------------------------
+# Tam sistem testi icin RTL listesi
+#
+# TEK DOGRULUK KAYNAGI asic/filelist.f'tir. Listeyi elle tekrarlamak yerine
+# oradan okuyoruz; boylece ASIC akisi ile regresyon AYNI kaynaklari kullanir
+# ve biri degisince digeri geride kalmaz.
+#
+# filelist.f yollari asic/ dizinine goredir (../rtl/...), burada cozuluyor.
+# -----------------------------------------------------------------------------
+def filelist_rtl():
+    fl = ROOT / "asic" / "filelist.f"
+    if not fl.is_file():
+        return None
+    kaynaklar = []
+    for satir in fl.read_text(encoding="utf-8", errors="replace").splitlines():
+        satir = satir.split("//")[0].split("#")[0].strip()
+        if not satir or satir.startswith("+") or satir.startswith("-"):
+            continue
+        yol = (ROOT / "asic" / satir).resolve()
+        if yol.is_file():
+            kaynaklar.append(yol)
+    return kaynaklar or None
+
+
 def test_kos(t, vivado_bin):
+    # Kaynak listesi gec baglanan testler (tam sistem) icin
+    if t.get("kaynak") is None:
+        rtl = filelist_rtl()
+        if rtl is None:
+            return dict(ad=t["ad"], durum="ATLANDI", denetim=0,
+                        not_="asic/filelist.f okunamadi")
+        t = dict(t, kaynak=rtl + list(t.get("ek_kaynak", [])))
+
     d = WORK / t["ad"]
     if d.exists():
         shutil.rmtree(d, ignore_errors=True)
@@ -125,6 +175,8 @@ def test_kos(t, vivado_bin):
     for m in t["mem"]:
         kaynak = mem_bul(m)
         if kaynak is None:
+            if not t.get("mem_zorunlu", True):
+                continue
             return dict(ad=t["ad"], durum="ATLANDI", denetim=0,
                         not_=f"{m} bulunamadi")
         shutil.copy2(kaynak, d / m)
