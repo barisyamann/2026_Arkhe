@@ -18,7 +18,9 @@ Kosum dizini           : ~/arkhe/asic  (WSL yerel diski)
                        # kosuyordu, kosum dizini WSL diskine tasindi.
 
 [LibreLane]
-Surum                  : v3.0.10                     # librelane --version
+Surum                  : v3.0.6                      # librelane --version
+                       # Sartname s.7 referans surumu. DDK onayi
+                       # gerektirmemesi icin referans surumde kalindi.
 Akis                   : Classic
 Kaynak                 : github:librelane/librelane
 
@@ -30,7 +32,7 @@ Kaynak                 : github:librelane/librelane
 # NOT: nixpkgs.follows zinciri "librelane/nix-eda/nixpkgs" olmalidir.
 # "librelane/nixpkgs" yazilirsa nix hata verir - LibreLane nixpkgs'i
 # dogrudan disari acmiyor, nix-eda uzerinden tasiyor.
-librelane              : bf8cc13c3b6314a099fabac208393d323cc5bfe2
+librelane              : ba7193bff33d68941683b2963b90aa30cea117d1
 nix-eda                : 8f990fb77529c09e540e453cd836af9930ec58db
 nixpkgs                : b3aad468604d3e488d627c0b43984eb60e75e782
 ciel                   : afcb23d368614ffa1e7e96584ed33f839c71c576
@@ -49,6 +51,15 @@ Standart hucre kutup.  : sky130_fd_sc_hd
 Zamanlama koseleri     : nom_tt_025C_1v80 (birincil)
                          nom_ff_n40C_1v95
                          nom_ss_100C_1v60
+
+[Akisi calistirmak icin gerekli komutlar]
+# Sartname s.11 bu bilgiyi versions.txt icinde zorunlu tutuyor.
+
+    nix develop ./environment        # ortama gir
+    cd asic
+    make asic_run                    # zorunlu hedef - tam akis
+    make asic_verify                 # rapor ve cikti varligini denetle
+    make asic_clean                  # run/ altini temizle
 
 [Akis araclari]
 Yosys                  : 0.62                        # sentez logu
@@ -71,7 +82,9 @@ Fiziksel boyut         : 683,1 x 416,54 um = 0,285 mm2
 Zamanlama modeli       : TT_1p8V_25C
                        # UYARI: makronun yalnizca TT kosesi vardir.
                        # ff ve ss koselerinde de ayni model okunuyor.
-OpenRAM surumu         : yok - hazir makro kullanildi
+OpenRAM surumu         : OpenRAM kullanilmadi
+                       # Sartname s.11 bu ifadeyi birebir istiyor.
+                       # Referans PDK'daki hazir makro kullanildi.
 Toplam makro sayisi    : 23  (NPU TCM 15 + I-RAM 4 + D-RAM 4)
 
 [Makro model degisiklikleri]

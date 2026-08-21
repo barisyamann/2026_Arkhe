@@ -27,7 +27,15 @@
   # Dogru yol nix-eda zincirini takip etmektir; boylece LibreLane'in
   # kendi araclarini derledigi nixpkgs ile BIREBIR AYNI surum kullanilir.
   inputs = {
-    librelane.url = "github:librelane/librelane";
+    # SURUM SABITLENDI: 3.0.6
+    #
+    # Sartname s.7 referans surumu 3.0.6 olarak belirliyor. Farkli bir surum
+    # ancak DDK'nin ONCEDEN ONAYIYLA kullanilabilir. Onay surecine girmemek
+    # icin referans surumde kaliyoruz.
+    #
+    # Gelistirme sirasinda bir sure 3.0.10 kullanildi; teslim edilecek butun
+    # ciktilar 3.0.6 ile uretilmistir.
+    librelane.url = "github:librelane/librelane/3.0.6";
     nixpkgs.follows = "librelane/nix-eda/nixpkgs";
   };
 
