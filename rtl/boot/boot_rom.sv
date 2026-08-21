@@ -5,10 +5,10 @@
 // Açıklama: İşlemci ilk komutlarını bu ROM içerisindeki bootloader üzerinden çeker.
 // =============================================================================
 
-module boot_rom (
+module boot_rom import boot_rom_pkg::*; (
     input  logic        clk_i,
     input  logic        rst_ni,
-    
+
     // İşlemci OBI/AXI Arayüzünden Gelen İstekler
     input  logic [31:0] rom_addr_i,
     input  logic        rom_req_i,
@@ -17,12 +17,22 @@ module boot_rom (
 );
 
     // 1 kB ROM Alanı: 256 satır x 32-bit (4 Byte) = 1024 Byte
-    logic [31:0] rom_mem [0:255]; 
-
-    // Bellek hücrelerini boot.hex dosyası ile dolduruyoruz
-    initial begin
-        $readmemh("boot.hex", rom_mem);
-    end
+    //
+    // İÇERİK RTL'E GÖMÜLÜDÜR - dosyadan okunmaz.
+    //
+    // Önceden `$readmemh("boot.hex", rom_mem)` kullanılıyordu. Dosya adı
+    // çıplaktı ve $readmemh dosyayı ÇALIŞMA DİZİNİNE göre arar. Vivado
+    // projeye eklenmiş dosyayı çözebiliyordu; LibreLane ise her adımı kendi
+    // dizininde koşturur (asic/run/arkhe/06-yosys-synthesis/) ve oradan
+    // boot.hex görünmüyordu. ROM tanımsız (X) kalıyor, Yosys de siliyordu:
+    //
+    //     soc_top.u_boot_rom.rom_mem: removing const-x lane 0..31
+    //
+    // Hata verilmiyordu - sessizdi. Üretilecek çip açılmazdı.
+    //
+    // Paket `scripts/gen_rom_paketleri.py` ile üretilir; aynı betik ürettiği
+    // değerleri kaynak dosyayla tek tek karşılaştırarak doğrular.
+    localparam logic [31:0] ROM_MEM [0:255] = BOOT_ROM_ICERIK;
 
     // Okuma Mantığı (Açılışta kararlılık için Yazmaç Destekli)
     always_ff @(posedge clk_i or negedge rst_ni) begin
@@ -33,7 +43,7 @@ module boot_rom (
             rom_rvalid_o <= rom_req_i; // İstek geldiği çevrimin (cycle) sonunda veri geçerlidir
             if (rom_req_i) begin
                 // Adres byte addressable olduğu için [9:2] bitlerini seçiyoruz (Word alignment)
-                rom_rdata_o <= rom_mem[rom_addr_i[9:2]]; 
+                rom_rdata_o <= ROM_MEM[rom_addr_i[9:2]];
             end
         end
     end

@@ -17,6 +17,10 @@
 
 # --- Paketler (once derlenmeli) ---
 ../rtl/Cevre_Birimleri/files_1/uart_pkg.sv
+# ROM icerik paketleri - URETILMISTIR (scripts/gen_rom_paketleri.py).
+# Bunlar boot_rom.sv ve npu_compute_engine.sv'den ONCE gelmelidir.
+../rtl/boot/boot_rom_pkg.sv
+../rtl/npu/npu_weights_pkg.sv
 ../rtl/Memory/memory_map_pck.sv
 ../rtl/cv32e40p-master/rtl/include/cv32e40p_apu_core_pkg.sv
 ../rtl/cv32e40p-master/rtl/include/cv32e40p_fpu_pkg.sv

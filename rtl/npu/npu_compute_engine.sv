@@ -13,7 +13,7 @@
 //              zamanlama kapatmak icin boru hattina ayrilmistir.
 //              Aritmetik degistirilmemistir; sadece cevrimlere yayilmistir.
 
-module npu_compute_engine (
+module npu_compute_engine import npu_weights_pkg::*; (
     input  logic        clk,
     input  logic        rst_n,
 
@@ -134,21 +134,31 @@ module npu_compute_engine (
     logic signed [8:0]  fc_y;       // ReLU + doygunluk sonrasi aktivasyon
     logic [13:0]        fc_idx;     // FC agirlik indeksi (0..3999)
 
-    // --- Ağırlık ve Sapma (Weight & Bias) ROM Dizi Tanımlamaları ---
-    logic signed [7:0]  dw_weights [0:639];
-    logic signed [31:0] dw_bias    [0:7];
-    logic signed [7:0]  fc_weights [0:15999];
-    logic signed [31:0] fc_bias    [0:3];
-    logic [12:0] softmax_exp_lut [0:255];
-
-    // ROM Belleklerin Dosyadan Okunarak İlklendirilmesi
-    initial begin
-        $readmemh("dw_weights.mem", dw_weights);
-        $readmemh("dw_bias.mem", dw_bias);
-        $readmemh("fc_weights.mem", fc_weights);
-        $readmemh("fc_bias.mem", fc_bias);
-        $readmemh("softmax_exp_lut.mem", softmax_exp_lut);
-    end
+    // --- Ağırlık ve Sapma (Weight & Bias) ROM Dizileri ---
+    //
+    // İÇERİK RTL'E GÖMÜLÜDÜR - dosyadan okunmaz.
+    //
+    // Önceden `$readmemh("fc_weights.mem", ...)` gibi ÇIPLAK dosya adlarıyla
+    // okunuyordu. $readmemh dosyayı ÇALIŞMA DİZİNİNE göre arar: Vivado
+    // projeye eklenmiş dosyaları çözebiliyordu, LibreLane ise her adımı
+    // kendi dizininde koşturduğu için (asic/run/arkhe/06-yosys-synthesis/)
+    // hiçbirini bulamıyordu. Beş tablo da tanımsız (X) kalıyor ve Yosys
+    // onları siliyordu:
+    //
+    //     dw_weights: removing const-x lane 0..7
+    //     fc_weights: removing const-x lane 0..7
+    //     ...
+    //
+    // Hata verilmiyordu. ASIC netlist'inde ağırlıklar yoktu; üretilecek çip
+    // NPU'da çöp hesaplardı.
+    //
+    // Paket `scripts/gen_rom_paketleri.py` ile üretilir; aynı betik ürettiği
+    // değerleri kaynak .mem dosyalarıyla tek tek karşılaştırarak doğrular.
+    localparam logic signed [7:0]  dw_weights [0:639]   = DW_WEIGHTS;
+    localparam logic signed [31:0] dw_bias    [0:7]     = DW_BIAS;
+    localparam logic signed [7:0]  fc_weights [0:15999] = FC_WEIGHTS;
+    localparam logic signed [31:0] fc_bias    [0:3]     = FC_BIAS;
+    localparam logic [12:0] softmax_exp_lut [0:255]     = SOFTMAX_EXP_LUT;
 
     // --- Adres ve Sınır Güvenliği Mantığı (Reshape 49x40x1) ---
     logic signed [31:0] t_in_signed;
