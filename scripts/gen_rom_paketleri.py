@@ -2,7 +2,7 @@
 # =============================================================================
 #  gen_rom_paketleri.py - ROM tablolarini SystemVerilog paketine gomer
 #
-#  NEDEN
+#  NEDEN GOMULU
 #    RTL'de tablolar $readmemh ile dosyadan okunuyordu:
 #
 #        $readmemh("boot.hex", rom_mem);
@@ -20,10 +20,40 @@
 #
 #    Uretilecek cip acilmaz, NPU cop hesaplardi. Hata verilmedi - sessiz.
 #
-#  COZUM
-#    Degerleri dogrudan RTL'e gomek. Dosya bagimliligi tamamen kalkar;
-#    hangi aracta kosarsan kos ayni sonucu verir.
+# -----------------------------------------------------------------------------
+#  NEDEN "PARCALI PACKED VEKTOR + ERISIM FONKSIYONU"
 #
+#    Ilk surum tablolari UNPACKED localparam dizisi olarak uretiyordu:
+#
+#        localparam logic signed [7:0] FC_WEIGHTS [0:15999] = '{...};
+#
+#    Verilator (0,4 sn) ve Yosys (20 dk, tam akis) bunu sorunsuz sindirdi.
+#    VIVADO SINDIREMEDI: xelab tek bir modulde 82 DAKIKA kosup bitiremedi.
+#
+#    Sebep: unpacked dizi elaboratore gore 16.000 AYRI NESNEDIR. Vivado her
+#    biri icin sembol tablosu girisi ve tip analizi yapar. Verilator ve Yosys
+#    ic temsilde hemen duzlestirdigi icin etkilenmez.
+#
+#    Packed vektor tek nesnedir; dilimleme (W[i*8 +: 8]) sentezde adres
+#    cozucuye doner. Olculdu:
+#
+#        bicim                     Vivado xelab
+#        unpacked localparam dizi  240 sn'de BITMEDI
+#        packed vektor + fonksiyon 2,5 SANIYE
+#
+#    PARCALAMA neden gerekli: Verilator sayi sabitlerinde 65.536 BIT sinirina
+#    sahiptir. Olculdu:
+#
+#        65.536 bit  -> tamam
+#        98.304 bit  -> "Width of number exceeds implementation limit"
+#
+#    fc_weights 128.000 bit oldugu icin tablolar parcalara bolunur; erisim
+#    fonksiyonu ust adres bitleriyle dogru parcayi secer.
+#
+#    DERS: bir tasarim karari, o kararin kosacagi BUTUN araclarda
+#    dogrulanmalidir. Hizli olan aracta gecmesi hicbir sey kanitlamaz.
+#
+# -----------------------------------------------------------------------------
 #  DOGRULAMA
 #    Bu betik uretim yaptiktan sonra urettigi dosyayi GERI OKUR ve kaynak
 #    .mem dosyasiyla deger deger karsilastirir. Tek bit kaymasi bile
@@ -33,7 +63,6 @@
 #  KULLANIM
 #      python scripts/gen_rom_paketleri.py            uret + dogrula
 #      python scripts/gen_rom_paketleri.py --denetle  yalnizca dogrula
-#                                                     (uretilmis dosya guncel mi)
 # =============================================================================
 
 import io
@@ -43,29 +72,47 @@ import sys
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# (paket_adi, cikti_yolu, [(sabit_adi, kaynak_dosya, adet, bit, isaretli), ...])
+# (paket_adi, cikti_yolu, aciklama,
+#  [(erisim_fonksiyonu_adi, kaynak_dosya, adet, bit, isaretli), ...])
 PAKETLER = [
     (
         "boot_rom_pkg",
         "rtl/boot/boot_rom_pkg.sv",
         u"Boot ROM icerigi - bootloader makine kodu (sw_nexys/src/bootloader.S)",
-        [("BOOT_ROM_ICERIK", "rtl/boot/boot.hex", 256, 32, False)],
+        [("boot_rom_icerik", "rtl/boot/boot.hex", 256, 32, False)],
     ),
     (
         "npu_weights_pkg",
         "rtl/npu/npu_weights_pkg.sv",
         u"NPU egitilmis agirliklari, sapmalari ve softmax bakis tablosu",
         [
-            ("DW_WEIGHTS",      "weights/dw_weights.mem",      640,    8, True),
-            ("DW_BIAS",         "weights/dw_bias.mem",           8,   32, True),
-            ("FC_WEIGHTS",      "weights/fc_weights.mem",    16000,    8, True),
-            ("FC_BIAS",         "weights/fc_bias.mem",           4,   32, True),
-            ("SOFTMAX_EXP_LUT", "weights/softmax_exp_lut.mem", 256,   13, False),
+            ("dw_weights",      "weights/dw_weights.mem",      640,    8, True),
+            ("dw_bias",         "weights/dw_bias.mem",           8,   32, True),
+            ("fc_weights",      "weights/fc_weights.mem",    16000,    8, True),
+            ("fc_bias",         "weights/fc_bias.mem",           4,   32, True),
+            ("softmax_exp_lut", "weights/softmax_exp_lut.mem", 256,   13, False),
         ],
     ),
 ]
 
-SATIR_BASINA = 8
+# Verilator sayi sabiti siniri 65.536 bit; guvenli pay birakiyoruz.
+PARCA_TAVAN_BIT = 32768
+
+
+def adres_biti(adet):
+    """adet degeri icin gereken adres bit sayisi."""
+    n = 1
+    while (1 << n) < adet:
+        n += 1
+    return n
+
+
+def parca_boyu(bit):
+    """Parca basina giris sayisi - tavani asmayan en buyuk ikinin kuvveti."""
+    n = 1
+    while n * 2 * bit <= PARCA_TAVAN_BIT:
+        n *= 2
+    return n
 
 
 def kaynak_oku(bagil_yol, adet, bit):
@@ -77,7 +124,6 @@ def kaynak_oku(bagil_yol, adet, bit):
     degerler = []
     with io.open(yol, encoding="utf-8", errors="replace") as f:
         for satir_no, satir in enumerate(f, 1):
-            # Yorumlari ve bos satirlari at
             s = satir.split("//")[0].split("#")[0].strip()
             if not s:
                 continue
@@ -98,72 +144,121 @@ def kaynak_oku(bagil_yol, adet, bit):
     return degerler
 
 
-def paket_uret(paket_adi, aciklama, tablolar):
-    basamak = {}
-    govde = []
+def duz_hex(degerler, bit):
+    """Degerleri tek tamsayiya paketler; indeks 0 EN DUSUK bitlerde."""
+    n = 0
+    for k, v in enumerate(degerler):
+        n |= v << (k * bit)
+    genislik = (len(degerler) * bit + 3) // 4
+    return "%0*x" % (genislik, n)
 
-    govde.append(u"// " + u"=" * 75)
-    govde.append(u"//  %s.sv" % paket_adi)
-    govde.append(u"//  %s" % aciklama)
-    govde.append(u"//")
-    govde.append(u"//  BU DOSYA URETILMISTIR - ELLE DUZENLEMEYIN.")
-    govde.append(u"//")
-    govde.append(u"//      python scripts/gen_rom_paketleri.py")
-    govde.append(u"//")
-    govde.append(u"//  Kaynak dosyalar degisirse betigi tekrar kosturun.")
-    govde.append(u"//  Tutarliligi denetlemek icin:")
-    govde.append(u"//      python scripts/gen_rom_paketleri.py --denetle")
-    govde.append(u"//")
-    govde.append(u"//  NEDEN GOMULU")
-    govde.append(u"//    Onceden $readmemh ile dosyadan okunuyordu. Dosya adlari")
-    govde.append(u"//    ciplakti ve $readmemh calisma dizinine gore arar; LibreLane")
-    govde.append(u"//    her adimi kendi dizininde kosturdugu icin dosyalar")
-    govde.append(u"//    bulunamiyordu. Tablolar tanimsiz kaliyor, Yosys de onlari")
-    govde.append(u"//    siliyordu - sessizce. Uretilecek cip acilmazdi.")
-    govde.append(u"// " + u"=" * 75)
-    govde.append(u"")
-    govde.append(u"package %s;" % paket_adi)
-    govde.append(u"")
+
+def sabit_adi(ad, parca_sayisi, c):
+    if parca_sayisi == 1:
+        return "%s_DUZ" % ad.upper()
+    return "%s_DUZ%d" % (ad.upper(), c)
+
+
+def paket_uret(paket_adi, aciklama, tablolar):
+    kaynak_degerler = {}
+    g = []
+
+    g.append(u"// " + u"=" * 74)
+    g.append(u"//  %s.sv" % paket_adi)
+    g.append(u"//  %s" % aciklama)
+    g.append(u"//")
+    g.append(u"//  BU DOSYA URETILMISTIR - ELLE DUZENLEMEYIN.")
+    g.append(u"//      python scripts/gen_rom_paketleri.py")
+    g.append(u"//  Tutarlilik denetimi:")
+    g.append(u"//      python scripts/gen_rom_paketleri.py --denetle")
+    g.append(u"//")
+    g.append(u"//  BICIM: parcali packed vektor + erisim fonksiyonu")
+    g.append(u"//    UNPACKED localparam dizisi denendi; Vivado xelab tek")
+    g.append(u"//    modulde 82 dakikada bitiremedi. Packed bicim ayni isi")
+    g.append(u"//    2,5 saniyede yapiyor.")
+    g.append(u"//")
+    g.append(u"//    Parcalama gerekli: Verilator sayi sabitlerinde 65.536 bit")
+    g.append(u"//    sinirina sahip. Parca basina tavan %d bit."
+             % PARCA_TAVAN_BIT)
+    g.append(u"//")
+    g.append(u"//  Indeks 0 vektorun EN DUSUK bitlerindedir.")
+    g.append(u"// " + u"=" * 74)
+    g.append(u"")
+    g.append(u"package %s;" % paket_adi)
+    g.append(u"")
 
     for ad, kaynak, adet, bit, isaretli in tablolar:
         degerler = kaynak_oku(kaynak, adet, bit)
-        basamak[ad] = degerler
+        kaynak_degerler[ad] = degerler
 
-        tip = u"logic signed [%d:0]" % (bit - 1) if isaretli \
-            else u"logic [%d:0]" % (bit - 1)
-        genislik = (bit + 3) // 4
+        pb = parca_boyu(bit)
+        parca_sayisi = (adet + pb - 1) // pb
+        aw = adres_biti(adet)
+        pw = adres_biti(pb)
+        if isaretli:
+            tip = u"logic signed [%d:0]" % (bit - 1)
+        else:
+            tip = u"logic [%d:0]" % (bit - 1)
 
-        govde.append(u"    // %s" % kaynak)
-        govde.append(u"    //   %d giris x %d bit = %d bit%s"
-                     % (adet, bit, adet * bit,
-                        u" (isaretli)" if isaretli else u""))
-        govde.append(u"    localparam %s %s [0:%d] = '{" % (tip, ad, adet - 1))
+        g.append(u"    // %s" % kaynak)
+        g.append(u"    //   %d giris x %d bit = %d bit%s"
+                 % (adet, bit, adet * bit,
+                    u" (isaretli)" if isaretli else u""))
+        if parca_sayisi > 1:
+            g.append(u"    //   %d parca x %d giris" % (parca_sayisi, pb))
 
-        for i in range(0, adet, SATIR_BASINA):
-            dilim = degerler[i:i + SATIR_BASINA]
-            metin = u", ".join(u"%d'h%0*x" % (bit, genislik, v) for v in dilim)
-            son = u"" if i + SATIR_BASINA >= adet else u","
-            govde.append(u"        %s%s" % (metin, son))
+        for c in range(parca_sayisi):
+            dilim = degerler[c * pb:(c + 1) * pb]
+            genislik = len(dilim) * bit
+            g.append(u"    localparam logic [%d:0] %s = %d'h%s;"
+                     % (genislik - 1, sabit_adi(ad, parca_sayisi, c),
+                        genislik, duz_hex(dilim, bit)))
+        g.append(u"")
 
-        govde.append(u"    };")
-        govde.append(u"")
+        g.append(u"    function automatic %s %s(input logic [%d:0] i);"
+                 % (tip, ad, aw - 1))
+        if parca_sayisi == 1:
+            g.append(u"        return %s_DUZ[i * %d +: %d];"
+                     % (ad.upper(), bit, bit))
+        else:
+            g.append(u"        logic [%d:0] o;" % (pw - 1))
+            g.append(u"        o = i[%d:0];" % (pw - 1))
+            g.append(u"        case (i[%d:%d])" % (aw - 1, pw))
+            for c in range(parca_sayisi):
+                if c == parca_sayisi - 1:
+                    etiket = u"default"
+                else:
+                    etiket = u"%d'd%d" % (aw - pw, c)
+                g.append(u"            %s: return %s[o * %d +: %d];"
+                         % (etiket, sabit_adi(ad, parca_sayisi, c), bit, bit))
+            g.append(u"        endcase")
+        g.append(u"    endfunction")
+        g.append(u"")
 
-    govde.append(u"endpackage")
-    govde.append(u"")
-    return u"\n".join(govde), basamak
+    g.append(u"endpackage")
+    g.append(u"")
+    return u"\n".join(g), kaynak_degerler
 
 
-DESEN = re.compile(r"(\d+)'h([0-9a-fA-F]+)")
+def uretilen_oku(metin, ad, adet, bit):
+    """Uretilen paketten bir tablonun degerlerini geri okur (parcali)."""
+    pb = parca_boyu(bit)
+    parca_sayisi = (adet + pb - 1) // pb
+    cikan = []
+    maske = (1 << bit) - 1
 
+    for c in range(parca_sayisi):
+        dilim_adet = min(pb, adet - c * pb)
+        genislik = dilim_adet * bit
+        desen = (r"localparam logic \[%d:0\] %s = %d'h([0-9a-f]+);"
+                 % (genislik - 1, sabit_adi(ad, parca_sayisi, c), genislik))
+        m = re.search(desen, metin)
+        if not m:
+            return None
+        n = int(m.group(1), 16)
+        cikan += [(n >> (k * bit)) & maske for k in range(dilim_adet)]
 
-def uretilen_oku(metin, ad, adet):
-    """Uretilen paketten bir sabitin degerlerini geri okur."""
-    bas = metin.find(u" %s [0:" % ad)
-    if bas < 0:
-        return None
-    bas = metin.index(u"'{", bas)
-    son = metin.index(u"};", bas)
-    return [int(m.group(2), 16) for m in DESEN.finditer(metin[bas:son])]
+    return cikan
 
 
 def main():
@@ -172,7 +267,7 @@ def main():
     toplam_bit = 0
 
     print(u"=" * 70)
-    print(u" ROM TABLOLARI -> SystemVerilog paketi")
+    print(u" ROM TABLOLARI -> SystemVerilog paketi (parcali packed vektor)")
     print(u"=" * 70)
 
     for paket_adi, cikti, aciklama, tablolar in PAKETLER:
@@ -184,9 +279,10 @@ def main():
                 print(u"[HATA] %s yok - once uretin" % cikti)
                 hata += 1
                 continue
-            mevcut = io.open(yol, encoding="utf-8").read()
-            if mevcut.replace("\r\n", "\n") != metin:
-                print(u"[HATA] %s guncel degil - kaynak dosyalar degismis" % cikti)
+            mevcut = io.open(yol, encoding="utf-8").read().replace("\r\n", "\n")
+            if mevcut != metin:
+                print(u"[HATA] %s guncel degil - kaynak dosyalar degismis"
+                      % cikti)
                 hata += 1
                 continue
             print(u"[OK]   %s guncel" % cikti)
@@ -198,16 +294,11 @@ def main():
         geri = io.open(yol, encoding="utf-8").read()
         for ad, kaynak, adet, bit, _ in tablolar:
             beklenen = kaynak_degerler[ad]
-            okunan = uretilen_oku(geri, ad, adet)
+            okunan = uretilen_oku(geri, ad, adet, bit)
             toplam_bit += adet * bit
 
             if okunan is None:
                 print(u"  [HATA] %-16s uretilen dosyada bulunamadi" % ad)
-                hata += 1
-                continue
-            if len(okunan) != adet:
-                print(u"  [HATA] %-16s %d deger bekleniyordu, %d okundu"
-                      % (ad, adet, len(okunan)))
                 hata += 1
                 continue
 
@@ -220,8 +311,11 @@ def main():
                 hata += 1
                 continue
 
-            print(u"  [OK]   %-16s %6d deger x %2d bit  (%s)"
-                  % (ad, adet, bit, kaynak))
+            pb = parca_boyu(bit)
+            ps = (adet + pb - 1) // pb
+            ek = (u"  %d parca" % ps) if ps > 1 else u""
+            print(u"  [OK]   %-16s %6d deger x %2d bit%s  (%s)"
+                  % (ad, adet, bit, ek, kaynak))
 
     print(u"\n" + u"-" * 70)
     print(u"Toplam gomulen: %d bit = %.1f kbit = %.1f kB"

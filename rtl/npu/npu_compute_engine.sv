@@ -154,11 +154,20 @@ module npu_compute_engine import npu_weights_pkg::*; (
     //
     // Paket `scripts/gen_rom_paketleri.py` ile üretilir; aynı betik ürettiği
     // değerleri kaynak .mem dosyalarıyla tek tek karşılaştırarak doğrular.
-    localparam logic signed [7:0]  dw_weights [0:639]   = DW_WEIGHTS;
-    localparam logic signed [31:0] dw_bias    [0:7]     = DW_BIAS;
-    localparam logic signed [7:0]  fc_weights [0:15999] = FC_WEIGHTS;
-    localparam logic signed [31:0] fc_bias    [0:3]     = FC_BIAS;
-    localparam logic [12:0] softmax_exp_lut [0:255]     = SOFTMAX_EXP_LUT;
+    // Erisim fonksiyonlari npu_weights_pkg icindedir:
+    //     dw_weights(i)  dw_bias(i)  fc_weights(i)  fc_bias(i)
+    //     softmax_exp_lut(i)
+    //
+    // Tablolar parcali packed vektorde tutulur. UNPACKED localparam dizisi
+    // denendi; lint ve sentez araclari sorunsuz sindirdi ama VIVADO xelab
+    // tek modulde 82 DAKIKA kosup bitiremedi. Packed bicim ayni isi 2,5
+    // saniyede yapiyor.
+    //
+    // Sebep: unpacked dizi elaboratore gore 16.000 AYRI NESNEDIR; packed
+    // vektor tek nesnedir ve dilimleme sentezde adres cozucuye doner.
+    //
+    // NOT: asagidaki satirin basina "Verilator" yazilmamalidir - o kelimeyle
+    // baslayan yorumlar pragma sanilir (%Error-BADVLTPRAGMA).
 
     // --- Adres ve Sınır Güvenliği Mantığı (Reshape 49x40x1) ---
     logic signed [31:0] t_in_signed;
@@ -328,7 +337,7 @@ function automatic logic [12:0] get_exp(
             get_exp = 13'd0;
 
         else
-            get_exp = softmax_exp_lut[diff];
+            get_exp = softmax_exp_lut(8'(diff));
 
     end
 endfunction
@@ -518,14 +527,14 @@ endfunction
 
                 INIT: begin
                     for (int i = 0; i < 4; i++) begin
-                        fc_acc[i]    <= fc_bias[i];
+                        fc_acc[i]    <= fc_bias(2'(i));
                         fc_logits[i] <= '0;
                     end
 
                     fc_q_idx <= 2'd0;
 
                     // Sekiz kanalin biriktiricisi ayni anda baslatilir
-                    for (int i = 0; i < 8; i++) conv_acc[i] <= dw_bias[i];
+                    for (int i = 0; i < 8; i++) conv_acc[i] <= dw_bias(3'(i));
                     state <= CONV_READ_REQ;
                 end
 
@@ -569,7 +578,7 @@ endfunction
                     // yani sekiz agirlik bitisik bir blokta duruyor.
                     for (int d = 0; d < 8; d++) begin
                         conv_acc[d] <= conv_acc[d] +
-                            x_centered * $signed(dw_weights[int'(mac_kh) * 64 + int'(mac_kw) * 8 + d]);
+                            x_centered * $signed(dw_weights(10'(int'(mac_kh) * 64 + int'(mac_kw) * 8 + d)));
                     end
 
                     // Cikis kosulu TUKETILEN tap'a bakar (mac_*), adresi
@@ -653,19 +662,19 @@ endfunction
                 // ============================================================
                 FC_MAC0: begin
                     fc_acc[0] <= fc_acc[0]
-                        + $signed(fc_y) * $signed(fc_weights[fc_idx]);
+                        + $signed(fc_y) * $signed(fc_weights(fc_idx));
                     state <= FC_MAC1;
                 end
 
                 FC_MAC1: begin
                     fc_acc[1] <= fc_acc[1]
-                        + $signed(fc_y) * $signed(fc_weights[fc_idx + 14'd4000]);
+                        + $signed(fc_y) * $signed(fc_weights(fc_idx + 14'd4000));
                     state <= FC_MAC2;
                 end
 
                 FC_MAC2: begin
                     fc_acc[2] <= fc_acc[2]
-                        + $signed(fc_y) * $signed(fc_weights[fc_idx + 14'd8000]);
+                        + $signed(fc_y) * $signed(fc_weights(fc_idx + 14'd8000));
                     state <= FC_MAC3;
                 end
 
@@ -674,7 +683,7 @@ endfunction
                 // cunku fc_idx ve dw_multiplier onlara bagli.
                 FC_MAC3: begin
                     fc_acc[3] <= fc_acc[3]
-                        + $signed(fc_y) * $signed(fc_weights[fc_idx + 14'd12000]);
+                        + $signed(fc_y) * $signed(fc_weights(fc_idx + 14'd12000));
 
                     // R4 sonrasi dongu duzeni:
                     //   konvolusyon (kh,kw) SEKIZ KANAL ICIN BIR KEZ kosar,
@@ -686,7 +695,7 @@ endfunction
                         d_out <= '0;
 
                         // Sonraki piksel icin sekiz biriktirici birden yenilenir
-                        for (int i = 0; i < 8; i++) conv_acc[i] <= dw_bias[i];
+                        for (int i = 0; i < 8; i++) conv_acc[i] <= dw_bias(3'(i));
 
                         if (f_out == 19) begin
                             f_out <= '0;

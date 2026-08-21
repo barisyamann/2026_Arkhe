@@ -32,7 +32,10 @@ module boot_rom import boot_rom_pkg::*; (
     //
     // Paket `scripts/gen_rom_paketleri.py` ile üretilir; aynı betik ürettiği
     // değerleri kaynak dosyayla tek tek karşılaştırarak doğrular.
-    localparam logic [31:0] ROM_MEM [0:255] = BOOT_ROM_ICERIK;
+    //
+    // Erişim `boot_rom_icerik(indeks)` fonksiyonuyla yapılır. İçerik tek bir
+    // packed vektörde durur; UNPACKED dizi denendi ve Vivado xelab tek modülde
+    // 82 dakikada bitiremedi (packed biçim aynı işi 2,5 saniyede yapıyor).
 
     // Okuma Mantığı (Açılışta kararlılık için Yazmaç Destekli)
     always_ff @(posedge clk_i or negedge rst_ni) begin
@@ -43,7 +46,7 @@ module boot_rom import boot_rom_pkg::*; (
             rom_rvalid_o <= rom_req_i; // İstek geldiği çevrimin (cycle) sonunda veri geçerlidir
             if (rom_req_i) begin
                 // Adres byte addressable olduğu için [9:2] bitlerini seçiyoruz (Word alignment)
-                rom_rdata_o <= ROM_MEM[rom_addr_i[9:2]];
+                rom_rdata_o <= boot_rom_icerik(rom_addr_i[9:2]);
             end
         end
     end
