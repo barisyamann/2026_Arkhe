@@ -424,3 +424,61 @@ tasindiginda ayni adima varis suresi 50 dk -> 19 dk (yaklasik 3x).
 | FPGA (eski olcum) | 18.587 LUT, +1,811 ns WNS, 137 mW |
 | Regresyon | 6/6 test, 55 denetim |
 | Lint | 0 hata |
+
+---
+
+# BOLUM 6 - TESLIM SONRASI YENIDEN DEGERLENDIRILECEK
+
+Bu iki karar bu teslim icin KAPALI, ama kalici degil. Ikisi de olcume
+dayaniyor ve gerekcesi belgeli; yine de tekrar bakilmasi kararlastirildi
+(21 Agustos 2026).
+
+## 6.1 FPU = 0
+
+**Su anki durum:** Kayan nokta yazilim oykunmesiyle (soft-float)
+desteklenir. Derleyici `__mulsf3`, `__addsf3` gibi libgcc rutinlerini
+cagirir. Calisir ama **20-50 kat yavastir**.
+
+**Neden simdilik boyle:** Hedef uygulama nicelenmis tamsayi cikarimidir.
+TFLite Micro zaten FPU'suz mikrodenetleyiciler icin tasarlanmistir
+(ARM Cortex-M0/M3'te de FPU yoktur).
+
+**Ne zaman yeniden bakilmali:** Kullanici kodu agir kayan nokta isi
+yapacaksa - ham sesten MFCC oznitelik cikarma, PID kontrol, sensor
+fuzyonu gibi. O durumda soft-float darbogaz olur.
+
+**Bu teslimde eklenmemesinin sebebi:**
+- Setup payi henuz kapanmadi; FPU kritik yolu daha da zorlar
+- Tam bir sentez + yerlestirme + yonlendirme dongusu gerekir (3+ saat)
+- Teslime 10 gun kaldi
+
+**Yeniden degerlendirme icin gereken olcum:** FPU=1 ile ASIC sentezi.
+FPGA'de maliyet +2.344 LUT / +1.048 FF olculdu; ASIC karsiligi
+olculmedi.
+
+## 6.2 NPU agirliklarinin mantik olarak sentezlenmesi
+
+**Su anki durum:** 145.024 bit sabit, kombinasyonel ROM olarak
+sentezleniyor. Netlist dagilimi:
+
+    Toplam standart hucre : 109.963
+    Flip-flop             :  11.586  (%10,5)
+    Latch                 :       0
+    Kombinasyonel         :  98.377  (%89,5)
+
+Agirliklar flip-flopta DEGIL - yazmaca konsaydi 145.024 flip-flop, kabaca
+1,4 milyon kapi ve devasa bir saat agaci gerekirdi.
+
+**Bilinen bedeli:** `fc_idx` adres bitleri ROM cozucusunu suruyor ve
+yuksek fanout uretiyor (olculdu: `fc_idx[3]` fanout **4.694**). Onarim
+adimi bu yuzden 2 saat surdu.
+
+**Ne zaman yeniden bakilmali:**
+- Zamanlama kapanmazsa (kritik yol ROM cozucusunden geciyorsa)
+- Agirliklar guncellenebilir olsun isteniyorsa - su an RTL'e gomulu
+  oldugu icin degistirmek yeniden sentez gerektirir
+- Daha buyuk bir model kullanilacaksa
+
+**Alternatifler zaten degerlendirildi** (bkz. bolum 1.2): flash'tan SRAM'e
+yukleme (+8 makro, die %20 buyume, bootloader eklentisi) ve melez cozum.
+Alan sigdigi icin gerekli olmadi.
