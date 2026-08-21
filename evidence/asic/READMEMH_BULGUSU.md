@@ -278,3 +278,92 @@ kaybetmisti.
 
 **Sonuc: 20 Agustos'un alan ve guc rakamlari sanildigindan daha
 iyimserdi.** Tasarim ilk kez tam.
+
+---
+
+# Vivado uyumu ve maliyeti - 21 Agustos 2026
+
+## Sorun
+
+Ilk gomme surumu UNPACKED `localparam` dizisi kullaniyordu:
+
+    localparam logic signed [7:0] FC_WEIGHTS [0:15999] = '{...};
+
+Verilator ve Yosys sindirdi, **Vivado sindiremedi**: `xelab` tek bir
+modulde 82 DAKIKA kosup bitiremedi.
+
+Sebep mimari: unpacked dizi elaboratore gore **16.000 ayri nesnedir**.
+Vivado her biri icin sembol tablosu girisi ve tip analizi yapar.
+Verilator ve Yosys ic temsilde hemen duzlestirdigi icin etkilenmez.
+
+## Cozum ve olcum
+
+Ayni tablo, iki bicim, ayni arac:
+
+| Bicim | Vivado xelab |
+|---|---|
+| unpacked `localparam` dizi | 240 sn'de **bitmedi** |
+| packed vektor + fonksiyon | **2,5 saniye** |
+
+Packed bicim tek basina yetmedi: **Verilator sayi sabitlerinde 65.536 bit
+sinirina sahip.** Olculdu:
+
+    65.536 bit -> tamam
+    98.304 bit -> Width of number exceeds implementation limit
+
+`fc_weights` 128.000 bit oldugu icin **4 parcaya** bolundu (4096 giris x
+8 bit = 32.768 bit/parca). Erisim fonksiyonu ust adres bitleriyle dogru
+parcayi secer.
+
+## Uc aracta da dogrulandi
+
+| Arac | Sonuc |
+|---|---|
+| Verilator lint | temiz |
+| Vivado xelab | **1,9 sn** (gercek `npu_compute_engine`) |
+| Regresyon | **6/6 gecti**, 55 denetim, 18 sn |
+
+`npu_blok` testi: 82 dk+ (bitmedi) -> **3,6 sn**.
+`npu_golden` gecti - altin referans testi; gomulu agirliklarin
+`$readmemh` surumuyle ayni sonucu urettiginin kaniti.
+
+Bicim dogrulugu ayrica 52 noktada denetlendi (sinirlar 0/1/15/16/255/
+256/4095/4096/15999 + 40 rastgele): hepsi dogru.
+
+## MALIYETI
+
+Vivado uyumu bedava degil. Ayni tasarim, iki bicim, Yosys sentezi:
+
+| | unpacked | **parcali packed** | fark |
+|---|---|---|---|
+| Standart hucre | 87.850 | **109.963** | +22.113 (+%25) |
+| Flip-flop | 11.586 | 11.586 | ayni |
+| Sentez suresi | 20:32 | **42:42** | +%108 |
+| SRAM makrosu | 23 | 23 | ayni |
+
+Sebep: unpacked dizi Yosys'in `memory_bmux2rom` yolunu tetikliyor ve
+Yosys ROM'u kendi ic gosterimiyle optimize ediyor. Parcali packed bicimde
+tablo siradan bir sabit vektordur; ustune bir de 4 yollu `case` secici
+ekleniyor.
+
+**Yine de kabul edilebilir.** Alan hesabi:
+
+    Die (ust pay 500 um)     16,28 mm2
+    Makrolar (23 x 0,285)   - 6,55 mm2
+                            ----------
+    Standart hucreye kalan    9,73 mm2
+    Kullanilan (tahmini)      ~1,3 mm2  ->  %13 doluluk
+
+Alternatif Vivado'nun hic calismamasiydi; FPGA akisina ve regresyona
+ihtiyacimiz var. `ifdef` ile araca gore bicim secmek de dusunuldu ve
+REDDEDILDI: tam olarak kurtulmaya calistigimiz araclar-arasi ayrisma
+budur.
+
+## Ders
+
+Bir tasarim karari, o kararin kosacagi **butun** araclarda dogrulanmali.
+Sabah bicim secildi, Verilator'de 0,4 saniyede gecti, devam edildi;
+Vivado saatler sonra denendi ve 82 dakika kayboldu.
+
+Ikinci denemede once iki aday uretilip Vivado'da yan yana olculdu -
+5 dakikalik is, karari kesinlestirdi.
