@@ -266,9 +266,11 @@ PDK: sky130A
 STD_CELL_LIBRARY: sky130_fd_sc_hd
 
 # >>> URETILEN BLOK - gen_sources.py ile uretilir, ELLE DUZENLEMEYIN >>>
-# Kaynak: filelist.f  (53 dosya)
+# Kaynak: filelist.f  (55 dosya)
 VERILOG_FILES:
   - ../rtl/Cevre_Birimleri/files_1/uart_pkg.sv
+  - ../rtl/boot/boot_rom_pkg.sv
+  - ../rtl/npu/npu_weights_pkg.sv
   - ../rtl/Memory/memory_map_pck.sv
   - ../rtl/cv32e40p-master/rtl/include/cv32e40p_apu_core_pkg.sv
   - ../rtl/cv32e40p-master/rtl/include/cv32e40p_fpu_pkg.sv

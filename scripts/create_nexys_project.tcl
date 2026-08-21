@@ -43,6 +43,8 @@ add_files -norecurse [list \
     "./rtl/cv32e40p-master/rtl/include/cv32e40p_fpu_pkg.sv" \
     "./rtl/cv32e40p-master/rtl/include/cv32e40p_pkg.sv" \
     "$periph_dir/files_1/uart_pkg.sv" \
+    "./rtl/boot/boot_rom_pkg.sv" \
+    "./rtl/npu/npu_weights_pkg.sv" \
 ]
 update_compile_order -fileset sources_1
 
