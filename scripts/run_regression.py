@@ -73,17 +73,20 @@ TESTLER = [
     dict(
         ad="npu_blok",
         top="tb_npu_compute_engine",
-        kaynak=[NPU/"npu_compute_engine.sv", TB/"tb_npu_compute_engine.sv"],
-        mem=["dw_weights.mem", "dw_bias.mem", "fc_weights.mem",
-             "fc_bias.mem", "softmax_exp_lut.mem"],
+        # npu_weights_pkg.sv modulden ONCE gelmeli - agirliklar artik
+        # RTL'e gomulu, $readmemh ile dosyadan okunmuyor.
+        kaynak=[NPU/"npu_weights_pkg.sv", NPU/"npu_compute_engine.sv",
+                TB/"tb_npu_compute_engine.sv"],
+        mem=[],
     ),
     dict(
         ad="npu_golden",
         top="tb_npu_golden",
-        kaynak=[NPU/"npu_compute_engine.sv", TB/"npu_golden"/"tb_npu_golden.sv"],
-        mem=["dw_weights.mem", "dw_bias.mem", "fc_weights.mem",
-             "fc_bias.mem", "softmax_exp_lut.mem",
-             "test_input_pattern.mem"],
+        kaynak=[NPU/"npu_weights_pkg.sv", NPU/"npu_compute_engine.sv",
+                TB/"npu_golden"/"tb_npu_golden.sv"],
+        # Agirliklar gomulu; test_input_pattern.mem testin GIRDISIDIR,
+        # agirlik degildir - kopyalanmaya devam ediyor.
+        mem=["test_input_pattern.mem"],
     ),
 ]
 

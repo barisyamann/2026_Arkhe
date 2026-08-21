@@ -2,6 +2,9 @@
 
 **Onem: ENGELLEYICI.** Bu haliyle uretilecek cip acilmaz ve NPU cop hesaplar.
 
+> **DURUM: COZULDU (21 Agustos 2026).** Tablolar RTL'e gomuldu, secim
+> olcumle yapildi. Ayrinti icin bkz. son bolum: *Cozum ve olcum*.
+
 ---
 
 ## Bulgu
@@ -175,3 +178,103 @@ Ayrica netlist'te ROM icerigi aranabilir:
 
     grep -c "u_boot_rom" run/arkhe/*yosys-synthesis*/soc_top.nl.v
     -> 0'dan buyuk olmali (su an 0)
+
+---
+
+# Cozum ve olcum - 21 Agustos 2026
+
+## Ne yapildi
+
+`scripts/gen_rom_paketleri.py` yazildi. Alti tablonun degerlerini
+SystemVerilog paketine gomer:
+
+    rtl/boot/boot_rom_pkg.sv        256 deger     8,2 kbit
+    rtl/npu/npu_weights_pkg.sv   16.908 deger   136,8 kbit
+                                   TOPLAM       145.024 bit = 17,7 kB
+
+`$readmemh` cagrilarinin tamami kaldirildi. Dosya bagimliligi yok;
+hangi aracta kosarsa kossun ayni sonucu verir.
+
+### Dogrulama betigin icinde
+
+Betik uretimden sonra urettigi dosyayi GERI OKUR ve kaynak `.mem` ile
+deger deger karsilastirir:
+
+    [OK] BOOT_ROM_ICERIK     256 deger x 32 bit
+    [OK] DW_WEIGHTS          640 deger x  8 bit
+    [OK] DW_BIAS               8 deger x 32 bit
+    [OK] FC_WEIGHTS       16.000 deger x  8 bit
+    [OK] FC_BIAS               4 deger x 32 bit
+    [OK] SOFTMAX_EXP_LUT     256 deger x 13 bit
+    [BASARILI] butun tablolar kaynak dosyalarla birebir ayni.
+
+Bu denetim gereksiz degil: tek bit kaymasi NPU'yu SESSIZCE yanlis
+siniflandirir ve ancak donanimda fark edilirdi.
+
+`--denetle` kipi de var; kaynak `.mem` degisip paket guncellenmezse
+yakalar.
+
+### Bagimsiz capraz denetim
+
+Boot ROM icerigi disassembly ile karsilastirildi:
+
+    paket : 32'h4e214381
+    kod   : 0x08: 4381  li t2,0     (RV32C, 2 bayt)
+            0x0a: 4e21  li t3,8     (RV32C, 2 bayt)
+
+Little-endian dogru paketlenmis. Bu iki buyruk onemli - 20 Agustos'ta
+geri cekilen sahte "Spike" referans dizisi tam da bunlari atliyordu.
+
+## Olcum: `fc_weights` mantik olarak ne kadar yer kapliyor
+
+`make synth` ile olculdu (20 dk 32 sn).
+
+| Metrik | Iceriksiz (20 Agu) | **Tablolar gomulu (21 Agu)** | Fark |
+|---|---|---|---|
+| Standart hucre | 47.926 | **87.850** | +39.924 (+%83) |
+| Cip alani | 0,631 mm2 | **1,028 mm2** | +%63 |
+| Flip-flop | 10.908 | **11.586** | +678 |
+| SRAM makrosu | 23 | 23 | - |
+| `removing const-x lane` | 32+ | **0** | cozuldu |
+| Sentez suresi | ~15 dk | 20:32 | +%37 |
+
+Tahmin araligi 40.000-90.000 hucreydi; gercek deger **39.924** cikti -
+alt sinirin da altinda. Yosys `memory_bmux2rom` ile 259.143 donusum
+yaparak verimli ROM kodlamasi uretti, saf coklayici agaci kurmadi.
+
+En cok kullanilan hucreler degisti:
+
+    mux2_1    10.163 -> 12.053   (+1.890)
+    nand2_2        - ->  5.509   (yeni)
+    nor2_2         - ->  5.161   (yeni)
+
+`nand2`/`nor2` patlamasi ROM kodlamasindan geliyor; coklayici sayisi
+gorece az artti. Bu, mantik minimizasyonunun ise yaradiginin gostergesi.
+
+## Karar: mantik olarak birakildi
+
+Alan hesabi:
+
+    Die (ust pay 500 um)     16,28 mm2
+    Makrolar (23 x 0,285)   - 6,55 mm2
+                            ----------
+    Standart hucreye kalan    9,73 mm2
+    Kullanilan                1,028 mm2  ->  %10,6 doluluk
+
+**Rahat sigiyor.** SRAM'e tasima, +8 makro, bootloader eklentisi -
+hicbirine gerek kalmadi. Secenek 3 (melez) gereksizlesti.
+
+Kalan risk zamanlamadir: ROM coklayici agaci derin bir kombinasyonel
+yol olusturabilir. Tam akis kosumunda olculecek.
+
+## Beklenmeyen bulgu: silinen yalnizca ROM'lar degildi
+
+Flip-flop sayisi da 678 artti. ROM gomek flip-flop EKLEMEZ.
+
+Aciklamasi: tablolar X iken Yosys onlara bagli AsAGI AKIS mantigini da
+optimize edip siliyordu. Yani 20 Agustos'taki 47.926 hucre yalnizca
+ROM'lari degil, ROM ciktisini kullanan devrenin bir kismini da
+kaybetmisti.
+
+**Sonuc: 20 Agustos'un alan ve guc rakamlari sanildigindan daha
+iyimserdi.** Tasarim ilk kez tam.
