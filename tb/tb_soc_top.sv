@@ -353,9 +353,23 @@ module tb_soc_top;
     `else
       `ifndef REAL_BOOT
         $readmemh("app.hex", uut.u_instruction_ram.ram);
-        uut.u_boot_rom.rom_mem[0] = 32'h010002B7;  // lui t0, 0x01000
-        uut.u_boot_rom.rom_mem[1] = 32'h00028067;  // jr  t0
-        log_print("[TB] HIZLI ACILIS: I-RAM dogrudan yuklendi, yukleyici atlandi.");
+
+        // HIZLI ACILIS - CPU'nun ACILIS ADRESI zorlanir.
+        //
+        // Onceden Boot ROM'un ilk iki komutu yazilarak I-RAM'e atlaniyordu:
+        //     uut.u_boot_rom.rom_mem[0] = 32'h010002B7;  // lui t0, 0x01000
+        //     uut.u_boot_rom.rom_mem[1] = 32'h00028067;  // jr  t0
+        //
+        // Bu artik MUMKUN DEGIL: ROM icerigi RTL'e gomuldu ve `rom_mem` bir
+        // localparam oldu (bkz. rtl/boot/boot_rom_pkg.sv). Sabite yazilamaz.
+        //
+        // Yerine cekirdegin `boot_addr_i` girisi zorlaniyor. Sonuc ayni -
+        // yukleyici atlanip dogrudan I-RAM'den baslaniyor - ama tasarima
+        // hicbir test kancasi eklenmiyor ve ROM icerigi el degmemis kaliyor.
+        force uut.u_core.boot_addr_i = 32'h0100_0000;
+
+        log_print("[TB] HIZLI ACILIS: I-RAM dogrudan yuklendi, acilis adresi");
+        log_print("[TB]               0x01000000'a zorlandi, yukleyici atlandi.");
         log_print("[TB] Gercek QSPI boot icin derlemeye -d REAL_BOOT ekleyin.");
       `else
         log_print("[TB] GERCEK BOOT: uygulama QSPI flash'tan yuklenecek.");

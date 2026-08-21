@@ -98,6 +98,12 @@ PAKETLER = [
 # Verilator sayi sabiti siniri 65.536 bit; guvenli pay birakiyoruz.
 PARCA_TAVAN_BIT = 32768
 
+# Bu esigin uzerindeki tablolar NPU_WEIGHTS_STUB ile devre disi
+# birakilabilir. Yalnizca fc_weights (128.000 bit) bu esigi asiyor;
+# dw_weights (5.120), softmax_exp_lut (3.328) ve biaslar etkilenmez.
+# Boylece deneyde TEK DEGISKEN yalitilmis olur.
+STUB_ESIK_BIT = 65536
+
 
 def adres_biti(adet):
     """adet degeri icin gereken adres bit sayisi."""
@@ -215,6 +221,26 @@ def paket_uret(paket_adi, aciklama, tablolar):
                         genislik, duz_hex(dilim, bit)))
         g.append(u"")
 
+        # --- DENEY KIPI ------------------------------------------------
+        # Buyuk tablolar NPU_WEIGHTS_STUB tanimliyken devre disi kalir.
+        # Amac: ROM'un fiziksel tasarima getirdigi yuku OLCMEK.
+        #
+        # 6. kosumda goruldu ki fc_weights ROM'u adres cozucusunde cok
+        # yuksek fanout uretiyor (fc_idx[3] -> 4.694) ve tampon agaclari
+        # hucre sayisini sentezden yerlestirmeye iki katina cikariyor
+        # (109.963 -> 223.456). Stub kipi bu degiskeni yalitir.
+        #
+        # TESLIM EDILECEK KOSUMDA BU TANIM KULLANILMAZ.
+        if adet * bit > STUB_ESIK_BIT:
+            g.append(u"`ifdef NPU_WEIGHTS_STUB")
+            g.append(u"    // DENEY: gercek tablo yerine adresten turetilen")
+            g.append(u"    // ucuz bir deger. Veri yolu canli kalir, ROM yok.")
+            g.append(u"    function automatic %s %s(input logic [%d:0] i);"
+                     % (tip, ad, aw - 1))
+            g.append(u"        return %s'(i);" % bit)
+            g.append(u"    endfunction")
+            g.append(u"`else")
+
         g.append(u"    function automatic %s %s(input logic [%d:0] i);"
                  % (tip, ad, aw - 1))
         if parca_sayisi == 1:
@@ -233,6 +259,8 @@ def paket_uret(paket_adi, aciklama, tablolar):
                          % (etiket, sabit_adi(ad, parca_sayisi, c), bit, bit))
             g.append(u"        endcase")
         g.append(u"    endfunction")
+        if adet * bit > STUB_ESIK_BIT:
+            g.append(u"`endif")
         g.append(u"")
 
     g.append(u"endpackage")

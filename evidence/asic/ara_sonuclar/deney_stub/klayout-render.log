@@ -1,0 +1,2 @@
+QObject::startTimer: Timers can only be used with threads started with QThread
+The layout has multiple top cells in Layout.top_cell
