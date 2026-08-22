@@ -1,0 +1,9 @@
+06-yosys-synthesis 00:13:51.780
+31-openroad-stamidpnr 00:00:45.314
+32-openroad-repairdesignpostgpl 00:28:11.169
+33-odb-manualglobalplacement 00:00:00.002
+34-openroad-detailedplacement 00:00:11.890
+35-openroad-cts 00:02:56.700
+36-openroad-stamidpnr-1 00:00:40.623
+37-openroad-resizertimingpostcts 00:26:21.207
+38-openroad-stamidpnr-2 00:00:42.146

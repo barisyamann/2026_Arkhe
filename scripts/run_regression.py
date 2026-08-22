@@ -102,7 +102,11 @@ TESTLER = [
         ad="sistem",
         top="tb_soc_top",
         kaynak=None,                      # filelist_rtl() ile doldurulur
-        ek_kaynak=[TB/"spi_flash_model.sv", TB/"tb_soc_top.sv"],
+        # axil_protocol_checker asic/filelist.f'te YOKTUR - yalnizca SVA
+        # denetleyicisidir, sentezlenmez. tb_soc_top onu bind ile
+        # bagliyor, bu yuzden simulasyon kaynagi olarak eklenmeli.
+        ek_kaynak=[MEM/"axil_protocol_checker.sv",
+                   TB/"spi_flash_model.sv", TB/"tb_soc_top.sv"],
         mem=["app.hex", "boot.hex"],
         mem_zorunlu=False,                # bulunamazsa test atlanir, cokmez
     ),
