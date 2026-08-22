@@ -132,7 +132,10 @@ module npu_compute_engine import npu_weights_pkg::*; (
     logic signed [31:0] rq_srhm;    // sat_round_high_mul sonucu
     logic signed [31:0] rq_scaled;  // multiply_quantized sonucu
     logic signed [8:0]  fc_y;       // ReLU + doygunluk sonrasi aktivasyon
-    logic [13:0]        fc_idx;     // FC agirlik indeksi (0..3999)
+    // FC agirlik indeksi. En buyuk deger (24*20+19)*8+7 = 3999 oldugu icin
+    // 12 bit yeterlidir. Onceden 14 bitti; daraltildi cunku fc_weights artik
+    // dort ayri 4.000'lik ROM'a bolundu ve her biri 12 bitlik adres aliyor.
+    logic [11:0]        fc_idx;
 
     // --- Ağırlık ve Sapma (Weight & Bias) ROM Dizileri ---
     //
@@ -155,8 +158,19 @@ module npu_compute_engine import npu_weights_pkg::*; (
     // Paket `scripts/gen_rom_paketleri.py` ile üretilir; aynı betik ürettiği
     // değerleri kaynak .mem dosyalarıyla tek tek karşılaştırarak doğrular.
     // Erisim fonksiyonlari npu_weights_pkg icindedir:
-    //     dw_weights(i)  dw_bias(i)  fc_weights(i)  fc_bias(i)
-    //     softmax_exp_lut(i)
+    //     dw_weights(i)   dw_bias(i)   fc_bias(i)   softmax_exp_lut(i)
+    //     fc_weights0(i)  fc_weights1(i)  fc_weights2(i)  fc_weights3(i)
+    //
+    // fc_weights DORDE BOLUNDU. Tek 16.000'lik ROM'un adres cozucusu
+    // fc_idx[3] uzerinde 4.694 FANOUT uretiyordu; onarim adimi bu yuzden
+    // iki saat suruyor, global yonlendirme hic bitmiyordu (olcum:
+    // evidence/asic/DENEY_STUB.md).
+    //
+    // FC katmani zaten dort sinif icin AYRIK araliklardan okuyor:
+    //     sinif 0 ->     0..3999      sinif 2 ->  8000..11999
+    //     sinif 1 ->  4000..7999      sinif 3 -> 12000..15999
+    // Dort ayri 4.000'lik ROM kuruldu; her cozucunun adresi 12 bit ve
+    // taradigi giris 4.000. Cagri yerlerinde toplama da kalkti.
     //
     // Tablolar parcali packed vektorde tutulur. UNPACKED localparam dizisi
     // denendi; lint ve sentez araclari sorunsuz sindirdi ama VIVADO xelab
@@ -652,7 +666,7 @@ endfunction
                     else
                         fc_y <= rq_scaled[8:0];
 
-                    fc_idx <= (int'(t_out) * 20 + int'(f_out)) * 8 + int'(d_out);
+                    fc_idx <= 12'((int'(t_out) * 20 + int'(f_out)) * 8 + int'(d_out));
                     state  <= FC_MAC0;
                 end
 
@@ -662,19 +676,19 @@ endfunction
                 // ============================================================
                 FC_MAC0: begin
                     fc_acc[0] <= fc_acc[0]
-                        + $signed(fc_y) * $signed(fc_weights(fc_idx));
+                        + $signed(fc_y) * $signed(fc_weights0(fc_idx));
                     state <= FC_MAC1;
                 end
 
                 FC_MAC1: begin
                     fc_acc[1] <= fc_acc[1]
-                        + $signed(fc_y) * $signed(fc_weights(fc_idx + 14'd4000));
+                        + $signed(fc_y) * $signed(fc_weights1(fc_idx));
                     state <= FC_MAC2;
                 end
 
                 FC_MAC2: begin
                     fc_acc[2] <= fc_acc[2]
-                        + $signed(fc_y) * $signed(fc_weights(fc_idx + 14'd8000));
+                        + $signed(fc_y) * $signed(fc_weights2(fc_idx));
                     state <= FC_MAC3;
                 end
 
@@ -683,7 +697,7 @@ endfunction
                 // cunku fc_idx ve dw_multiplier onlara bagli.
                 FC_MAC3: begin
                     fc_acc[3] <= fc_acc[3]
-                        + $signed(fc_y) * $signed(fc_weights(fc_idx + 14'd12000));
+                        + $signed(fc_y) * $signed(fc_weights3(fc_idx));
 
                     // R4 sonrasi dongu duzeni:
                     //   konvolusyon (kh,kw) SEKIZ KANAL ICIN BIR KEZ kosar,

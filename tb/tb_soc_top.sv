@@ -9,6 +9,24 @@
 module tb_soc_top;
 
     // --- Sinyal Tanımlamaları ---
+    // -------------------------------------------------------------------------
+    // UART cozucu bayraklari
+    //
+    // Bunlar asagida (~satir 390) `wait (uart_saw_stream_ready)` ile
+    // kullaniliyor ama bildirimleri dosyanin sonundaydi. Vivado proje kipi
+    // buna goz yumuyordu; xvlog dogrudan cagrildiginda reddediyor:
+    //     [VRFC 10-3380] identifier 'uart_saw_stream_ready' is used before
+    //                    its declaration
+    // Bildirimler kullanimdan ONCEYE tasindi.
+    // -------------------------------------------------------------------------
+    string uart_line             = "";
+    bit    uart_saw_irq          = 1'b0;
+    bit    uart_saw_stream_ready = 1'b0;
+    bit    uart_saw_dma_done     = 1'b0;
+    string uart_rdr_line         = "";
+    string uart_fault_line       = "";
+    string uart_i2c_line         = "";
+
     logic        clk;
     logic        rst_n;
 
@@ -603,13 +621,6 @@ module tb_soc_top;
     // =========================================================================
     localparam int UART_BIT_NS = 8680;
 
-    string uart_line   = "";
-    bit    uart_saw_irq = 1'b0;
-    bit    uart_saw_stream_ready = 1'b0;
-    bit    uart_saw_dma_done     = 1'b0;
-    string uart_rdr_line         = "";
-    string uart_fault_line       = "";
-    string uart_i2c_line         = "";
 
     task automatic uart_monitor();
         logic [7:0] ch;
