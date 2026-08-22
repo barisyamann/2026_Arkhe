@@ -578,7 +578,65 @@ adresle yuksek tutabiliyor, kod ayni islemi ikinci kez baslatiyordu. Geri
 alindi; `ST_IDLE` cevrimi CPU'nun adres guncellemesi icin gereken ayrim
 noktasidir.
 
-## 9.5 DDK tarafindan onceden kabul edilmis istisna yoktur
+## 9.5 Komut seti ONTASARIM RAPORUNDAN sapiyor: RV32IMC (RV32IMFC degil)
+
+ON Tasarim Raporu Bolum 3.6.2 ve Detay Tasarim Raporu cekirdegi
+**RV32IMFC** olarak tanimlamisti. Teslim edilen tasarim **RV32IMC**'dir;
+`soc_top.sv` icinde `.FPU (0)` ile ornekleme yapilmaktadir.
+
+Sapma OLCUME dayanmaktadir. Ayni RTL uzerinde yalnizca `.FPU()`
+parametresi degistirilerek iki Vivado sentezi kosulmustur
+(xc7a100tcsg324-1):
+
+| Yapilandirma | LUT | FF | FPU hucresi |
+|---|---|---|---|
+| `FPU = 0` | 18.906 | 5.255 | - |
+| `FPU = 1` | 21.250 | 6.303 | 17 |
+| Fark | **+2.344** | **+1.048** | |
+
+CV32E40P'de `FPU = 1` yalnizca kayan nokta buyruk cozme mantigini ve APU
+(koprosesor) arayuzunu ekler. Asil hesaplama birimi FPnew cekirdegin
+ICINDE degildir; `cv32e40p_fp_wrapper.sv` olarak ayrica baglanmalidir.
+Bu baglanti yapilmadigi icin `FPU = 1`:
+
+- 2.344 LUT ve 1.048 FF maliyet getirmekte,
+- kayan nokta yetenegi kazandirmamakta,
+- bir F buyrugunda cekirdegi gelmeyecek bir APU cevabini beklemeye
+  sokmaktadir.
+
+Sistem yazilimi ve INT8 yapay zeka hizlandiricisi kayan nokta islemi
+icermedigi icin F eklentisi cikarilmistir.
+
+Tam olcum raporu: [`evidence/fpga/fpu_karar_olcumu.md`](../evidence/fpga/fpu_karar_olcumu.md)
+Ham sentez raporlari: `evidence/fpga/utilization_FPU0_synth.rpt`,
+`evidence/fpga/utilization_FPU1_synth.rpt`, `evidence/fpga/timing_FPU1_synth.rpt`
+
+## 9.6 QSPI 4-bayt adresleme modu icin rezerve bit kullanimi
+
+Sartname s.24 anlati bolumu *"Tum flash alanini kapsamak icin 4-bayt
+adresleme modu destegi bulunacaktir"* der. Ayni sartnamenin `QSPI_ADR`
+yazmac tanimi ise *"READ, DOR, QOR ve PP komutunda 3-bayt olarak
+kullanilir. Yani QSPI_ADR[23:0] bitleri adres olarak gonderilir"* der.
+Bu iki ifade birbiriyle celiskilidir.
+
+Ikisini de karsilamak icin `QSPI_CCR[24]` - sartnamede **REZERVE**
+birakilan bit - adres genisligi secicisi olarak kullanilmistir:
+
+| `QSPI_CCR[24]` | Davranis |
+|---|---|
+| `0` (reset degeri) | 3 bayt adres, `QSPI_ADR[23:0]` - sartname yazmac tanimiyla birebir |
+| `1` | 4 bayt adres, `QSPI_ADR[31:0]` |
+
+Reset degeri 0 oldugu icin varsayilan davranis sartnameyle **degismemistir**;
+4-bayt yalnizca yazilim acikca istediginde devreye girer.
+
+Dogrulama: `rtl/Cevre_Birimleri/tb_qspi_mock.sv` iki flash modeli ornekler
+(3 bayt ve 4 bayt bekleyen) ve her iki yolu da ayri ayri kosar. Test
+**ayirt edicidir**: 4-bayt bekleyen modele yalnizca 3 bayt adres
+gonderilirse model hala adres fazindadir, ilk veri baytini yutar ve
+okunan kelime kayar.
+
+## 9.7 DDK tarafindan onceden kabul edilmis istisna yoktur
 
 Referans surumden sapma, ozel akis veya ozel adim kullanilmamistir.
 

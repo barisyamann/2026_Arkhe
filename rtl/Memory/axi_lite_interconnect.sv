@@ -441,9 +441,18 @@ module axi_lite_interconnect (
                 if (m_bvalid && m_bready) write_sel_d = 4'd13;
             end
             default: begin // Hatalı adres yönlendirmesi (Default Slave)
+                // DECERR (2'b11), SLVERR (2'b10) DEGIL.
+                //
+                // AXI ayrimi: SLVERR = slave adresi tanidi ama islemi
+                // yerine getiremedi; DECERR = adres cozulemedi, boyle bir
+                // slave YOK. Buradaki durum ikincisidir.
+                //
+                // DTR Bolum 2.2.1 zaten "DECERR yaniti" diyordu; RTL
+                // SLVERR donuyordu. Teslim edilen raporla RTL arasindaki
+                // olgusal uyusmazlik giderildi.
                 m_awready = err_awready;
                 m_wready  = err_wready;
-                m_bresp   = 2'b10; // SLVERR
+                m_bresp   = 2'b11; // DECERR - adres cozulemedi
                 m_bvalid  = err_bvalid;
                 if (m_bvalid && m_bready) write_sel_d = 4'd13;
             end
@@ -573,10 +582,10 @@ module axi_lite_interconnect (
                 m_arready  = s12_arready; m_rdata = s12_rdata; m_rresp = s12_rresp; m_rvalid = s12_rvalid;
                 if (m_rvalid && m_rready) read_sel_d = 4'd13;
             end
-            default: begin // Hatalı adres (Default Slave)
+            default: begin // Hatalı adres (Default Slave) - bkz. yazma kanali notu
                 m_arready = err_arready;
                 m_rdata   = 32'hDEADBEEF;
-                m_rresp   = 2'b10; // SLVERR
+                m_rresp   = 2'b11; // DECERR - adres cozulemedi
                 m_rvalid  = err_rvalid;
                 if (m_rvalid && m_rready) read_sel_d = 4'd13;
             end

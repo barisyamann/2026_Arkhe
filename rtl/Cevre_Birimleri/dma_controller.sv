@@ -101,6 +101,28 @@ module dma_controller (
     logic [12:0] xfer_cnt;      // Kalan kelime sayısı
     logic [31:0] read_data_q;   // Okunan veri tampon
 
+    // -------------------------------------------------------------------------
+    // AW / W KANAL AYRIMI  (22 Agustos 2026 - bkz. evidence/veriyolu_incelemesi.md)
+    //
+    // Eski kod DMA_WRITE_REQ'ten cikmak icin awready VE wready'nin AYNI
+    // cevrimde gelmesini bekliyordu:
+    //
+    //     if (m_axi_awready && m_axi_wready) dma_state <= DMA_WRITE_WAIT;
+    //
+    // AXI4-Lite'ta AW ve W BAGIMSIZ kanallardir; bir slave adresi N.
+    // cevrimde, veriyi N+1'de kabul edebilir - tamamen gecerlidir. Boyle
+    // bir slave'de eski kod:
+    //   N.   cevrim: awvalid & awready -> slave adresi TUKETIR
+    //   N+1. cevrim: FSM hala WRITE_REQ, awvalid HALA yuksek
+    //                -> slave bunu IKINCI bir yazma islemi sanar
+    //
+    // Mevcut slave'lerin hepsi iki ready'yi birlikte yukselttigi icin hata
+    // gorunmuyordu; varsayim gizliydi. Kanal basina "tamamlandi" bayragi
+    // varsayimi ortadan kaldirir.
+    // -------------------------------------------------------------------------
+    logic        aw_done_q;      // AW el sikismasi tamamlandi
+    logic        w_done_q;       // W  el sikismasi tamamlandi
+
     // AXI Master varsayılan değerleri
     always_comb begin
         m_axi_awaddr  = dst_addr_q;
@@ -121,8 +143,9 @@ module dma_controller (
                 m_axi_rready  = 1'b1;
             end
             DMA_WRITE_REQ: begin
-                m_axi_awvalid = 1'b1;
-                m_axi_wvalid  = 1'b1;
+                // Kabul edilen kanal geri cekilir; digeri beklemeye devam eder
+                m_axi_awvalid = !aw_done_q;
+                m_axi_wvalid  = !w_done_q;
             end
             DMA_WRITE_WAIT: begin
                 m_axi_bready  = 1'b1;
@@ -142,6 +165,8 @@ module dma_controller (
             dst_addr_q   <= 32'b0;
             xfer_cnt     <= 13'b0;
             read_data_q  <= 32'b0;
+            aw_done_q    <= 1'b0;
+            w_done_q     <= 1'b0;
         end else if (dma_reset) begin
             dma_state    <= DMA_IDLE;
             dma_busy     <= 1'b0;
@@ -151,6 +176,8 @@ module dma_controller (
             dst_addr_q   <= 32'b0;
             xfer_cnt     <= 13'b0;
             read_data_q  <= 32'b0;
+            aw_done_q    <= 1'b0;
+            w_done_q     <= 1'b0;
         end else begin
             case (dma_state)
                 DMA_IDLE: begin
@@ -187,9 +214,16 @@ module dma_controller (
                 end
 
                 DMA_WRITE_REQ: begin
-                    // AW+W kanallarından yazma isteği gönder
-                    if (m_axi_awready && m_axi_wready) begin
+                    // Her kanal kendi el sikismasini bagimsiz tamamlar
+                    if (m_axi_awvalid && m_axi_awready) aw_done_q <= 1'b1;
+                    if (m_axi_wvalid  && m_axi_wready)  w_done_q  <= 1'b1;
+
+                    // Ikisi de tamamlandiysa (bu cevrimde tamamlananlar dahil)
+                    if ((aw_done_q || (m_axi_awvalid && m_axi_awready)) &&
+                        (w_done_q  || (m_axi_wvalid  && m_axi_wready))) begin
                         dma_state <= DMA_WRITE_WAIT;
+                        aw_done_q <= 1'b0;
+                        w_done_q  <= 1'b0;
                     end
                 end
 

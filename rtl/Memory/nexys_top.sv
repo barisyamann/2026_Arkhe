@@ -14,7 +14,24 @@ module nexys_top (
 
     // UART 1 (USB-UART Bridge)
     input  logic        UART_TXD_IN,    // Pin C4 (RX on FPGA side)
-    output logic        UART_RXD_OUT    // Pin D4 (TX on FPGA side)
+    output logic        UART_RXD_OUT,   // Pin D4 (TX on FPGA side)
+
+    // -------------------------------------------------------------------------
+    // I2C Master - Pmod JA (22 Agustos 2026'da eklendi)
+    //
+    // ONCEKI DURUM: I2C hatlari yalnizca modul ICINDE kablolanmisti, karta
+    // hic cikmiyordu. Yani sartname 5.2'nin istedigi "kurul tarafindan
+    // verilecek test senaryolari" arasinda bir I2C senaryosu olsaydi
+    // kosulamazdi.
+    //
+    // ACIK DRENAJ: her iki hat da yalnizca asagi cekilir, asla yukari
+    // surulmez. Yukari cekme direnci gerekir - XDC'de PULLUP TRUE ile
+    // FPGA'nin dahili zayif direnci (~50 kOhm) etkinlestirildi. Bu
+    // fonksiyonel testler icin yeterlidir; 400 kHz'de guvenilir kenar
+    // icin HARICI 2,2-4,7 kOhm direnc onerilir.
+    // -------------------------------------------------------------------------
+    inout  wire         I2C_SCL,        // Pmod JA1 - C17
+    inout  wire         I2C_SDA         // Pmod JA2 - D18
 );
 
     // 100 MHz -> 50 MHz Saat Bölücü (Clock Divider)
@@ -51,20 +68,20 @@ module nexys_top (
     // uclusu verir. Gercek 'z surumu burada, en ust seviyede yapiliyor -
     // ASIC akisinda bu katmanin yerini pad halkasi alir.
     //
-    // Bu kartta I2C ve QSPI kullanilmiyor; hatlar yine de dogru sekilde
-    // modellendi ki soc_top arayuzu FPGA ile ASIC arasinda ayni kalsin.
+    // I2C artik karta cikiyor (Pmod JA). QSPI hala kart disina cikmiyor;
+    // hatlar yine de dogru modellendi ki soc_top arayuzu FPGA ile ASIC
+    // arasinda ayni kalsin.
     // =========================================================================
-    wire       i2c_sda_io;
-    wire       i2c_scl_io;
     wire [3:0] qspi_io_io;
 
     wire       i2c_sda_o_w, i2c_sda_oe_w;
     wire       i2c_scl_o_w, i2c_scl_oe_w;
     wire [3:0] qspi_io_o_w, qspi_io_oe_w;
 
-    // I2C acik drenaj: yalnizca asagi cekilir, asla yukari surulmez
-    assign i2c_sda_io = i2c_sda_oe_w ? i2c_sda_o_w : 1'bz;
-    assign i2c_scl_io = i2c_scl_oe_w ? i2c_scl_o_w : 1'bz;
+    // I2C acik drenaj: yalnizca asagi cekilir, asla yukari surulmez.
+    // oe yuksekken bile '1' surulmez - bu I2C'nin tanimi geregidir.
+    assign I2C_SDA = (i2c_sda_oe_w && !i2c_sda_o_w) ? 1'b0 : 1'bz;
+    assign I2C_SCL = (i2c_scl_oe_w && !i2c_scl_o_w) ? 1'b0 : 1'bz;
 
     genvar gi;
     generate
@@ -91,13 +108,13 @@ module nexys_top (
         .uart2_rxd      (1'b1),
         .uart2_txd      (),
 
-        // I2C (Kullanılmıyor)
+        // I2C Master -> Pmod JA
         .i2c_sda_o      (i2c_sda_o_w),
         .i2c_sda_oe     (i2c_sda_oe_w),
-        .i2c_sda_i      (i2c_sda_io),
+        .i2c_sda_i      (I2C_SDA),
         .i2c_scl_o      (i2c_scl_o_w),
         .i2c_scl_oe     (i2c_scl_oe_w),
-        .i2c_scl_i      (i2c_scl_io),
+        .i2c_scl_i      (I2C_SCL),
 
         // QSPI NOR Flash (Kullanılmıyor)
         .qspi_sck       (),

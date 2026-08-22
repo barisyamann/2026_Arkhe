@@ -64,6 +64,18 @@ module tb_qspi_mock;
     // Harici pull-up'lar
     pullup(spi_io0); pullup(spi_io1); pullup(spi_io2); pullup(spi_io3);
 
+    // -------------------------------------------------------------------------
+    // IKI FLASH MODELI - 3 bayt ve 4 bayt adres bekleyen
+    //
+    // Adres genisligi flash tarafinda derleme zamani parametresidir; tek
+    // ornekle iki modu da deneyemeyiz. Bu yuzden iki model ayni veri yoluna
+    // baglanir ve secim CS ile yapilir. Secilmeyen model cs_n=1 oldugu icin
+    // io1'i yuksek empedansta birakir, yani hat cakismasi olmaz.
+    // -------------------------------------------------------------------------
+    logic sel_4byte = 1'b0;
+    wire  cs_n_3b = sel_4byte ? 1'b1 : spi_cs_n;
+    wire  cs_n_4b = sel_4byte ? spi_cs_n : 1'b1;
+
     // =========================================================================
     // Self-checking altyapisi
     // =========================================================================
@@ -120,6 +132,23 @@ module tb_qspi_mock;
     // =========================================================================
     logic [31:0] v;
     int          waited;
+
+    // QSPI_STA bit 0 (done) yukselene kadar bekler
+    task automatic bekle_bitti();
+        logic [31:0] st;
+        int          n;
+        n = 0;
+        forever begin
+            axi_read(32'h0C, st);
+            if (st[0]) break;
+            if (n++ > 20000) begin
+                $display("      [HATA] islem bitmedi - zaman asimi");
+                error_count++;
+                break;
+            end
+            @(posedge clk);
+        end
+    endtask
 
     initial begin
         // NOT: Flash icerigi tb/qspi_test_pattern.hex dosyasindan gelir.
@@ -178,6 +207,150 @@ module tb_qspi_mock;
         check("Flash kelime 1", v, 32'hA5A5_0001);
 
         // ---------------------------------------------------------------------
+        // 4-BAYT ADRESLEME MODU (CCR[24] = 1)
+        //
+        // Sartname s.24: "Tum flash alanini kapsamak icin 4-bayt adresleme
+        // modu destegi bulunacaktir."
+        //
+        // Bu test AYIRT EDICIDIR: 4-bayt bekleyen flash'a yalnizca 3 bayt
+        // adres gonderilirse model hala adres fazindadir ve ilk veri baytini
+        // adresin son bayti sanip yutar. Okunan kelime kayar, denetim duser.
+        //
+        // Bayt adresi 8 -> kelime 2 -> 0xA5A50002 beklenir.
+        // ---------------------------------------------------------------------
+        sel_4byte = 1'b1;
+        repeat (5) @(posedge clk);
+
+        axi_write(32'h10, 32'h0000_0003);          // QSPI_FCR: iki FIFO'yu bosalt
+        axi_write(32'h04, 32'h0000_0008);          // QSPI_ADR = 8
+        axi_write(32'h00, 32'h8907_0103);          // CCR: ayni + bit24 (4 bayt)
+
+        waited = 0;
+        forever begin
+            axi_read(32'h0C, v);
+            if (v[0]) break;
+            if (waited++ > 20000) break;
+            @(posedge clk);
+        end
+        check("4-bayt: QSPI_STA done biti", {31'b0, v[0]}, 32'h1);
+
+        axi_read(32'h08, v);
+        check("4-bayt: flash kelime 2", v, 32'hA5A5_0002);
+
+        axi_read(32'h08, v);
+        check("4-bayt: flash kelime 3", v, 32'hA5A5_0003);
+
+        // ---------------------------------------------------------------------
+        // KOMUT KAPSAMI  (Sartname s.24)
+        //
+        // Onceki surum YALNIZCA READ (0x03) yolunu kosuyordu. Sartname su
+        // komutlari zorunlu tutuyor ve hepsi RTL'de gerceklenmisti ama
+        // dogrulanmamisti - kapsama olcumunde qspi_master %58,4 statement
+        // ile en dusuk modulumuzdu.
+        //
+        // CCR alan kodlamasi:
+        //   [7:0] komut  [9:8] veri modu (00 yok / 01 x1 / 10 x2 / 11 x4)
+        //   [10] yaz(1)/oku(0)  [15:11] dummy  [23:16] bayt-1
+        //   [24] 4-bayt adres   [30:25] prescaler  [31] durum temizle
+        // ---------------------------------------------------------------------
+        sel_4byte = 1'b0;                        // 3-bayt modeline geri don
+        repeat (5) @(posedge clk);
+
+        // --- RDID (0x9F): uretici/cihaz kimligi, 3 bayt tek hatli --------
+        axi_write(32'h10, 32'h0000_0003);        // FIFO'lari bosalt
+        axi_write(32'h00, 32'h8802_019F);
+        bekle_bitti();
+        axi_read(32'h08, v);
+        // Model JEDEC_ID = 24'h01_02_19; baytlar dusuk-anlamliya dogru toplanir
+        check("RDID = 01 02 19", v[23:0], 24'h1902_01);
+
+        // --- WREN (0x06) -> RDSR1 (0x05): WEL biti 1 olmali --------------
+        axi_write(32'h00, 32'h8800_0006);        // WREN, veri fazi yok
+        bekle_bitti();
+        axi_write(32'h10, 32'h0000_0003);
+        axi_write(32'h00, 32'h8800_0105);        // RDSR1, 1 bayt
+        bekle_bitti();
+        axi_read(32'h08, v);
+        check("WREN sonrasi RDSR1.WEL", {31'b0, v[1]}, 32'h1);
+
+        // --- WRDI (0x04) -> RDSR1: WEL biti 0 olmali ---------------------
+        axi_write(32'h00, 32'h8800_0004);        // WRDI
+        bekle_bitti();
+        axi_write(32'h10, 32'h0000_0003);
+        axi_write(32'h00, 32'h8800_0105);
+        bekle_bitti();
+        axi_read(32'h08, v);
+        check("WRDI sonrasi RDSR1.WEL", {31'b0, v[1]}, 32'h0);
+
+        // --- QOR (0x6B): DORTLU hatli okuma, 8 dummy cevrim --------------
+        //
+        // DTR "Quad modunun donanimsal olarak desteklenmesi, boot suresini
+        // teorik olarak %75 oraninda kisaltir" diyor - ama x4 yolu hic
+        // test edilmemisti. Ayni veriyi x1 ile ayni sonucu vermeli.
+        axi_write(32'h10, 32'h0000_0003);
+        axi_write(32'h04, 32'h0000_0000);        // adres 0
+        axi_write(32'h00, 32'h8807_436B);        // QOR, x4, 8 dummy, 8 bayt
+        bekle_bitti();
+        axi_read(32'h08, v);
+        check("QOR (x4) kelime 0", v, 32'hA5A5_0000);
+        axi_read(32'h08, v);
+        check("QOR (x4) kelime 1", v, 32'hA5A5_0001);
+
+        // --- SE (0xD8): sektor sil -> her sey 0xFF ------------------------
+        //
+        // NOT: bundan SONRA flash icerigi bozulur, okuma testleri yukarida
+        // bitmis olmali.
+        axi_write(32'h00, 32'h8800_0006);        // WREN
+        bekle_bitti();
+        axi_write(32'h04, 32'h0000_0000);
+        axi_write(32'h00, 32'h8800_00D8);        // SE
+        bekle_bitti();
+
+        axi_write(32'h10, 32'h0000_0003);
+        axi_write(32'h04, 32'h0000_0000);
+        axi_write(32'h00, 32'h8803_0103);        // READ, 4 bayt
+        bekle_bitti();
+        axi_read(32'h08, v);
+        check("SE sonrasi silinmis kelime", v, 32'hFFFF_FFFF);
+        check("model SE sayaci", u_flash_3b.se_sayisi, 32'd1);
+
+        // --- PP (0x02): sayfa programla -> geri oku -----------------------
+        //
+        // NOR flash yalnizca 1 -> 0 yapabilir; silme sonrasi 0xFF oldugu
+        // icin istenen deger dogrudan yazilabilir.
+        axi_write(32'h00, 32'h8800_0006);        // WREN
+        bekle_bitti();
+        axi_write(32'h10, 32'h0000_0003);
+        axi_write(32'h04, 32'h0000_0000);
+        axi_write(32'h08, 32'h1234_5678);        // TX FIFO'ya veri
+        axi_write(32'h00, 32'h8803_0502);        // PP, x1 yazma, 4 bayt
+        bekle_bitti();
+        check("model PP bayt sayaci", u_flash_3b.pp_bayt, 32'd4);
+
+        axi_write(32'h10, 32'h0000_0003);
+        axi_write(32'h04, 32'h0000_0000);
+        axi_write(32'h00, 32'h8803_0103);        // READ, 4 bayt
+        bekle_bitti();
+        axi_read(32'h08, v);
+        check("PP sonrasi geri okuma", v, 32'h1234_5678);
+
+        // --- WEL olmadan PP yazmamali ------------------------------------
+        //
+        // WREN verilmeden yazma denenirse flash yok saymalidir. Bu, gercek
+        // NOR flash davranisidir ve yazilim hatasini yakalar.
+        axi_write(32'h10, 32'h0000_0003);
+        axi_write(32'h04, 32'h0000_0010);        // farkli adres (bayt 16)
+        axi_write(32'h08, 32'h0000_0000);
+        axi_write(32'h00, 32'h8803_0502);        // WREN YOK
+        bekle_bitti();
+        axi_write(32'h10, 32'h0000_0003);
+        axi_write(32'h04, 32'h0000_0010);
+        axi_write(32'h00, 32'h8803_0103);
+        bekle_bitti();
+        axi_read(32'h08, v);
+        check("WEL yokken PP yazmadi", v, 32'hFFFF_FFFF);
+
+        // ---------------------------------------------------------------------
         // Ozet
         // ---------------------------------------------------------------------
         $display("================================================================");
@@ -231,10 +404,25 @@ module tb_qspi_mock;
     // Kendi flash modelimiz (satici modeli depoda yok)
     spi_flash_model #(
         .INIT_FILE  (INIT_FILE),
-        .WORD_COUNT (TEST_WORDS)
-    ) u_flash (
+        .WORD_COUNT (TEST_WORDS),
+        .ADDR_BYTES (3)
+    ) u_flash_3b (
         .sck   (spi_sck),
-        .cs_n  (spi_cs_n),
+        .cs_n  (cs_n_3b),
+        .io0   (spi_io0),
+        .io1   (spi_io1),
+        .io2   (spi_io2),
+        .io3   (spi_io3)
+    );
+
+    // 4-bayt adres bekleyen ikinci model
+    spi_flash_model #(
+        .INIT_FILE  (INIT_FILE),
+        .WORD_COUNT (TEST_WORDS),
+        .ADDR_BYTES (4)
+    ) u_flash_4b (
+        .sck   (spi_sck),
+        .cs_n  (cs_n_4b),
         .io0   (spi_io0),
         .io1   (spi_io1),
         .io2   (spi_io2),
