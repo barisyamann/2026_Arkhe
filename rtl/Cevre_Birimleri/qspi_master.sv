@@ -82,6 +82,7 @@ logic [4:0]  ccr_dummy_cycles;
 logic [7:0]  ccr_data_size;
 logic [5:0]  ccr_prescaler;
 logic        ccr_clr_status;
+logic        ccr_addr_4byte;
 
 logic        sta_done;
 logic        sta_busy;
@@ -270,6 +271,22 @@ assign ccr_dummy_cycles = reg_ccr[15:11];
 assign ccr_data_size    = reg_ccr[23:16];
 assign ccr_prescaler    = reg_ccr[30:25];
 assign ccr_clr_status   = reg_ccr[31];
+// -----------------------------------------------------------------------
+// CCR[24] - 4 BAYT ADRESLEME MODU
+//
+// Sartname QSPI_CCR[24] bitini REZERVE olarak birakir. Sartnamenin anlati
+// bolumu ise "Tum flash alanini kapsamak icin 4-bayt adresleme modu
+// destegi bulunacaktir" der; QSPI_ADR yazmac tanimi ise 3-bayt anlatir.
+// Bu iki ifadeyi uzlastirmak icin rezerve bit adres genisligi secicisi
+// olarak kullanilmistir:
+//
+//   CCR[24] = 0 -> 3 bayt adres (QSPI_ADR[23:0])  <- VARSAYILAN, sartname
+//   CCR[24] = 1 -> 4 bayt adres (QSPI_ADR[31:0])
+//
+// Reset degeri 0 oldugu icin davranis sartnameyle birebir ayni kalir;
+// 4-bayt yalnizca yazilim acikca istediginde devreye girer.
+// -----------------------------------------------------------------------
+assign ccr_addr_4byte   = reg_ccr[24];
 
 assign sta_fifo_err = {2'b00, err_tx_full, err_rx_empty | err_rx_full};
 assign reg_sta = {20'h0,
@@ -387,12 +404,10 @@ logic [1:0]  nibble_cnt;
 logic [8:0]  byte_cnt;
 logic [8:0]  total_bytes;
 logic [4:0]  dummy_cnt;
-logic [31:0] addr_shift;
 logic [2:0]  addr_byte_cnt;
 
 logic [31:0] tx_word;
 logic [1:0]  tx_byte_idx;
-logic        need_addr;
 
 function automatic logic cmd_needs_addr(input logic [7:0] cmd);
     case (cmd)
@@ -476,10 +491,11 @@ always_ff @(posedge clk or negedge rst_n) begin
                 if (sck_edge_fall) begin
                     if (bit_cnt == 3'h0) begin
                         if (cmd_needs_addr(ccr_instr)) begin
-                            addr_shift    <= reg_adr;
                             addr_byte_cnt <= 3'd0;
                             state         <= SEND_ADDR;
-                            shift_out     <= reg_adr[23:16];
+                            // 4 baytta en anlamli bayt once gider.
+                            shift_out     <= ccr_addr_4byte ? reg_adr[31:24]
+                                                            : reg_adr[23:16];
                             bit_cnt       <= 3'd7;
                         end else if (ccr_dummy_cycles > 5'h0) begin
                             dummy_cnt <= ccr_dummy_cycles;
@@ -527,10 +543,17 @@ always_ff @(posedge clk or negedge rst_n) begin
                         // (0xFF) okuyordu. Sistem testi bunu goremezdi cunku
                         // varsayilan akis hizli acilis kullaniyor ve QSPI
                         // yolunu hic calistirmiyor.
+                        // 3 bayt modu: [23:16] -> [15:8] -> [7:0]
+                        // 4 bayt modu: [31:24] -> [23:16] -> [15:8] -> [7:0]
                         if (addr_byte_cnt == 3'd0) begin
-                            shift_out <= reg_adr[15:8];
+                            shift_out <= ccr_addr_4byte ? reg_adr[23:16]
+                                                        : reg_adr[15:8];
                             bit_cnt   <= 3'd7;
                         end else if (addr_byte_cnt == 3'd1) begin
+                            shift_out <= ccr_addr_4byte ? reg_adr[15:8]
+                                                        : reg_adr[7:0];
+                            bit_cnt   <= 3'd7;
+                        end else if (ccr_addr_4byte && addr_byte_cnt == 3'd2) begin
                             shift_out <= reg_adr[7:0];
                             bit_cnt   <= 3'd7;
                         end else begin
@@ -590,30 +613,61 @@ always_ff @(posedge clk or negedge rst_n) begin
                 io_oe  <= 1'b1;
                 sck_en <= 1'b1;
 
+                // -------------------------------------------------------------
+                // HATA 1 - CIKIS SURUCUSU KENAR KONTROLUNUN DISINDA OLMALI
+                //
+                // 22 Agustos 2026, PP testi eklenince bulundu.
+                //
+                // SEND_ADDR cikisini HER cevrim guncelliyor; WRITE_DATA ise
+                // yalnizca sck_edge_fall altinda guncelliyordu. Duruma
+                // girildigi cevrimde io0 bayat ADRES bitini tasiyor, ilk veri
+                // biti bir SCK cevrimi GEC cikiyordu. Flash bir bit kaymis
+                // veri yaziyordu: 0x78 -> 0x3C, 0x56 -> 0x2B, 0x34 -> 0x1A.
+                //
+                // Okuma testleri bunu goremezdi: hepsi adres 0 kullaniyor ve
+                // bir bit kaymis sifir yine sifirdir.
+                // -------------------------------------------------------------
+                unique case (ccr_data_mode)
+                    2'b10:   io_out[1:0] <= shift_out[7:6];
+                    2'b11:   io_out[3:0] <= shift_out[7:4];
+                    default: io_out[0]   <= shift_out[7];
+                endcase
+
                 if (sck_edge_fall) begin
                     case (ccr_data_mode)
                         2'b01: begin
-                            io_out[0] <= shift_out[7];
                             if (bit_cnt == 3'h0) begin
                                 byte_cnt <= byte_cnt + 1;
                                 if (byte_cnt + 1 >= total_bytes) begin
                                     state  <= DEASSERT_CS;
                                     sck_en <= 1'b0;
                                 end else begin
+                                    // ---------------------------------------------
+                                    // HATA 2 - HER KELIMENIN 4. BAYTI ATLANIYORDU
+                                    //
+                                    // Eski kod tx_byte_idx==3 oldugunda yeni
+                                    // kelimeyi cekip tx_word[7:0]'i yukluyordu;
+                                    // boylece tx_word[31:24] HIC gonderilmiyordu.
+                                    // 4 baytlik bir PP'de son bayt, ilk baytin
+                                    // TEKRARIYDI.
+                                    //
+                                    // Dogrusu: once 4. bayti yukle, SONRAKI bayt
+                                    // icin yeni kelimeyi cek.
+                                    // ---------------------------------------------
+                                    case (tx_byte_idx)
+                                        2'd0: shift_out <= tx_word[7:0];
+                                        2'd1: shift_out <= tx_word[15:8];
+                                        2'd2: shift_out <= tx_word[23:16];
+                                        2'd3: shift_out <= tx_word[31:24];
+                                    endcase
+
                                     if (tx_byte_idx == 2'd3) begin
                                         if (!tx_empty) begin
-                                            tx_word     <= tx_fifo[tx_rd_ptr[$clog2(FIFO_DEPTH)-1:0]];
-                                            tx_rd_ptr   <= tx_rd_ptr + 1;
+                                            tx_word   <= tx_fifo[tx_rd_ptr[$clog2(FIFO_DEPTH)-1:0]];
+                                            tx_rd_ptr <= tx_rd_ptr + 1;
                                         end
                                         tx_byte_idx <= 2'd0;
-                                        shift_out   <= tx_word[7:0];
                                     end else begin
-                                        case (tx_byte_idx)
-                                            2'd0: shift_out <= tx_word[7:0];
-                                            2'd1: shift_out <= tx_word[15:8];
-                                            2'd2: shift_out <= tx_word[23:16];
-                                            2'd3: shift_out <= tx_word[31:24];
-                                        endcase
                                         tx_byte_idx <= tx_byte_idx + 1;
                                     end
                                     bit_cnt <= 3'd7;

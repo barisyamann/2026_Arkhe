@@ -113,6 +113,58 @@ module tb_jtag_debug;
     endtask
 
     // Bir cevrimlik hata darbesi uretir (kopruler boyle davranir)
+    // =========================================================================
+    // JTAG TAP SERI PROTOKOL SURUCUSU  (22 Agustos 2026'da eklendi)
+    //
+    // Bu blok testi TAP pinlerini bagliyordu ama HIC SURMUYORDU: 16 durumlu
+    // TAP durum makinesi yalnizca sistem testinde calisiyordu, blok
+    // kapsamasinda gorunmuyordu (%54,9 statement).
+    // =========================================================================
+    task automatic jtag_clock();
+        jtag_tck = 1'b0; #100;
+        jtag_tck = 1'b1; #100;
+        jtag_tck = 1'b0;
+    endtask
+
+    task automatic jtag_reset();
+        jtag_trst_n = 1'b0; #100;
+        jtag_trst_n = 1'b1;
+        jtag_tms = 1'b1;
+        repeat (5) jtag_clock();      // TEST_LOGIC_RESET garanti
+        jtag_tms = 1'b0;
+        jtag_clock();                 // -> RUN_TEST_IDLE
+    endtask
+
+    task automatic jtag_shift_ir(input logic [3:0] ir_in);
+        jtag_tms = 1'b1; jtag_clock();   // -> SELECT_DR_SCAN
+        jtag_tms = 1'b1; jtag_clock();   // -> SELECT_IR_SCAN
+        jtag_tms = 1'b0; jtag_clock();   // -> CAPTURE_IR
+        jtag_tms = 1'b0; jtag_clock();   // -> SHIFT_IR
+        for (int i = 0; i < 4; i++) begin
+            jtag_tdi = ir_in[i];
+            jtag_tms = (i == 3) ? 1'b1 : 1'b0;
+            jtag_clock();
+        end
+        jtag_tms = 1'b1; jtag_clock();   // -> UPDATE_IR
+        jtag_tms = 1'b0; jtag_clock();   // -> RUN_TEST_IDLE
+    endtask
+
+    task automatic jtag_shift_dr(input  logic [63:0] dr_in,
+                                 input  int          len,
+                                 output logic [63:0] dr_out);
+        jtag_tms = 1'b1; jtag_clock();   // -> SELECT_DR_SCAN
+        jtag_tms = 1'b0; jtag_clock();   // -> CAPTURE_DR
+        jtag_tms = 1'b0; jtag_clock();   // -> SHIFT_DR
+        for (int i = 0; i < len; i++) begin
+            jtag_tdi = dr_in[i];
+            jtag_tms = (i == len - 1) ? 1'b1 : 1'b0;
+            jtag_clock();
+            dr_out[i] = jtag_tdo;
+        end
+        jtag_tms = 1'b1; jtag_clock();   // -> UPDATE_DR
+        jtag_tms = 1'b0; jtag_clock();   // -> RUN_TEST_IDLE
+    endtask
+
     task automatic hata_darbesi(input bit buyruk, input logic [31:0] adres);
         @(posedge clk);
         if (buyruk) begin
@@ -217,6 +269,70 @@ module tb_jtag_debug;
 
         axi_write({27'b0, REG_FAULT_CLR}, 32'h1);
         repeat (2) @(posedge clk);
+
+        // ---------------------------------------------------------------------
+        // JTAG TAP SERI PROTOKOLU
+        //
+        // Sartname EK-2 (JTAG, opsiyonel): "Islemcinin debug portuna
+        // mikrodenetleyici icerisindeki bir JTAG TAP kontrolcusu uzerinden
+        // erisilebilir."
+        //
+        // 16 durumlu TAP durum makinesi yalnizca sistem testinde
+        // calisiyordu; blok kapsamasinda hic gorunmuyordu.
+        // ---------------------------------------------------------------------
+        begin
+            logic [63:0] dr;
+
+            $display("  -- JTAG TAP seri protokolu");
+            jtag_reset();
+
+            // --- IDCODE (IR = 0x1) ---
+            jtag_shift_ir(4'h1);
+            jtag_shift_dr(64'h0, 32, dr);
+            check("TAP IDCODE", dr[31:0], 32'h4152_4B48);
+
+            // --- Ikinci okuma ayni degeri vermeli (TAP kararliligi) ---
+            jtag_shift_dr(64'h0, 32, dr);
+            check("TAP IDCODE tekrar", dr[31:0], 32'h4152_4B48);
+
+            // --- BYPASS (IR = 0xF): tek bitlik yazmac ---
+            // BYPASS'ta TDI, bir cevrim gecikmeyle TDO'ya cikar. Ilk bit
+            // her zaman 0'dir (yazmac reset degeri).
+            jtag_shift_ir(4'hF);
+            jtag_shift_dr(64'h0, 1, dr);
+            check("TAP BYPASS ilk bit 0", {63'b0, dr[0]}, 64'h0);
+
+            // --- TAP reset IR'i BYPASS'a dondurur ---
+            // Sartname/IEEE 1149.1: TEST_LOGIC_RESET durumunda IR, IDCODE
+            // veya BYPASS'a doner. Bu tasarimda IR_BYPASS'tir.
+            jtag_reset();
+            jtag_shift_dr(64'h0, 1, dr);
+            check("TAP reset sonrasi BYPASS", {63'b0, dr[0]}, 64'h0);
+
+            // --- DBG_CTRL uzerinden halt (IR = 0x4) ---
+            //
+            // TAP yolunda RTL dogrudan bit 0'i kullanir:
+            //     dbg_halted <= jtag_dr_latched[0];
+            // (CSR yolundan farkli: orada [0]=halt, [1]=resume ayri bitler.)
+            //
+            // Komut TCK alanindan CLK alanina iki asamali senkronizatorle
+            // gecer; TCK periyodu 200 ns, sistem saati 20 ns. Bekleme
+            // buna gore secilmeli - kisa beklemede test yaniltici sekilde
+            // "bir islem geriden" gorunuyordu.
+            // DR 64 bittir ve SAGA kayar:
+            //     dr_reg <= {jtag_tdi, dr_reg[63:1]};
+            // Yani TDI bit 63'ten girer. Bir degerin bit 0'a ulasmasi icin
+            // TAM 64 bit kaydirmak gerekir. Kisa kaydirma denemesi bu
+            // yuzden basarisiz olmustu - tasarim dogru, test eksikti.
+            jtag_shift_ir(4'h4);
+            jtag_shift_dr(64'h1, 64, dr);          // bit0 = 1 -> halt
+            repeat (60) @(posedge clk);
+            check("TAP DBG_CTRL halt", {31'b0, debug_req}, 32'h1);
+
+            jtag_shift_dr(64'h0, 64, dr);          // bit0 = 0 -> resume
+            repeat (60) @(posedge clk);
+            check("TAP DBG_CTRL resume", {31'b0, debug_req}, 32'h0);
+        end
 
         // ---------------------------------------------------------------------
         // Ozet

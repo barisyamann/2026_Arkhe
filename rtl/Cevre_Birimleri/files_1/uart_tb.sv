@@ -151,6 +151,41 @@ module uart_tb;
         @(posedge clk);
     endtask
 
+    // Yanit kodunu da donduren erisimler - AXI hata dallarini sinamak icin.
+    // Mevcut axil_write/axil_read yanit kodunu disari vermiyordu, bu yuzden
+    // SLVERR yolu hicbir testte kontrol edilmiyordu.
+    task automatic axil_write_resp(
+        input  logic [AXI_ADDR_W-1:0] addr,
+        input  logic [AXI_DATA_W-1:0] data,
+        output logic [1:0]            resp
+    );
+        @(posedge clk);
+        awaddr  <= addr; awvalid <= 1'b1;
+        wdata   <= data; wvalid  <= 1'b1;
+        @(posedge clk);
+        while (!awready) @(posedge clk);
+        awvalid <= 1'b0;
+        while (!wready) @(posedge clk);
+        wvalid <= 1'b0;
+        while (!bvalid) @(posedge clk);
+        resp = bresp;
+        @(posedge clk);
+    endtask
+
+    task automatic axil_read_resp(
+        input  logic [AXI_ADDR_W-1:0] addr,
+        output logic [1:0]            resp
+    );
+        @(posedge clk);
+        araddr  <= addr; arvalid <= 1'b1;
+        @(posedge clk);
+        while (!arready) @(posedge clk);
+        arvalid <= 1'b0;
+        while (!rvalid) @(posedge clk);
+        resp = rresp;
+        @(posedge clk);
+    endtask
+
     // =========================================================================
     // Test kontrol makrosu
     // =========================================================================
@@ -166,6 +201,49 @@ module uart_tb;
             $display("[FAIL] %s | %s", test_name, fail_msg);
             test_fail++;
         end
+    endtask
+
+    // =========================================================================
+    // Test: yazmac davranislari ve AXI hata yaniti
+    //
+    // 22 Agustos 2026'da eklendi. Kapsama olcumunde uart_peripheral %48,7
+    // statement ile dusuk cikmisti; AXI hata dallari (SLVERR) ve RDR
+    // salt-okunurlugu hicbir testte calismiyordu.
+    // =========================================================================
+    task automatic test_yazmac_ve_hata();
+        logic [31:0] rd_val;
+        logic [31:0] rdr_onceki;
+        logic [1:0]  resp;
+
+        $display("");
+        $display("--- Test: yazmac davranislari ve hata yaniti ---");
+
+        // RDR salt-okunur (Sartname EK-2: "RO")
+        axil_read(UART_RDR_OFFSET, rdr_onceki);
+        axil_write(UART_RDR_OFFSET, 32'hDEAD_BEEF);
+        axil_read(UART_RDR_OFFSET, rd_val);
+        check("UART_RDR yazmaya direnir", rd_val === rdr_onceki,
+              $sformatf("onceki=%08h simdi=%08h", rdr_onceki, rd_val));
+
+        // TDR geri okunabilir ve yalnizca [7:0] tutar
+        axil_write(UART_TDR_OFFSET, 32'hFFFF_FF3C);
+        axil_read(UART_TDR_OFFSET, rd_val);
+        check("UART_TDR yalnizca [7:0] tutar", rd_val === 32'h0000_003C,
+              $sformatf("okunan=%08h", rd_val));
+
+        // Gecersiz adres -> SLVERR (yazmac haritasi 0x00..0x10)
+        axil_write_resp(8'h20, 32'h0, resp);
+        check("gecersiz adrese yazma SLVERR", resp === 2'b10,
+              $sformatf("bresp=%b", resp));
+
+        axil_read_resp(8'h20, resp);
+        check("gecersiz adresten okuma SLVERR", resp === 2'b10,
+              $sformatf("rresp=%b", resp));
+
+        // Gecerli adres OKAY donmeli
+        axil_write_resp(UART_CPB_OFFSET, 32'd50, resp);
+        check("gecerli adrese yazma OKAY", resp === 2'b00,
+              $sformatf("bresp=%b", resp));
     endtask
 
     // =========================================================================
@@ -305,6 +383,7 @@ module uart_tb;
 
         test_cpb_rw();
         test_stp_config();
+        test_yazmac_ve_hata();
 
         // Farklı bayt değerleriyle loopback testi
         test_tx_rx_loopback(8'hAA);

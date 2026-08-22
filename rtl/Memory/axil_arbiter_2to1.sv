@@ -131,6 +131,14 @@ module axil_arbiter_2to1 (
                     r_state_d = R_IDLE;
                 end
             end
+
+            // Durum kodlamasi 2 bit; 2'b11 erisilemez ama KODLANABILIR.
+            // Tum cikislar case oncesinde varsayilan aldigi icin latch
+            // uretilmiyordu, ancak FSM bir sekilde o duruma duserse
+            // (reset sirasinda X yayilimi, tek olay bozulmasi) orada
+            // kalirdi - kurtulus yolu yoktu. 3'e 1 arbiter'da bu dal
+            // zaten vardi; tutarsizlik yalnizca burdaydi.
+            default: r_state_d = R_IDLE;
         endcase
     end
 

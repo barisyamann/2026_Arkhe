@@ -50,3 +50,11 @@ build/regression/
 asic/run/
 __pycache__/
 *.pyc
+
+# Tum gecici derleme/simulasyon calisma dizinleri
+build/
+
+# Tam SoC kapsama raporu - 41 MB, cogu CV32E40P kaynak dokumu ve her
+# kosumda tumuyle yeniden uretiliyor. Sayilari evidence/KAPSAMA_RAPORU.md
+# icinde; yeniden uretmek icin: python scripts/run_regression.py --coverage
+evidence/coverage_sistem/

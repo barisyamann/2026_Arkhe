@@ -747,6 +747,64 @@ module tb_soc_top;
         .rready   (merged_m_rready)
     );
 
+    // -------------------------------------------------------------------------
+    // EK PROTOKOL DENETLEYICILERI - master portlari (22 Agustos 2026)
+    //
+    // Yukaridaki denetleyici YALNIZCA birlesik master arayuzunu izliyordu
+    // (arbiter cikisi -> interconnect). Master portlarinin KENDILERI
+    // izlenmiyordu; yani bir master AXI kuralini ihlal etse bile arbiter
+    // cikisinda duzelmis gorunebiliyordu.
+    //
+    // Somut ornek: DMA'nin yazma kanali AW ve W'nin AYNI cevrimde kabulunu
+    // sart kosuyordu (bkz. evidence/veriyolu_incelemesi.md, bulgu V1).
+    // Duzeltildi, ama regresyonda KORUNMUYORDU cunku DMA master portu
+    // izlenmiyordu. Artik izleniyor.
+    //
+    // Sartname Bolum 5.2 (odul icin asgari basari kriteri):
+    //   "Cevre birimleri ve YZ hizlandiricinin {AXI or AXI-Lite}
+    //    arayuzlerinin en azindan protocol check duzeyinde AXI
+    //    agent'lariyla dogrulanmasi."
+    // -------------------------------------------------------------------------
+
+    // M2 - DMA master portu
+    bind soc_top axil_protocol_checker u_pc_dma (
+        .clk      (clk_i),
+        .rst_n    (rst_ni),
+        .awaddr   (dma_m_awaddr),   .awvalid (dma_m_awvalid), .awready (dma_m_awready),
+        .wdata    (dma_m_wdata),    .wstrb   (dma_m_wstrb),
+        .wvalid   (dma_m_wvalid),   .wready  (dma_m_wready),
+        .bresp    (dma_m_bresp),    .bvalid  (dma_m_bvalid),  .bready  (dma_m_bready),
+        .araddr   (dma_m_araddr),   .arvalid (dma_m_arvalid), .arready (dma_m_arready),
+        .rdata    (dma_m_rdata),    .rresp   (dma_m_rresp),
+        .rvalid   (dma_m_rvalid),   .rready  (dma_m_rready)
+    );
+
+    // M1 - JTAG/Debug master portu
+    bind soc_top axil_protocol_checker u_pc_jtag (
+        .clk      (clk_i),
+        .rst_n    (rst_ni),
+        .awaddr   (jtag_m_awaddr),  .awvalid (jtag_m_awvalid), .awready (jtag_m_awready),
+        .wdata    (jtag_m_wdata),   .wstrb   (jtag_m_wstrb),
+        .wvalid   (jtag_m_wvalid),  .wready  (jtag_m_wready),
+        .bresp    (jtag_m_bresp),   .bvalid  (jtag_m_bvalid),  .bready  (jtag_m_bready),
+        .araddr   (jtag_m_araddr),  .arvalid (jtag_m_arvalid), .arready (jtag_m_arready),
+        .rdata    (jtag_m_rdata),   .rresp   (jtag_m_rresp),
+        .rvalid   (jtag_m_rvalid),  .rready  (jtag_m_rready)
+    );
+
+    // M0 - CPU veri portu (OBI -> AXI koprusu cikisi)
+    bind soc_top axil_protocol_checker u_pc_cpu (
+        .clk      (clk_i),
+        .rst_n    (rst_ni),
+        .awaddr   (data_axil_awaddr),  .awvalid (data_axil_awvalid), .awready (data_axil_awready),
+        .wdata    (data_axil_wdata),   .wstrb   (data_axil_wstrb),
+        .wvalid   (data_axil_wvalid),  .wready  (data_axil_wready),
+        .bresp    (data_axil_bresp),   .bvalid  (data_axil_bvalid),  .bready  (data_axil_bready),
+        .araddr   (data_axil_araddr),  .arvalid (data_axil_arvalid), .arready (data_axil_arready),
+        .rdata    (data_axil_rdata),   .rresp   (data_axil_rresp),
+        .rvalid   (data_axil_rvalid),  .rready  (data_axil_rready)
+    );
+
     // =========================================================================
     // JTAG Sürücü Yardımcı Görevleri (Tasks)
     // =========================================================================

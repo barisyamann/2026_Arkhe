@@ -14,6 +14,19 @@ set_property -dict { PACKAGE_PIN C12   IOSTANDARD LVCMOS33 } [get_ports { CPU_RE
 set_property -dict { PACKAGE_PIN C4    IOSTANDARD LVCMOS33 } [get_ports { UART_TXD_IN }];
 set_property -dict { PACKAGE_PIN D4    IOSTANDARD LVCMOS33 } [get_ports { UART_RXD_OUT }];
 
+# --- I2C Master (Pmod JA) ---
+#
+# 22 Agustos 2026'da eklendi. Onceden I2C hatlari karta HIC cikmiyordu;
+# sartname 5.2 "kurul tarafindan verilecek test senaryolari" istiyor ve
+# bir I2C senaryosu kosulamazdi.
+#
+# PULLUP TRUE, FPGA'nin dahili zayif yukari cekme direncini (~50 kOhm)
+# etkinlestirir. Acik drenaj hattinin bosta '1' okunmasi icin gereklidir.
+# Fonksiyonel test icin yeterlidir; 400 kHz Fast Mode'da guvenilir yukselme
+# kenari icin HARICI 2,2-4,7 kOhm direnc onerilir.
+set_property -dict { PACKAGE_PIN C17   IOSTANDARD LVCMOS33  PULLUP TRUE } [get_ports { I2C_SCL }];
+set_property -dict { PACKAGE_PIN D18   IOSTANDARD LVCMOS33  PULLUP TRUE } [get_ports { I2C_SDA }];
+
 # --- 16 Anahtar (Switches - Girişler) ---
 set_property -dict { PACKAGE_PIN J15   IOSTANDARD LVCMOS33 } [get_ports { SW[0] }];
 set_property -dict { PACKAGE_PIN L16   IOSTANDARD LVCMOS33 } [get_ports { SW[1] }];

@@ -18,7 +18,7 @@ CONFIG    ?= config.yaml
 RUN_DIR   ?= run
 TAG       ?= arkhe
 
-.PHONY: asic_run asic_verify asic_clean lint synth sources collect check clean distclean help
+.PHONY: asic_run asic_verify asic_clean lint synth sources collect check clean distclean help checksums
 
 # -----------------------------------------------------------------------------
 # ZORUNLU HEDEF - tam akis
@@ -72,6 +72,14 @@ sources:
 # -----------------------------------------------------------------------------
 collect:
 	@python3 scripts/collect_outputs.py $(RUN_DIR)/$(TAG)
+	@python3 scripts/gen_checksums.py
+
+# -----------------------------------------------------------------------------
+# Teslim edilen ciktilarin SHA-256 ozetlerini uretir (Final Ciktilar s.32).
+# 'collect' sonunda otomatik cagriliyor; ayrica elle de calistirilabilir.
+# -----------------------------------------------------------------------------
+checksums:
+	@python3 scripts/gen_checksums.py
 
 # -----------------------------------------------------------------------------
 # ONERILEN HEDEFLER  (Final Ciktilar s.34)

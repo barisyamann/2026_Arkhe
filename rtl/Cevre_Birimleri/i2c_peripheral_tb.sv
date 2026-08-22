@@ -216,6 +216,60 @@ module i2c_peripheral_tb;
         $display("--- I2C TEST BAŞLIYOR ---");
 
         // ---------------------------------------------------------------------
+        // TEST 0: YAZMAC DAVRANISLARI  (22 Agustos 2026'da eklendi)
+        //
+        // Sartname EK-2 su davranislari acikca tanimliyor ama hicbiri test
+        // edilmiyordu; kapsama olcumunde i2c_peripheral %64,2 statement ile
+        // dusuk cikti.
+        // ---------------------------------------------------------------------
+
+        // --- I2C_NBY kirpma -------------------------------------------------
+        // Sartname: "1-4 arasinda bir deger alabilmektedir. 1,2,3,4 degerleri
+        // disinda bir deger yazilirsa en yakin sayiya yuvarlanir. Ornegin 0
+        // yazilmasi durumunda 1, 25 yazilmasi durumunda 4 degerini alir."
+        axil_write(8'h00, 32'd0);
+        axil_read(8'h00, rdata);
+        check("I2C_NBY: 0 yazildi -> 1", rdata, 32'd1);
+
+        axil_write(8'h00, 32'd25);
+        axil_read(8'h00, rdata);
+        check("I2C_NBY: 25 yazildi -> 4", rdata, 32'd4);
+
+        axil_write(8'h00, 32'd3);
+        axil_read(8'h00, rdata);
+        check("I2C_NBY: 3 yazildi -> 3", rdata, 32'd3);
+
+        axil_write(8'h00, 32'd1);
+        axil_read(8'h00, rdata);
+        check("I2C_NBY: 1 yazildi -> 1", rdata, 32'd1);
+
+        // --- I2C_ADR 7-bit maskeleme ----------------------------------------
+        // Sartname: "7-bit mod desteklenmektedir. I2C_ADR[6:0] bitleri slave
+        // adresi tanimlar. Diger bitler etkisizdir."
+        axil_write(8'h04, 32'hFFFF_FFFF);
+        axil_read(8'h04, rdata);
+        check("I2C_ADR: yalnizca [6:0] tutuluyor", rdata, 32'h0000_007F);
+
+        // --- I2C_RDR salt-okunur --------------------------------------------
+        // Sartname RDR'yi "RO" olarak isaretliyor.
+        axil_read(8'h08, rdata);
+        begin
+            logic [31:0] rdr_onceki;
+            rdr_onceki = rdata;
+            axil_write(8'h08, 32'hDEAD_BEEF);
+            axil_read(8'h08, rdata);
+            check("I2C_RDR yazmaya direnir", rdata, rdr_onceki);
+        end
+
+        // --- Yazmac geri okuma ----------------------------------------------
+        axil_write(8'h0C, 32'h1234_5678);
+        axil_read(8'h0C, rdata);
+        check("I2C_TDR geri okuma", rdata, 32'h1234_5678);
+
+        // Sonraki testler icin temiz baslangic
+        axil_write(8'h10, 32'h00);
+
+        // ---------------------------------------------------------------------
         // TEST 1: I2C MASTER YAZMA (TX) İŞLEMİ
         // ---------------------------------------------------------------------
         axil_write(8'h00, 32'd2);       // I2C_NBY = 2 Bayt
