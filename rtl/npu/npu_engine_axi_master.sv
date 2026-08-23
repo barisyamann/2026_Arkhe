@@ -3,15 +3,19 @@
 // ============================================================================
 // NPU Compute Engine -> AXI4-Lite Master Bridge
 //
-// Bu modul Compute Engine'in basit bellek isteklerini
+// Compute Engine'in basit bellek read/write isteklerini
 // AXI4-Lite transaction'larina cevirir.
 //
-// Asama 1:
-//   Sadece READ yolu aktiftir.
+// Compute Engine WORD adresi kullanir.
+// AXI BYTE adresi kullandigi icin:
 //
-// TCM adresleri Compute Engine tarafinda WORD adresidir.
-// AXI'de BYTE adresi kullanildigi icin:
 //   AXI_ADDR = TCM_BASE_ADDR + (word_addr * 4)
+//
+// READ:
+//   req -> AR -> R -> response
+//
+// WRITE:
+//   req -> AW + W -> B -> response
 // ============================================================================
 
 module npu_engine_axi_master #(
@@ -25,7 +29,7 @@ module npu_engine_axi_master #(
     // ------------------------------------------------------------------------
     input  logic        req_valid_i,
     input  logic        req_write_i,
-    input  logic [12:0] req_addr_i,      // TCM word address
+    input  logic [12:0] req_addr_i,
     input  logic [31:0] req_wdata_i,
     input  logic [3:0]  req_wstrb_i,
 
@@ -68,19 +72,28 @@ module npu_engine_axi_master #(
 );
 
     // ========================================================================
-    // READ FSM
+    // FSM
     // ========================================================================
 
-    typedef enum logic [1:0] {
+    typedef enum logic [2:0] {
         IDLE,
         READ_ADDR,
-        READ_DATA
+        READ_DATA,
+        WRITE_SEND,
+        WRITE_RESP
     } state_t;
 
     state_t state;
 
-    // Compute Engine'den gelen adres burada tutulur.
+    // Request bilgilerini transaction boyunca sakla.
     logic [12:0] req_addr_q;
+    logic [31:0] req_wdata_q;
+    logic [3:0]  req_wstrb_q;
+
+    // AXI write address ve write data kanallari birbirinden bagimsizdir.
+    // Hangisinin kabul edildigini ayri ayri tutuyoruz.
+    logic aw_done;
+    logic w_done;
 
     // ========================================================================
     // Sequential logic
@@ -89,7 +102,13 @@ module npu_engine_axi_master #(
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             state       <= IDLE;
+
             req_addr_q  <= '0;
+            req_wdata_q <= '0;
+            req_wstrb_q <= '0;
+
+            aw_done     <= 1'b0;
+            w_done      <= 1'b0;
 
             rsp_valid_o <= 1'b0;
             rsp_rdata_o <= '0;
@@ -97,37 +116,83 @@ module npu_engine_axi_master #(
 
         end else begin
 
-            // Response normalde tek clock pulse.
+            // Response normalde bir clock pulse.
             rsp_valid_o <= 1'b0;
 
             case (state)
 
-                // ------------------------------------------------------------
-                // Yeni Compute Engine istegini bekle
-                // ------------------------------------------------------------
+                // ============================================================
+                // Yeni Compute Engine istegi
+                // ============================================================
                 IDLE: begin
-                    if (req_valid_i && !req_write_i) begin
+                    aw_done <= 1'b0;
+                    w_done  <= 1'b0;
+
+                    if (req_valid_i) begin
                         req_addr_q <= req_addr_i;
-                        state      <= READ_ADDR;
+
+                        if (req_write_i) begin
+                            req_wdata_q <= req_wdata_i;
+                            req_wstrb_q <= req_wstrb_i;
+                            state       <= WRITE_SEND;
+                        end else begin
+                            state <= READ_ADDR;
+                        end
                     end
                 end
 
-                // ------------------------------------------------------------
-                // AXI read-address handshake
-                // ------------------------------------------------------------
+                // ============================================================
+                // AXI READ
+                // ============================================================
+
+                // Read address handshake
                 READ_ADDR: begin
                     if (m_axi_arready) begin
                         state <= READ_DATA;
                     end
                 end
 
-                // ------------------------------------------------------------
-                // AXI read-data handshake
-                // ------------------------------------------------------------
+                // Read data handshake
                 READ_DATA: begin
                     if (m_axi_rvalid) begin
                         rsp_rdata_o <= m_axi_rdata;
                         rsp_resp_o  <= m_axi_rresp;
+                        rsp_valid_o <= 1'b1;
+
+                        state <= IDLE;
+                    end
+                end
+
+                // ============================================================
+                // AXI WRITE
+                // ============================================================
+
+                // AXI4-Lite'ta AW ve W kanallari bagimsizdir.
+                // Ikisi de kabul edilene kadar VALID'ler tutulur.
+                WRITE_SEND: begin
+
+                    if (m_axi_awready && !aw_done) begin
+                        aw_done <= 1'b1;
+                    end
+
+                    if (m_axi_wready && !w_done) begin
+                        w_done <= 1'b1;
+                    end
+
+                    // Ikisi ayni clock'ta veya farkli clock'larda
+                    // kabul edilmis olabilir.
+                    if ((aw_done || m_axi_awready) &&
+                        (w_done  || m_axi_wready)) begin
+
+                        state <= WRITE_RESP;
+                    end
+                end
+
+                // Slave'in write response'unu bekle.
+                WRITE_RESP: begin
+                    if (m_axi_bvalid) begin
+                        rsp_rdata_o <= 32'b0;
+                        rsp_resp_o  <= m_axi_bresp;
                         rsp_valid_o <= 1'b1;
 
                         state <= IDLE;
@@ -143,41 +208,41 @@ module npu_engine_axi_master #(
     end
 
     // ========================================================================
-    // Combinational AXI outputs
+    // Combinational outputs
     // ========================================================================
 
     always_comb begin
 
         // --------------------------------------------------------------------
-        // Compute Engine request kabul sinyali
-        // Su an yalniz READ kabul ediyoruz.
+        // Compute Engine yeni istegi yalniz IDLE durumunda verebilir.
         // --------------------------------------------------------------------
-        req_ready_o = (state == IDLE) && !req_write_i;
+        req_ready_o = (state == IDLE);
 
         // --------------------------------------------------------------------
-        // WRITE kanallari henuz kullanilmiyor.
+        // AXI WRITE ADDRESS
         // --------------------------------------------------------------------
-        m_axi_awaddr  = 32'b0;
-        m_axi_awvalid = 1'b0;
+        m_axi_awaddr =
+            TCM_BASE_ADDR + {17'b0, req_addr_q, 2'b00};
 
-        m_axi_wdata   = 32'b0;
-        m_axi_wstrb   = 4'b0000;
-        m_axi_wvalid  = 1'b0;
-
-        m_axi_bready  = 1'b0;
+        m_axi_awvalid =
+            (state == WRITE_SEND) && !aw_done;
 
         // --------------------------------------------------------------------
-        // READ ADDRESS
-        //
-        // Compute Engine WORD adresi kullanir.
-        // AXI BYTE adresi kullandigi icin adres 2 bit sola kaydirilir.
-        //
-        // Ornek:
-        // req_addr_q = 0
-        // AXI = 0x20010000
-        //
-        // req_addr_q = 3584
-        // AXI = 0x20013800
+        // AXI WRITE DATA
+        // --------------------------------------------------------------------
+        m_axi_wdata  = req_wdata_q;
+        m_axi_wstrb  = req_wstrb_q;
+
+        m_axi_wvalid =
+            (state == WRITE_SEND) && !w_done;
+
+        // --------------------------------------------------------------------
+        // AXI WRITE RESPONSE
+        // --------------------------------------------------------------------
+        m_axi_bready = (state == WRITE_RESP);
+
+        // --------------------------------------------------------------------
+        // AXI READ ADDRESS
         // --------------------------------------------------------------------
         m_axi_araddr =
             TCM_BASE_ADDR + {17'b0, req_addr_q, 2'b00};
@@ -185,7 +250,7 @@ module npu_engine_axi_master #(
         m_axi_arvalid = (state == READ_ADDR);
 
         // --------------------------------------------------------------------
-        // READ DATA
+        // AXI READ DATA
         // --------------------------------------------------------------------
         m_axi_rready = (state == READ_DATA);
 
