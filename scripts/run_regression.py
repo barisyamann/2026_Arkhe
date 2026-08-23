@@ -193,7 +193,7 @@ TESTLER = [
         # bagliyor, bu yuzden simulasyon kaynagi olarak eklenmeli.
         ek_kaynak=[MEM/"axil_protocol_checker.sv",
                    TB/"spi_flash_model.sv", TB/"tb_soc_top.sv"],
-        mem=["app.hex", "boot.hex"],
+        mem=["app.hex", "boot.hex", "flash.hex", "fc_weights_packed32.mem"],
         mem_zorunlu=False,                # bulunamazsa test atlanir, cokmez
     ),
     # -------------------------------------------------------------------------
@@ -218,13 +218,14 @@ TESTLER = [
         ek_kaynak=[MEM/"axil_protocol_checker.sv",
                    TB/"spi_flash_model.sv", TB/"tb_soc_top.sv"],
         tanim=["REAL_BOOT"],
-        mem=["app.hex", "boot.hex"],
+        mem=["app.hex", "boot.hex", "flash.hex", "fc_weights_packed32.mem"],
         mem_zorunlu=False,
     ),
 ]
 
 MEM_KAYNAKLARI = [
     ROOT/"weights",
+    ROOT/"sw_nexys"/"build",
     TB,
     ROOT/"vivado"/"vivado_nexys_project"/"Arkhe_SoC_Nexys.ip_user_files"/"mem_init_files",
     TB/"npu_golden",

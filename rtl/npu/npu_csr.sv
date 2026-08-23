@@ -50,6 +50,19 @@ module npu_csr (
 
     // Yazmaç Değişkenleri
     logic        reg_start;
+    // AGIRLIK HAZIR BAYRAGI (23 Agustos 2026)
+    //
+    // FC agirliklari artik kombinasyonel ROM'da degil TCM/SRAM'de. Gercek
+    // cipte SRAM acilista BOSTUR; yukleyicinin onu QSPI flash'tan doldurmasi
+    // gerekir. Doldurmadan start verilirse motor sifir agirlikla kosar ve
+    // her giriste ayni sinifi dondurur - sessiz, yaniltici bir sonuc.
+    //
+    // Bu bayrak o sessiz hatayi ACIK bir davranisa cevirir: bayrak
+    // kurulmadan start KABUL EDILMEZ.
+    //
+    // Yazilim sirasi: agirliklari TCM'ye yaz -> CTRL.WEIGHTS_READY=1 ->
+    // CTRL.START=1. Bayrak yapiskandir, yalnizca NPU_RESET temizler.
+    logic        reg_weights_ready;
     logic        reg_npu_reset;
     logic        reg_irq_enable;
     logic [31:0] reg_in_addr;
@@ -59,14 +72,20 @@ module npu_csr (
     logic        done_sticky;
     logic        irq_clear_pulse;
 
-    assign start_o      = reg_start;
+    // START, agirliklar hazir olmadan GECMEZ.
+    assign start_o      = reg_start && reg_weights_ready;
     assign npu_reset_o  = reg_npu_reset;
     assign in_addr_o    = reg_in_addr[12:0];
     assign out_addr_o   = reg_out_addr[12:0];
 
-    // Status register mapping: Bit 0 = BUSY, Bit 1 = DONE, Bit 2 = IRQ_STATUS
+    // Status register mapping:
+    //   Bit 0 = BUSY
+    //   Bit 1 = DONE
+    //   Bit 2 = IRQ_STATUS
+    //   Bit 3 = WEIGHTS_READY  (yazilim yuklemeyi dogrulayabilsin diye)
     logic [31:0] reg_status;
-    assign reg_status = {29'b0, (done_sticky && reg_irq_enable), done_sticky, busy_i};
+    assign reg_status = {28'b0, reg_weights_ready,
+                         (done_sticky && reg_irq_enable), done_sticky, busy_i};
 
     // Kesme Çıkışı
     assign irq_o = done_sticky && reg_irq_enable;
@@ -116,6 +135,7 @@ module npu_csr (
             w_data_lat      <= '0;
             w_mask_lat      <= '0;
             reg_start       <= 1'b0;
+            reg_weights_ready <= 1'b0;
             reg_npu_reset   <= 1'b0;
             reg_irq_enable  <= 1'b0;
             irq_clear_pulse <= 1'b0;
@@ -126,6 +146,20 @@ module npu_csr (
             if (reg_start)       reg_start       <= 1'b0;
             if (reg_npu_reset)   reg_npu_reset   <= 1'b0;
             if (irq_clear_pulse) irq_clear_pulse <= 1'b0;
+
+            // NPU_RESET agirlik bayragini TEMIZLEMEZ.
+            //
+            // Ilk yazimda temizliyordu; bu YANLISTI. npu_reset yalnizca
+            // hesaplama motorunun durum makinesini bastan baslatir,
+            // TCM ICERIGINE DOKUNMAZ. Agirliklar yerinde durdugu icin
+            // bayragin dusmesi gercegi modellemiyordu.
+            //
+            // Pratik sonucu da vardi: uygulama her cikarim oncesi
+            // npu_reset veriyor (main.c), yani bayrak her seferinde
+            // dusuyor ve START bir daha asla kabul edilmiyordu.
+            //
+            // Bayragi yalnizca SISTEM reseti (rst_n) temizler - orada
+            // TCM icerigi gercekten tanimsizdir.
 
             // AW Handshake
             if (s_axi_awvalid && !aw_valid_lat) begin
@@ -166,6 +200,9 @@ module npu_csr (
                             reg_npu_reset   <= w_data_lat[1];
                             irq_clear_pulse <= w_data_lat[2];
                             reg_irq_enable  <= w_data_lat[3];
+                            // Bit 4: yapiskan - yalnizca 1 yazilarak kurulur,
+                            // 0 yazmak temizlemez. NPU_RESET temizler (asagida).
+                            if (w_data_lat[4]) reg_weights_ready <= 1'b1;
                         end
                     end
                     REG_IN_ADDR:  reg_in_addr  <= (reg_in_addr  & ~w_mask_lat) | (w_data_lat & w_mask_lat);
@@ -209,7 +246,7 @@ module npu_csr (
                 s_axi_rresp  <= 2'b00;
 
                 case (ar_addr_lat[4:0])
-                    REG_CTRL:      s_axi_rdata <= {28'b0, reg_irq_enable, 1'b0, reg_npu_reset, reg_start};
+                    REG_CTRL:      s_axi_rdata <= {27'b0, reg_weights_ready, reg_irq_enable, 1'b0, reg_npu_reset, reg_start};
                     REG_STATUS:    s_axi_rdata <= reg_status;
                     REG_IN_ADDR:   s_axi_rdata <= reg_in_addr;
                     REG_OUT_ADDR:  s_axi_rdata <= reg_out_addr;

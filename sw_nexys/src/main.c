@@ -384,9 +384,27 @@ int main(void)
         uart_print_dec(run_count);
         uart_print("\n");
 
-        // NPU yerel bellegini temizle (30 kB = 7680 kelime)
+        // ---------------------------------------------------------------
+        // NPU yerel bellegini temizle - AMA YALNIZCA CALISMA BOLGESINI
+        //
+        // 23 Agustos 2026: bu dongu eskiden 7680 kelimenin TAMAMINI
+        // siliyordu. FC agirliklari TCM'e tasindiktan sonra bu, her
+        // cikarim oncesi yukleyicinin flash'tan getirdigi 16 kB
+        // agirligi da SILIYORDU.
+        //
+        // Sonuc sessizdi: NPU sifir agirlikla kosuyor, fc_acc yalnizca
+        // bias'a esit oluyor ve HER SESE ayni cevabi veriyordu
+        // (bias = [427,-518,-94,186] -> her zaman sinif 0 / SILENCE).
+        //
+        // TCM YERLESIMI (7680 kelime):
+        //     0    ..  489   girdi tensoru (DMA buraya yazar)
+        //     0    ..    3   cikis olasiliklari (out_addr = 0)
+        //     490  .. 3583   serbest
+        //     3584 .. 7583   FC AGIRLIKLARI - DOKUNULMAZ
+        //     7584 .. 7679   serbest
+        // ---------------------------------------------------------------
         uart_print("Clear TCM\n");
-        for (int i = 0; i < 7680; i++) {
+        for (int i = 0; i < 3584; i++) {
             NPU_TCM_BASE[i] = 0;
         }
 
