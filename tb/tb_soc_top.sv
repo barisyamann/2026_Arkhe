@@ -129,7 +129,18 @@ module tb_soc_top;
     // --- QSPI Flash Modeli ---
     // Sartname s.16: sistem QSPI flash'tan boot olur. Yukleyici (boot.hex)
     // uygulamayi (app.hex) buradan okuyup I-RAM'e yazar.
+    //
+    // APP_OFS: F2 karari (23 Agustos 2026) sonrasi uygulama, kart ustu
+    // flash'in BASINDA DEGIL 0x800000'de duruyor - orasi FPGA
+    // bitstream'inin uzerinde kalan ilk guvenli sinir. Yukleyici de
+    // (bootloader.S / APP_FLASH_OFS) oradan okuyor.
+    //
+    // Simulasyonun bunu birebir modellemesi sart: aksi halde test,
+    // gercek donanimda kosacak olandan BASKA bir adresten boot etmis
+    // olurdu ve ofset hatasi FPGA'ye kadar gorunmezdi.
+    //
     spi_flash_model #(
+        .APP_OFS    (32'h0080_0000),
         .INIT_FILE  ("app.hex"),
         .WORD_COUNT (2048)
     ) u_flash (
