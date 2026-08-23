@@ -43,7 +43,36 @@ def oku(yol):
     return [x.strip() for x in yol.read_text().split() if x.strip()]
 
 
+def uret(app_yolu, dest, etiket):
+    app = oku(app_yolu)
+    agirlik = oku(WEIGHTS_HEX)
+    if len(app) > APP_WORDS:
+        sys.exit("HATA: %s %d kelime, ayrilan alan %d kelime."
+                 % (etiket, len(app), APP_WORDS))
+    if len(agirlik) != WEIGHT_WORDS:
+        sys.exit("HATA: agirlik dosyasi %d kelime, beklenen %d."
+                 % (len(agirlik), WEIGHT_WORDS))
+    imaj = app + ["00000000"] * (APP_WORDS - len(app)) + agirlik
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text("\n".join(imaj) + "\n", encoding="ascii")
+    print("%-10s uygulama %4d kelime  toplam %d kelime -> %s"
+          % (etiket, len(app), len(imaj), dest.name))
+
+
 def main():
+    # FPGA imaji - gercek uygulama (cikarimlar arasi 3 s bekleme)
+    uret(APP_HEX, DEST, "flash")
+
+    # Simulasyon imaji - ARKHE_SIM ile derlenmis uygulama (bekleme 2 ms).
+    # REUSE testi (global reset olmadan iki cikarim) bunu kullanir; 3 saniye
+    # simulasyonda ~3,5 saat surerdi.
+    app_sim = APP_HEX.parent / "app_sim.hex"
+    if app_sim.is_file():
+        uret(app_sim, DEST.parent / "flash_sim.hex", "flash_sim")
+    else:
+        print("UYARI: app_sim.hex yok, flash_sim.hex uretilmedi")
+    return
+
     app = oku(APP_HEX)
     agirlik = oku(WEIGHTS_HEX)
 

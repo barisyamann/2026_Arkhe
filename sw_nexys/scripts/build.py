@@ -126,7 +126,8 @@ def to_hex_words(data, total_bytes):
 
 
 def build_image(gcc, objcopy, size, name, c_sources, asm_sources,
-                linker_script, image_bytes, hex_dest, bin_dest=None):
+                linker_script, image_bytes, hex_dest, bin_dest=None,
+                extra_defs=None):
     print(f"\n=== {name} ===")
     obj_dir = BUILD_DIR / name
     obj_dir.mkdir(parents=True, exist_ok=True)
@@ -134,7 +135,7 @@ def build_image(gcc, objcopy, size, name, c_sources, asm_sources,
     object_files = []
     for src in c_sources:
         obj = obj_dir / (src.stem + ".o")
-        compile_source(gcc, src, obj)
+        compile_source(gcc, src, obj, extra_defs)
         object_files.append(obj)
     for src in asm_sources:
         obj = obj_dir / (src.stem + ".o")
@@ -220,6 +221,27 @@ def main():
         image_bytes=APP_IMAGE_BYTES,
         hex_dest=APP_HEX_DEST,
         bin_dest=APP_BIN_DEST,
+    )
+
+    # -------------------------------------------------------------------------
+    # SIMULASYON YAPIMI - app_sim.hex
+    #
+    # ARKHE_SIM tanimli: cikarimlar arasi bekleme 3 s yerine 2 ms.
+    # Boylece "global reset olmadan iki cikarim" (REUSE) testi simulasyonda
+    # kosulabiliyor - 3 saniye 150 milyon cevrim demek ve ~3,5 saat surerdi.
+    #
+    # BASKA HICBIR FARK YOKTUR: boot, DMA, NPU, ISR ve UART yollari iki
+    # yapimda da birebir aynidir.
+    # -------------------------------------------------------------------------
+    build_image(
+        gcc, objcopy, size,
+        name="app_sim",
+        c_sources=[SRC_DIR / "main.c"],
+        asm_sources=[SRC_DIR / "crt0.S"],
+        linker_script=LINK_DIR / "app.ld",
+        image_bytes=APP_IMAGE_BYTES,
+        hex_dest=BUILD_DIR / "app_sim.hex",
+        extra_defs=["-DARKHE_SIM"],
     )
 
     copied = deploy_to_sim(APP_HEX_DEST)

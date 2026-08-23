@@ -70,23 +70,50 @@ puts $fh ""
 # Vivado SystemVerilog'da bunu genelde kendi cozer, ama garanti icin
 # dosya tipi ve derleme sirasi acikca ayarlaniyor.
 # -----------------------------------------------------------------------------
-set paketler {
-    rtl/boot/boot_rom_pkg.sv
-    rtl/npu/npu_weights_pkg.sv
-}
-foreach p $paketler {
-    set tam [file normalize $p]
-    if {![file exists $tam]} { continue }
-    if {[llength [get_files -quiet [file tail $p]]] == 0} {
-        add_files -norecurse -fileset sources_1 $tam
-        puts "  projeye eklendi: $p"
+# -----------------------------------------------------------------------------
+# TEK KAYNAK: asic/filelist.f
+#
+# Vivado projesinin kaynak listesi ile asic/filelist.f AYRI yerlerde
+# tutuluyordu ve surekli birbirinden kopuyordu:
+#
+#   23 Agu  boot_rom_pkg.sv     projede yoktu  -> sentez dustu
+#   23 Agu  npu_engine_axi_master.sv / npu_tcm_axi_slave.sv
+#                               projede yoktu  -> sentez dustu
+#
+# Ikisi de yalnizca Vivado'da gorundu; regresyon kendi listesini
+# kullandigi icin sorunu gostermedi.
+#
+# Artik filelist.f TEK KAYNAK: icindeki her dosya projede yoksa
+# otomatik ekleniyor. Yeni bir RTL modulu filelist.f'e girdigi anda
+# Vivado da onu gorur.
+# -----------------------------------------------------------------------------
+set fl [open "asic/filelist.f" r]
+set fl_icerik [read $fl]
+close $fl
+
+set eklenen 0
+foreach satir [split $fl_icerik "
+"] {
+    set satir [string trim $satir]
+    if {$satir eq "" || [string index $satir 0] eq "#"} { continue }
+
+    # filelist.f yollari asic/ dizinine gore bagil: ../rtl/... -> rtl/...
+    regsub {^\.\./} $satir "" yol
+    if {![file exists $yol]} { continue }
+
+    set ad [file tail $yol]
+    if {[llength [get_files -quiet $ad]] == 0} {
+        add_files -norecurse -fileset sources_1 [file normalize $yol]
+        puts "  projeye eklendi: $yol"
+        incr eklenen
     }
-    set f [get_files -quiet [file tail $p]]
-    if {[llength $f] > 0} {
+    set f [get_files -quiet $ad]
+    if {[llength $f] > 0 && [string match "*.sv" $ad]} {
         set_property file_type SystemVerilog $f
-        set_property is_global_include false $f
     }
 }
+puts "  filelist.f senkronizasyonu: $eklenen dosya eklendi"
+
 update_compile_order -fileset sources_1
 
 # Kosumlari sifirla - guncel RTL ile bastan olcum yapiliyor

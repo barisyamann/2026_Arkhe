@@ -150,7 +150,7 @@ module tb_soc_top;
     // olacak seyin AYNISINI kosar.
     spi_flash_model #(
         .APP_OFS    (32'h0080_0000),
-        .INIT_FILE  ("flash.hex"),
+        .INIT_FILE  ("flash_sim.hex"),
         .WORD_COUNT (6048)
     ) u_flash (
         .sck   (qspi_sck),
@@ -390,7 +390,9 @@ module tb_soc_top;
         log_print("[TB] SRAM MAKRO KIPI: bellekler 23 adet sky130 makrosu.");
     `else
       `ifndef REAL_BOOT
-        $readmemh("app.hex", uut.u_instruction_ram.ram);
+        // app_sim.hex: ARKHE_SIM ile derlenmis - cikarimlar arasi bekleme
+        // 3 s yerine 2 ms. REUSE testi icin sart; baska fark yok.
+        $readmemh("app_sim.hex", uut.u_instruction_ram.ram);
 
         // ---------------------------------------------------------------
         // HIZLI ACILIS YUKLEYICIYI ATLADIGI ICIN ONUN ISINI TAKLIT ET
@@ -555,6 +557,118 @@ module tb_soc_top;
             error_count++;
             log_print($sformatf("      [HATA] GPIO 5 ms icinde yazilmadi: 0x%h", gpio_o));
         end
+
+        // =====================================================================
+        // REUSE - GLOBAL RESET OLMADAN IKINCI CIKARIM
+        //
+        // Sartname 4.2.2.1: sistem, global reset gerekmeden tekrar
+        // kullanilabilmelidir.
+        //
+        // Bu denetim SIFIRDAN yoktu. Bir cikarim calisiyor diye ikincisinin
+        // de calisacagi varsayilamaz: DMA isaretcileri, NPU done_sticky,
+        // UART-stream FIFO ve ISR bayraklari ilk kosumdan sonra takili
+        // kalabilir.
+        //
+        // AYIRT EDILEBILIRLIK: ikinci tensor FARKLI desen (0x80) gonderiliyor.
+        // Ayni deseni gondermek yaniltici olurdu - GPIO zaten 0xAAAA'da
+        // kalirdi ve ikinci cikarim hic olmasa bile test gecerdi.
+        //
+        //   0x55 -> sinif 3 (NO)      -> GPIO 0xAAAA   (ilk)
+        //   0x80 -> sinif 0 (SILENCE) -> GPIO 0x0F0F   (ikinci)
+        //
+        // Beklenen sinif yine resmi TFLite'a capali referans modelden
+        // (tb/npu_audio/npu_ref_model.py) alindi.
+        //
+        // NOT: uygulama ARKHE_SIM ile derlendiginde cikarimlar arasi bekleme
+        // 3 s yerine 2 ms'dir; baska hicbir fark yoktur.
+        // =====================================================================
+        log_print("  -- REUSE: global reset olmadan ikinci cikarim");
+
+        // ---------------------------------------------------------------------
+        // YARISA DAYANIKLI SENKRONIZASYON
+        //
+        // Iki yanlis deneme yapildi, ikisi de ogreticiydi:
+        //
+        //  1) "gpio_o != 0xAAAA" beklendi. YANLIS: uygulama GPIO'yu
+        //     cikarimlar ARASINDA degistirmez, yalnizca her cikarimin
+        //     sonunda yazar. Beklenen olay ancak ikinci cikarim BITTIKTEN
+        //     sonra olusurdu - tensor gonderilmeden once.
+        //
+        //  2) Bayrak temizlenip TEK bir "Stream ready" beklendi. YANLIS:
+        //     uygulama serbest kosuyor ve ARKHE_SIM ile 2 ms'de bir yeni
+        //     tura giriyor. Bayragi temizledigimizde o turun mesaji coktan
+        //     gecmis olabiliyor; tensor bir sonraki tura yetisiyor ve
+        //     aradaki cikarim SIFIR girdiyle kosuyordu.
+        //
+        //     Bunu sifir girdinin de sinif 3 vermesi gizliyordu:
+        //         0x00 -> sinif 3 (NO)   0x55 -> sinif 3 (NO)
+        //     yani "tensor ulasmadi" ile "ilk sonuc duruyor" ayni gorunuyordu.
+        //
+        // Dogru cozum: her "Stream ready" gorulusunde tensoru gonder ve
+        // sonucu bekle; olmazsa tekrar dene. Boylece hangi tura denk
+        // geldigimiz onemsiz olur.
+        // ---------------------------------------------------------------------
+        begin
+            int deneme;
+            bit tur_gorundu;
+
+            tur_gorundu = 1'b0;
+
+            for (deneme = 0; deneme < 4 && gpio_o != 16'h0F0F; deneme++) begin
+                uart_saw_stream_ready = 1'b0;
+
+                fork : bekle_tur
+                    wait (uart_saw_stream_ready);
+                    #(30_000_000);
+                join_any
+                disable bekle_tur;
+
+                if (!uart_saw_stream_ready) begin
+                    log_print($sformatf("      [BILGI] deneme %0d: 'Stream ready' gelmedi", deneme));
+                end else begin
+                    tur_gorundu = 1'b1;
+                    uart2_send_tensor(8'h80);
+
+                    // UYGULAMA HER TURDA 4 BAYT DAHA BEKLER
+                    //
+                    // main.c, DMA bittikten sonra UART_RDR bayt okuma
+                    // yolunu denetliyor:
+                    //     while ((*UARTS_LEVEL & 0x1FF) < 4) { }
+                    //
+                    // Ilk turda testbench bu dort bayti gonderiyor. Ikinci
+                    // turda gonderilmeyince uygulama "DMA done"dan sonra
+                    // ASILI KALIYORDU - log tam orada duruyordu ve disaridan
+                    // "NPU yanlis sinif verdi" gibi gorunuyordu.
+                    uart2_send_byte(8'hA1);
+                    uart2_send_byte(8'hB2);
+                    uart2_send_byte(8'hC3);
+                    uart2_send_byte(8'hD4);
+
+                    fork : bekle_sonuc
+                        wait (gpio_o == 16'h0F0F);
+                        #(30_000_000);
+                    join_any
+                    disable bekle_sonuc;
+                end
+            end
+
+            if (!tur_gorundu) begin
+                error_count++;
+                log_print("      [HATA] Uygulama ikinci tura hic girmedi");
+            end else begin
+                log_print("      [OK]   Uygulama reset olmadan yeni tura girdi");
+            end
+
+            if (gpio_o == 16'h0F0F) begin
+                log_print("      [OK]   Ikinci cikarim RESET OLMADAN dogru sonuc verdi: 0 (SILENCE)");
+            end else begin
+                error_count++;
+                log_print($sformatf(
+                    "      [HATA] Ikinci cikarim basarisiz - GPIO 0x%h, beklenen 0x0F0F (sinif 0)",
+                    gpio_o));
+            end
+        end
+
                 // ISR gercekten calisip UART'tan yazdirdi mi?
         // Sartname s.16: "... sonuclari UART arayuzu uzerinden yazdirmalidir."
         // DMA, UART-stream'den TCM'e tasimayi tamamladi mi?

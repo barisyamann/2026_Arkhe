@@ -31,7 +31,12 @@ module tb_qspi_mock;
     //   word[i] = 32'hA5A50000 + i
     // Flash modeli kelimeleri little-endian bayt dizisine aciyor.
     // -------------------------------------------------------------------------
-    localparam int TEST_WORDS = 8;
+    // 23 Agustos 2026: 8 kelime (32 bayt) idi. Sartnamenin zorunlu tuttugu
+// 256 BAYTLIK SAYFA testi bu boyuta sigmiyordu - model gecersiz adres
+// icin 0x00 dondurdugu icin test sessizce sifir okuyordu.
+// 128 kelime = 512 bayt: sayfa testi 0x100..0x1FF araligina sigar ve
+// adres 0 silinmis (0xFF) kalir, sonraki testler bozulmaz.
+localparam int TEST_WORDS = 128;
     localparam string INIT_FILE = "qspi_test_pattern.hex";  // tb/ altinda sabit dosya
 
     logic clk = 0;
@@ -369,6 +374,74 @@ module tb_qspi_mock;
         bekle_bitti();
         axi_read(32'h08, v);
         check("PP sonrasi geri okuma", v, 32'h1234_5678);
+
+        // ---------------------------------------------------------------------
+        // 256 BAYTLIK TAM SAYFA PROGRAMLAMA VE GERI OKUMA  (23 Agustos 2026)
+        //
+        // Sartname s.1056-1057 acikca zorunlu tutuyor:
+        //   "Veri islemleri, 256 baytlik SAYFA YAZMA ve SAYFA OKUMAYI
+        //    destekleyecektir."
+        //
+        // Onceki PP testi yalnizca 4 BAYT yaziyordu. 256 bayt, QSPI_CCR'nin
+        // veri boyutu alaninin ([23:16]) ust siniridir (255 = 256 bayt) ve
+        // TX FIFO'nun (64 x 32-bit = 256 bayt) tam kapasitesidir. Yani bu
+        // test ayni anda FIFO derinligini de zorluyor.
+        //
+        // Icerik bayt bayt degil KELIME KELIME denetleniyor (64 kelime),
+        // ama her kelime dort bayt tasidigi icin 256 baytin TAMAMI
+        // dogrulanmis oluyor. Desen her kelimede farkli olsun diye
+        // indise bagli uretiliyor - tek tip desen kaymalari gizlerdi.
+        // ---------------------------------------------------------------------
+        $display("  -- 256 baytlik tam sayfa programlama");
+        begin
+            logic [31:0] beklenen [0:63];
+            int hatali;
+            int pp_once;
+
+            // pp_bayt KUMULATIFTIR (model boyunca artar) - fark alinir
+            pp_once = u_flash_3b.pp_bayt;
+
+            // Once sektoru sil (NOR yalnizca 1->0 yapabilir)
+            axi_write(32'h00, 32'h8800_0006);        // WREN
+            bekle_bitti();
+            axi_write(32'h04, 32'h0000_0000);        // sektor 0
+            axi_write(32'h00, 32'h8800_00D8);        // SE
+            bekle_bitti();
+
+            // TX FIFO'ya 64 kelime = 256 bayt
+            axi_write(32'h00, 32'h8800_0006);        // WREN
+            bekle_bitti();
+            axi_write(32'h10, 32'h0000_0003);
+            axi_write(32'h04, 32'h0000_0100);   // sayfa 0x100..0x1FF
+            for (int i = 0; i < 64; i++) begin
+                beklenen[i] = {8'(i + 8'hC0), 8'(i + 8'h80),
+                               8'(i + 8'h40), 8'(i)};
+                axi_write(32'h08, beklenen[i]);
+            end
+            // CCR: [23:16] = 255 -> 256 bayt,  [10] = 1 yazma,  PP = 0x02
+            axi_write(32'h00, 32'h88FF_0502);
+            bekle_bitti();
+
+            check("256 bayt tam sayfa yazildi", u_flash_3b.pp_bayt - pp_once, 32'd256);
+
+            // Geri oku ve TAMAMINI denetle
+            axi_write(32'h10, 32'h0000_0003);
+            axi_write(32'h04, 32'h0000_0100);
+            axi_write(32'h00, 32'h88FF_0103);        // READ, 256 bayt
+            bekle_bitti();
+
+            hatali = 0;
+            for (int i = 0; i < 64; i++) begin
+                axi_read(32'h08, v);
+                if (v !== beklenen[i]) begin
+                    if (hatali < 4)
+                        $display("      [HATA] kelime %0d: beklenen=0x%08h gercek=0x%08h",
+                                 i, beklenen[i], v);
+                    hatali++;
+                end
+            end
+            check("256 baytin TAMAMI dogru geri okundu", hatali, 32'd0);
+        end
 
         // --- WEL olmadan PP yazmamali ------------------------------------
         //

@@ -338,6 +338,73 @@ module uart_tb;
     // =========================================================================
     // Test: Kesme üretimi
     // =========================================================================
+    // =========================================================================
+    // UART_CFG[0] - GONDERIM BASLAT / KENDINI TEMIZLE  (23 Agustos 2026)
+    //
+    // Sartname v1.3 EK-2, UART_CFG:
+    //   Bit 0 bir "transmit start" bitidir. '1' yazilinca gonderim baslar,
+    //   DONANIM tamamlandiginda bu biti '0'a ceker.
+    //
+    // RTL bunu zaten yapiyor (uart_peripheral.sv: tx_done_w geldiginde
+    // reg_cfg_tx_en <= 1'b0), ama HIC DENETLENMIYORDU. Onceki testler
+    // yalnizca CFG[0]'a 1 yaziyor, geri okumuyordu.
+    //
+    // Bu gorev iki seyi ayri ayri kanitlar:
+    //   1. Gonderim SURERKEN bit '1' olarak okunur (yani gercekten set edildi)
+    //   2. Gonderim BITINCE bit '0'a doner (donanim kendi temizledi)
+    //
+    // Ikisi birden onemli: yalnizca (2) denetlenirse, bit hic set edilmemis
+    // olsa da test gecerdi.
+    // =========================================================================
+    task automatic test_cfg_start_self_clear();
+        logic [31:0] cfg_val;
+        int          timeout;
+        bit          gorulen_bir;
+
+        $display("  -- UART_CFG[0] baslat / kendini temizle");
+
+        // Temiz baslangic
+        axil_write(UART_CFG_OFFSET, 32'h00);
+        repeat (4) @(posedge clk);
+        axil_read(UART_CFG_OFFSET, cfg_val);
+        check("CFG[0] baslangicta 0", cfg_val[CFG_TX_EN] == 1'b0);
+
+        // Veri yaz ve gonderimi baslat
+        axil_write(UART_TDR_OFFSET, 32'h00000039);   // '9'
+        axil_write(UART_CFG_OFFSET, 32'h1);
+
+        // Gonderim surerken bit '1' okunmali
+        gorulen_bir = 1'b0;
+        timeout     = 0;
+        while (timeout < 200) begin
+            axil_read(UART_CFG_OFFSET, cfg_val);
+            if (cfg_val[CFG_TX_EN]) gorulen_bir = 1'b1;
+            if (cfg_val[CFG_TX_DONE]) break;
+            @(posedge clk);
+            timeout++;
+        end
+        check("CFG[0] gonderim sirasinda 1 olarak okundu", gorulen_bir);
+
+        // Gonderim bitene kadar bekle
+        timeout = 0;
+        do begin
+            axil_read(UART_CFG_OFFSET, cfg_val);
+            @(posedge clk);
+            timeout++;
+        end while (!cfg_val[CFG_TX_DONE] && timeout < 20000);
+
+        check("TX_DONE geldi", cfg_val[CFG_TX_DONE] == 1'b1);
+
+        // ASIL DENETIM: donanim CFG[0]'i kendi temizledi mi
+        axil_read(UART_CFG_OFFSET, cfg_val);
+        check("CFG[0] donanim tarafindan 0'a cekildi",
+                     cfg_val[CFG_TX_EN] == 1'b0);
+
+        // Durum bitlerini temizle
+        axil_write(UART_CFG_OFFSET, 32'h00);
+        repeat (4) @(posedge clk);
+    endtask
+
     task automatic test_irq();
         int timeout;
         logic irq_seen;
@@ -391,6 +458,8 @@ module uart_tb;
         test_tx_rx_loopback(8'hFF);
         test_tx_rx_loopback(8'h00);
         test_tx_rx_loopback(8'h5A);
+
+        test_cfg_start_self_clear();
 
         test_irq();
 

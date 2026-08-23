@@ -512,8 +512,26 @@ int main(void)
         // Yaklasik 3 saniye bekle
         // 3 saniye bekle. Islemci timer kesmesini bekleyerek uyur;
         // eskiden 12 milyon iterasyonluk mesgul bekleme vardi.
+        // ---------------------------------------------------------------
+        // Cikarimlar arasi bekleme
+        //
+        // Kartta 3 saniye: sonucu insan gozuyle okuyabilmek icin.
+        //
+        // ARKHE_SIM tanimliyken 2 ms: 3 saniye = 150 MILYON cevrim ve
+        // simulasyonda ~3,5 saat surerdi. Sartname 'global reset olmadan
+        // tekrar kullanim' isterini (REUSE-01) dogrulamak icin ikinci bir
+        // cikarimi gormemiz gerekiyor.
+        //
+        // TEK FARK BEKLEME SURESIDIR. Boot, DMA, NPU, ISR ve UART yollari
+        // iki yapimda da BIREBIR aynidir.
+        // ---------------------------------------------------------------
+#ifdef ARKHE_SIM
+        uart_print("Wait 2ms\n");
+        timer_wait_ms(2);
+#else
         uart_print("Wait 3s\n");
         timer_wait_ms(3000);
+#endif
 
     }
 
