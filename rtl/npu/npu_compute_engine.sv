@@ -712,19 +712,18 @@ endfunction
                 end
                 FC_MAC0: begin
                     fc_acc[0] <= fc_acc[0]
-                        + $signed(fc_y) * $signed(fc_weights0(fc_idx));
+                        + $signed(fc_y) * $signed(fc_weight_word[7:0]);
                     state <= FC_MAC1;
                 end
-
                 FC_MAC1: begin
                     fc_acc[1] <= fc_acc[1]
-                        + $signed(fc_y) * $signed(fc_weights1(fc_idx));
+                        + $signed(fc_y) * $signed(fc_weight_word[15:8]);
                     state <= FC_MAC2;
                 end
 
                 FC_MAC2: begin
                     fc_acc[2] <= fc_acc[2]
-                        + $signed(fc_y) * $signed(fc_weights2(fc_idx));
+                        + $signed(fc_y) * $signed(fc_weight_word[23:16]);
                     state <= FC_MAC3;
                 end
 
