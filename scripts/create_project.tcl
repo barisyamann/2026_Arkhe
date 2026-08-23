@@ -136,6 +136,17 @@ add_files -fileset sim_1 -norecurse [list \
     "./rtl/boot/boot.hex" \
 ]
 
+# flash.hex varsa simülasyona ekle
+set flash_hex "./sw_nexys/build/flash.hex"
+
+if {[file exists $flash_hex]} {
+    add_files -fileset sim_1 -norecurse $flash_hex
+    puts "INFO: flash.hex simulation projesine eklendi."
+} else {
+    puts "WARNING: flash.hex bulunamadi."
+    puts "WARNING: Gercek QSPI boot testi icin once gen_flash_image.py calistirilmalidir."
+}
+
 # 8. Kısıt Dosyalarını (Constraints) Ekle
 add_files -fileset constrs_1 -norecurse [list "./rtl/constraints.xdc"]
 
