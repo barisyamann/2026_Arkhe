@@ -28,12 +28,19 @@ module npu_compute_engine import npu_weights_pkg::*; (
     output logic        done_o,
     output logic [1:0]  class_o,
 
-    // --- Port B TCM Bellek Arayüzü ---
-    output logic        mem_en_b,
-    output logic [3:0]  mem_we_b,
-    output logic [12:0] mem_addr_b,
-    output logic [31:0] mem_wdata_b,
-    input  logic [31:0] mem_rdata_b
+    // --- AXI bellek request/response arayuzu ---
+    // Compute Engine AXI protokolunu dogrudan surmez. Bu basit arayuz,
+    // npu_engine_axi_master tarafindan AXI4-Lite transaction'larina cevrilir.
+    output logic        mem_req_valid_o,
+    output logic        mem_req_write_o,
+    output logic [12:0] mem_req_addr_o,
+    output logic [31:0] mem_req_wdata_o,
+    output logic [3:0]  mem_req_wstrb_o,
+    input  logic        mem_req_ready_i,
+
+    input  logic        mem_rsp_valid_i,
+    input  logic [31:0] mem_rsp_rdata_i,
+    input  logic [1:0]  mem_rsp_resp_i
 );
 
     // FSM Durum Tanımları
@@ -117,7 +124,7 @@ module npu_compute_engine import npu_weights_pkg::*; (
     logic [3:0] mac_kw;
     logic [1:0] mac_bo;      // gecikmeli byte_offset
     logic       mac_ib;      // gecikmeli in_bounds
-    logic       mac_valid;   // mem_rdata_b gecerli bir tap tasiyor mu
+    logic       mac_valid;   // gecikmeli tap bilgisi (debug/izleme icin)
     logic signed [31:0] fc_acc [0:3];
 
     // TFLite FC katmanının quantized INT8 çıkışları
@@ -158,6 +165,14 @@ module npu_compute_engine import npu_weights_pkg::*; (
     // [23:16] = Yes
     // [31:24] = No
     logic [31:0] fc_weight_word;
+
+    // AXI bellek cevabini MAC asamasinda kullanmak icin tutulan kelime.
+    logic [31:0] mem_read_word;
+
+    // WRITE_OUT_0..3 durumlarinda ayni istegin birden fazla kez AXI master'a
+    // verilmesini engeller. Request kabul edilince 1, response gelince 0 olur.
+    logic write_req_sent;
+
     // --- Ağırlık ve Sapma (Weight & Bias) ROM Dizileri ---
     //
     // İÇERİK RTL'E GÖMÜLÜDÜR - dosyadan okunmaz.
@@ -492,6 +507,8 @@ endfunction
             fc_y        <= '0;
             fc_idx      <= '0;
             fc_weight_word <= '0;
+            mem_read_word   <= '0;
+            write_req_sent  <= 1'b0;
             for (int i = 0; i < 4; i++) begin
                 fc_acc[i]    <= '0;
                 fc_logits[i] <= '0;
@@ -536,6 +553,8 @@ endfunction
             fc_y        <= '0;
             fc_idx      <= '0;
             fc_weight_word <= '0;
+            mem_read_word   <= '0;
+            write_req_sent  <= 1'b0;
             for (int i = 0; i < 4; i++) begin
                 fc_acc[i]    <= '0;
                 fc_logits[i] <= '0;
@@ -573,9 +592,10 @@ endfunction
                     state <= CONV_READ_REQ;
                 end
 
-                // Boru hattini doldur: tap 0'in adresi bu cevrim veriliyor,
-                // verisi bir sonraki cevrimde gelecek. Okuma isaretcisi
-                // tap 1'e ilerletilir.
+                // AXI tabanli konvolusyon okuma akisi.
+                // Her tap icin request -> response -> MAC sirasi izlenir.
+                // Ilk hedef burada dogruluk ve sartname uyumudur; AXI burst/
+                // prefetch gibi performans optimizasyonlari daha sonra eklenebilir.
                 CONV_READ_REQ: begin
                     mac_kh    <= kh;
                     mac_kw    <= kw;
@@ -583,8 +603,19 @@ endfunction
                     mac_ib    <= in_bounds;
                     mac_valid <= 1'b1;
 
-                    kw    <= 4'd1;      // tap 1 (kh zaten 0)
-                    state <= CONV_MAC;
+                    // SAME padding icin bellege gereksiz AXI erisimi yapma.
+                    if (!in_bounds) begin
+                        state <= CONV_MAC;
+                    end else if (mem_req_ready_i) begin
+                        state <= CONV_READ_WAIT;
+                    end
+                end
+
+                CONV_READ_WAIT: begin
+                    if (mem_rsp_valid_i) begin
+                        mem_read_word <= mem_rsp_rdata_i;
+                        state         <= CONV_MAC;
+                    end
                 end
 
                 CONV_MAC: begin
@@ -593,52 +624,41 @@ endfunction
                     if (mac_ib) begin
                         logic [7:0] raw_byte;
 
-                        raw_byte = (mac_bo == 2'd0) ? mem_rdata_b[7:0]   :
-                                   (mac_bo == 2'd1) ? mem_rdata_b[15:8]  :
-                                   (mac_bo == 2'd2) ? mem_rdata_b[23:16] :
-                                                      mem_rdata_b[31:24];
+                        raw_byte = (mac_bo == 2'd0) ? mem_read_word[7:0]   :
+                                   (mac_bo == 2'd1) ? mem_read_word[15:8]  :
+                                   (mac_bo == 2'd2) ? mem_read_word[23:16] :
+                                                      mem_read_word[31:24];
 
                         // TFLite input zero-point = -128
                         // x_centered = x_q - (-128) = x_q + 128
                         x_centered = $signed({raw_byte[7], raw_byte}) + 9'sd128;
 
                     end else begin
-                        // SAME padding gerçek değer olarak 0 olmalıdır.
-                        // Zero-point çıkarıldıktan sonra centered değer doğrudan 0'dır.
+                        // SAME padding gercek deger olarak 0 olmalidir.
                         x_centered = 9'sd0;
                     end
 
                     // Okunan tek piksel sekiz kanala paralel dagitilir.
-                    // dw_weights indisleri d icin ARDISIKTIR (kh*64+kw*8+d),
-                    // yani sekiz agirlik bitisik bir blokta duruyor.
                     for (int d = 0; d < 8; d++) begin
                         conv_acc[d] <= conv_acc[d] +
                             x_centered * $signed(dw_weights(10'(int'(mac_kh) * 64 + int'(mac_kw) * 8 + d)));
                     end
 
-                    // Cikis kosulu TUKETILEN tap'a bakar (mac_*), adresi
-                    // verilene degil.
                     if (mac_kh == 9 && mac_kw == 7) begin
-                        // Son tap islendi: boru hatti bosaltildi
                         mac_valid <= 1'b0;
                         kh        <= '0;
                         kw        <= '0;
-                        d_out     <= '0;      // requant/FC turu kanal 0'dan baslar
+                        d_out     <= '0;
                         state     <= CONV_ReLU_FC;
                     end else begin
-                        // Bu cevrim adresi verilen tap'i boru hattina al
-                        mac_kh <= kh;
-                        mac_kw <= kw;
-                        mac_bo <= byte_offset;
-                        mac_ib <= in_bounds;
-
-                        // Okuma isaretcisini ilerlet
+                        // Siradaki tap'a ilerle.
                         if (kw == 7) begin
                             kw <= '0;
-                            kh <= kh + 1;
+                            kh <= kh + 1'b1;
                         end else begin
-                            kw <= kw + 1;
+                            kw <= kw + 1'b1;
                         end
+                        state <= CONV_READ_REQ;
                     end
                 end
 
@@ -699,16 +719,18 @@ endfunction
                 // FC weight TCM/SRAM okuma
                 // ============================================================
 
-                // Bu state'te TCM'ye adres verilir.
-                // Veri TCM cikisinda bir sonraki clock'ta hazir olur.
+                // FC weight kelimesi de ayni AXI request/response yolu ile okunur.
                 FC_WEIGHT_REQ: begin
-                    state <= FC_WEIGHT_WAIT;
+                    if (mem_req_ready_i) begin
+                        state <= FC_WEIGHT_WAIT;
+                    end
                 end
 
-                // Onceki clock'ta istenen 32-bit weight kelimesini kaydet.
                 FC_WEIGHT_WAIT: begin
-                    fc_weight_word <= mem_rdata_b;
-                    state <= FC_MAC0;
+                    if (mem_rsp_valid_i) begin
+                        fc_weight_word <= mem_rsp_rdata_i;
+                        state          <= FC_MAC0;
+                    end
                 end
                 FC_MAC0: begin
                     fc_acc[0] <= fc_acc[0]
@@ -874,46 +896,52 @@ endfunction
                 end
 
                 WRITE_OUT_0: begin
-                    state <= WRITE_OUT_1;
+                    if (!write_req_sent) begin
+                        if (mem_req_ready_i) write_req_sent <= 1'b1;
+                    end else if (mem_rsp_valid_i) begin
+                        write_req_sent <= 1'b0;
+                        state          <= WRITE_OUT_1;
+                    end
                 end
 
                 WRITE_OUT_1: begin
-                    state <= WRITE_OUT_2;
+                    if (!write_req_sent) begin
+                        if (mem_req_ready_i) write_req_sent <= 1'b1;
+                    end else if (mem_rsp_valid_i) begin
+                        write_req_sent <= 1'b0;
+                        state          <= WRITE_OUT_2;
+                    end
                 end
 
                 WRITE_OUT_2: begin
-                    state <= WRITE_OUT_3;
+                    if (!write_req_sent) begin
+                        if (mem_req_ready_i) write_req_sent <= 1'b1;
+                    end else if (mem_rsp_valid_i) begin
+                        write_req_sent <= 1'b0;
+                        state          <= WRITE_OUT_3;
+                    end
                 end
 
                 WRITE_OUT_3: begin
-                    state <= DONE;
-                    // --------------------------------------------------------
-                    // Sınıf seçimi doğrudan quantized FC logits üzerinden.
-                    // Softmax sıralamayı değiştirmez.
-                    // --------------------------------------------------------
+                    if (!write_req_sent) begin
+                        if (mem_req_ready_i) write_req_sent <= 1'b1;
+                    end else if (mem_rsp_valid_i) begin
+                        write_req_sent <= 1'b0;
+                        state          <= DONE;
 
-                    if (($signed(fc_logits[0]) >= $signed(fc_logits[1])) &&
-                        ($signed(fc_logits[0]) >= $signed(fc_logits[2])) &&
-                        ($signed(fc_logits[0]) >= $signed(fc_logits[3]))) begin
-
-                        class_o <= 2'd0; // SILENCE
-
-                    end
-                    else if (($signed(fc_logits[1]) >= $signed(fc_logits[2])) &&
-                             ($signed(fc_logits[1]) >= $signed(fc_logits[3]))) begin
-
-                        class_o <= 2'd1; // UNKNOWN
-
-                    end
-                    else if ($signed(fc_logits[2]) >= $signed(fc_logits[3])) begin
-
-                        class_o <= 2'd2; // YES
-
-                    end
-                    else begin
-
-                        class_o <= 2'd3; // NO
-
+                        // Sinif secimi quantized FC logits uzerinden.
+                        if (($signed(fc_logits[0]) >= $signed(fc_logits[1])) &&
+                            ($signed(fc_logits[0]) >= $signed(fc_logits[2])) &&
+                            ($signed(fc_logits[0]) >= $signed(fc_logits[3]))) begin
+                            class_o <= 2'd0;
+                        end else if (($signed(fc_logits[1]) >= $signed(fc_logits[2])) &&
+                                     ($signed(fc_logits[1]) >= $signed(fc_logits[3]))) begin
+                            class_o <= 2'd1;
+                        end else if ($signed(fc_logits[2]) >= $signed(fc_logits[3])) begin
+                            class_o <= 2'd2;
+                        end else begin
+                            class_o <= 2'd3;
+                        end
                     end
                 end
 
@@ -937,54 +965,69 @@ endfunction
         end
     end
 
-    // --- Port B RAM Kontrol Sinyallerinin Kombinasyonel Sürülmesi ---
+    // --- AXI request sinyallerinin kombinasyonel surulmesi ---
     always_comb begin
-        mem_en_b    = 1'b0;
-        mem_we_b    = 4'b0000;
-        mem_addr_b  = 13'b0;
-        mem_wdata_b = 32'b0;
+        mem_req_valid_o = 1'b0;
+        mem_req_write_o = 1'b0;
+        mem_req_addr_o  = 13'b0;
+        mem_req_wdata_o = 32'b0;
+        mem_req_wstrb_o = 4'b0000;
 
         case (state)
-            // Boru hatti: hem doldurma (READ_REQ) hem akis (MAC) sirasinda
-            // her cevrim bir okuma baslatilir.
-            //
-            // kh == 10 kosulu: son tap'in adresi verildikten sonra okuma
-            // isaretcisi tasar. O cevrimde tuketim hala surer ama yeni
-            // okuma baslatilmamalidir.
-            CONV_READ_REQ, CONV_MAC: begin
-                if (in_bounds && kh <= 4'd9) begin
-                    mem_en_b   = 1'b1;
-                    mem_addr_b = in_addr_i + word_offset;
+            CONV_READ_REQ: begin
+                if (in_bounds) begin
+                    mem_req_valid_o = 1'b1;
+                    mem_req_write_o = 1'b0;
+                    mem_req_addr_o  = in_addr_i + word_offset;
                 end
             end
+
             FC_WEIGHT_REQ: begin
-                mem_en_b = 1'b1;
-                mem_addr_b = FC_WEIGHT_BASE + {1'b0, fc_idx};
+                mem_req_valid_o = 1'b1;
+                mem_req_write_o = 1'b0;
+                mem_req_addr_o  = FC_WEIGHT_BASE + {1'b0, fc_idx};
             end
+
             WRITE_OUT_0: begin
-                mem_en_b    = 1'b1;
-                mem_we_b    = 4'hf;
-                mem_addr_b  = out_addr_i;
-                mem_wdata_b = 32'(probs[0]);
+                if (!write_req_sent) begin
+                    mem_req_valid_o = 1'b1;
+                    mem_req_write_o = 1'b1;
+                    mem_req_addr_o  = out_addr_i;
+                    mem_req_wdata_o = 32'(probs[0]);
+                    mem_req_wstrb_o = 4'hf;
+                end
             end
+
             WRITE_OUT_1: begin
-                mem_en_b    = 1'b1;
-                mem_we_b    = 4'hf;
-                mem_addr_b  = out_addr_i + 13'd1;
-                mem_wdata_b = 32'(probs[1]);
+                if (!write_req_sent) begin
+                    mem_req_valid_o = 1'b1;
+                    mem_req_write_o = 1'b1;
+                    mem_req_addr_o  = out_addr_i + 13'd1;
+                    mem_req_wdata_o = 32'(probs[1]);
+                    mem_req_wstrb_o = 4'hf;
+                end
             end
+
             WRITE_OUT_2: begin
-                mem_en_b    = 1'b1;
-                mem_we_b    = 4'hf;
-                mem_addr_b  = out_addr_i + 13'd2;
-                mem_wdata_b = 32'(probs[2]);
+                if (!write_req_sent) begin
+                    mem_req_valid_o = 1'b1;
+                    mem_req_write_o = 1'b1;
+                    mem_req_addr_o  = out_addr_i + 13'd2;
+                    mem_req_wdata_o = 32'(probs[2]);
+                    mem_req_wstrb_o = 4'hf;
+                end
             end
+
             WRITE_OUT_3: begin
-                mem_en_b    = 1'b1;
-                mem_we_b    = 4'hf;
-                mem_addr_b  = out_addr_i + 13'd3;
-                mem_wdata_b = 32'(probs[3]);
+                if (!write_req_sent) begin
+                    mem_req_valid_o = 1'b1;
+                    mem_req_write_o = 1'b1;
+                    mem_req_addr_o  = out_addr_i + 13'd3;
+                    mem_req_wdata_o = 32'(probs[3]);
+                    mem_req_wstrb_o = 4'hf;
+                end
             end
+
             default: ;
         endcase
     end
