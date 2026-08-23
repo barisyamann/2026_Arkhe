@@ -150,6 +150,42 @@ module tb_qspi_mock;
         end
     endtask
 
+    // =========================================================================
+    // SCK PERIYODU OLCUMU  (23 Agustos 2026)
+    //
+    // Sartname s.1127-1132 prescaler'i su sekilde tanimlar:
+    //
+    //   "Bu alana yazan degerin BIR FAZLASI kadar saat frekansi bolunerek...
+    //    '0' yazilirsa SCLK sistem saat hizinda olacaktir. '1' oldugu zaman
+    //    SCLK sistem saat hizinin YARISINDA olacaktir."
+    //
+    // Yani beklenen:  SCLK = clk / (P+1)
+    //   P=0 -> 50 MHz (20 ns periyot)
+    //   P=1 -> 25 MHz (40 ns)
+    //   P=4 -> 10 MHz (100 ns)
+    //
+    // Bu gorev GERCEK periyodu olcer. Boylece prescaler semantigi beyan
+    // degil, olculmus bir deger olur.
+    // =========================================================================
+    task automatic sck_periyodu_olc(input logic [5:0] presc, output int periyot_ns);
+        time t1, t2;
+        int  n;
+        // Prescaler'i CCR'ye yaz ve bir okuma islemi baslat
+        axi_write(32'h04, 32'h0);                                  // ADR = 0
+        axi_write(32'h00, {1'b1, presc, 1'b0, 8'h03, 5'b0, 2'b00, 1'b0, 8'h03});
+        // Ilk yukselen kenari bekle, sonra iki kenar arasi sureyi olc
+        n = 0;
+        while (spi_sck !== 1'b1 && n < 5000) begin @(posedge clk); n++; end
+        while (spi_sck !== 1'b0 && n < 5000) begin @(posedge clk); n++; end
+        while (spi_sck !== 1'b1 && n < 5000) begin @(posedge clk); n++; end
+        t1 = $time;
+        while (spi_sck !== 1'b0 && n < 5000) begin @(posedge clk); n++; end
+        while (spi_sck !== 1'b1 && n < 5000) begin @(posedge clk); n++; end
+        t2 = $time;
+        periyot_ns = int'(t2 - t1);
+        bekle_bitti();
+    endtask
+
     initial begin
         // NOT: Flash icerigi tb/qspi_test_pattern.hex dosyasindan gelir.
         //
@@ -349,6 +385,33 @@ module tb_qspi_mock;
         bekle_bitti();
         axi_read(32'h08, v);
         check("WEL yokken PP yazmadi", v, 32'hFFFF_FFFF);
+
+        // ---------------------------------------------------------------------
+        // PRESCALER - SCK PERIYODU OLCUMU
+        //
+        // Sartname: SCLK = clk / (P+1).  Sistem saati 50 MHz (20 ns).
+        //   P=1 -> 40 ns    P=2 -> 60 ns    P=4 -> 100 ns
+        //
+        // Bu denetimler GERCEK olculen periyodu bekleneni karsilastirir.
+        // Sapma varsa RTL'in prescaler semantigi sartnameden farklidir ve
+        // bu ACIKCA gorunur - yorum satirinda gizli kalmaz.
+        // ---------------------------------------------------------------------
+        $display("  -- Prescaler SCK periyodu (sartname: clk/(P+1))");
+        begin
+            int olculen;
+
+            sck_periyodu_olc(6'd1, olculen);
+            $display("      prescaler=1  olculen=%0d ns  beklenen=40 ns", olculen);
+            check("prescaler 1 -> 40 ns", olculen, 32'd40);
+
+            sck_periyodu_olc(6'd2, olculen);
+            $display("      prescaler=2  olculen=%0d ns  beklenen=60 ns", olculen);
+            check("prescaler 2 -> 60 ns", olculen, 32'd60);
+
+            sck_periyodu_olc(6'd4, olculen);
+            $display("      prescaler=4  olculen=%0d ns  beklenen=100 ns", olculen);
+            check("prescaler 4 -> 100 ns", olculen, 32'd100);
+        end
 
         // ---------------------------------------------------------------------
         // Ozet

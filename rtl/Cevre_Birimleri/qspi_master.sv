@@ -305,6 +305,7 @@ assign sta_tx_full  = tx_full;
 assign sta_tx_empty = tx_empty;
 
 logic [5:0]  sck_cnt;
+logic [5:0]  sck_tam_periyot;
 logic        sck_en;
 logic        sck_int;
 logic        sck_edge_rise, sck_edge_fall;
@@ -335,7 +336,19 @@ logic [5:0]  sck_half_period;
 //
 // Ust sinir: 50 MHz / (2 x 2) = 12,5 MHz SCK. Boot icin fazlasiyla yeterli.
 // =============================================================================
-assign sck_half_period = (ccr_prescaler == 6'h0) ? 6'h1 : ccr_prescaler;
+// SARTNAME s.1127-1132: SCLK = clk / (P+1)
+//   "...degerin BIR FAZLASI kadar saat frekansi bolunerek... '0' yazilirsa
+//    SCLK sistem saat hizinda, '1' oldugu zaman yarisinda olacaktir."
+//
+// Onceki gerceklemede YARIM periyot P+1 cevrimdi, yani tam periyot 2(P+1).
+// Olcum bunu dogruladi: P=1 -> 80 ns (beklenen 40), P=4 -> 200 ns (100).
+// Sapma yorum satirinda gizliydi; artik tb_qspi_mock periyodu OLCUYOR.
+//
+// P=0 DESTEKLENMEZ: SCLK = sistem saati demek olurdu ve veri ayni saatle
+// uretildigi icin kurulum suresi kalmazdi (DDR cikis yazmaci gerekir).
+// P=0 yazilirsa P=1 gibi davranilir.
+assign sck_tam_periyot = (ccr_prescaler == 6'h0) ? 6'd2 : (ccr_prescaler + 6'd1);
+assign sck_half_period = (sck_tam_periyot >> 1);
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
@@ -346,18 +359,17 @@ always_ff @(posedge clk or negedge rst_n) begin
     end else if (sck_en) begin
         sck_edge_rise <= 1'b0;
         sck_edge_fall <= 1'b0;
-        if (sck_half_period == 6'h0) begin
-            sck_int       <= ~sck_int;
-            sck_edge_rise <= ~sck_int;
-            sck_edge_fall <=  sck_int;
+        // Sayac 0..(tam-1): cnt < half -> SCK dusuk, cnt >= half -> yuksek
+        // SPI Mode 0: dusen kenarda veri degisir, yukselende ornekleni r.
+        if (sck_cnt >= sck_tam_periyot - 6'd1) begin
+            sck_cnt       <= '0;
+            sck_int       <= 1'b0;
+            sck_edge_fall <= 1'b1;
         end else begin
-            if (sck_cnt >= sck_half_period) begin
-                sck_cnt       <= '0;
-                sck_int       <= ~sck_int;
-                sck_edge_rise <= ~sck_int;
-                sck_edge_fall <=  sck_int;
-            end else begin
-                sck_cnt <= sck_cnt + 1;
+            sck_cnt <= sck_cnt + 6'd1;
+            if (sck_cnt + 6'd1 == sck_half_period) begin
+                sck_int       <= 1'b1;
+                sck_edge_rise <= 1'b1;
             end
         end
     end else begin
@@ -374,7 +386,7 @@ logic        io_oe;
 logic [3:0]  io_out;
 logic [3:0]  io_in;
 
-assign qspi_io_o = io_out;
+// qspi_io_o suruculeri modulun SONUNDA (always_comb) - tum tanimlar orada hazir
 
 assign qspi_io_oe[0] = io_oe;
 assign qspi_io_oe[1] = io_oe && ccr_data_mode[1];
@@ -862,5 +874,34 @@ assign irq = sta_done;
     assert property (@(posedge clk) disable iff (!rst_n)
         !tx_full |-> !sta_fifo_err[1]);
 `endif
+
+
+// -----------------------------------------------------------------------------
+// VERI HATLARI KOMBINASYONEL SURULUR  (23 Agustos 2026)
+//
+// Onceden pin yazmacli io_out'tan surulyordu; io_out ise shift_out'u BIR
+// CEVRIM gecikmeyle takip ediyordu. Yani yeni bit dusen kenardan IKI cevrim
+// sonra pine ulasiyordu ve yarim periyot 2 cevrimden kisa olamiyordu -
+// prescaler semantigi bu yuzden sartnameden 2 kat sapiyordu.
+//
+// Simdi pin dogrudan shift_out'tan surulyor: bit dusen kenardan BIR cevrim
+// sonra kararli, yarim periyot 1 cevrime inebiliyor.
+//
+// Komut ve adres DAIMA tek hatlidir (SPI Mode 0); yalnizca veri fazi
+// x1/x2/x4 olabilir. Diger durumlarda yazmacli io_out kullanilir.
+// -----------------------------------------------------------------------------
+always_comb begin
+    qspi_io_o = io_out;
+    if (state == SEND_CMD || state == SEND_ADDR) begin
+        qspi_io_o[0]   = shift_out[7];
+        qspi_io_o[3:1] = 3'b111;
+    end else if (state == WRITE_DATA) begin
+        unique case (ccr_data_mode)
+            2'b10:   qspi_io_o[1:0] = shift_out[7:6];
+            2'b11:   qspi_io_o[3:0] = shift_out[7:4];
+            default: qspi_io_o[0]   = shift_out[7];
+        endcase
+    end
+end
 
 endmodule
