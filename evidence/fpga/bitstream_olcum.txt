@@ -1,0 +1,141 @@
+=======================================================================
+ FPGA BITSTREAM OLCUMU - Nexys A7-100T (xc7a100tcsg324-1)
+ Tarih: 2026-08-23 19:21:52
+ RTL  : npu-sram-entegrasyon dali (FC agirliklari TCM/SRAM'de)
+=======================================================================
+
+Proje     : vivado/vivado_nexys_project/Arkhe_SoC_Nexys.xpr
+Ust modul : nexys_top
+Vivado    : 2025.2
+
+-----------------------------------------------------------------------
+ASAMA SURELERI                                    (4 is parcacigi)
+-----------------------------------------------------------------------
+
+  Sentez (synth_1)                     3 dk 41 sn   (221,2 s)
+  Implementasyon + bitstream           2 dk 56 sn   (176,5 s)
+  ---------------------------------------------------------------
+  TOPLAM                               6 dk 37 sn   (397,6 s)
+
+-----------------------------------------------------------------------
+ZAMANLAMA                                          Saat: 50 MHz (20 ns)
+-----------------------------------------------------------------------
+
+  WNS  (setup en kotu)          +0,768 ns    basarisiz uc:    0 / 16985
+  TNS  (setup toplam)            0,000 ns
+  WHS  (hold en kotu)           +0,062 ns    basarisiz uc:    0 / 16985
+  THS  (hold toplam)             0,000 ns
+  WPWS (darbe genisligi)        +4,500 ns    basarisiz uc:    0 /  5603
+
+  SONUC: butun zamanlama kisitlari KARSILANIYOR.
+         ("All user specified timing constraints are met.")
+
+  ONCEKI OLCUMLE KARSILASTIRMA
+  ----------------------------
+                        20 Agustos    23 Agustos    fark
+    WNS                  +1,886 ns     +0,768 ns    -1,118 ns
+    WHS                  +0,021 ns     +0,062 ns    +0,041 ns
+    toplam uc               16.874        16.985       +111
+
+  20 Agustos olcumu FC agirliklari HALA KOMBINASYONEL ROM'dayken
+  alinmisti. Aradaki 1,118 ns'lik setup marj kaybi, agirliklarin
+  TCM/SRAM'e tasinmasinin FPGA'deki bedelidir.
+
+  Marj %59 azaldi ama HALA POZITIF - tasarim 50 MHz'de calisiyor.
+
+-----------------------------------------------------------------------
+EN KOTU SETUP YOLU
+-----------------------------------------------------------------------
+
+  baslangic  u_soc/u_npu/u_npu_engine/fc_logits_reg[1][0]/C
+  bitis      u_soc/u_npu/u_npu_engine/exp_val_reg[2][3]/D
+  slack      +0,768 ns
+  grup       clk_50mhz
+
+  DIKKAT - ASIC ILE FARKLI YOL
+
+  ASIC tarafinda (sky130) en kotu yol NPU TCM SRAM okumasiydi:
+
+    Startpoint: u_npu.u_npu_sram.g_sram[3].u_macro
+                (falling edge-triggered)
+    Endpoint:   _124166_ (rising edge-triggered)
+    slack:      -4,00 ns  (tipik kose)
+
+  FPGA'de SRAM okuma yolu kritik DEGIL. Sebep: TCM burada Xilinx
+  BRAM'e gidiyor - BRAM yukselen kenarda ve hizli okur. sky130 SRAM
+  makrosu ise dusen kenarda veri verir, yani yolun yalnizca YARIM
+  cevrimi vardir ve makronun erisim suresi bu butcenin cogunu yer.
+
+  FPGA'deki kritik yol bunun yerine softmax exp bakis tablosunda:
+  fc_logits -> exp_val. Bu yol her iki teknolojide de var ama
+  ASIC'te SRAM yolu onun onune geciyor.
+
+  SONUC: FPGA'nin temiz gecmesi ASIC zamanlama sorununu curutmez.
+  Iki teknolojinin bellek karakteristigi farklidir.
+
+-----------------------------------------------------------------------
+KAYNAK KULLANIMI
+-----------------------------------------------------------------------
+
+  Slice LUTs            10.386 /  63.400    %16,4
+  Slice Registers        5.510 / 126.800    % 4,3
+  Block RAM Tile            13 /     135    % 9,6
+  DSPs                       9 /     240    % 3,8
+  Bonded IOB                43 /     210    %20,5
+
+  Kaynak kullanimi rahat, buyume icin genis yer var.
+
+-----------------------------------------------------------------------
+BITSTREAM
+-----------------------------------------------------------------------
+
+  dosya   nexys_top.bit
+  boyut   3,65 MB
+  DURUM   URETILDI
+
+  NOT: Bu boyut QSPI flash yerlesimini dogruluyor. Uygulama
+  0x800000'e (8 MB) konuldu; bitstream 3,65 MB oldugu icin
+  aralarinda ~4,3 MB bosluk var, cakisma yok.
+
+-----------------------------------------------------------------------
+KOSUM SIRASINDA BULUNAN HATA
+-----------------------------------------------------------------------
+
+  Ilk deneme sentezde dustu:
+
+      ERROR: [Synth 8-36] 'boot_rom_pkg' is not declared
+             [rtl/boot/boot_rom.sv:8]
+
+  Sebep: rtl/boot/boot_rom_pkg.sv Vivado projesinde HIC KAYITLI
+  DEGILDI. Regresyon akisi (run_regression.py) kendi dosya listesini
+  kullandigi icin orada sorun cikmiyordu - hata yalnizca Vivado
+  projesinde vardi ve bugune kadar fark edilmemisti.
+
+  scripts/fpga_bitstream_olc.tcl artik eksik paket dosyalarini
+  (boot_rom_pkg.sv, npu_weights_pkg.sv) projeye otomatik ekliyor.
+
+-----------------------------------------------------------------------
+OLCUM BETIGINDE DUZELTILEN IKI HATA
+-----------------------------------------------------------------------
+
+  1. get_property STATS.WPWS BOS donuyordu. Bos degeri sayisal
+     karsilastirmaya sokmak "ZAMANLAMA IHLALI VAR" gibi yaniltici bir
+     sonuc uretti - oysa WNS ve WHS pozitifti ve Vivado raporu
+     "All user specified timing constraints are met" diyordu.
+
+  2. Kaynak sayimi PRIMITIVE_GROUP filtreleriyle yapiliyordu ve
+     REGISTER / BLOCKRAM / DSP diye bir grup olmadigi icin FF, BRAM
+     ve DSP hep 0 gorunuyordu. Sayilar artik report_utilization
+     ciktisindan okunuyor.
+
+-----------------------------------------------------------------------
+Ek raporlar
+-----------------------------------------------------------------------
+
+  evidence/fpga/utilization_bitstream.rpt
+  evidence/fpga/timing_bitstream.rpt
+  evidence/fpga/vivado_bitstream.log
+
+Yeniden uretmek icin:
+
+  vivado -mode batch -source scripts/fpga_bitstream_olc.tcl
