@@ -134,6 +134,25 @@ module tb_npu_compute_engine;
 
     // --- Test Akışı ---
     initial begin
+        // -------------------------------------------------------------------
+        // FC AGIRLIKLARI ARTIK TCM'DEN OKUNUYOR (23 Agustos 2026)
+        //
+        // Yuklenmezse motor sifir agirlik okur ve fc_acc yalnizca bias'a
+        // esit cikar - sessiz bir yanlis sonuc degil, acik bir hata olur.
+        //
+        // GUNCEL TCM YERLESIMI (7680 word toplam):
+        //     0    ..  489   giris (1960 bayt)
+        //     490  .. 3583   serbest
+        //     3584 .. 7583   FC agirliklari (4000 word)   <-- YENI
+        //     7584 .. 7595   serbest (12 word)
+        //     7596 .. 7599   cikis olasiliklari (out_addr_i)
+        //     7600 .. 7679   serbest
+        //
+        // Cikis bolgesi ile agirlik bolgesi arasinda yalnizca 12 word pay
+        // vardir. out_addr_i degistirilecekse 7583'un uzerinde kalmalidir.
+        // -------------------------------------------------------------------
+        $readmemh("fc_weights_packed32.mem", tcm_mem, 3584, 7583);
+
         log_file = $fopen("simulation.log", "w");
         if (log_file == 0) begin
             $display("HATA: simulation.log dosyası açılamadı!");
@@ -222,6 +241,15 @@ module tb_npu_compute_engine;
         for (int i = 0; i < 7680; i = i + 1) begin
             tcm_mem[i] = 32'h00000000;
         end
+
+        // FC AGIRLIKLARINI GERI YUKLE (23 Agustos 2026)
+        //
+        // Yukaridaki sifirlama TUM TCM'yi siliyor - artik agirliklar da
+        // TCM'de oldugu icin onlari da siliyordu. Senaryo yalitimi icin
+        // sifirlama dogru; agirliklar kurulumun parcasi olarak geri
+        // yuklenmelidir. Aksi halde motor sifir agirlik okur ve uc
+        // senaryo da tekduze 1024/1024/1024/1024 uretir.
+        $readmemh("fc_weights_packed32.mem", tcm_mem, 3584, 7583);
         
         // Giris spektrogramin TAMAMINI (1960 bayt = 490 kelime) desenle doldur.
         // Onceden yalnizca ilk kelime yaziliyordu; uc senaryo birbirinin

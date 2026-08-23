@@ -125,7 +125,7 @@ TESTLER = [
         # RTL'e gomulu, $readmemh ile dosyadan okunmuyor.
         kaynak=[NPU/"npu_weights_pkg.sv", NPU/"npu_compute_engine.sv",
                 TB/"tb_npu_compute_engine.sv"],
-        mem=[],
+        mem=["fc_weights_packed32.mem"],
     ),
     dict(
         ad="npu_golden",
@@ -134,7 +134,7 @@ TESTLER = [
                 TB/"npu_golden"/"tb_npu_golden.sv"],
         # Agirliklar gomulu; test_input_pattern.mem testin GIRDISIDIR,
         # agirlik degildir - kopyalanmaya devam ediyor.
-        mem=["test_input_pattern.mem"],
+        mem=["test_input_pattern.mem", "fc_weights_packed32.mem"],
     ),
     # -------------------------------------------------------------------------
     # NPU COK-VEKTORLU DOGRULUK TESTI
@@ -153,7 +153,7 @@ TESTLER = [
         top="tb_npu_audio",
         kaynak=[NPU/"npu_weights_pkg.sv", NPU/"npu_compute_engine.sv",
                 TB/"npu_audio"/"tb_npu_audio.sv"],
-        mem=["vectors.mem"],
+        mem=["vectors.mem", "fc_weights_packed32.mem"],
     ),
     # -------------------------------------------------------------------------
     # YAZILIM / DONANIM HIZLANMA OLCUMU
@@ -224,6 +224,7 @@ TESTLER = [
 ]
 
 MEM_KAYNAKLARI = [
+    ROOT/"weights",
     TB,
     ROOT/"vivado"/"vivado_nexys_project"/"Arkhe_SoC_Nexys.ip_user_files"/"mem_init_files",
     TB/"npu_golden",
