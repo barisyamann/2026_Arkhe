@@ -116,6 +116,22 @@ puts "  filelist.f senkronizasyonu: $eklenen dosya eklendi"
 
 update_compile_order -fileset sources_1
 
+# -----------------------------------------------------------------------------
+# ARTIMLI SENTEZ KAPATILIR
+#
+# 24 Agustos 2026: Vivado sentez sirasinda COKTU -
+#     Start Preparing Guide Design
+#     Finished Doing Graph Differ
+#     Abnormal program termination (EXCEPTION_ACCESS_VIOLATION)
+#
+# Bu adimlar ARTIMLI sentezin parcasidir: Vivado onceki sonucu yeniden
+# kullanmaya calisirken cokuyor. Olcum kosumlarinda artimli sentezin
+# zaten anlami yok - amac SIFIRDAN sureyi olcmek.
+# -----------------------------------------------------------------------------
+catch { set_property AUTO_INCREMENTAL_CHECKPOINT 0 [get_runs synth_1] }
+catch { set_property INCREMENTAL_CHECKPOINT "" [get_runs synth_1] }
+catch { reset_run synth_1 -prev_step }
+
 # Kosumlari sifirla - guncel RTL ile bastan olcum yapiliyor
 reset_run synth_1
 puts $fh "ASAMA SURELERI"
