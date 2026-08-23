@@ -27,7 +27,21 @@ module tb_npu_audio;
     `include "vectors_expected.svh"
 
     // Cikis alani girdilerin uzerine binmesin: 5 x 490 = 2450 word kullaniliyor
-    localparam int CIKIS_TABAN = 4096;
+    // CIKIS BOLGESI - 23 Agustos 2026'da TASINDI
+    //
+    // Eskiden 4096 idi. FC agirliklari TCM'nin 3584..7583 bolgesine
+    // yerlesince cikis yazmalari agirliklarin TAM ORTASINA dusuyordu:
+    // 4096..4123 arasi 28 kelime, yani fc_idx 512..539'un agirliklari
+    // her vektorden sonra olasilik degerleriyle eziliyordu.
+    //
+    // Belirti sinsiydi: v0 temiz agirliklarla dogru sonuc veriyor, sonraki
+    // vektorler birikimli bozulmus agirlik okuyordu. Sinif kararlari yine
+    // dogru cikiyordu (bozulma kucuk), yalnizca logit/olasilik degerleri
+    // kayiyordu - bu yuzden ilk bakista "yuvarlama farki" gibi gorundu.
+    //
+    // Agirliklar 7583'te bitiyor, TCM 7680 kelime -> 7584..7679 arasi
+    // 96 kelime bos. 7 vektor x 4 kelime = 28 kelime sigiyor.
+    localparam int CIKIS_TABAN = 7584;
 
     logic clk = 0;
     always #10 clk = ~clk;                     // 50 MHz
@@ -115,6 +129,47 @@ module tb_npu_audio;
 
         // Tum vektorler ard arda: vektor v -> word [v*490 .. v*490+489]
         $readmemh("vectors.mem", mem, 0, VEKTOR_SAYISI * VEKTOR_WORD - 1);
+
+        // -------------------------------------------------------------------
+        // FC AGIRLIKLARI ARTIK TCM'DEN OKUNUYOR (23 Agustos 2026)
+        //
+        // GUNCEL TCM YERLESIMI (7680 word):
+        //     0    .. 3429   girdi vektorleri (7 x 490)
+        //     3430 .. 3583   bos
+        //     3584 .. 7583   FC agirliklari (4000 word)
+        //     7584 .. 7611   cikis olasiliklari (7 x 4)
+        //
+        // Iki bolge de agirliklara DEGMEMELIDIR; asagidaki denetimler bunu
+        // derleme/kosum aninda zorlar.
+        // -------------------------------------------------------------------
+        if (VEKTOR_SAYISI * VEKTOR_WORD > 3584)
+            $fatal(1, "Girdi bolgesi FC agirliklarina tasiyor (%0d > 3584)",
+                   VEKTOR_SAYISI * VEKTOR_WORD);
+        if (CIKIS_TABAN < 7584)
+            $fatal(1, "Cikis bolgesi FC agirliklarini eziyor (%0d < 7584)",
+                   CIKIS_TABAN);
+        if (CIKIS_TABAN + VEKTOR_SAYISI * 4 > 7680)
+            $fatal(1, "Cikis bolgesi TCM sonunu asiyor");
+
+        $readmemh("fc_weights_packed32.mem", mem, 3584, 7583);
+
+        // -------------------------------------------------------------------
+        // FC AGIRLIKLARI ARTIK TCM'DEN OKUNUYOR (23 Agustos 2026)
+        //
+        // npu_compute_engine, FC agirliklarini buyuk kombinasyonel ROM yerine
+        // TCM'nin 3584..7583 bolgesinden okuyor (ASIC fiziksel akisini
+        // acmak icin). Testbench bunlari yuklemezse motor SIFIR agirlik
+        // okur ve fc_acc yalnizca bias'a esit cikar.
+        //
+        // YERLESIM DENETIMI: 7 vektor x 490 word = 3430 word (0..3429).
+        // Agirliklar 3584'ten basliyor -> cakisma YOK, 154 word pay var.
+        // Vektor sayisi 7'yi asarsa bu pay biter; VEKTOR_SAYISI * 490
+        // her zaman 3584'un altinda kalmalidir.
+        // -------------------------------------------------------------------
+        if (VEKTOR_SAYISI * VEKTOR_WORD > 3584)
+            $fatal(1, "Vektor bolgesi FC agirlik bolgesine tasiyor (%0d > 3584)",
+                   VEKTOR_SAYISI * VEKTOR_WORD);
+        $readmemh("fc_weights_packed32.mem", mem, 3584, 7583);
 
         rst_n         = 1'b0;
         start_i       = 1'b0;
