@@ -66,3 +66,26 @@ set_property -dict { PACKAGE_PIN V11   IOSTANDARD LVCMOS33 } [get_ports { LED[15
 # --- Zamanlama Bölücü Kısıt Tanımı ---
 # 50 MHz iç saati elde etmek için üretilen saati Vivado zamanlama motoruna bildiriyoruz
 create_generated_clock -name clk_50mhz -source [get_ports CLK100MHZ] -divide_by 2 [get_pins bufg_clk/O]
+
+# =============================================================================
+#  QSPI NOR Flash - KART USTU Spansion S25FL128S (16 MB)
+#  F2 karari, 23 Agustos 2026
+#
+#  SAAT PINI YOKTUR: 7-serisi Artix'te flash saati (CCLK) yapilandirma
+#  devresine aittir ve pakete atanamaz. Kullanici mantigi onu ancak
+#  STARTUPE2 ilkel blogunun USRCCLKO girisinden surebilir; bkz.
+#  rtl/Memory/nexys_top.sv icindeki u_startupe2.
+#
+#  Bu pinler yapilandirma sonrasi kullanici mantigina birakilir. CS ve DQ
+#  hatlari yapilandirma sirasinda da kullanildigi icin Vivado uyari
+#  uretebilir; asagidaki iki ayar bunu bilinen/kabul edilmis hale getirir.
+# =============================================================================
+set_property -dict { PACKAGE_PIN L13 IOSTANDARD LVCMOS33 } [get_ports { QSPI_CS_N }]
+set_property -dict { PACKAGE_PIN K17 IOSTANDARD LVCMOS33 } [get_ports { QSPI_DQ[0] }]
+set_property -dict { PACKAGE_PIN K18 IOSTANDARD LVCMOS33 } [get_ports { QSPI_DQ[1] }]
+set_property -dict { PACKAGE_PIN L14 IOSTANDARD LVCMOS33 } [get_ports { QSPI_DQ[2] }]
+set_property -dict { PACKAGE_PIN M14 IOSTANDARD LVCMOS33 } [get_ports { QSPI_DQ[3] }]
+
+# Yapilandirma arayuzunu kullanici mantigina birak
+set_property CONFIG_MODE SPIx4 [current_design]
+set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design]

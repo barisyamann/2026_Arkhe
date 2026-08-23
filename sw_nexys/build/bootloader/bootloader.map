@@ -11,21 +11,22 @@ Linker script and memory map
 
 LOAD C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
 
-.text           0x00000000       0x4c
+.text           0x00000000       0x50
                 0x00000000                        . = ALIGN (0x4)
  *(.text.start)
- .text.start    0x00000000       0x4c C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
+ .text.start    0x00000000       0x4e C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
                 0x00000000                _start
  *(.text*)
- .text          0x0000004c        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
+ .text          0x0000004e        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
  *(.rodata*)
-                0x0000004c                        . = ALIGN (0x4)
+                0x00000050                        . = ALIGN (0x4)
+ *fill*         0x0000004e        0x2 
 
-.data           0x0000004c        0x0
- .data          0x0000004c        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
+.data           0x00000050        0x0
+ .data          0x00000050        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
 
-.bss            0x0000004c        0x0
- .bss           0x0000004c        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
+.bss            0x00000050        0x0
+ .bss           0x00000050        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\bootloader\bootloader.o
 
 /DISCARD/
  *(.comment)

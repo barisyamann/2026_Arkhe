@@ -31,7 +31,20 @@ module nexys_top (
     // icin HARICI 2,2-4,7 kOhm direnc onerilir.
     // -------------------------------------------------------------------------
     inout  wire         I2C_SCL,        // Pmod JA1 - C17
-    inout  wire         I2C_SDA         // Pmod JA2 - D18
+    inout  wire         I2C_SDA,        // Pmod JA2 - D18
+
+    // -------------------------------------------------------------------
+    // QSPI NOR Flash - KART USTU Spansion S25FL128S (16 MB)
+    //
+    // F2 karari (23 Agustos 2026): harici Pmod modulu alinmadi, kartin
+    // kendi flash'i kullaniliyor.
+    //
+    // DIKKAT: Saat (CCLK) burada YOKTUR. 7-serisinde flash saati ozel bir
+    // yapilandirma pinidir; XDC ile atanamaz, STARTUPE2/USRCCLKO
+    // uzerinden surulur (asagida).
+    // -------------------------------------------------------------------
+    output logic        QSPI_CS_N,      // L13
+    inout  wire  [3:0]  QSPI_DQ         // K17 K18 L14 M14
 );
 
     // 100 MHz -> 50 MHz Saat Bölücü (Clock Divider)
@@ -68,27 +81,65 @@ module nexys_top (
     // uclusu verir. Gercek 'z surumu burada, en ust seviyede yapiliyor -
     // ASIC akisinda bu katmanin yerini pad halkasi alir.
     //
-    // I2C artik karta cikiyor (Pmod JA). QSPI hala kart disina cikmiyor;
-    // hatlar yine de dogru modellendi ki soc_top arayuzu FPGA ile ASIC
-    // arasinda ayni kalsin.
+    // I2C -> Pmod JA. QSPI -> KART USTU Spansion S25FL128S (F2 karari,
+    // 23 Agustos 2026). Harici modul alinmadi; kartin kendi flash'i
+    // kullaniliyor.
     // =========================================================================
-    wire [3:0] qspi_io_io;
-
     wire       i2c_sda_o_w, i2c_sda_oe_w;
     wire       i2c_scl_o_w, i2c_scl_oe_w;
     wire [3:0] qspi_io_o_w, qspi_io_oe_w;
+    wire       qspi_sck_w, qspi_cs_n_w;
 
     // I2C acik drenaj: yalnizca asagi cekilir, asla yukari surulmez.
     // oe yuksekken bile '1' surulmez - bu I2C'nin tanimi geregidir.
     assign I2C_SDA = (i2c_sda_oe_w && !i2c_sda_o_w) ? 1'b0 : 1'bz;
     assign I2C_SCL = (i2c_scl_oe_w && !i2c_scl_o_w) ? 1'b0 : 1'bz;
 
+    // -------------------------------------------------------------------------
+    // QSPI veri hatlari - kart ustu flash'a cift yonlu baglanti
+    // -------------------------------------------------------------------------
     genvar gi;
     generate
         for (gi = 0; gi < 4; gi = gi + 1) begin : g_qspi_io
-            assign qspi_io_io[gi] = qspi_io_oe_w[gi] ? qspi_io_o_w[gi] : 1'bz;
+            assign QSPI_DQ[gi] = qspi_io_oe_w[gi] ? qspi_io_o_w[gi] : 1'bz;
         end
     endgenerate
+
+    assign QSPI_CS_N = qspi_cs_n_w;
+
+    // -------------------------------------------------------------------------
+    // QSPI SAATI - STARTUPE2 UZERINDEN CIKMAK ZORUNDA
+    //
+    // 7-serisi Artix'te flash saati (CCLK) NORMAL BIR KULLANICI PINI DEGILDIR.
+    // Yapilandirma (configuration) devresine ait ozel bir pindir ve XDC ile
+    // bir pakete atanamaz. Kullanici mantiginin flash saatini surebilmesinin
+    // TEK yolu STARTUPE2 ilkel blogunun USRCCLKO girisidir.
+    //
+    // Bu detay atlanirsa sentez hata vermez - tasarim kurulur, bitstream
+    // uretilir, ama flash'tan HICBIR SEY okunmaz cunku saat pine hic
+    // ulasmaz. Sessiz bir basarisizliktir.
+    //
+    // USRCCLKTS = 0 -> cikis surucusu etkin (ts = tri-state, ters mantik)
+    // USRDONEO / USRDONETS -> DONE pinine dokunmuyoruz, varsayilanda birakiliyor
+    // -------------------------------------------------------------------------
+    STARTUPE2 #(
+        .PROG_USR      ("FALSE"),
+        .SIM_CCLK_FREQ (0.0)
+    ) u_startupe2 (
+        .CFGCLK    (),          // kullanilmiyor
+        .CFGMCLK   (),          // kullanilmiyor
+        .EOS       (),          // kullanilmiyor
+        .PREQ      (),          // kullanilmiyor
+        .CLK       (1'b0),
+        .GSR       (1'b0),
+        .GTS       (1'b0),
+        .KEYCLEARB (1'b0),
+        .PACK      (1'b0),
+        .USRCCLKO  (qspi_sck_w),  // <-- flash saati buradan cikar
+        .USRCCLKTS (1'b0),        // 0 = surucu etkin
+        .USRDONEO  (1'b1),
+        .USRDONETS (1'b1)
+    );
 
     // SoC Ana Modülünün Çağrılması
     soc_top u_soc (
@@ -116,12 +167,12 @@ module nexys_top (
         .i2c_scl_oe     (i2c_scl_oe_w),
         .i2c_scl_i      (I2C_SCL),
 
-        // QSPI NOR Flash (Kullanılmıyor)
-        .qspi_sck       (),
-        .qspi_cs_n      (),
+        // QSPI NOR Flash - kart ustu S25FL128S (F2)
+        .qspi_sck       (qspi_sck_w),
+        .qspi_cs_n      (qspi_cs_n_w),
         .qspi_io_o      (qspi_io_o_w),
         .qspi_io_oe     (qspi_io_oe_w),
-        .qspi_io_i      (qspi_io_io),
+        .qspi_io_i      (QSPI_DQ),
 
         // JTAG (Kullanılmıyor - Kararsız çalışmayı önlemek için güvenli durumlara çekildi)
         .jtag_tms       (1'b1),

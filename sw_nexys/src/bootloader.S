@@ -21,6 +21,25 @@
 
 .equ IRAM_BASE,       0x01000000
 
+# -----------------------------------------------------------------------------
+# UYGULAMANIN FLASH ICINDEKI YERI  (F2 karari, 23 Agustos 2026)
+#
+# Kart ustu Spansion S25FL128S'in BASINDA FPGA BITSTREAM'I DURUR.
+# XC7A100T bitstream'i yaklasik 3,7 MB'dir. Uygulamayi adres 0'dan
+# okumak, bitstream baytlarini buyruk sanip calistirmak demektir.
+#
+# Bu yuzden uygulama 8 MB sinirina konuluyor: bitstream'in cok
+# uzerinde, 16 MB'lik flash'in ortasinda.
+#
+# Uygulamayi flash'a yazarken AYNI ofset kullanilmalidir:
+#     Vivado > Add Configuration Memory Device > s25fl128sxxxxxx0-spi-x1_x2_x4
+#     app.bin dosyasi 0x800000 ofsetine programlanir.
+#
+# 3 baytlik adresleme 16 MB'i tamamen kapsar (0xFFFFFF), bu yuzden
+# CCR[24] 4-bayt kipi burada GEREKMEZ.
+# -----------------------------------------------------------------------------
+.equ APP_FLASH_OFS,   0x800000
+
 # QSPI islem basina en fazla 256 bayt okunabilir (CCR[23:16] 8 bit).
 # 8 kB uygulama icin 32 islem gerekir.
 .equ CHUNK_COUNT,     8
@@ -44,7 +63,7 @@
 _start:
     li   t0, QSPI_BASE          # QSPI taban adresi
     li   t1, IRAM_BASE          # hedef: I-RAM yazma isaretcisi
-    li   t2, 0                  # kaynak: flash adresi
+    li   t2, APP_FLASH_OFS      # kaynak: flash adresi (bitstream'in USTUNDE)
     li   t3, CHUNK_COUNT        # kalan blok sayisi
 
 chunk_loop:
