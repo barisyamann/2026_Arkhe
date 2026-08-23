@@ -39,7 +39,9 @@ OLCUMLER = [
     (50, 542273),
 ]
 
-DONANIM_CEVRIM = 72583      # tb_npu_audio, cikarim basina
+DONANIM_CEVRIM = 81083      # tb_npu_audio, cikarim basina
+                            # 23 Agu 2026: CONV_MAC 3 asamali
+                            # boru hatti -> 80.583 + 500
 SAAT_HZ        = 50_000_000
 
 

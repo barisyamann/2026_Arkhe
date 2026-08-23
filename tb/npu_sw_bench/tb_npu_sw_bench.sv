@@ -226,8 +226,10 @@ module tb_npu_sw_bench;
         $display("  Tam cikarim tap sayisi      : %0d", TOPLAM_TAP);
         $display("  Kaba alt sinir tahmini      : %.0f cevrim (%.2f s @50MHz)",
                  tam_cikarim, tam_cikarim / 50.0e6);
-        $display("  Donanim (tb_npu_audio)      : 72583 cevrim = 1.45 ms");
-        $display("  Kaba hizlanma               : %.0fx", tam_cikarim / 72583.0);
+        // 23 Agustos 2026: CONV_MAC uc asamali boru hattina cevrildi,
+// cikarim 80.583 -> 81.083 cevrim (+500, piksel basina bosaltma).
+        $display("  Donanim (tb_npu_audio)      : 81083 cevrim = 1.62 ms");
+        $display("  Kaba hizlanma               : %.0fx", tam_cikarim / 81083.0);
         $display("");
         $display("  NOT: kesin sayi icin iki N olcumu gerekir ->");
         $display("       python tb/npu_sw_bench/analiz.py");
@@ -241,7 +243,7 @@ module tb_npu_sw_bench;
         // Akil sagligi: yazilim donanimdan YAVAS olmali, aksi halde
         // hizlandirici bir ise yaramiyor demektir
         denetle("yazilim donanimdan en az 100x yavas",
-                tam_cikarim > 100.0 * 72583.0);
+                tam_cikarim > 100.0 * 81083.0);
 
         $display("================================================================");
         if (hata != 0) begin

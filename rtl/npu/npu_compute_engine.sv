@@ -118,6 +118,49 @@ module npu_compute_engine import npu_weights_pkg::*; (
     logic [1:0] mac_bo;      // gecikmeli byte_offset
     logic       mac_ib;      // gecikmeli in_bounds
     logic       mac_valid;   // mem_rdata_b gecerli bir tap tasiyor mu
+
+    // -------------------------------------------------------------------------
+    // ASAMA 3 - SRAM CIKISI MAC'TEN ONCE YAZMACLANIR  (23 Agustos 2026)
+    //
+    // NEDEN
+    //
+    //   ASIC (sky130) yerlestirme-sonrasi STA'da en kotu setup yolu buydu:
+    //
+    //     Startpoint: u_npu.u_npu_sram.g_sram[3].u_macro
+    //                 (falling edge-triggered flip-flop clocked by clk_i)
+    //     Endpoint:   u_npu.u_npu_engine.conv_acc[223]
+    //     slack:      -4,00 ns  (tipik kose) / -18,76 ns (yavas kose)
+    //
+    //   SRAM makrosunun Liberty modeli ciktiyi DUSEN kenarda birakiyor
+    //   (timing_type : falling_edge). Yakalayan yazmac yukselen kenarda
+    //   oldugu icin bu yolun yalnizca YARIM cevrimi var - 20 ns yerine
+    //   ~9,6 ns. Makronun kendi erisimi hizli (0,4-0,5 ns); butceyi yiyen
+    //   sey, SRAM cikisindan hemen sonra gelen SEKIZ PARALEL carpma-toplama.
+    //
+    //   Cozum: SRAM verisini once yazmaca al, MAC bir sonraki cevrimde
+    //   KAYITLI degerle calissin. Yol ikiye bolunur:
+    //     SRAM -> rdata_q        yarim cevrim, neredeyse bos (kolay)
+    //     rdata_q -> conv_acc    tam cevrim (MAC'e rahat yer)
+    //
+    // MALIYET
+    //
+    //   Bu bir BORU HATTI oldugu icin ek asama gecikme ekler, verim
+    //   dusurmez: tap basina yine 1 cevrim. Yalnizca her pikselin
+    //   sonunda boru hattini bosaltmak icin +1 cevrim gerekir.
+    //   25 x 20 = 500 piksel -> +500 cevrim (~%0,6).
+    //
+    // BORU HATTI ARTIK UC ASAMALI
+    //
+    //   kh/kw        adresi BU cevrim verilen tap
+    //   mac_*        verisi BU cevrim mem_rdata_b'de olan tap
+    //   mac_*_q      verisi rdata_q'da YAZMACLANMIS, MAC edilen tap
+    // -------------------------------------------------------------------------
+    logic [31:0] rdata_q;      // yazmaclanmis SRAM cikisi
+    logic [3:0]  mac_kh_q;
+    logic [3:0]  mac_kw_q;
+    logic [1:0]  mac_bo_q;
+    logic        mac_ib_q;
+    logic        mac_valid_q;
     logic signed [31:0] fc_acc [0:3];
 
     // TFLite FC katmanının quantized INT8 çıkışları
@@ -478,6 +521,12 @@ endfunction
             mac_bo      <= '0;
             mac_ib      <= 1'b0;
             mac_valid   <= 1'b0;
+            rdata_q     <= '0;
+            mac_kh_q    <= '0;
+            mac_kw_q    <= '0;
+            mac_bo_q    <= '0;
+            mac_ib_q    <= 1'b0;
+            mac_valid_q <= 1'b0;
             div_start   <= 1'b0;
             div_num     <= '0;
             div_den     <= '0;
@@ -519,6 +568,12 @@ endfunction
             mac_bo      <= '0;
             mac_ib      <= 1'b0;
             mac_valid   <= 1'b0;
+            rdata_q     <= '0;
+            mac_kh_q    <= '0;
+            mac_kw_q    <= '0;
+            mac_bo_q    <= '0;
+            mac_ib_q    <= 1'b0;
+            mac_valid_q <= 1'b0;
 
             div_start   <= 1'b0;
             div_num     <= '0;
@@ -590,41 +645,75 @@ endfunction
                 CONV_MAC: begin
                     logic signed [8:0] x_centered;
 
-                    if (mac_ib) begin
-                        logic [7:0] raw_byte;
+                    // =========================================================
+                    // ASAMA 3 - MAC
+                    //
+                    // Artik mem_rdata_b'yi DOGRUDAN kullanmiyor; bir cevrim
+                    // once yakalanmis rdata_q ile calisiyor. Kritik yol
+                    // boylece ikiye bolunuyor (bkz. yukaridaki aciklama).
+                    // =========================================================
+                    if (mac_valid_q) begin
+                        if (mac_ib_q) begin
+                            logic [7:0] raw_byte;
 
-                        raw_byte = (mac_bo == 2'd0) ? mem_rdata_b[7:0]   :
-                                   (mac_bo == 2'd1) ? mem_rdata_b[15:8]  :
-                                   (mac_bo == 2'd2) ? mem_rdata_b[23:16] :
-                                                      mem_rdata_b[31:24];
+                            raw_byte = (mac_bo_q == 2'd0) ? rdata_q[7:0]   :
+                                       (mac_bo_q == 2'd1) ? rdata_q[15:8]  :
+                                       (mac_bo_q == 2'd2) ? rdata_q[23:16] :
+                                                            rdata_q[31:24];
 
-                        // TFLite input zero-point = -128
-                        // x_centered = x_q - (-128) = x_q + 128
-                        x_centered = $signed({raw_byte[7], raw_byte}) + 9'sd128;
+                            // TFLite input zero-point = -128
+                            // x_centered = x_q - (-128) = x_q + 128
+                            x_centered = $signed({raw_byte[7], raw_byte}) + 9'sd128;
 
-                    end else begin
-                        // SAME padding gerçek değer olarak 0 olmalıdır.
-                        // Zero-point çıkarıldıktan sonra centered değer doğrudan 0'dır.
-                        x_centered = 9'sd0;
+                        end else begin
+                            // SAME padding gerçek değer olarak 0 olmalıdır.
+                            // Zero-point çıkarıldıktan sonra centered değer doğrudan 0'dır.
+                            x_centered = 9'sd0;
+                        end
+
+                        // Okunan tek piksel sekiz kanala paralel dagitilir.
+                        // dw_weights indisleri d icin ARDISIKTIR (kh*64+kw*8+d),
+                        // yani sekiz agirlik bitisik bir blokta duruyor.
+                        for (int d = 0; d < 8; d++) begin
+                            conv_acc[d] <= conv_acc[d] +
+                                x_centered * $signed(dw_weights(10'(int'(mac_kh_q) * 64 + int'(mac_kw_q) * 8 + d)));
+                        end
                     end
 
-                    // Okunan tek piksel sekiz kanala paralel dagitilir.
-                    // dw_weights indisleri d icin ARDISIKTIR (kh*64+kw*8+d),
-                    // yani sekiz agirlik bitisik bir blokta duruyor.
-                    for (int d = 0; d < 8; d++) begin
-                        conv_acc[d] <= conv_acc[d] +
-                            x_centered * $signed(dw_weights(10'(int'(mac_kh) * 64 + int'(mac_kw) * 8 + d)));
-                    end
+                    // =========================================================
+                    // ASAMA 2 - SRAM cikisini yazmaca al
+                    //
+                    // Bu atama neredeyse bos bir yol: SRAM dout -> rdata_q.
+                    // Yarim cevrimlik butce buna fazlasiyla yeter.
+                    // =========================================================
+                    rdata_q     <= mem_rdata_b;
+                    mac_kh_q    <= mac_kh;
+                    mac_kw_q    <= mac_kw;
+                    mac_bo_q    <= mac_bo;
+                    mac_ib_q    <= mac_ib;
+                    mac_valid_q <= mac_valid;
 
-                    // Cikis kosulu TUKETILEN tap'a bakar (mac_*), adresi
-                    // verilene degil.
-                    if (mac_kh == 9 && mac_kw == 7) begin
-                        // Son tap islendi: boru hatti bosaltildi
+                    // =========================================================
+                    // Cikis ve asama 1 (adres) ilerletme
+                    //
+                    // Cikis kosulu artik ASAMA 3'e bakiyor (mac_*_q): son tap
+                    // MAC edildiginde boru hatti gercekten bosalmistir.
+                    // Asama 1 bir cevrim ONCE durur - son adres verildikten
+                    // sonra yeni adres uretmenin anlami yok.
+                    // =========================================================
+                    if (mac_valid_q && mac_kh_q == 9 && mac_kw_q == 7) begin
+                        // Son tap MAC edildi: boru hatti bosaldi
+                        mac_valid   <= 1'b0;
+                        mac_valid_q <= 1'b0;
+                        kh          <= '0;
+                        kw          <= '0;
+                        d_out       <= '0;    // requant/FC turu kanal 0'dan baslar
+                        state       <= CONV_ReLU_FC;
+                    end else if (mac_valid && mac_kh == 9 && mac_kw == 7) begin
+                        // Son tap asama 2'ye girdi; adres uretimi durur.
+                        // mac_valid_q yukarida mac_valid'den yuklendigi icin
+                        // bu tap bir sonraki cevrimde MAC edilecek.
                         mac_valid <= 1'b0;
-                        kh        <= '0;
-                        kw        <= '0;
-                        d_out     <= '0;      // requant/FC turu kanal 0'dan baslar
-                        state     <= CONV_ReLU_FC;
                     end else begin
                         // Bu cevrim adresi verilen tap'i boru hattina al
                         mac_kh <= kh;
