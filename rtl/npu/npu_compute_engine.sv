@@ -69,7 +69,8 @@ module npu_compute_engine import npu_weights_pkg::*; (
         // FC weight artik buyuk kombinasyonel ROM'dan degil,
         // TCM/SRAM icinden okunacak.
         FC_WEIGHT_REQ   = 5'd25,
-        FC_WEIGHT_WAIT  = 5'd26
+        FC_WEIGHT_WAIT  = 5'd26,
+        FC_WEIGHT_LATCH = 5'd27
     } state_t;
 
     state_t state;
@@ -705,8 +706,13 @@ endfunction
                     state <= FC_WEIGHT_WAIT;
                 end
 
-                // Onceki clock'ta istenen 32-bit weight kelimesini kaydet.
+                // SRAM cikisinin oturmasi icin bir ek cevrim bekle.
                 FC_WEIGHT_WAIT: begin
+                    state <= FC_WEIGHT_LATCH;
+                end
+
+                // SRAM'den gelen 32-bit FC weight kelimesini burada kaydet.
+                FC_WEIGHT_LATCH: begin
                     fc_weight_word <= mem_rdata_b;
                     state <= FC_MAC0;
                 end
