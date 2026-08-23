@@ -136,7 +136,17 @@ module npu_compute_engine import npu_weights_pkg::*; (
     // 12 bit yeterlidir. Onceden 14 bitti; daraltildi cunku fc_weights artik
     // dort ayri 4.000'lik ROM'a bolundu ve her biri 12 bitlik adres aliyor.
     logic [11:0]        fc_idx;
-
+    // ============================================================
+    // FC weight SRAM / TCM yerlesimi
+    //
+    // TCM toplam: 7680 x 32-bit = 30 kB
+    // Ilk 3584 word veri/input/output icin ayrildi.
+    // Sonraki 4000 word FC weightleri icin kullanilir.
+    //
+    // 3584 = 7 x 512 word -> SRAM macro sinirina hizali.
+    // ============================================================
+    localparam logic [12:0] FC_WEIGHT_BASE = 13'd3584;
+    localparam int unsigned FC_WEIGHT_WORDS = 4000;
     // --- Ağırlık ve Sapma (Weight & Bias) ROM Dizileri ---
     //
     // İÇERİK RTL'E GÖMÜLÜDÜR - dosyadan okunmaz.
