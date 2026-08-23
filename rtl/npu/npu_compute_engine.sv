@@ -688,13 +688,28 @@ endfunction
                         fc_y <= rq_scaled[8:0];
 
                     fc_idx <= 12'((int'(t_out) * 20 + int'(f_out)) * 8 + int'(d_out));
-                    state  <= FC_MAC0;
+                    state <= FC_WEIGHT_REQ;
                 end
 
                 // ============================================================
                 // Asama 5-8: dort FC MAC, her cevrimde TEK ROM okumasi
                 // (D9 bulgusu burada kapaniyor)
                 // ============================================================
+                // ============================================================
+                // FC weight TCM/SRAM okuma
+                // ============================================================
+
+                // Bu state'te TCM'ye adres verilir.
+                // Veri TCM cikisinda bir sonraki clock'ta hazir olur.
+                FC_WEIGHT_REQ: begin
+                    state <= FC_WEIGHT_WAIT;
+                end
+
+                // Onceki clock'ta istenen 32-bit weight kelimesini kaydet.
+                FC_WEIGHT_WAIT: begin
+                    fc_weight_word <= mem_rdata_b;
+                    state <= FC_MAC0;
+                end
                 FC_MAC0: begin
                     fc_acc[0] <= fc_acc[0]
                         + $signed(fc_y) * $signed(fc_weights0(fc_idx));
@@ -718,7 +733,7 @@ endfunction
                 // cunku fc_idx ve dw_multiplier onlara bagli.
                 FC_MAC3: begin
                     fc_acc[3] <= fc_acc[3]
-                        + $signed(fc_y) * $signed(fc_weights3(fc_idx));
+                        + $signed(fc_y) * $signed(fc_weight_word[31:24]);
 
                     // R4 sonrasi dongu duzeni:
                     //   konvolusyon (kh,kw) SEKIZ KANAL ICIN BIR KEZ kosar,
@@ -942,6 +957,10 @@ endfunction
                     mem_en_b   = 1'b1;
                     mem_addr_b = in_addr_i + word_offset;
                 end
+            end
+            FC_WEIGHT_REQ: begin
+                mem_en_b = 1'b1;
+                mem_addr_b = FC_WEIGHT_BASE + {1'b0, fc_idx};
             end
             WRITE_OUT_0: begin
                 mem_en_b    = 1'b1;
