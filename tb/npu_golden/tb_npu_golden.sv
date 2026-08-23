@@ -72,7 +72,9 @@ module tb_npu_golden;
 
         // 1960 byte = 490 adet 32-bit word
         $readmemh("test_input_pattern.mem", mem, 0, 489);
-
+        // FC weightleri TCM'in ayrilan 16 kB bolgesine yukle
+        // 4000 adet 32-bit word: adres 3584 ... 7583
+        $readmemh("fc_weights_packed32.mem", mem, 3584, 7583);
         rst_n       = 1'b0;
         start_i     = 1'b0;
         npu_reset_i = 1'b0;
