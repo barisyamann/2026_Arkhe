@@ -69,6 +69,8 @@
 ../rtl/cv32e40p-master/rtl/cv32e40p_prefetch_controller.sv
 ../rtl/cv32e40p-master/rtl/cv32e40p_register_file_ff.sv
 ../rtl/cv32e40p-master/rtl/cv32e40p_sleep_unit.sv
+../rtl/npu/npu_engine_axi_master.sv
+../rtl/npu/npu_tcm_axi_slave.sv
 ../rtl/npu/npu_accelerator.sv
 ../rtl/npu/npu_axi_controller.sv
 ../rtl/npu/npu_compute_engine.sv

@@ -848,6 +848,32 @@ module tb_soc_top;
         .rvalid   (dma_m_rvalid),   .rready  (dma_m_rready)
     );
 
+    // -------------------------------------------------------------------------
+    // NPU HESAPLAMA MOTORU <-> TCM AXI4-Lite HATTI  (23 Agustos 2026)
+    //
+    // Sartname s.549-554 verinin bellekten AXI arayuzu uzerinden
+    // hizlandiriciya cekilmesini ve sonucun yine AXI ile geri yazilmasini
+    // istiyor. Motor artik npu_engine_axi_master uzerinden gercek AXI4-Lite
+    // islemleri uretiyor.
+    //
+    // Bu bind, o hattin PROTOKOL UYUMUNU denetler. Boylece "AXI kullaniyoruz"
+    // iddiasi beyan degil, her regresyon kosumunda dogrulanan bir olgu olur.
+    //
+    // NOT: bu, npu_accelerator icindeki hiyerarsiye baglanir - soc_top
+    // seviyesinden gorunen ad u_npu.u_eng_axi_master cevresindeki hatlardir.
+    // -------------------------------------------------------------------------
+    bind npu_accelerator axil_protocol_checker u_pc_npu_eng (
+        .clk      (clk),
+        .rst_n    (rst_n),
+        .awaddr   (eng_awaddr),     .awvalid (eng_awvalid),  .awready (eng_awready),
+        .wdata    (eng_wdata_axi),  .wstrb   (eng_wstrb),
+        .wvalid   (eng_wvalid),     .wready  (eng_wready),
+        .bresp    (eng_bresp),      .bvalid  (eng_bvalid),   .bready  (eng_bready),
+        .araddr   (eng_araddr),     .arvalid (eng_arvalid),  .arready (eng_arready),
+        .rdata    (eng_rdata_axi),  .rresp   (eng_rresp),
+        .rvalid   (eng_rvalid),     .rready  (eng_rready)
+    );
+
     // M1 - JTAG/Debug master portu
     bind soc_top axil_protocol_checker u_pc_jtag (
         .clk      (clk_i),
