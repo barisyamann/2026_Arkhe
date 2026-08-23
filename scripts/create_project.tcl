@@ -129,8 +129,10 @@ add_files -fileset sim_1 -norecurse [list \
     "./tb/tb_npu_compute_engine.sv" \
     "./tb/tb_npu_engine_axi_master.sv" \
     "./tb/tb_npu_axi_tcm_integration.sv" \
+    "./tb/spi_flash_model.sv" \
     "./tb/npu_golden/tb_npu_golden.sv" \
     "./tb/npu_golden/test_input_pattern.mem" \
+    "./sw_nexys/build/app.hex" \
     "./rtl/boot/boot.hex" \
 ]
 
