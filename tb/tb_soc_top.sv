@@ -129,9 +129,29 @@ module tb_soc_top;
     // --- QSPI Flash Modeli ---
     // Sartname s.16: sistem QSPI flash'tan boot olur. Yukleyici (boot.hex)
     // uygulamayi (app.hex) buradan okuyup I-RAM'e yazar.
+    //
+    // APP_OFS: F2 karari (23 Agustos 2026) sonrasi uygulama, kart ustu
+    // flash'in BASINDA DEGIL 0x800000'de duruyor - orasi FPGA
+    // bitstream'inin uzerinde kalan ilk guvenli sinir. Yukleyici de
+    // (bootloader.S / APP_FLASH_OFS) oradan okuyor.
+    //
+    // Simulasyonun bunu birebir modellemesi sart: aksi halde test,
+    // gercek donanimda kosacak olandan BASKA bir adresten boot etmis
+    // olurdu ve ofset hatasi FPGA'ye kadar gorunmezdi.
+    //
+    // flash.hex = uygulama + NPU FC agirliklari, tek imaj.
+    // Uretimi: python sw_nexys/scripts/gen_flash_image.py
+    //
+    //     0x800000  uygulama         2048 kelime (8 kB ayrildi)
+    //     0x802000  FC agirliklari   4000 kelime (16 kB)
+    //
+    // Agirliklar buradan TCM'e YUKLEYICI tarafindan kopyalanir; testbench
+    // artik onlari TCM'e onyuklemez. Boylece simulasyon, uretilmis cipte
+    // olacak seyin AYNISINI kosar.
     spi_flash_model #(
-        .INIT_FILE  ("app.hex"),
-        .WORD_COUNT (2048)
+        .APP_OFS    (32'h0080_0000),
+        .INIT_FILE  ("flash.hex"),
+        .WORD_COUNT (6048)
     ) u_flash (
         .sck   (qspi_sck),
         .cs_n  (qspi_cs_n),
@@ -372,6 +392,28 @@ module tb_soc_top;
       `ifndef REAL_BOOT
         $readmemh("app.hex", uut.u_instruction_ram.ram);
 
+        // ---------------------------------------------------------------
+        // HIZLI ACILIS YUKLEYICIYI ATLADIGI ICIN ONUN ISINI TAKLIT ET
+        //
+        // Gercek acilista yukleyici (bootloader.S) iki is yapar:
+        //   1. uygulamayi flash'tan I-RAM'e kopyalar   <- yukaridaki satir
+        //   2. FC agirliklarini flash'tan TCM'e kopyalar ve
+        //      npu_csr CTRL.WEIGHTS_READY bitini kurar
+        //
+        // Hizli acilis yalnizca (1)'i taklit ediyordu. (2) olmadan NPU
+        // sifir agirlikla kosardi - ve WEIGHTS_READY korumasi eklendikten
+        // sonra hic BASLAMAZ. Ikisi de burada taklit ediliyor.
+        //
+        // Not: bu, gercek boot zincirinin dogrulanmadigini gostermez -
+        // sistem_gercek_boot testi (-d REAL_BOOT) tam zinciri kosar.
+        // ---------------------------------------------------------------
+        $readmemh("fc_weights_packed32.mem", uut.u_npu.u_npu_sram.ram, 3584, 7583);
+
+        // CTRL bit 4 = WEIGHTS_READY (yapiskan)
+        force uut.u_npu.u_npu_csr.reg_weights_ready = 1'b1;
+        #1;
+        release uut.u_npu.u_npu_csr.reg_weights_ready;
+
         // HIZLI ACILIS - CPU'nun ACILIS ADRESI zorlanir.
         //
         // Onceden Boot ROM'un ilk iki komutu yazilarak I-RAM'e atlaniyordu:
@@ -472,19 +514,46 @@ module tb_soc_top;
         // CPU once UART'tan "Class: N" yazdirdigi icin (~1.3 ms) zaman asimli
         // bekleme kullaniyoruz.
         // =====================================================================
+        // ---------------------------------------------------------------------
+        // BEKLENEN SINIF DENETLENIR - yalnizca "bir sinif geldi" YETMEZ
+        //
+        // 23 Agustos 2026'da bulunan bosluk: bu denetim eskiden UC deseni
+        // birden kabul ediyordu (0x5555 YES / 0xAAAA NO / 0x0F0F SILENCE).
+        // Yani NPU'nun HANGI sinifi verdigi hic denetlenmiyordu.
+        //
+        // Bunun somut bedeli vardi: FC agirliklari TCM'e tasindiktan sonra
+        // testbench onlari yuklemiyordu, dolayisiyla NPU SIFIR AGIRLIKLA
+        // kosuyordu - ve test yine geciyordu. Sessiz bir yanlis sonuc.
+        //
+        // Girdi: UART-stream'den 1960 bayt 0x55 (uart2_send_tensor).
+        // Bu girdi icin beklenen sonuc, resmi TFLite yorumlayicisina capali
+        // referans modelimizden (tb/npu_audio/npu_ref_model.py) alindi:
+        //
+        //     fc_acc = [-985885, 242268, 240758, 387226]
+        //     logits = [-128, 120, 120, 127]
+        //     sinif  = 3  (NO)   ->  GPIO deseni 0xAAAA
+        //
+        // Girdi deseni degistirilirse bu beklenti de yeniden hesaplanmalidir.
+        // ---------------------------------------------------------------------
         fork : wait_gpio
-        wait (gpio_o == 16'h5555 || gpio_o == 16'hAAAA || gpio_o == 16'h0F0F);
-
+            wait (gpio_o == 16'h5555 || gpio_o == 16'hAAAA ||
+                  gpio_o == 16'h0F0F || gpio_o == 16'hFFFF);
             #(5_000_000 + BOOT_PAYI_NS);   // 5 ms + boot payi
         join_any
         disable wait_gpio;
 
-        if (gpio_o == 16'h5555 || gpio_o == 16'hAAAA || gpio_o == 16'h0F0F) begin
-
-            log_print($sformatf("      [OK]   CPU sinif sonucunu GPIO'ya yazdi: 0x%h", gpio_o));
+        if (gpio_o == 16'hAAAA) begin
+            log_print("      [OK]   NPU beklenen sinifi verdi: 3 (NO), GPIO 0xAAAA");
+        end else if (gpio_o == 16'h5555 || gpio_o == 16'h0F0F ||
+                     gpio_o == 16'hFFFF) begin
+            error_count++;
+            log_print($sformatf(
+                "      [HATA] NPU YANLIS sinif verdi - GPIO 0x%h, beklenen 0xAAAA (sinif 3 / NO)",
+                gpio_o));
+            log_print("             Olasi sebep: FC agirliklari TCM'e yuklenmemis.");
         end else begin
             error_count++;
-            log_print($sformatf("      [HATA] GPIO 5 ms icinde beklenen desende yazilmadi: 0x%h", gpio_o));
+            log_print($sformatf("      [HATA] GPIO 5 ms icinde yazilmadi: 0x%h", gpio_o));
         end
                 // ISR gercekten calisip UART'tan yazdirdi mi?
         // Sartname s.16: "... sonuclari UART arayuzu uzerinden yazdirmalidir."

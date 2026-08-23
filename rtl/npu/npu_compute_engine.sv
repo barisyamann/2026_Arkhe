@@ -64,7 +64,12 @@ module npu_compute_engine import npu_weights_pkg::*; (
         // --- FC requantization boru hatti ---
         FC_RQ_NUDGE     = 5'd22,
         FC_RQ_SHIFT     = 5'd23,
-        FC_RQ_SAT       = 5'd24
+        FC_RQ_SAT       = 5'd24,
+
+        // FC weight artik buyuk kombinasyonel ROM'dan degil,
+        // TCM/SRAM icinden okunacak.
+        FC_WEIGHT_REQ   = 5'd25,
+        FC_WEIGHT_WAIT  = 5'd26
     } state_t;
 
     state_t state;
@@ -136,7 +141,23 @@ module npu_compute_engine import npu_weights_pkg::*; (
     // 12 bit yeterlidir. Onceden 14 bitti; daraltildi cunku fc_weights artik
     // dort ayri 4.000'lik ROM'a bolundu ve her biri 12 bitlik adres aliyor.
     logic [11:0]        fc_idx;
-
+    // ============================================================
+    // FC weight SRAM / TCM yerlesimi
+    //
+    // TCM toplam: 7680 x 32-bit = 30 kB
+    // Ilk 3584 word veri/input/output icin ayrildi.
+    // Sonraki 4000 word FC weightleri icin kullanilir.
+    //
+    // 3584 = 7 x 512 word -> SRAM macro sinirina hizali.
+    // ============================================================
+    localparam logic [12:0] FC_WEIGHT_BASE = 13'd3584;
+    localparam int unsigned FC_WEIGHT_WORDS = 4000;
+    // SRAM'den tek okumada gelen dort sinifin FC weight'i.
+    // [7:0]   = Silence
+    // [15:8]  = Unknown
+    // [23:16] = Yes
+    // [31:24] = No
+    logic [31:0] fc_weight_word;
     // --- Ağırlık ve Sapma (Weight & Bias) ROM Dizileri ---
     //
     // İÇERİK RTL'E GÖMÜLÜDÜR - dosyadan okunmaz.
@@ -470,7 +491,7 @@ endfunction
             rq_scaled   <= '0;
             fc_y        <= '0;
             fc_idx      <= '0;
-
+            fc_weight_word <= '0;
             for (int i = 0; i < 4; i++) begin
                 fc_acc[i]    <= '0;
                 fc_logits[i] <= '0;
@@ -514,7 +535,7 @@ endfunction
             rq_scaled   <= '0;
             fc_y        <= '0;
             fc_idx      <= '0;
-
+            fc_weight_word <= '0;
             for (int i = 0; i < 4; i++) begin
                 fc_acc[i]    <= '0;
                 fc_logits[i] <= '0;
@@ -667,28 +688,42 @@ endfunction
                         fc_y <= rq_scaled[8:0];
 
                     fc_idx <= 12'((int'(t_out) * 20 + int'(f_out)) * 8 + int'(d_out));
-                    state  <= FC_MAC0;
+                    state <= FC_WEIGHT_REQ;
                 end
 
                 // ============================================================
                 // Asama 5-8: dort FC MAC, her cevrimde TEK ROM okumasi
                 // (D9 bulgusu burada kapaniyor)
                 // ============================================================
-                FC_MAC0: begin
-                    fc_acc[0] <= fc_acc[0]
-                        + $signed(fc_y) * $signed(fc_weights0(fc_idx));
-                    state <= FC_MAC1;
+                // ============================================================
+                // FC weight TCM/SRAM okuma
+                // ============================================================
+
+                // Bu state'te TCM'ye adres verilir.
+                // Veri TCM cikisinda bir sonraki clock'ta hazir olur.
+                FC_WEIGHT_REQ: begin
+                    state <= FC_WEIGHT_WAIT;
                 end
 
+                // Onceki clock'ta istenen 32-bit weight kelimesini kaydet.
+                FC_WEIGHT_WAIT: begin
+                    fc_weight_word <= mem_rdata_b;
+                    state <= FC_MAC0;
+                end
+                FC_MAC0: begin
+                    fc_acc[0] <= fc_acc[0]
+                        + $signed(fc_y) * $signed(fc_weight_word[7:0]);
+                    state <= FC_MAC1;
+                end
                 FC_MAC1: begin
                     fc_acc[1] <= fc_acc[1]
-                        + $signed(fc_y) * $signed(fc_weights1(fc_idx));
+                        + $signed(fc_y) * $signed(fc_weight_word[15:8]);
                     state <= FC_MAC2;
                 end
 
                 FC_MAC2: begin
                     fc_acc[2] <= fc_acc[2]
-                        + $signed(fc_y) * $signed(fc_weights2(fc_idx));
+                        + $signed(fc_y) * $signed(fc_weight_word[23:16]);
                     state <= FC_MAC3;
                 end
 
@@ -697,7 +732,7 @@ endfunction
                 // cunku fc_idx ve dw_multiplier onlara bagli.
                 FC_MAC3: begin
                     fc_acc[3] <= fc_acc[3]
-                        + $signed(fc_y) * $signed(fc_weights3(fc_idx));
+                        + $signed(fc_y) * $signed(fc_weight_word[31:24]);
 
                     // R4 sonrasi dongu duzeni:
                     //   konvolusyon (kh,kw) SEKIZ KANAL ICIN BIR KEZ kosar,
@@ -921,6 +956,10 @@ endfunction
                     mem_en_b   = 1'b1;
                     mem_addr_b = in_addr_i + word_offset;
                 end
+            end
+            FC_WEIGHT_REQ: begin
+                mem_en_b = 1'b1;
+                mem_addr_b = FC_WEIGHT_BASE + {1'b0, fc_idx};
             end
             WRITE_OUT_0: begin
                 mem_en_b    = 1'b1;

@@ -35,6 +35,18 @@
 // =============================================================================
 
 module spi_flash_model #(
+    // -----------------------------------------------------------------
+    // APP_OFS - imajin flash icindeki MANTIKSAL adresi (23 Agustos 2026)
+    //
+    // F2'de kart ustu flash kullaniliyor ve basinda FPGA bitstream'i
+    // duruyor; uygulama 0x800000'e programlaniyor. Bootloader da oradan
+    // okuyor. Simulasyonun bunu birebir modellemesi gerekir, yoksa test
+    // gercek donanimdan BASKA bir seyi dogrular.
+    //
+    // 8 MB'lik bir dizi ayirmamak icin imaj yine dizinin basinda tutulur;
+    // yalnizca ADRES ESLEMESI kaydirilir: mantiksal APP_OFS -> indeks 0.
+    // -----------------------------------------------------------------
+    parameter int unsigned APP_OFS = 0,
     parameter string INIT_FILE  = "app.hex",
     parameter int    WORD_COUNT = 2048,     // 2048 x 4 = 8 kB
     // Adres fazi genisligi: 3 = eski davranis (24 bit), 4 = 4-bayt mod.
@@ -110,6 +122,17 @@ module spi_flash_model #(
 
     logic [7:0]  cmd_reg;
     logic [31:0] addr_reg;
+
+    // Mantiksal flash adresini dizi indeksine cevirir. APP_OFS altindaki
+    // veya imaj sonrasindaki adresler gecersizdir (bos flash = 0xFF degil
+    // 0x00 donuyoruz - mevcut davranis korundu).
+    function automatic bit gecerli(input logic [31:0] a);
+        return (a >= APP_OFS) && ((a - APP_OFS) < BYTE_COUNT);
+    endfunction
+
+    function automatic int unsigned indeks(input logic [31:0] a);
+        return int'(a - APP_OFS);
+    endfunction
     logic [7:0]  out_shift;
     logic [7:0]  in_shift;
     int          bit_cnt;
@@ -194,7 +217,7 @@ module spi_flash_model #(
                         bit_cnt = 0;
                         case (cmd_reg)
                             CMD_READ: begin
-                                out_shift = (addr_reg < BYTE_COUNT) ? mem_b[addr_reg] : 8'h00;
+                                out_shift = gecerli(addr_reg) ? mem_b[indeks(addr_reg)] : 8'h00;
                                 phase     = PH_RD1;
                             end
                             CMD_QOR: begin
@@ -211,7 +234,7 @@ module spi_flash_model #(
                                 end else begin
                                     // Sektor tabanina hizala ve 0xFF yap
                                     int taban;
-                                    taban = (addr_reg / SECTOR_BYTES) * SECTOR_BYTES;
+                                    taban = (indeks(addr_reg) / SECTOR_BYTES) * SECTOR_BYTES;
                                     for (int i = 0; i < SECTOR_BYTES; i++)
                                         if ((taban + i) < BYTE_COUNT) mem_b[taban + i] = 8'hFF;
                                     se_sayisi = se_sayisi + 1;
@@ -230,7 +253,7 @@ module spi_flash_model #(
                     bit_cnt = bit_cnt + 1;
                     if (bit_cnt == QOR_DUMMY) begin
                         bit_cnt   = 0;
-                        out_shift = (addr_reg < BYTE_COUNT) ? mem_b[addr_reg] : 8'h00;
+                        out_shift = gecerli(addr_reg) ? mem_b[indeks(addr_reg)] : 8'h00;
                         phase     = PH_RD4;
                     end
                 end
@@ -243,9 +266,9 @@ module spi_flash_model #(
                     bit_cnt  = bit_cnt + 1;
                     if (bit_cnt == 8) begin
                         bit_cnt = 0;
-                        if (wel && addr_reg < BYTE_COUNT) begin
+                        if (wel && gecerli(addr_reg)) begin
                             // Gercek NOR flash yalnizca 1 -> 0 yapabilir
-                            mem_b[addr_reg] = mem_b[addr_reg] & in_shift;
+                            mem_b[indeks(addr_reg)] = mem_b[indeks(addr_reg)] & in_shift;
                             pp_bayt         = pp_bayt + 1;
                         end
                         addr_reg = addr_reg + 1;
@@ -278,7 +301,7 @@ module spi_flash_model #(
                     end
                     default: begin
                         addr_reg  = addr_reg + 1;
-                        out_shift = (addr_reg < BYTE_COUNT) ? mem_b[addr_reg] : 8'h00;
+                        out_shift = gecerli(addr_reg) ? mem_b[indeks(addr_reg)] : 8'h00;
                     end
                 endcase
             end
@@ -292,7 +315,7 @@ module spi_flash_model #(
             if (bit_cnt == 2) begin          // iki nibble = bir bayt
                 bit_cnt   = 0;
                 addr_reg  = addr_reg + 1;
-                out_shift = (addr_reg < BYTE_COUNT) ? mem_b[addr_reg] : 8'h00;
+                out_shift = gecerli(addr_reg) ? mem_b[indeks(addr_reg)] : 8'h00;
             end
         end
     end
