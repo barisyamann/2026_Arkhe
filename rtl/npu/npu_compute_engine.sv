@@ -64,7 +64,12 @@ module npu_compute_engine import npu_weights_pkg::*; (
         // --- FC requantization boru hatti ---
         FC_RQ_NUDGE     = 5'd22,
         FC_RQ_SHIFT     = 5'd23,
-        FC_RQ_SAT       = 5'd24
+        FC_RQ_SAT       = 5'd24,
+
+        // FC weight artik buyuk kombinasyonel ROM'dan degil,
+        // TCM/SRAM icinden okunacak.
+        FC_WEIGHT_REQ   = 5'd25,
+        FC_WEIGHT_WAIT  = 5'd26
     } state_t;
 
     state_t state;
@@ -147,6 +152,12 @@ module npu_compute_engine import npu_weights_pkg::*; (
     // ============================================================
     localparam logic [12:0] FC_WEIGHT_BASE = 13'd3584;
     localparam int unsigned FC_WEIGHT_WORDS = 4000;
+    // SRAM'den tek okumada gelen dort sinifin FC weight'i.
+    // [7:0]   = Silence
+    // [15:8]  = Unknown
+    // [23:16] = Yes
+    // [31:24] = No
+    logic [31:0] fc_weight_word;
     // --- Ağırlık ve Sapma (Weight & Bias) ROM Dizileri ---
     //
     // İÇERİK RTL'E GÖMÜLÜDÜR - dosyadan okunmaz.
@@ -480,7 +491,7 @@ endfunction
             rq_scaled   <= '0;
             fc_y        <= '0;
             fc_idx      <= '0;
-
+            fc_weight_word <= '0;
             for (int i = 0; i < 4; i++) begin
                 fc_acc[i]    <= '0;
                 fc_logits[i] <= '0;
@@ -524,7 +535,7 @@ endfunction
             rq_scaled   <= '0;
             fc_y        <= '0;
             fc_idx      <= '0;
-
+            fc_weight_word <= '0;
             for (int i = 0; i < 4; i++) begin
                 fc_acc[i]    <= '0;
                 fc_logits[i] <= '0;
