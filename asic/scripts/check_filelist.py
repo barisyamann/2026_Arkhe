@@ -99,6 +99,15 @@ def main():
         if ilk in ISTISNA_DIZIN or ilk == "run":
             dizinler[:] = []
             continue
+
+        # LibreLane cikti dizinlerini HER DERINLIKTE budа.
+        #
+        # Onceden yalnizca ust duzey "run" atlaniyordu. Ama LibreLane
+        # ciktilarini <tag>/runs/RUN_<tarih>/ altina yazar; ornegin
+        # asic/uart_tx_smoke/runs/... Bu agacta uretilmis netlistler
+        # (.nl.v, .pnl.v) var ve denetleyici bunlari "asic/ altinda RTL"
+        # sanip akisi durduruyordu. Uretilmis netlist kaynak degildir.
+        dizinler[:] = [d for d in dizinler if d not in ("run", "runs")]
         for d in dosyalar:
             if d.lower().endswith(YASAK_UZANTI):
                 hata.append("asic/ ALTINDA RTL: %s" %
