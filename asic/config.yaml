@@ -385,3 +385,32 @@ GRT_ANTENNA_REPAIR_JUMPER_ONLY: true
 #     make asic_resume
 # -----------------------------------------------------------------------------
 MAGIC_MACRO_STD_CELL_SOURCE: "PDK"
+
+# -----------------------------------------------------------------------------
+# MAGIC DRC KAYNAGI  (6. kosumda eklendi - 24 Agustos 2026)
+#
+# MAGIC_MACRO_STD_CELL_SOURCE: PDK ayarinin BEKLENMEYEN BEDELI.
+#
+# PDK kipi makro hiyerarsisini gercekten kurunca Magic DRC artik 23 SRAM
+# makrosunun ICINE de iniyor. Eski 'macro' kipinde makro bos kabuktu ve DRC
+# iceri hic girmiyordu. Is yuku kat kat artti:
+#     99-magic-drc  1 saat 27 dakika kostu, bitmedi
+#     bellek 31 GB'lik makinede tukendi, yeni SSH oturumu acilamaz oldu
+#
+# 'false' DRC'yi GDS yerine DEF uzerinden kosturur. Makrolar DEF'te SOYUT
+# (abstract) gorunur, yani DRC BIZIM tasarimimizi denetler, ucuncu taraf
+# makronun icini denetlemez.
+#
+# BU NEDEN KABUL EDILEBILIR
+#   1. Makro ic geometrisinin DRC imzasi makro saglayicisina aittir; endustri
+#      pratigi de budur. Biz makroyu degistirmiyoruz.
+#   2. GDS uzerinden DRC yine kosuluyor - KLayout.DRC adimi bagimsiz olarak
+#      nihai GDS'i denetliyor. Iki farkli araç, iki farkli kapsam.
+#   3. Makro icini denetlemek zaten 5. kosuma kadarki butun sonuclarin
+#      dayanagi degildi; oradaki DRC de soyut makro uzerindendi.
+#
+# TAM DENETIM ISTENIRSE
+#   Bu satiri 'true' yapip 64 GB+ bellekli bir makinede kosmak yeterli.
+#   Sonuc farki yalnizca makro ic geometrisidir.
+# -----------------------------------------------------------------------------
+MAGIC_DRC_USE_GDS: false
