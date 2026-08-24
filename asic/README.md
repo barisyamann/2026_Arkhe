@@ -655,6 +655,45 @@ Dogrulama: `rtl/Cevre_Birimleri/tb_qspi_mock.sv` iki flash modeli ornekler
 gonderilirse model hala adres fazindadir, ilk veri baytini yutar ve
 okunan kelime kayar.
 
+## 9.8 Magic DRC makro icini denetlemiyor (`MAGIC_DRC_USE_GDS: false`)
+
+**Karar:** Magic DRC yerlesimi GDS yerine **DEF** uzerinden okur.
+
+Magic DRC iki kaynaktan calisabilir:
+
+| | `true` | `false` (secilen) |
+|---|---|---|
+| Okunan dosya | `soc_top.gds` (324 MB) | `soc_top.def` |
+| Makro gorunumu | ici acik, tum geometri | soyut kutu (LEF): pin ve bloke alan |
+| Denetlenen | tasarim + 23 SRAM makrosunun ici | yalnizca tasarim |
+
+**Neden:** 9.1'deki `MAGIC_MACRO_STD_CELL_SOURCE: PDK` degisikligi makro
+hiyerarsisini gercek hale getirdi. Bunun beklenmeyen bedeli, Magic DRC'nin
+artik 23 SRAM makrosunun tamamina inmesi oldu:
+
+    99-magic-drc   1 saat 27 dakika kostu
+    drc.magic.rpt  0 bayt - tek ihlal satiri bile yazilamadi
+    bellek         31 GB tukendi, makineye yeni SSH oturumu acilamaz oldu
+
+**Neden kabul edilebilir:**
+
+1. **Makro ic geometrisinin DRC imzasi bize ait degil.** SRAM makrosu
+   ucuncu taraf; tek bir poligonuna dokunulmuyor. Hard makroyu kara kutu
+   olarak alip saglayicinin imzasina guvenmek endustri pratigidir.
+2. **GDS uzerinden DRC yine kosuluyor.** `KLayout.DRC` adimi nihai GDS'i
+   bagimsiz bir kural motoruyla denetler. Yani iki DRC vardir: biri DEF
+   uzerinden tasarim, biri GDS uzerinden butun dosya.
+3. Zorunlu hicbir signoff adimi kapatilmamistir; adimin **kapsami**
+   daraltilmistir.
+
+**Ne kaybediliyor:** SRAM makrosunun icinin bu PDK'da DRC temiz oldugunun
+Magic tarafindan dogrulanmasi.
+
+**Planlanan:** teslim oncesi vakit kalirsa `MAGIC_DRC_USE_GDS: true` ile
+64 GB bellekli makinede ayrica kosulacak ve sonuc buraya eklenecektir. Bu
+kalici bir istisna degil, **asamali** bir yaklasimdir - once sonuc alinmis,
+tam denetim sonraya birakilmistir.
+
 ## 9.7 DDK tarafindan onceden kabul edilmis istisna yoktur
 
 Referans surumden sapma, ozel akis veya ozel adim kullanilmamistir.
