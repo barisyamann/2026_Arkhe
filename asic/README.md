@@ -694,6 +694,53 @@ Magic tarafindan dogrulanmasi.
 kalici bir istisna degil, **asamali** bir yaklasimdir - once sonuc alinmis,
 tam denetim sonraya birakilmistir.
 
+## 9.9 `PL_TIMING_DRIVEN` kullanilamiyor - OpenROAD ic hatasi
+
+**Sorun:** `PL_TIMING_DRIVEN: true` yapildiginda global yerlestirme (adim 28)
+su hatayla dusuyor:
+
+    [INFO GPL-0100] Timing-driven iteration 1/2, virtual: false.
+    [CRITICAL RSZ-2007] buffering pin _061835_/X: wire step options empty
+
+**Kok neden:** OpenROAD boyutlandiricisinin tamponlama algoritmasi
+(van Ginneken / Steiner tabanli) tel bolutleme secenekleri bos kalinca
+CRITICAL atip akisi durduruyor. Bu bir arac ici hatasidir; ayarin kendisi
+mesrudur ve LibreLane tarafindan desteklenir.
+
+**Kaybin sinirli oldugu nokta:** coktugu andan HEMEN ONCE kosan
+`repair_design` adimi basariyla tamamlandi ve SDC'ye eklenen tasarim kurali
+kisitlarinin (bkz. 9.10) calistigini kanitladi:
+
+    final | +1,6% alan | 153 boyutlandirma | 12648 tampon | 2452 ag onarildi
+
+Bu kazanc `PL_TIMING_DRIVEN`'dan bagimsizdir ve `false` degerinde de elde
+edilir. Timing-driven yerlestirme yalnizca ek bir iyilestirmeydi; zorunlu
+hicbir adim veya denetim kaybedilmemistir.
+
+**Durum:** `false` birakildi. OpenROAD surumu yukseltilirse yeniden
+denenebilir.
+
+## 9.10 Ozel SDC kullanimi tasarim kurali kisitlarini dusurmustu
+
+**Sorun:** `asic/constraints/design.sdc` dosyasinda `set_max_fanout`,
+`set_max_transition`, `set_max_capacitance` ve `set_driving_cell` hic yoktu.
+
+LibreLane bu kisitlari varsayilan SDC sablonunda `config.yaml` degerlerinden
+uretir. `PNR_SDC_FILE` / `SIGNOFF_SDC_FILE` ile kendi SDC'mizi verdigimiz
+icin o sablon devre disi kaldi ve kisitlar araca HIC ULASMADI.
+
+**Belirti:** 6. kosumda dokuz kosenin tamaminda max cap / max slew ihlali
+(en iyi kosede bile 215 / 579, en kotude 1305 / 12364).
+
+**Kanit:** netlist'te reset agaci 49 tampona bolunmus, her biri ~150 yuk
+suruyordu; buna ragmen STA "max fanout violation count 0" diyordu - cunku
+ortada kisit yoktu.
+
+**Duzeltme:** uc kisit `config.yaml` degerlerinden okunacak sekilde SDC'ye
+eklendi, giris portlarina `sky130_fd_sc_hd__inv_2` surucu modeli verildi.
+7. kosumda etkisi dogrulandi: `repair_design` 1576 fanout, 941 slew ve
+786 capacitance ihlali BULDU ve 12648 tamponla onardi.
+
 ## 9.7 DDK tarafindan onceden kabul edilmis istisna yoktur
 
 Referans surumden sapma, ozel akis veya ozel adim kullanilmamistir.

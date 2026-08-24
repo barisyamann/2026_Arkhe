@@ -483,7 +483,29 @@ RSZ_CORNERS:
 # Maliyet: yerlestirme adimi uzar. Kazanc: kritik yollar kisalir, hem setup
 # hem DRV (slew/cap) iyilesir.
 # -----------------------------------------------------------------------------
-PL_TIMING_DRIVEN: true
+# 7. KOSUM DENENDI VE GERI ALINDI - ARAC HATASI
+#
+# true yapildiginda global yerlestirme 28. adimda coktu:
+#
+#   [INFO GPL-0100] Timing-driven iteration 1/2, virtual: false.
+#   [CRITICAL RSZ-2007] buffering pin _061835_/X: wire step options empty
+#
+# Bu OpenROAD boyutlandiricisinin KENDI IC HATASI - tamponlama algoritmasi
+# (van Ginneken / Steiner) tel bolutleme secenekleri bos kalinca CRITICAL
+# atip akisi durduruyor. Bizim ayar hatamiz degil; ayar mesru ama bu
+# OpenROAD surumu bu tasarimda o kod yoluna girince cokuyor.
+#
+# ONEMLI: kaybimiz sinirli. Coktugu noktadan HEMEN ONCE calisan
+# repair_design adimi basariyla bitti ve SDC'ye eklenen tasarim kurali
+# kisitlarinin calistigini kanitladi:
+#
+#   final | +1,6% alan | 153 boyutlandirma | 12648 tampon | 2452 ag onarildi
+#
+# O kazanc PL_TIMING_DRIVEN'dan BAGIMSIZ, false'ta da elde ediliyor.
+# Timing-driven yerlestirme yalnizca "olsa iyi olurdu" kategorisindeydi.
+#
+# Tekrar denenecekse OpenROAD surumu yukseltildikten sonra denenmeli.
+PL_TIMING_DRIVEN: false
 
 # -----------------------------------------------------------------------------
 # YONLENDIRME SONRASI TASARIM KURALI ONARIMI  (Talha - §5)
