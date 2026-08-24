@@ -14,6 +14,7 @@ kalir ve yeniden uretilebilir.
 """
 
 import os
+import re
 import shutil
 import sys
 
@@ -64,8 +65,33 @@ RAPOR_ESLEME = [
 ]
 
 
+# PVT kose dizini deseni:  nom_ss_100C_1v60, max_ff_n40C_1v95 ...
+KOSE_DESENI = re.compile(r"^(min|nom|max)_(tt|ss|ff)_", re.I)
+
+
 def hedef_dizin(yol):
     ad = os.path.basename(yol).lower()
+
+    # -------------------------------------------------------------------------
+    # KOSE BAZLI RAPORLAR
+    #
+    # 6. kosumda toplanan max.rpt / min.rpt YALNIZCA max_ff kosesini
+    # iceriyordu. Sebep asagidaki 'adaylar' sozlugunun (hedef, dosya_adi)
+    # ciftiyle anahtarlanmasiydi: dokuz kose dizininin her birindeki max.rpt
+    # ayni anahtara dusuyor ve en yenisi digerlerinin uzerine yaziyordu.
+    #
+    # Sonuc: 5223 setup ihlalinin tamami ss koselerindeydi ve o koselerin
+    # HICBIR yol detayi elimizde yoktu - triyaj yapilamiyordu.
+    #
+    # Duzeltme: dosya bir kose dizininin icindeyse hedefi
+    # reports/timing/<kose> olur. Boylece anahtar benzersizlesir ve dokuz
+    # kosenin tamami korunur. Final Ciktilar Bolum 5 de zaten
+    # "summary.rpt + <corner>/ alt dizinleri" istiyor.
+    # -------------------------------------------------------------------------
+    ust = os.path.basename(os.path.dirname(yol))
+    if KOSE_DESENI.match(ust):
+        return "reports/timing/" + ust
+
     kok, uzanti = os.path.splitext(ad)
 
     # netlist'ler ayri: .nl.v, .pnl.v vb.
