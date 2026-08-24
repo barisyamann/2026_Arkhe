@@ -1,0 +1,300 @@
+812 Lint warnings found.
+Cell 'sky130_sram_2kbyte_1rw1r_32x512_8' has (59) input pin(s) without antenna gate information. They might not be connected to a gate.
+Cell 'sky130_sram_2kbyte_1rw1r_32x512_8' has (64) output pin(s) without antenna diffusion information. They might not be driven.
+[GRT-0281] Net _033816_ has a large fanout of 1902 terminals.
+[GRT-0281] Net _033828_ has a large fanout of 2324 terminals.
+[GRT-0281] Net _033829_ has a large fanout of 1045 terminals.
+[GRT-0281] Net _062805_ has a large fanout of 1132 terminals.
+[GRT-0281] Net _063092_ has a large fanout of 1284 terminals.
+[GRT-0281] Net _063103_ has a large fanout of 1085 terminals.
+[GRT-0281] Net _063114_ has a large fanout of 1275 terminals.
+[GRT-0281] Net clk_i has a large fanout of 11479 terminals.
+[GRT-0281] Net rst_ni has a large fanout of 5630 terminals.
+[GRT-0281] Net u_npu.u_npu_engine.fc_idx\[2\] has a large fanout of 3280 terminals.
+[GRT-0281] Net u_npu.u_npu_engine.fc_idx\[3\] has a large fanout of 4695 terminals.
+[GRT-0281] Net u_npu.u_npu_engine.fc_idx\[4\] has a large fanout of 2223 terminals.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib line 1, library sky130_fd_sc_hd__tt_025C_1v80 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib line 1, library sky130_fd_sc_hd__ff_n40C_1v95 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib line 1, library sky130_fd_sc_hd__ss_100C_1v60 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib line 1, library sky130_fd_sc_hd__tt_025C_1v80 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib line 1, library sky130_fd_sc_hd__ss_100C_1v60 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib line 1, library sky130_fd_sc_hd__ff_n40C_1v95 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+817 Lint warnings found.
+Cell 'sky130_sram_2kbyte_1rw1r_32x512_8' has (59) input pin(s) without antenna gate information. They might not be connected to a gate.
+Cell 'sky130_sram_2kbyte_1rw1r_32x512_8' has (64) output pin(s) without antenna diffusion information. They might not be driven.
+[GRT-0281] Net clk_i has a large fanout of 12102 terminals.
+[GRT-0281] Net rst_ni has a large fanout of 5741 terminals.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib line 1, library sky130_fd_sc_hd__tt_025C_1v80 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib line 1, library sky130_fd_sc_hd__ff_n40C_1v95 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib line 1, library sky130_fd_sc_hd__ss_100C_1v60 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib line 1, library sky130_fd_sc_hd__tt_025C_1v80 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib line 1, library sky130_fd_sc_hd__ss_100C_1v60 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib line 1, library sky130_fd_sc_hd__ff_n40C_1v95 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[RSZ-0020] found 2 floating nets.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib line 1, library sky130_fd_sc_hd__tt_025C_1v80 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib line 1, library sky130_fd_sc_hd__ff_n40C_1v95 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib line 1, library sky130_fd_sc_hd__ss_100C_1v60 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib line 1, library sky130_fd_sc_hd__tt_025C_1v80 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib line 1, library sky130_fd_sc_hd__ss_100C_1v60 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib line 1, library sky130_fd_sc_hd__ff_n40C_1v95 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib line 1, library sky130_fd_sc_hd__tt_025C_1v80 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib line 1, library sky130_fd_sc_hd__ff_n40C_1v95 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib line 1, library sky130_fd_sc_hd__ss_100C_1v60 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib line 1, library sky130_fd_sc_hd__tt_025C_1v80 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib line 1, library sky130_fd_sc_hd__ss_100C_1v60 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib line 1, library sky130_fd_sc_hd__ff_n40C_1v95 already exists.
+[STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+[RSZ-0062] Unable to repair all setup violations.
+[RSZ-0064] Unable to repair all hold checks within margin.
+[DRT-0349] LEF58_ENCLOSURE with no CUTCLASS is not supported. Skipping for layer mcon
+[DRT-0349] LEF58_ENCLOSURE with no CUTCLASS is not supported. Skipping for layer mcon
+[DRT-0349] LEF58_ENCLOSURE with no CUTCLASS is not supported. Skipping for layer via
+[DRT-0349] LEF58_ENCLOSURE with no CUTCLASS is not supported. Skipping for layer via
+[DRT-0349] LEF58_ENCLOSURE with no CUTCLASS is not supported. Skipping for layer via2
+[DRT-0349] LEF58_ENCLOSURE with no CUTCLASS is not supported. Skipping for layer via2
+[DRT-0349] LEF58_ENCLOSURE with no CUTCLASS is not supported. Skipping for layer via3
+[DRT-0349] LEF58_ENCLOSURE with no CUTCLASS is not supported. Skipping for layer via3
+[DRT-0349] LEF58_ENCLOSURE with no CUTCLASS is not supported. Skipping for layer via4
+[DRT-0349] LEF58_ENCLOSURE with no CUTCLASS is not supported. Skipping for layer via4
+[DRT-0120] Large net net2006 has 114 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2007 has 115 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2040 has 116 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2132 has 116 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2136 has 103 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net5934 has 102 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6190 has 126 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6191 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6192 has 157 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6193 has 158 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6194 has 142 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6195 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6196 has 130 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6197 has 152 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6198 has 147 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6199 has 150 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6200 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6201 has 131 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6202 has 161 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6203 has 155 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6204 has 153 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6205 has 155 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6206 has 157 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6207 has 147 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6208 has 148 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6209 has 159 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6210 has 144 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6211 has 116 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6213 has 128 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6214 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6215 has 120 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6216 has 153 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6218 has 115 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6220 has 112 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6221 has 112 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6223 has 125 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6224 has 107 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6226 has 155 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6227 has 126 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6228 has 149 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6229 has 119 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6230 has 111 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6231 has 126 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6232 has 142 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6233 has 143 pins which may impact routing performance. Consider optimization.
+[GRT-0243] Unable to repair antennas on net with diodes.
+[DRT-0120] Large net net2006 has 114 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2007 has 115 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2040 has 116 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2132 has 116 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2136 has 103 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net5934 has 102 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6190 has 126 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6191 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6192 has 157 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6193 has 158 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6194 has 142 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6195 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6196 has 130 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6197 has 152 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6198 has 147 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6199 has 150 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6200 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6201 has 131 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6202 has 161 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6203 has 155 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6204 has 153 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6205 has 155 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6206 has 157 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6207 has 147 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6208 has 148 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6209 has 159 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6210 has 144 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6211 has 116 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6213 has 128 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6214 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6215 has 120 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6216 has 153 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6218 has 115 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6220 has 112 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6221 has 112 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6223 has 125 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6224 has 107 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6226 has 155 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6227 has 126 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6228 has 149 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6229 has 119 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6230 has 111 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6231 has 126 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6232 has 142 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6233 has 143 pins which may impact routing performance. Consider optimization.
+[GRT-0243] Unable to repair antennas on net with diodes.
+[DRT-0120] Large net net2006 has 114 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2007 has 115 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2040 has 116 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2132 has 116 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2136 has 103 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net5934 has 102 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6190 has 126 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6191 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6192 has 157 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6193 has 158 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6194 has 142 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6195 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6196 has 130 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6197 has 152 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6198 has 147 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6199 has 150 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6200 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6201 has 131 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6202 has 161 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6203 has 155 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6204 has 153 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6205 has 155 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6206 has 157 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6207 has 147 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6208 has 148 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6209 has 159 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6210 has 144 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6211 has 116 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6213 has 128 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6214 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6215 has 120 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6216 has 153 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6218 has 115 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6220 has 112 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6221 has 112 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6223 has 125 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6224 has 107 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6226 has 155 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6227 has 126 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6228 has 149 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6229 has 119 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6230 has 111 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6231 has 126 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6232 has 142 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6233 has 143 pins which may impact routing performance. Consider optimization.
+[GRT-0243] Unable to repair antennas on net with diodes.
+[DRT-0120] Large net net2006 has 114 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2007 has 115 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2040 has 116 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2132 has 116 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net2136 has 103 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net5934 has 102 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6190 has 126 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6191 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6192 has 157 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6193 has 158 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6194 has 142 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6195 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6196 has 130 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6197 has 152 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6198 has 147 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6199 has 150 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6200 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6201 has 131 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6202 has 161 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6203 has 155 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6204 has 153 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6205 has 155 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6206 has 157 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6207 has 147 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6208 has 148 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6209 has 159 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6210 has 144 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6211 has 116 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6213 has 128 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6214 has 106 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6215 has 120 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6216 has 153 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6218 has 115 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6220 has 112 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6221 has 112 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6223 has 125 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6224 has 107 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6226 has 155 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6227 has 126 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6228 has 149 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6229 has 119 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6230 has 111 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6231 has 126 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6232 has 142 pins which may impact routing performance. Consider optimization.
+[DRT-0120] Large net net6233 has 143 pins which may impact routing performance. Consider optimization.
+Threshold for Threshold-surpassing long wires is not set. The checker will be skipped.
+'VSRC_LOC_FILES' was not given a value, which may make the results of IR drop analysis inaccurate. If you are not integrating a top-level chip for manufacture, you may ignore this warning, otherwise, see the documentation for 'VSRC_LOC_FILES'.
+Cell 'soc_top' has (1) input pin(s) without antenna gate information. They might not be connected to a gate.
+Cell 'soc_top' has (2) output pin(s) without antenna diffusion information. They might not be driven.
+Setup violations found in the following corners:
+* max_ss_100C_1v60
+* min_ss_100C_1v60
+* nom_ss_100C_1v60
+Max Slew violations found in the following corners:
+* max_ff_n40C_1v95
+* max_ss_100C_1v60
+* max_tt_025C_1v80
+* min_ff_n40C_1v95
+* min_ss_100C_1v60
+* min_tt_025C_1v80
+* nom_ff_n40C_1v95
+* nom_ss_100C_1v60
+* nom_tt_025C_1v80
+Max Cap violations found in the following corners:
+* max_ff_n40C_1v95
+* max_ss_100C_1v60
+* max_tt_025C_1v80
+* min_ff_n40C_1v95
+* min_ss_100C_1v60
+* min_tt_025C_1v80
+* nom_ff_n40C_1v95
+* nom_ss_100C_1v60
+* nom_tt_025C_1v80

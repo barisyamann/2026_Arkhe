@@ -1,0 +1,145 @@
+Reading timing models for corner nom_tt_025C_1v80…
+Reading timing library for the 'nom_tt_025C_1v80' corner at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib'…
+Reading timing library for the 'nom_tt_025C_1v80' corner at 'macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib'…
+Reading OpenROAD database at '/home/tatua7806/arkhe/asic/run/arkhe/53-openroad-generatepdn/soc_top.odb'…
+Reading design constraints file at 'constraints/design.sdc'…
+[INFO] No information on clock propagation in input SDC file-- propagating all clocks.
++ global_placement -density 0.567045 -skip_io -pad_right 0 -pad_left 0 -init_wirelength_coef 0.25
+[INFO GPL-0001] ---- Initialize GPL Main Data Structures
+[INFO GPL-0002] DBU: 1000
+[INFO GPL-0003] SiteSize: (  0.460  2.720 ) um
+[INFO GPL-0004] CoreBBox: (  5.520 10.880 ) ( 3826.740 4237.760 ) um
+[INFO GPL-0036] Movable instances area:     857283.453 um^2
+[INFO GPL-0037] Total instances area:       7641827.869 um^2
+[INFO GPL-0035] Pin density area adjust:    114394.946 um^2
+[INFO GPL-0032] ---- Initialize Region: Top-level
+[INFO GPL-0006] Number of instances:            201875
+[INFO GPL-0007] Movable instances:               69556
+[INFO GPL-0008] Fixed instances:                124713
+[INFO GPL-0009] Dummy instances:                  7606
+[INFO GPL-0010] Number of nets:                  70802
+[INFO GPL-0011] Number of pins:                 273294
+[INFO GPL-0012] Die BBox:  (  0.000  0.000 ) ( 3832.400 4249.240 ) um
+[INFO GPL-0013] Core BBox: (  5.520 10.880 ) ( 3826.740 4237.760 ) um
+[INFO GPL-0016] Core area:                  16151838.394 um^2
+[INFO GPL-0014] Region name: top-level.
+[INFO GPL-0015] Region area:                16151838.394 um^2
+[INFO GPL-0017] Fixed instances area:       8387501.779 um^2
+[INFO GPL-0018] Movable instances area:     971678.399 um^2
+[INFO GPL-0019] Utilization:                    12.515 %
+[INFO GPL-0020] Standard cells area:        971678.399 um^2
+[INFO GPL-0021] Large instances area:            0.000 um^2
+[INFO GPL-0005] ---- Execute Conjugate Gradient Initial Placement.
+[INFO GPL-0051] Source of initial instance position counters:
+	Odb location = 0	Core center = 69556	Region center = 0
+[INFO GPL-0033] ---- Initialize Nesterov Region: Top-level
+[INFO GPL-0023] Placement target density:       0.5670
+[INFO GPL-0024] Movable insts average area:     13.970 um^2
+[INFO GPL-0025] Ideal bin area:                 24.636 um^2
+[INFO GPL-0026] Ideal bin count:                655619
+[INFO GPL-0027] Total bin area:             16151838.394 um^2
+[INFO GPL-0028] Bin count (X, Y):         512 ,    512
+[INFO GPL-0029] Bin size (W * H):       7.463 *  8.256 um
+[INFO GPL-0030] Number of bins:                 262144
+[INFO GPL-0007] ---- Execute Nesterov Global Placement.
+[INFO GPL-0031] HPWL: Half-Perimeter Wirelength
+Iteration | Overflow |     HPWL (um) |  HPWL(%) |   Penalty | Group
+---------------------------------------------------------------
+        0 |   0.9941 |  2.759973e+06 |   +0.00% |  4.26e-16 |      
+       10 |   0.9781 |  2.354778e+06 |  -14.68% |  6.86e-16 |      
+       20 |   0.9748 |  2.399208e+06 |   +1.89% |  1.11e-15 |      
+       30 |   0.9731 |  2.425793e+06 |   +1.11% |  1.81e-15 |      
+       40 |   0.9714 |  2.444049e+06 |   +0.75% |  2.94e-15 |      
+       50 |   0.9699 |  2.465824e+06 |   +0.89% |  4.77e-15 |      
+       60 |   0.9689 |  2.483850e+06 |   +0.73% |  7.76e-15 |      
+       70 |   0.9675 |  2.497696e+06 |   +0.56% |  1.26e-14 |      
+       80 |   0.9662 |  2.508328e+06 |   +0.43% |  2.05e-14 |      
+       90 |   0.9652 |  2.516158e+06 |   +0.31% |  3.34e-14 |      
+      100 |   0.9642 |  2.522204e+06 |   +0.24% |  5.44e-14 |      
+      110 |   0.9632 |  2.528081e+06 |   +0.23% |  8.85e-14 |      
+      120 |   0.9623 |  2.533664e+06 |   +0.22% |  1.44e-13 |      
+      130 |   0.9616 |  2.538217e+06 |   +0.18% |  2.35e-13 |      
+      140 |   0.9604 |  2.542686e+06 |   +0.18% |  3.82e-13 |      
+      150 |   0.9590 |  2.551994e+06 |   +0.37% |  6.22e-13 |      
+      160 |   0.9577 |  2.573321e+06 |   +0.84% |  1.01e-12 |      
+      170 |   0.9564 |  2.613855e+06 |   +1.58% |  1.64e-12 |      
+      180 |   0.9523 |  2.683010e+06 |   +2.65% |  2.65e-12 |      
+      190 |   0.9455 |  2.793161e+06 |   +4.11% |  4.27e-12 |      
+      200 |   0.9408 |  2.969528e+06 |   +6.31% |  6.82e-12 |      
+      210 |   0.9410 |  3.253680e+06 |   +9.57% |  1.08e-11 |      
+      220 |   0.9380 |  3.632453e+06 |  +11.64% |  1.69e-11 |      
+      230 |   0.9388 |  3.792450e+06 |   +4.40% |  2.69e-11 |      
+      240 |   0.9080 |  4.096980e+06 |   +8.03% |  4.26e-11 |      
+      250 |   0.8798 |  4.401155e+06 |   +7.42% |  6.67e-11 |      
+      260 |   0.8510 |  4.511687e+06 |   +2.51% |  1.08e-10 |      
+      270 |   0.8105 |  4.684159e+06 |   +3.82% |  1.72e-10 |      
+      280 |   0.7865 |  4.876895e+06 |   +4.11% |  2.74e-10 |      
+      290 |   0.7278 |  4.955179e+06 |   +1.61% |  4.42e-10 |      
+      300 |   0.6821 |  4.959332e+06 |   +0.08% |  7.18e-10 |      
+      310 |   0.6045 |  5.020734e+06 |   +1.24% |  1.16e-09 |      
+      320 |   0.5471 |  5.033273e+06 |   +0.25% |  1.88e-09 |      
+      330 |   0.4797 |  5.066474e+06 |   +0.66% |  3.04e-09 |      
+      340 |   0.4266 |  5.046083e+06 |   -0.40% |  4.95e-09 |      
+      350 |   0.3728 |  4.996628e+06 |   -0.98% |  8.05e-09 |      
+      360 |   0.3314 |  4.913320e+06 |   -1.67% |  1.27e-08 |      
+      370 |   0.2981 |  4.802086e+06 |   -2.26% |  1.88e-08 |      
+      380 |   0.2664 |  4.720679e+06 |   -1.70% |  2.76e-08 |      
+      390 |   0.2349 |  4.653772e+06 |   -1.42% |  4.07e-08 |      
+      400 |   0.2093 |  4.584845e+06 |   -1.48% |  6.00e-08 |      
+      410 |   0.1842 |  4.532269e+06 |   -1.15% |  8.83e-08 |      
+      420 |   0.1608 |  4.490562e+06 |   -0.92% |  1.30e-07 |      
+      430 |   0.1402 |  4.461271e+06 |   -0.65% |  1.92e-07 |      
+      440 |   0.1223 |  4.427085e+06 |   -0.77% |  2.82e-07 |      
+      450 |   0.1064 |  4.395534e+06 |   -0.71% |  4.16e-07 |      
+      455 |   0.0994 |  4.390578e+06 |          |  5.25e-07 |      
+---------------------------------------------------------------
+[INFO GPL-1001] Global placement finished at iteration 455
+[INFO GPL-1002] Placed Cell Area            971678.3992
+[INFO GPL-1003] Available Free Area         7764336.6144
+[INFO GPL-1004] Minimum Feasible Density        0.1300 (cell_area / free_area)
+[INFO GPL-1006]   Suggested Target Densities:
+[INFO GPL-1007]     - For 90% usage of free space: 0.1391
+[INFO GPL-1008]     - For 80% usage of free space: 0.1564
+[INFO GPL-1009]     - For 50% usage of free space: 0.2503
+[INFO GPL-1014] Final placement area: 971678.40 (+0.00%)
+Setting global connections for newly added cells…
+[INFO] Setting global connections...
+.*u_macro matched with u_data_ram.g_sram\[0\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[1\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[2\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[3\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[0\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[1\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[2\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[3\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[0\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[10\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[11\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[12\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[13\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[14\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[1\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[2\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[3\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[4\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[5\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[6\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[7\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[8\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[9\].u_macro
+[INFO ODB-0403] 0 connections made, 0 conflicts skipped.
+Updating metrics…
+Cell type report:                       Count       Area
+  Macro                                    23 6544384.90
+  Fill cell                             11220   42115.39
+  Tap cell                             113470  141973.66
+  Buffer                                    2      10.01
+  Inverter                               1200    4504.32
+  Sequential cell                       12209  289273.69
+  Multi-Input combinational cell        56145  563495.44
+  Total                                194269 7585757.41
+Writing OpenROAD database to '/home/tatua7806/arkhe/asic/run/arkhe/56-openroad-globalplacementskipio/soc_top.odb'…
+Writing netlist to '/home/tatua7806/arkhe/asic/run/arkhe/56-openroad-globalplacementskipio/soc_top.nl.v'…
+Writing powered netlist to '/home/tatua7806/arkhe/asic/run/arkhe/56-openroad-globalplacementskipio/soc_top.pnl.v'…
+Writing layout to '/home/tatua7806/arkhe/asic/run/arkhe/56-openroad-globalplacementskipio/soc_top.def'…
+Writing timing constraints to '/home/tatua7806/arkhe/asic/run/arkhe/56-openroad-globalplacementskipio/soc_top.sdc'…

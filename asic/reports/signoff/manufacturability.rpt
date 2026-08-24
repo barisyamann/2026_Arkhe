@@ -1,0 +1,15 @@
+* Antenna
+Failed 𐄂
+Pin violations: 33
+Net violations: 23
+Check the report directory of OpenROAD.CheckAntennas.
+
+* LVS
+Passed ✅
+
+* DRC
+Failed 𐄂
+KLayout DRC errors: 0
+Magic DRC errors: 7659
+Check the report directories of KLayout.DRC and Magic.DRC.
+

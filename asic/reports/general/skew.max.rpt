@@ -1,0 +1,21 @@
+
+===========================================================================
+Clock Skew (Setup)
+============================================================================
+======================= max_ff_n40C_1v95 Corner ===================================
+
+Clock clk_i
+3.232651 source latency u_npu.u_npu_sram.g_sram[12].u_macro/clk0 v
+-2.188236 target latency _124315_/CLK ^
+0.250000 clock uncertainty
+0.000000 CRPR
+--------------
+1.294415 setup skew
+
+Clock jtag_clk
+0.560102 source latency _124153_/CLK ^
+-0.542108 target latency _124095_/CLK ^
+0.000000 CRPR
+--------------
+0.017994 setup skew
+

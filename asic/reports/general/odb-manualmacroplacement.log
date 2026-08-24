@@ -1,0 +1,28 @@
+[WARNING ORD-0039] .openroad ignored with -python
+Placing the following macros:
+{'u_npu.u_npu_sram.g_sram\\[0\\].u_macro': ['u_npu.u_npu_sram.g_sram[0].u_macro', 250000, 250000, 'N'], 'u_npu.u_npu_sram.g_sram\\[1\\].u_macro': ['u_npu.u_npu_sram.g_sram[1].u_macro', 1133100, 250000, 'N'], 'u_npu.u_npu_sram.g_sram\\[2\\].u_macro': ['u_npu.u_npu_sram.g_sram[2].u_macro', 2016200, 250000, 'N'], 'u_npu.u_npu_sram.g_sram\\[3\\].u_macro': ['u_npu.u_npu_sram.g_sram[3].u_macro', 2899300, 250000, 'N'], 'u_npu.u_npu_sram.g_sram\\[4\\].u_macro': ['u_npu.u_npu_sram.g_sram[4].u_macro', 250000, 866540, 'N'], 'u_npu.u_npu_sram.g_sram\\[5\\].u_macro': ['u_npu.u_npu_sram.g_sram[5].u_macro', 1133100, 866540, 'N'], 'u_npu.u_npu_sram.g_sram\\[6\\].u_macro': ['u_npu.u_npu_sram.g_sram[6].u_macro', 2016200, 866540, 'N'], 'u_npu.u_npu_sram.g_sram\\[7\\].u_macro': ['u_npu.u_npu_sram.g_sram[7].u_macro', 2899300, 866540, 'N'], 'u_npu.u_npu_sram.g_sram\\[8\\].u_macro': ['u_npu.u_npu_sram.g_sram[8].u_macro', 250000, 1483080, 'N'], 'u_npu.u_npu_sram.g_sram\\[9\\].u_macro': ['u_npu.u_npu_sram.g_sram[9].u_macro', 1133100, 1483080, 'N'], 'u_npu.u_npu_sram.g_sram\\[10\\].u_macro': ['u_npu.u_npu_sram.g_sram[10].u_macro', 2016200, 1483080, 'N'], 'u_npu.u_npu_sram.g_sram\\[11\\].u_macro': ['u_npu.u_npu_sram.g_sram[11].u_macro', 2899300, 1483080, 'N'], 'u_npu.u_npu_sram.g_sram\\[12\\].u_macro': ['u_npu.u_npu_sram.g_sram[12].u_macro', 250000, 2099620, 'N'], 'u_npu.u_npu_sram.g_sram\\[13\\].u_macro': ['u_npu.u_npu_sram.g_sram[13].u_macro', 1133100, 2099620, 'N'], 'u_npu.u_npu_sram.g_sram\\[14\\].u_macro': ['u_npu.u_npu_sram.g_sram[14].u_macro', 2016200, 2099620, 'N'], 'u_instruction_ram.g_sram\\[0\\].u_macro': ['u_instruction_ram.g_sram[0].u_macro', 2899300, 2099620, 'N'], 'u_instruction_ram.g_sram\\[1\\].u_macro': ['u_instruction_ram.g_sram[1].u_macro', 250000, 2716160, 'N'], 'u_instruction_ram.g_sram\\[2\\].u_macro': ['u_instruction_ram.g_sram[2].u_macro', 1133100, 2716160, 'N'], 'u_instruction_ram.g_sram\\[3\\].u_macro': ['u_instruction_ram.g_sram[3].u_macro', 2016200, 2716160, 'N'], 'u_data_ram.g_sram\\[0\\].u_macro': ['u_data_ram.g_sram[0].u_macro', 2899300, 2716160, 'N'], 'u_data_ram.g_sram\\[1\\].u_macro': ['u_data_ram.g_sram[1].u_macro', 250000, 3332700, 'N'], 'u_data_ram.g_sram\\[2\\].u_macro': ['u_data_ram.g_sram[2].u_macro', 1133100, 3332700, 'N'], 'u_data_ram.g_sram\\[3\\].u_macro': ['u_data_ram.g_sram[3].u_macro', 2016200, 3332700, 'N']}
+Design name: soc_top
+Placing u_data_ram.g_sram\[0\].u_macro
+Placing u_data_ram.g_sram\[1\].u_macro
+Placing u_data_ram.g_sram\[2\].u_macro
+Placing u_data_ram.g_sram\[3\].u_macro
+Placing u_instruction_ram.g_sram\[0\].u_macro
+Placing u_instruction_ram.g_sram\[1\].u_macro
+Placing u_instruction_ram.g_sram\[2\].u_macro
+Placing u_instruction_ram.g_sram\[3\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[0\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[10\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[11\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[12\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[13\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[14\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[1\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[2\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[3\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[4\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[5\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[6\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[7\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[8\].u_macro
+Placing u_npu.u_npu_sram.g_sram\[9\].u_macro
+Successfully placed 23 instances.
