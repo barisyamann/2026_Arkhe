@@ -155,6 +155,42 @@ module npu_compute_engine import npu_weights_pkg::*; (
     //   mac_*        verisi BU cevrim mem_rdata_b'de olan tap
     //   mac_*_q      verisi rdata_q'da YAZMACLANMIS, MAC edilen tap
     // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // ASAMA 0 - ADRES YAZMACLANIR  (24 Agustos 2026)
+    //
+    // NEDEN
+    //
+    //   Yerlestirme-sonrasi STA'da (yavas kose) 275 setup ihlali su yolda
+    //   toplandi:  NPU mantik -> NPU TCM SRAM,  en kotu -5,42 ns.
+    //
+    //   Adres zinciri yazmactan cikip TEK CEVRIMDE SRAM adres pinine
+    //   variyordu:
+    //
+    //     t_out -> *2 -+ kh -> sinir denetimi (4 karsilastirma)
+    //                  -> *40 carpma -> +f_in -> >>2 -> +in_addr_i -> SRAM
+    //
+    //   Cozum CONV_MAC'te yapilanin AYNISI, ters yonde: adresi bir cevrim
+    //   ONCEDEN hesaplayip yazmaclamak. SRAM artik hazir bir adres goruyor.
+    //
+    // MALIYET
+    //
+    //   Boru hatti 3 -> 4 asama. Verim degismez (tap basina 1 cevrim),
+    //   yalnizca her pikselin sonunda bosaltma icin +1 cevrim gerekir.
+    //   500 piksel -> +500 cevrim (~%0,6).
+    //
+    // BORU HATTI ARTIK DORT ASAMALI
+    //
+    //   kh/kw      adresi HESAPLANAN tap
+    //   *_q0       adresi SRAM'e VERILEN tap        <-- yeni
+    //   mac_*      verisi mem_rdata_b'de olan tap
+    //   mac_*_q    verisi rdata_q'da olan, MAC edilen tap
+    // -------------------------------------------------------------------------
+    logic [12:0] wo_q0;        // yazmaclanmis word_offset
+    logic [1:0]  bo_q0;
+    logic        ib_q0;
+    logic [3:0]  kh_q0, kw_q0;
+    logic        av_q0;        // adres asamasi gecerli
+
     logic [31:0] rdata_q;      // yazmaclanmis SRAM cikisi
     logic [3:0]  mac_kh_q;
     logic [3:0]  mac_kw_q;
@@ -521,6 +557,12 @@ endfunction
             mac_bo      <= '0;
             mac_ib      <= 1'b0;
             mac_valid   <= 1'b0;
+            wo_q0       <= '0;
+            bo_q0       <= '0;
+            ib_q0       <= 1'b0;
+            kh_q0       <= '0;
+            kw_q0       <= '0;
+            av_q0       <= 1'b0;
             rdata_q     <= '0;
             mac_kh_q    <= '0;
             mac_kw_q    <= '0;
@@ -568,6 +610,12 @@ endfunction
             mac_bo      <= '0;
             mac_ib      <= 1'b0;
             mac_valid   <= 1'b0;
+            wo_q0       <= '0;
+            bo_q0       <= '0;
+            ib_q0       <= 1'b0;
+            kh_q0       <= '0;
+            kw_q0       <= '0;
+            av_q0       <= 1'b0;
             rdata_q     <= '0;
             mac_kh_q    <= '0;
             mac_kw_q    <= '0;
@@ -631,12 +679,18 @@ endfunction
                 // Boru hattini doldur: tap 0'in adresi bu cevrim veriliyor,
                 // verisi bir sonraki cevrimde gelecek. Okuma isaretcisi
                 // tap 1'e ilerletilir.
+                // Boru hatti doldurma: asama 0 (adres) bu cevrim tap 0'i
+                // yazmacliyor. Veri asamasi (mac_*) bir sonraki cevrimde
+                // asama 0'dan beslenecek.
                 CONV_READ_REQ: begin
-                    mac_kh    <= kh;
-                    mac_kw    <= kw;
-                    mac_bo    <= byte_offset;
-                    mac_ib    <= in_bounds;
-                    mac_valid <= 1'b1;
+                    wo_q0 <= word_offset;
+                    bo_q0 <= byte_offset;
+                    ib_q0 <= in_bounds;
+                    kh_q0 <= kh;
+                    kw_q0 <= kw;
+                    av_q0 <= 1'b1;
+
+                    mac_valid <= 1'b0;  // veri henuz yok
 
                     kw    <= 4'd1;      // tap 1 (kh zaten 0)
                     state <= CONV_MAC;
@@ -693,6 +747,13 @@ endfunction
                     mac_ib_q    <= mac_ib;
                     mac_valid_q <= mac_valid;
 
+                    // Asama 0 -> asama 1 (veri asamasi)
+                    mac_kh    <= kh_q0;
+                    mac_kw    <= kw_q0;
+                    mac_bo    <= bo_q0;
+                    mac_ib    <= ib_q0;
+                    mac_valid <= av_q0;
+
                     // =========================================================
                     // Cikis ve asama 1 (adres) ilerletme
                     //
@@ -709,19 +770,20 @@ endfunction
                         kw          <= '0;
                         d_out       <= '0;    // requant/FC turu kanal 0'dan baslar
                         state       <= CONV_ReLU_FC;
-                    end else if (mac_valid && mac_kh == 9 && mac_kw == 7) begin
-                        // Son tap asama 2'ye girdi; adres uretimi durur.
-                        // mac_valid_q yukarida mac_valid'den yuklendigi icin
-                        // bu tap bir sonraki cevrimde MAC edilecek.
-                        mac_valid <= 1'b0;
+                    end else if (av_q0 && kh_q0 == 9 && kw_q0 == 7) begin
+                        // Son tap asama 0'dan cikti; adres uretimi durur.
+                        // Boru hattindaki taplar bosaltilmaya devam eder.
+                        av_q0 <= 1'b0;
                     end else begin
-                        // Bu cevrim adresi verilen tap'i boru hattina al
-                        mac_kh <= kh;
-                        mac_kw <= kw;
-                        mac_bo <= byte_offset;
-                        mac_ib <= in_bounds;
+                        // Asama 0'i bu cevrimin kh/kw'siyle doldur ve
+                        // okuma isaretcisini ilerlet.
+                        wo_q0 <= word_offset;
+                        bo_q0 <= byte_offset;
+                        ib_q0 <= in_bounds;
+                        kh_q0 <= kh;
+                        kw_q0 <= kw;
+                        av_q0 <= 1'b1;
 
-                        // Okuma isaretcisini ilerlet
                         if (kw == 7) begin
                             kw <= '0;
                             kh <= kh + 1;
@@ -1041,9 +1103,11 @@ endfunction
             // isaretcisi tasar. O cevrimde tuketim hala surer ama yeni
             // okuma baslatilmamalidir.
             CONV_READ_REQ, CONV_MAC: begin
-                if (in_bounds && kh <= 4'd9) begin
+                // Adres artik KOMBINASYONEL degil, asama 0'da yazmaclanmis.
+                // Uzun carpma-karsilastirma zinciri SRAM pininden koptu.
+                if (av_q0 && ib_q0) begin
                     mem_en_b   = 1'b1;
-                    mem_addr_b = in_addr_i + word_offset;
+                    mem_addr_b = in_addr_i + wo_q0;
                 end
             end
             FC_WEIGHT_REQ: begin
