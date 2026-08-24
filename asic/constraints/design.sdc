@@ -80,3 +80,61 @@ set_false_path -from [get_ports rst_ni]
 # Cikis yuku
 # -----------------------------------------------------------------------------
 set_load 0.02 [all_outputs]
+
+# =============================================================================
+#  TASARIM KURALI KISITLARI  (6. kosum sonrasi eklendi - 24 Agustos 2026)
+#
+#  NEDEN EKSIKTILER
+#
+#    LibreLane'in varsayilan SDC sablonu bu uc kisiti config.yaml'daki
+#    degerlerden uretir. Biz PNR_SDC_FILE / SIGNOFF_SDC_FILE ile KENDI
+#    SDC'mizi verdigimiz icin o sablon devre disi kaldi. Sonuc: kisitlar
+#    config'de yaziyordu ama araca HIC ULASMIYORDU.
+#
+#  BELIRTI
+#
+#    6. kosumda dokuz kosenin TAMAMINDA max cap ve max slew ihlali:
+#        min_ff (en iyi kose)  :  215 cap / 579 slew
+#        nom_tt                :  438 cap / 1842 slew
+#        max_ss (en kotu)      : 1305 cap / 12364 slew
+#
+#    Kok neden kanit: reset agaci 49 tampona bolunmus, HER BIRI ~150 YUK
+#    suruyor. Buna ragmen STA "max fanout violation count 0" diyordu -
+#    cunku ortada kisit yoktu. MAX_FANOUT_CONSTRAINT: 10 config'de duruyor,
+#    hicbir etkisi olmamis.
+#
+#    Ihlallerin dagilimi da bunu dogruluyor:
+#        215 RESET_B pini      (yuksek fanout reset agi)
+#        279 DIODE pini        (ayni yavas aglara takili anten diyotlari)
+#         92 SRAM wmask pini
+#
+#  DEGERLER config.yaml ILE AYNI TUTULUR
+#
+#    Env degiskeni varsa ondan okunur, yoksa ayni sabit kullanilir. Boylece
+#    config.yaml'daki deger degistiginde burasi da otomatik uyar.
+# =============================================================================
+
+proc _kisit_degeri {ad varsayilan} {
+    if {[info exists ::env($ad)] && $::env($ad) ne ""} {
+        return $::env($ad)
+    }
+    return $varsayilan
+}
+
+set_max_fanout      [_kisit_degeri MAX_FANOUT_CONSTRAINT     10]   [current_design]
+set_max_transition  [_kisit_degeri MAX_TRANSITION_CONSTRAINT 0.75] [current_design]
+set_max_capacitance [_kisit_degeri MAX_CAPACITANCE_CONSTRAINT 0.2] [current_design]
+
+# -----------------------------------------------------------------------------
+#  GIRIS PORTLARI ICIN SURUCU MODELI
+#
+#  set_driving_cell olmadan giris portlari IDEAL surucu varsayilir: gecis
+#  suresi sifir kabul edilir ve ag RC'si uzerinden hesaplanan slew gercekci
+#  olmaz. 6. kosumda clk_i giris agi 0,562 pF yuk tasiyordu ve ilk saat
+#  tamponunun girisinde 1,61 ns slew olculuyordu - bu deger bir surucu
+#  modeliyle hesaplanmis degildi.
+#
+#  inv_2 orta guclu bir surucu; disaridan gelen tipik bir sinyali temsil
+#  eder. Saat portlari da dahil edilir, cunku onlar da disaridan surulur.
+# -----------------------------------------------------------------------------
+set_driving_cell -lib_cell sky130_fd_sc_hd__inv_2 -pin Y [all_inputs]

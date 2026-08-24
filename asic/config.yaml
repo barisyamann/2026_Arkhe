@@ -414,3 +414,49 @@ MAGIC_MACRO_STD_CELL_SOURCE: "PDK"
 #   Sonuc farki yalnizca makro ic geometrisidir.
 # -----------------------------------------------------------------------------
 MAGIC_DRC_USE_GDS: false
+
+# -----------------------------------------------------------------------------
+# YONLENDIRME SONRASI ZAMANLAMA ONARIMI  (6. kosum sonrasi - 24 Agustos 2026)
+#
+# 6. kosumda max_ff kosesinde 8 HOLD ihlali cikti (en kotu -0,0622 ns):
+#
+#   u_uart2.u_rx.bit_cnt_r[1] -> [2]              -0,0622   UART2 RX sayaci
+#   u_uart2.u_rx.state_r[3]   -> [0]              -0,0593   UART2 RX FSM
+#   u_npu.ram_wdata_a[12..14] -> NPU SRAM         -0,0470   NPU yazma verisi
+#   u_instruction_ram.rdata_hold[17] -> CPU FIFO  -0,0172   I-RAM -> cekirdek
+#   u_data_ram.aw_addr_reg[7] -> D-RAM SRAM       -0,0164   D-RAM adres
+#
+# HOLD IHLALI SETUP'TAN FARKLIDIR: saati yavaslatarak DUZELMEZ. Veri saat
+# kenarindan once varir ve yanlis deger yakalanir - her frekansta bozuktur.
+# Bu yuzden ss kosesindeki setup sapmasi gibi "belgelenmis sapma" olarak
+# birakilamaz.
+#
+# KOK NEDEN
+#   RUN_POST_GRT_RESIZER_TIMING varsayilan olarak FALSE idi. Yani hold
+#   onarimi YALNIZCA CTS sonrasi, TAHMINI parazitiklerle kosuldu. Gercek
+#   yonlendirme gecikmeleri eklendikten sonra ortaya cikan ihlalleri
+#   yakalayacak ikinci gecis hic calismadi.
+#
+# HICBIRI CEKIRDEGIN KENDI MANTIGINDA DEGIL - hepsi cevre birimi ya da
+# bellek arayuzu. Cozum RTL'e dokunmadan, tampon ekleyerek yapilir.
+# -----------------------------------------------------------------------------
+RUN_POST_GRT_RESIZER_TIMING: true
+
+# Yonlendirme sonrasi hold marji 0,05 -> 0,10 ns.
+# En kotu ihlal -0,0622 ns; 0,05'lik marj onu kapatmaya yetmiyordu.
+# 0,10 hem mevcut ihlalleri hem de kucuk kosum farklarini kapsar.
+GRT_RESIZER_HOLD_SLACK_MARGIN: 0.1
+
+# -----------------------------------------------------------------------------
+# BOYUTLANDIRICI KOSELERI
+#
+# RSZ_CORNERS tanimsizdi. Hold onarimi HIZLI kosede yapilmalidir - ihlaller
+# tam da orada (max_ff, -40C / 1,95 V). Yalnizca tipik kosede calisan bir
+# onarim ff kosesindeki hold sorununu GORMEZ.
+#
+# Uc kose veriliyor: hold icin ff, setup icin ss, denge icin tt.
+# -----------------------------------------------------------------------------
+RSZ_CORNERS:
+  - nom_tt_025C_1v80
+  - nom_ff_n40C_1v95
+  - nom_ss_100C_1v60
