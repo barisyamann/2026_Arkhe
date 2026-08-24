@@ -192,4 +192,31 @@ set_max_capacitance [_kisit_degeri MAX_CAPACITANCE_CONSTRAINT 0.2] [current_desi
 #  inv_2 orta guclu bir surucu; disaridan gelen tipik bir sinyali temsil
 #  eder. Saat portlari da dahil edilir, cunku onlar da disaridan surulur.
 # -----------------------------------------------------------------------------
-set_driving_cell -lib_cell sky130_fd_sc_hd__inv_2 -pin Y [all_inputs]
+# DUZELTME (7. kosum olcumu sonrasi - 25 Agustos 2026)
+#
+# Ilk yazimda surucu modeli [all_inputs] icin verilmisti ve SAAT PORTLARI
+# da bu listeye giriyordu. inv_2 zayif bir surucudur; clk_i giris aginin
+# 0,56 pF yukunu surunce gercekci olmayan bir kenar uretti:
+#
+#     clkbuf_0_clk_i/A   nom_tt 2,99 ns    nom_ss 4,24 ns
+#
+# 6. kosumda ayni nokta 1,61 ns idi - yani modelleme hatasi olcumu
+# KOTULESTIRDI. Gercekte saat guclu bir osilator/pad surucusunden gelir,
+# kucuk bir ic evirici gibi davranmaz.
+#
+# Cozum iki parcali:
+#   - veri girisleri  : inv_2 surucu modeli (disaridan gelen tipik sinyal)
+#   - saat girisleri  : dogrudan gecis suresi bildirimi
+#
+# 0,15 ns degeri yukaridaki set_clock_transition ile ayni tutuluyor.
+set veri_girisleri [all_inputs]
+foreach saat_portu [list $clk_port jtag_tck] {
+    set idx [lsearch $veri_girisleri [get_ports $saat_portu]]
+    if {$idx >= 0} {
+        set veri_girisleri [lreplace $veri_girisleri $idx $idx]
+    }
+}
+
+set_driving_cell -lib_cell sky130_fd_sc_hd__inv_2 -pin Y $veri_girisleri
+set_input_transition 0.15 [get_ports $clk_port]
+set_input_transition 0.15 [get_ports jtag_tck]
