@@ -519,3 +519,39 @@ PL_TIMING_DRIVEN: false
 # bile 215/579). SDC'ye eklenen kisitlarla birlikte bu adim da acilmali.
 # -----------------------------------------------------------------------------
 RUN_POST_GRT_DESIGN_REPAIR: true
+
+# -----------------------------------------------------------------------------
+# FANOUT SINIRI  (7. kosum GRT cokusunden sonra - 24 Agustos 2026)
+#
+# 7. kosum 39-openroad-globalrouting adiminda dustu:
+#     [GRT-0116] Global routing finished with congestion.
+# 50 ekstra iterasyonun tamami tuketildi, overflow kapanmadi.
+# Yerlestirme de uyarmisti: GPL-1005 agirlikli sikisiklik 1,1350 (>1).
+#
+# SEBEP BIZIM DUZELTMEMIZ
+#   SDC'ye tasarim kurali kisitlarini ekleyince repair_design 1576 fanout
+#   ihlali buldu ve toplam 18.430 tampon ekledi. Her tampon yeni hucre ve
+#   yeni ag demek. 6. kosumda kisit yoktu, GRT kullanimi %14,4 ve overflow
+#   0 idi - bol paydan kapasite asimina gectik.
+#
+#   Standart hucre dolulugu hala %12,7; sorun hucre kalabaligi DEGIL.
+#   23 makro alanin %40'ini kapliyor ve uzerlerinden gecis kisitli;
+#   mantigin baglantilari aradaki 140 um'lik dar kanallardan geciyor.
+#   Tampon sayisi artinca o kanallar tikandi.
+#
+# NEDEN 20, NEDEN 10 DEGIL
+#   Asil sorun reset agacindaki ~150 yuklu dallardi (slew 2,69 ns, sinir
+#   1,50). Sinir 10 iken her dal ~15 tampon istiyor; 20'de ~8'e duser,
+#   fanout kaynakli tampon sayisi kabaca yarilanir.
+#
+#   20 hala 150'ye kiyasla 7,5 KAT iyilesme - slew sorununu fazlasiyla
+#   kapatir. Ustelik asil is fanout sinirinda degil: set_max_transition
+#   (0,75 ns) ve set_max_capacitance (0,2 pF) slew/cap'i DOGRUDAN hedefler
+#   ve degismeden duruyor. Fanout siniri onlarin yardimcisi.
+#
+#   Yani kazancin esasi korunuyor, sikisiklik birakilıyor.
+#
+# constraints/design.sdc bu degeri env uzerinden okur, elle senkron
+# tutmaya gerek yok.
+# -----------------------------------------------------------------------------
+MAX_FANOUT_CONSTRAINT: 20
