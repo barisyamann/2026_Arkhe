@@ -345,3 +345,43 @@ VERILOG_FILES:
 # %14,4, overflow 0.
 # -----------------------------------------------------------------------------
 GRT_ANTENNA_REPAIR_JUMPER_ONLY: true
+
+# -----------------------------------------------------------------------------
+# MAKRO ICERIGININ KAYNAGI  (6. kosumda eklendi - 24 Agustos 2026)
+#
+# 6. kosum 91-klayout-render adiminda dustu:
+#     The layout has multiple top cells in Layout.top_cell
+#
+# KOK NEDEN
+#   Magic'in varsayilan 'macro' kipinde makro BOS bir kabuk olarak yaratilir;
+#   gercek icerik yazma aninda GDS dosyasindan kopyalanir. Kopyalanirken
+#   makronun ALT HUCRE TANIMLARI da GDS'e girer, ama kabuk bos oldugu icin
+#   onlara HICBIR HUCRE REFERANS VERMEZ. GDS dilinde referanssiz hucre = ust
+#   hucre. Dosyada 13 ust hucre olusur: soc_top + SRAM makrosunun 12 ic
+#   hucresi. KLayout'un Layout.top_cell metodu TEK ust hucre bekler ve
+#   istisna atar (cikis kodu 1 - bellek yetmezligi degil).
+#
+# TASARIM SAGLAMDI. Geometri soc_top altinda eksiksizdi: makro 23 kez
+# ornekleniyor, sinir kutusu 683,1 x 416,54 um dogru, SRAM hucresi ust hucre
+# degil. Fazla 12 tanim ARTIK TANIMDI.
+#
+# YINE DE DUZELTILDI, cunku:
+#   - tek ust hucreli GDS foundry teslimi icin dogru olan
+#   - sonraki KLayout adimlari (XOR, DRC) AYNI GDS'i acar ve ayni
+#     Layout.top_cell duvarina carpabilirdi. Onlar signoff adimi, atlanamaz.
+#
+# 'PDK' kipi makro hiyerarsisini gercekten kurar, kabuk kalmaz, GDS tek ust
+# hucreli cikar. Daha once denenmisti: render 17 saniyede gecti.
+#
+# NEDEN BASTAN ACIK DEGILDI
+#   Bu kipte Magic butun makro hiyerarsisini bellege alir; RSS 10,4 GB
+#   olculdu ve 16 GB'lik gelistirme makinesi takas alanina dusuyordu. Akis
+#   31 GB'lik bulut makinesine tasindi (yonlendirme tepe bellegi 5,8 GB) -
+#   kisit artik gecerli degil.
+#
+# NOT: bu ayar yalnizca Magic adimlarini etkiler (StreamOut ve sonrasi).
+# Yerlestirme ve yonlendirme sonuclari korunur; akis 89. adimdan devam
+# ettirilebilir:
+#     make asic_resume
+# -----------------------------------------------------------------------------
+MAGIC_MACRO_STD_CELL_SOURCE: "PDK"

@@ -18,7 +18,7 @@ CONFIG    ?= config.yaml
 RUN_DIR   ?= run
 TAG       ?= arkhe
 
-.PHONY: asic_run asic_verify asic_clean lint synth sources collect check clean distclean help checksums
+.PHONY: asic_run asic_resume asic_verify asic_clean lint synth sources collect check clean distclean help checksums
 
 # -----------------------------------------------------------------------------
 # ZORUNLU HEDEF - tam akis
@@ -26,6 +26,25 @@ TAG       ?= arkhe
 asic_run: check
 	@mkdir -p $(RUN_DIR)/$(TAG)
 	$(LIBRELANE) $(CONFIG) --run-tag $(TAG) --force-run-dir $(RUN_DIR)/$(TAG)
+	$(MAKE) collect
+
+# -----------------------------------------------------------------------------
+# DEVAM ETTIRME - dusen bir kosumu kaldigi yerden surdurur
+#
+# Tam akisi bastan kosmak yerlestirme ve yonlendirmeyi (saatler) sifirlar.
+# FROM ile hangi adimdan devam edilecegi verilir; o adimdan onceki durum
+# run/$(TAG) icinden yuklenir.
+#
+#     make asic_resume FROM=Magic.StreamOut
+#
+# Adim kimligi run/$(TAG)/ altindaki dizin adindan okunur:
+#     89-magic-streamout  ->  Magic.StreamOut
+# -----------------------------------------------------------------------------
+FROM ?= Magic.StreamOut
+
+asic_resume:
+	@test -d $(RUN_DIR)/$(TAG) || { 	    echo "HATA: $(RUN_DIR)/$(TAG) yok - devam ettirilecek kosum bulunamadi"; 	    echo "      tam akis icin: make asic_run"; exit 1; }
+	$(LIBRELANE) $(CONFIG) --run-tag $(TAG) --force-run-dir $(RUN_DIR)/$(TAG) 	    --from $(FROM)
 	$(MAKE) collect
 
 # -----------------------------------------------------------------------------

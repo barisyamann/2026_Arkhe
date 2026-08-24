@@ -524,7 +524,7 @@ gercek hata cikmamistir:
 
 # 9. Bilinen Sorunlar ve Kabul Edilmis Istisnalar
 
-## 9.1 `KLayout.Render` adimi atlanmaktadir
+## 9.1 `KLayout.Render` - COZULDU (24 Agustos 2026)
 
 **Sorun:** Adim su hatayla dusuyor:
 
@@ -549,17 +549,36 @@ hucresi.
 
 Fazla 12 tanim **artik tanimdir**; geometri `soc_top` altinda eksiksizdir.
 
-**Denenen cozum:** `MAGIC_MACRO_STD_CELL_SOURCE: PDK` kipi sorunu **cozdu**
-(render 17 saniyede gecti). Ancak bu kipte Magic butun makro hiyerarsisini
-bellege alir: Magic RSS 10,4 GB olculdu ve 16 GB'lik gelistirme
-makinesinde takas alanina dusuldu. **Yeterli bellegi olan (32 GB+) bir
-makinede bu kip tercih edilmelidir.**
+**Cozum:** `MAGIC_MACRO_STD_CELL_SOURCE: PDK`. Bu kipte Magic makro
+hiyerarsisini gercekten kurar, bos kabuk kalmaz, GDS **tek ust hucreli**
+cikar. Denendiginde render 17 saniyede gecti.
 
-**Kabul gerekcesi:** `KLayout.Render`'in urettigi yerlesim goruntusu Final
-Ciktilar **Bolum 6.3 "Onerilen Ek Ciktilar"** listesindedir, zorunlu
-degildir. Atlanmasinin sebebi bir arac/bellek kisitidir; sonuc gizleme
-amaci tasimaz. **Zorunlu hicbir dogrulama veya signoff adimi
-kapatilmamistir.**
+**Neden bastan uygulanmadi:** bu kipte Magic butun makro hiyerarsisini
+bellege alir. Magic RSS **10,4 GB** olculdu ve 16 GB'lik gelistirme
+makinesi takas alanina dusuyordu.
+
+### 24 Agustos 2026 - kisit ortadan kalkti, ayar acildi
+
+Akis 31 GB bellekli bir bulut makinesine tasindi (yonlendirme tepe bellegi
+5,8 GB olculdu). `MAGIC_MACRO_STD_CELL_SOURCE: "PDK"` artik `config.yaml`
+icinde etkindir.
+
+**Onceki surumdeki tutarsizlik:** bu bolum "adim atlanmaktadir" diyordu,
+ancak `config.yaml` icinde adimi atlatan HICBIR ayar yoktu - karar belgeye
+yazilmis, config'e gecirilmemisti. Yerelde akis bu adima varmadan bellek
+duvarina tostugu icin fark edilmedi. 6. kosumda bulut makinesinde adim
+gercekten kosuldu ve dustu.
+
+**Neden atlamak yerine duzeltmek secildi:** GDS'teki cok-ust-hucre durumu
+dosyanin kendisindedir. Sonraki `KLayout.XOR` ve `KLayout.DRC` adimlari
+AYNI GDS'i acar ve ayni `Layout.top_cell` duvarina carpabilirdi. Bunlar
+signoff adimidir, atlanamaz. Kok nedeni kaldirmak tek adimi susturmaktan
+daha guvenli.
+
+**Devam ettirme:** ayar yalnizca Magic adimlarini etkiler, yerlestirme ve
+yonlendirme korunur:
+
+    make asic_resume FROM=Magic.StreamOut
 
 ## 9.2 SRAM makrosunun tek PVT modeli
 
@@ -769,8 +788,9 @@ Akis iki GDSII gorunumu uretir:
     results/mag/          Magic layout
     checksums/SHA256SUMS  teslim dosyalarinin ozet degerleri
 
-`results/images/` **bostur** - `KLayout.Render` adimi atlanmaktadir
-(bkz. Bolum 9.1).
+`results/images/` yerlesim goruntusunu icerir. 6. kosuma kadar bostu;
+`MAGIC_MACRO_STD_CELL_SOURCE: PDK` ile `KLayout.Render` adimi calisir hale
+geldi (bkz. Bolum 9.1).
 
 ## Calisma alani
 
