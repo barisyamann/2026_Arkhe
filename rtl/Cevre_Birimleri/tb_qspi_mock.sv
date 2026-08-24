@@ -178,15 +178,28 @@ localparam int TEST_WORDS = 128;
         // Prescaler'i CCR'ye yaz ve bir okuma islemi baslat
         axi_write(32'h04, 32'h0);                                  // ADR = 0
         axi_write(32'h00, {1'b1, presc, 1'b0, 8'h03, 5'b0, 2'b00, 1'b0, 8'h03});
-        // Ilk yukselen kenari bekle, sonra iki kenar arasi sureyi olc
-        n = 0;
-        while (spi_sck !== 1'b1 && n < 5000) begin @(posedge clk); n++; end
-        while (spi_sck !== 1'b0 && n < 5000) begin @(posedge clk); n++; end
-        while (spi_sck !== 1'b1 && n < 5000) begin @(posedge clk); n++; end
-        t1 = $time;
-        while (spi_sck !== 1'b0 && n < 5000) begin @(posedge clk); n++; end
-        while (spi_sck !== 1'b1 && n < 5000) begin @(posedge clk); n++; end
-        t2 = $time;
+        // KENAR TABANLI OLCUM
+        //
+        // Ilk yazimda dongu @(posedge clk) ile yokluyordu. P=0'da SCK = ~clk
+        // oldugu icin posedge aninda SCK HER ZAMAN 0'dir; olcum 0 ns
+        // donuyordu. Sinyalin kendi kenarlarini beklemek her frekansta
+        // dogru calisir.
+        //
+        // Zaman asimi ayri bir surecle korunur; SCK hic gelmezse test
+        // asili kalmaz.
+        t1 = 0;
+        t2 = 0;
+        fork : olc
+            begin
+                @(posedge spi_sck);   // boru hatti dolsun, ilkini atla
+                @(posedge spi_sck);
+                t1 = $time;
+                @(posedge spi_sck);
+                t2 = $time;
+            end
+            #100000;                  // 100 us zaman asimi
+        join_any
+        disable olc;
         periyot_ns = int'(t2 - t1);
         bekle_bitti();
     endtask
@@ -472,6 +485,14 @@ localparam int TEST_WORDS = 128;
         $display("  -- Prescaler SCK periyodu (sartname: clk/(P+1))");
         begin
             int olculen;
+
+            // P=0: sartname "SCLK sistem saat hizinda" diyor -> 20 ns.
+            // Bu, SCK'nin saatin KENDISI olmasini gerektirir; her cevrim
+            // degisen bir yazmac en fazla 40 ns (25 MHz) uretebilirdi.
+            // Tasarim ~clk yonlendirmesi kullaniyor.
+            sck_periyodu_olc(6'd0, olculen);
+            $display("      prescaler=0  olculen=%0d ns  beklenen=20 ns", olculen);
+            check("prescaler 0 -> 20 ns (sistem saati)", olculen, 32'd20);
 
             sck_periyodu_olc(6'd1, olculen);
             $display("      prescaler=1  olculen=%0d ns  beklenen=40 ns", olculen);

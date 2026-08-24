@@ -244,6 +244,26 @@ def main():
         extra_defs=["-DARKHE_SIM"],
     )
 
+    # -------------------------------------------------------------------------
+    # CEKIRDEK TESTI - core_test.hex  (Spike ISS karsilastirmasi icin)
+    #
+    # Sartname s.569 ve EK-3 "Cekirdek Testleri": komut izlerinin Spike ISS
+    # ile tur ve sira bakimindan eslesmesi.
+    #
+    # main.c bu is icin KULLANILAMAZ: Spike bizim cevre birimlerimizi
+    # (UART/GPIO/NPU/DMA) modellemez, izler ilk UART yaziminda ayrisir.
+    # core_test.c yalnizca cekirdek ve bellek kullanir.
+    # -------------------------------------------------------------------------
+    build_image(
+        gcc, objcopy, size,
+        name="core_test",
+        c_sources=[SRC_DIR / "core_test.c"],
+        asm_sources=[SRC_DIR / "crt0.S"],
+        linker_script=LINK_DIR / "app.ld",
+        image_bytes=APP_IMAGE_BYTES,
+        hex_dest=BUILD_DIR / "core_test.hex",
+    )
+
     copied = deploy_to_sim(APP_HEX_DEST)
 
     print("\n=== OZET ===")

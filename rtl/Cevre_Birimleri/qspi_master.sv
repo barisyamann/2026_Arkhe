@@ -306,6 +306,7 @@ assign sta_tx_empty = tx_empty;
 
 logic [5:0]  sck_cnt;
 logic [5:0]  sck_tam_periyot;
+logic        presc_sifir;
 logic        sck_en;
 logic        sck_int;
 logic        sck_edge_rise, sck_edge_fall;
@@ -347,7 +348,28 @@ logic [5:0]  sck_half_period;
 // P=0 DESTEKLENMEZ: SCLK = sistem saati demek olurdu ve veri ayni saatle
 // uretildigi icin kurulum suresi kalmazdi (DDR cikis yazmaci gerekir).
 // P=0 yazilirsa P=1 gibi davranilir.
-assign sck_tam_periyot = (ccr_prescaler == 6'h0) ? 6'd2 : (ccr_prescaler + 6'd1);
+// P = 0 -> SCLK = SISTEM SAATI  (24 Agustos 2026)
+//
+// Sartname s.1127-1132: "...'0' yazilirsa SCLK sistem saat hizinda
+// olacaktir." Yani bolme orani 1; SCK saatin KENDISIDIR.
+//
+// Her cevrim degisen bir YAZMAC en fazla clk/2 (25 MHz) uretir. 50 MHz icin
+// saatin dogrudan pine yonlendirilmesi gerekir.
+//
+// SECIM: SCK = ~clk  (ters yonlendirme)
+//
+//   SCK yukselen kenari  = clk DUSEN kenari  -> flash burada ornekler
+//   veri (shift_out)     = clk YUKSELEN kenarda degisir
+//   -> arada YARIM CEVRIM kurulum suresi olusur, ayri bir negedge cikis
+//      yazmaci gerekmez.
+//
+//   SPI Mode 0 uyumu: sck_en dusukken cikis 0'a zorlanir, yani SCK bostada
+//   '0'dir. sck_en clk YUKSELEN kenarinda degisir ve o anda ~clk = 0
+//   oldugu icin gecis glitch uretmez.
+//
+// P >= 1 icin eski sayac yolu aynen korunur.
+assign presc_sifir     = (ccr_prescaler == 6'h0);
+assign sck_tam_periyot = presc_sifir ? 6'd1 : (ccr_prescaler + 6'd1);
 assign sck_half_period = (sck_tam_periyot >> 1);
 
 always_ff @(posedge clk or negedge rst_n) begin
@@ -359,9 +381,19 @@ always_ff @(posedge clk or negedge rst_n) begin
     end else if (sck_en) begin
         sck_edge_rise <= 1'b0;
         sck_edge_fall <= 1'b0;
+        if (presc_sifir) begin
+            // SCK = ~clk: her clk cevrimi TAM BIR SCK periyodudur.
+            //   clk posedge -> veri degisir  (sck_edge_fall)
+            //   clk negedge -> flash ornekler (sck_edge_rise)
+            // Ikisi de her cevrim darbelenir; sayac kullanilmaz.
+            sck_cnt       <= '0;
+            sck_int       <= 1'b0;      // pin ~clk'den surulur, bu kullanilmaz
+            sck_edge_fall <= 1'b1;
+            sck_edge_rise <= 1'b1;
+        end
         // Sayac 0..(tam-1): cnt < half -> SCK dusuk, cnt >= half -> yuksek
         // SPI Mode 0: dusen kenarda veri degisir, yukselende ornekleni r.
-        if (sck_cnt >= sck_tam_periyot - 6'd1) begin
+        else if (sck_cnt >= sck_tam_periyot - 6'd1) begin
             sck_cnt       <= '0;
             sck_int       <= 1'b0;
             sck_edge_fall <= 1'b1;
@@ -380,7 +412,9 @@ always_ff @(posedge clk or negedge rst_n) begin
     end
 end
 
-assign qspi_sck = sck_en ? sck_int : 1'b0;
+// P=0'da saat dogrudan yonlendirilir (bkz. yukaridaki aciklama).
+// sck_en dusukken cikis 0 - SPI Mode 0 bosta durumu.
+assign qspi_sck = sck_en ? (presc_sifir ? ~clk : sck_int) : 1'b0;
 
 logic        io_oe;
 logic [3:0]  io_out;
