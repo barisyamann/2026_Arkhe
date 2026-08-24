@@ -57,15 +57,70 @@ set io_delay [expr $clk_period * 0.20]
 # islemleriyle filtreliyoruz.
 set giris_portlari [all_inputs]
 
-foreach saat_portu [list $clk_port jtag_tck] {
-    set idx [lsearch $giris_portlari [get_ports $saat_portu]]
+# Listeden cikarilacaklar:
+#   clk_i, jtag_tck  - saat portlari
+#   jtag_tms, jtag_tdi - AYRI saat alani, asagida jtag_clk ile kisitlanir
+#   uart1_rxd, uart2_rxd - asenkron, 2-FF senkronizatorden gecer
+foreach cikar [list $clk_port jtag_tck jtag_tms jtag_tdi uart1_rxd uart2_rxd] {
+    set idx [lsearch $giris_portlari [get_ports $cikar]]
     if {$idx >= 0} {
         set giris_portlari [lreplace $giris_portlari $idx $idx]
     }
 }
 
+set cikis_portlari [all_outputs]
+set idx [lsearch $cikis_portlari [get_ports jtag_tdo]]
+if {$idx >= 0} { set cikis_portlari [lreplace $cikis_portlari $idx $idx] }
+
 set_input_delay  $io_delay -clock $clk_name $giris_portlari
-set_output_delay $io_delay -clock $clk_name [all_outputs]
+set_output_delay $io_delay -clock $clk_name $cikis_portlari
+
+# -----------------------------------------------------------------------------
+#  JTAG I/O KENDI SAAT ALANINDA  (7. kosum oncesi eklendi - 24 Agustos 2026)
+#
+#  ONCEKI DURUM YANLISTI
+#    jtag_tms / jtag_tdi / jtag_tdo, clk_i referansiyla kisitlaniyordu. Oysa
+#    yukarida jtag_clk'i AYRI bir saat olarak tanimlayip iki saati
+#    set_clock_groups -asynchronous ile ayirmistik. Bir yandan "bu iki alan
+#    iliskisiz" deyip ote yandan JTAG pinlerine clk_i referansli gecikme
+#    dayatmak kendi icinde tutarsizdi.
+#
+#  ETKISI
+#    6. kosumda ss koselerindeki hold "ihlallerinin" TAMAMI kutukler arasi
+#    DEGILDI (of which reg-to-reg = 0); giris/cikis yollarindaydi ve bu
+#    yapay I/O modelinden besleniyordu. nom_ss'te kutukler arasi hold
+#    +0,5008 ns payla temizdi.
+#
+#  jtag_clk periyodu 100 ns; ayni %20 orani kullaniliyor.
+# -----------------------------------------------------------------------------
+set jtag_io_delay [expr 100.0 * 0.20]
+set_input_delay  $jtag_io_delay -clock jtag_clk [get_ports jtag_tms]
+set_input_delay  $jtag_io_delay -clock jtag_clk [get_ports jtag_tdi]
+set_output_delay $jtag_io_delay -clock jtag_clk [get_ports jtag_tdo]
+
+# -----------------------------------------------------------------------------
+#  SENKRONIZE EDILMIS ASENKRON GIRISLER
+#
+#  uart1_rxd ve uart2_rxd disaridan, saatle hicbir iliskisi olmayan bir
+#  kaynaktan gelir. rtl/Cevre_Birimleri/files_1/uart_rx.sv icinde iki
+#  kademeli metastabilite zinciri var:
+#
+#      logic rx_sync1_r, rx_sync2_r;
+#      rx_sync1_r <= i_rx;
+#      rx_sync2_r <= rx_sync1_r;
+#      wire rx_s = rx_sync2_r;
+#
+#  Senkronizatorun ILK kademesine zamanlama kisiti koymak anlamsizdir -
+#  metastabilite zaten orada cozulur. Bu yol analizden cikariliyor.
+#
+#  DIKKAT - i2c_sda_i / i2c_scl_i BU LISTEDE YOK.
+#  i2c_peripheral.sv'de girisler 'assign sda_in = sda_i;' ile dogrudan
+#  aliniyor; iki kademeli bir senkronizator YOK. Dogrulanmamis bir yolu
+#  false_path yapmak gercek bir sorunu gizlemek olurdu, o yuzden onlar
+#  clk_i kisitinda birakildi. RTL tarafinda ayrica incelenmeli.
+# -----------------------------------------------------------------------------
+set_false_path -from [get_ports uart1_rxd]
+set_false_path -from [get_ports uart2_rxd]
 
 # -----------------------------------------------------------------------------
 # Asenkron reset

@@ -456,7 +456,44 @@ GRT_RESIZER_HOLD_SLACK_MARGIN: 0.1
 #
 # Uc kose veriliyor: hold icin ff, setup icin ss, denge icin tt.
 # -----------------------------------------------------------------------------
+# DUZELTME (7. kosum baslatildiktan sonra): nom_ss LISTEDEN CIKARILDI.
+#
+# Ilk yazimda uc kose verilmisti. 7. kosumun yerlestirme sonrasi setup
+# onarim dongusunde boyutlandirici ss kosesini kovalamaya basladi:
+#     iterasyon 1140 -> 1220 arasinda WNS -5,936 -> -5,802
+#     yani 80 iterasyonda 0,13 ns
+# ss'teki -6,31 ns'nin kaynagi CV32E40P'nin KENDI ICI ve ucuncu taraf IP'ye
+# dokunmama karari geregi kapatilamaz. Boyutlandiriciyi oraya salmak
+# saatlerce kosum suresi ve tampon siskinligi demek, kazanc yok.
+#
+# tt : imza hedefimiz (50 MHz), setup onarimi buraya odaklanmali
+# ff : hold ihlalleri BURADA - hold onarimi hizli koseyi gormek zorunda
 RSZ_CORNERS:
   - nom_tt_025C_1v80
   - nom_ff_n40C_1v95
-  - nom_ss_100C_1v60
+
+# -----------------------------------------------------------------------------
+# ZAMANLAMA ODAKLI YERLESTIRME  (Talha'nin 6. kosum incelemesi - §5)
+#
+# resolved.json'da PL_TIMING_DRIVEN false idi. Yerlestirici hucreleri
+# yalnizca tel uzunlugunu gozeterek konumluyordu; kritik yollarin kisalmasi
+# icin bir cabasi yoktu. Zamanlama sinirli bir tasarimda bu birakilmis
+# kazanctir.
+#
+# Maliyet: yerlestirme adimi uzar. Kazanc: kritik yollar kisalir, hem setup
+# hem DRV (slew/cap) iyilesir.
+# -----------------------------------------------------------------------------
+PL_TIMING_DRIVEN: true
+
+# -----------------------------------------------------------------------------
+# YONLENDIRME SONRASI TASARIM KURALI ONARIMI  (Talha - §5)
+#
+# RUN_POST_GRT_DESIGN_REPAIR false idi. max cap / max slew onarimi yalnizca
+# yerlestirme asamasinda, TAHMINI parazitiklerle yapiliyordu. Gercek
+# yonlendirme kapasitesi eklendikten sonra dogan ihlalleri kapatacak gecis
+# yoktu - hold'daki RUN_POST_GRT_RESIZER_TIMING sorununun DRV karsiligi.
+#
+# 6. kosumda dokuz kosenin tamaminda cap/slew ihlali vardi (en iyi kosede
+# bile 215/579). SDC'ye eklenen kisitlarla birlikte bu adim da acilmali.
+# -----------------------------------------------------------------------------
+RUN_POST_GRT_DESIGN_REPAIR: true
