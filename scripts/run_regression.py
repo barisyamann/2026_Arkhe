@@ -212,6 +212,77 @@ TESTLER = [
     # Bu test -d REAL_BOOT ile gercek zinciri kosar:
     #   Boot ROM -> QSPI Master -> flash -> I-RAM -> jalr -> uygulama
     # -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # CEKIRDEK TESTI - Spike ISS karsilastirmasi icin iz uretir
+    #
+    # Sartname s.569: "CV32E40P ... dogrulanmasinin bir buyruk kumesi
+    # benzetim araci (ISS) ile (Orn. Spike ISS) yapilmasi beklenmektedir."
+    #
+    # Bu test core_test.hex'i kosar ve cv32e40p_tracer ile komut izini
+    # trace_core_00000000.log dosyasina yazar. Kendi kendini denetler:
+    # D-RAM imzasi 0xC0DE0001 programin bastan sona kostugunu gosterir.
+    #
+    # Spike ile karsilastirma AYRI bir adimdir (spike Linux gerektirir):
+    #     python3 scripts/spike_iz_al.py
+    #     python  scripts/spike_karsilastir.py
+    # -------------------------------------------------------------------------
+    dict(
+        ad="cekirdek_izi",
+        top="tb_soc_top",
+        kaynak=None,
+        ek_kaynak=[MEM/"axil_protocol_checker.sv",
+                   TB/"spi_flash_model.sv", TB/"tb_soc_top.sv",
+                   ROOT/"rtl"/"cv32e40p-master"/"bhv"/"include"/"cv32e40p_tracer_pkg.sv",
+                   ROOT/"rtl"/"cv32e40p-master"/"bhv"/"cv32e40p_tracer.sv"],
+        tanim=["CORE_TEST", "CV32E40P_TRACE_EXECUTION"],
+        mem=["core_test.hex", "app.hex", "app_sim.hex", "boot.hex",
+             "flash.hex", "flash_sim.hex", "fc_weights_packed32.mem"],
+        mem_zorunlu=False,
+        ek_bayrak=["-L", "uvm",
+                   "-i", str(ROOT/"rtl"/"cv32e40p-master"/"bhv"/"include"),
+                   "-i", str(ROOT/"rtl"/"cv32e40p-master"/"rtl"/"include")],
+        elab_bayrak=["-L", "uvm"],
+    ),
+    # -------------------------------------------------------------------------
+    # UVM AXI4-Lite PASSIVE AGENT
+    #
+    # Sartname Bolum 4.2.2:
+    #   "...cevre birimlerinin ve YZ hizlandiricinin {AXI veya AXI-Lite}
+    #    arayuzlerinin SystemVerilog HDL ve Universal Verification
+    #    Methodology (UVM) kullanilarak dogrulanmasi beklenecektir."
+    #
+    # Sartname Bolum 5.2 (odul icin asgari basari kriteri):
+    #   "...AXI arayuzlerinin en azindan protocol check duzeyinde AXI
+    #    agent'lariyla dogrulanmasi."
+    #
+    # 'sistem' testiyle AYNI uyaranlari kosar; farki, NPU motorunun AXI4-Lite
+    # master hattina bir UVM passive agent baglanmasidir. Agent ham sinyalleri
+    # ISLEM nesnelerine cevirir ve islem duzeyinde denetler:
+    #   - her AR'ye tam bir R, her AW+W'ye tam bir B yaniti
+    #   - yanit kodu gecerli (AXI4-Lite'ta EXOKAY olamaz)
+    #   - asili kalmis islem yok
+    #
+    # Testbench ayrica ham el sikismalarini bagimsiz sayar ve monitor
+    # sayaclariyla karsilastirir; boylece agent'in islem DUSURMEDIGI de
+    # kanitlanir.
+    #
+    # NOT: -d UVM_AXI olmadan bu dosyalar hic derlenmez, diger 14 test
+    # uvm kutuphanesine baglanmak zorunda kalmaz.
+    # -------------------------------------------------------------------------
+    dict(
+        ad="uvm_axi_agent",
+        top="tb_soc_top",
+        kaynak=None,
+        ek_kaynak=[TB/"uvm"/"axil_if.sv", TB/"uvm"/"axil_uvm_pkg.sv",
+                   MEM/"axil_protocol_checker.sv",
+                   TB/"spi_flash_model.sv", TB/"tb_soc_top.sv"],
+        tanim=["UVM_AXI"],
+        mem=["app.hex", "app_sim.hex", "boot.hex", "flash.hex",
+             "flash_sim.hex", "fc_weights_packed32.mem"],
+        mem_zorunlu=False,
+        ek_bayrak=["-L", "uvm"],
+        elab_bayrak=["-L", "uvm"],
+    ),
     dict(
         ad="sistem_gercek_boot",
         top="tb_soc_top",
@@ -310,7 +381,13 @@ def test_kos(t, vivado_bin, kapsam=False):
     for tn in t.get("tanim", []):
         tanim_arg += ["-d", tn]
 
-    rc, out = komut([xvlog, "-sv"] + tanim_arg + [str(k) for k in t["kaynak"]] +
+    # ek_bayrak: teste ozel derleyici bayraklari (orn. -L uvm, -i <dizin>)
+    # cekirdek izi testi cv32e40p_tracer'i kullanir; o da uvm_pkg import
+    # eder ve bhv/include dizinindeki basliklara ihtiyac duyar.
+    ek_bayrak = [str(x) for x in t.get("ek_bayrak", [])]
+
+    rc, out = komut([xvlog, "-sv"] + tanim_arg + ek_bayrak +
+                    [str(k) for k in t["kaynak"]] +
                     ["-log", "vlog.log"], d, d / "vlog.log")
     if rc != 0:
         return dict(ad=t["ad"], durum="DERLEME HATASI", denetim=0,
@@ -337,8 +414,11 @@ def test_kos(t, vivado_bin, kapsam=False):
                       "--cov_db_dir", (WORK / "covdb").as_posix(),
                       "--cov_db_name", t["ad"]]
 
+    # elab_bayrak: teste ozel elaborate bayraklari (orn. -L uvm)
+    elab_bayrak = [str(x) for x in t.get("elab_bayrak", [])]
+
     rc, out = komut([xelab, "-debug", "typical", "-timescale", "1ns/1ps"] +
-                    kapsam_arg +
+                    kapsam_arg + elab_bayrak +
                     [t["top"], "-s", "snap", "-log", "elab.log"],
                     d, d / "elab.log")
     if rc != 0:

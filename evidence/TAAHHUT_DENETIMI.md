@@ -17,7 +17,7 @@ Denetim uc sonuc uretti:
 
 ---
 
-## 1. KARSILANMADI - Spike ISS karsilastirmasi
+## 1. SONRADAN KARSILANDI - Spike ISS karsilastirmasi
 
 **Taahhut** (OTR s.177, WP3): "Spike ISS cekirdek testleri"
 
@@ -56,7 +56,29 @@ sabit dizinin ta kendisi ve reddediliyor:
 **Kapsam siniri acikca yazildi:** yeni denetim kontrol akisini dogrular,
 aritmetik sonuc dogrulugunu degil. Onun icin gercek bir ISS gerekir.
 
-**Kanit:** `tb/T2.1_core_trace/T2.1_test_report.md` bolum 4.1
+### 24 Agustos 2026 - eksik KAPATILDI
+
+Yukaridaki "onun icin gercek bir ISS gerekir" cumlesi artik gecerli degil.
+Spike kuruldu (**1.1.1-dev**) ve kosturuldu:
+
+| Olcum | Deger |
+|---|---|
+| Karsilastirilan buyruk | **409** (eski iddia: 20) |
+| PC uyusmazligi | **0** |
+| Makine kodu uyusmazligi | **0** |
+| Sikistirilmis gosterim farki | 156 (beklenen) |
+
+Karsilastirma icin cevre birimi kullanmayan ayri bir test programi yazildi
+(`sw_nexys/src/core_test.c`): RV32I aritmetik/mantik, dallanmalarin her iki
+sonucu, jal/jalr, bayt/yarim kelime yukleme-saklama ve RV32M carpma/bolme
+kumesini uyarir. Spike bizim SoC'umuzu degil ciplak bir cekirdegi modeller;
+`main.c` UART'a yazdigi anda izler platform farkindan ayrisirdi.
+
+Regresyona **`cekirdek_izi`** testi olarak eklendi (RTL izini uretir).
+
+**Kanit:** `evidence/dogrulama/SPIKE_ISS_KARSILASTIRMA.md`
+
+**Onceki kanit:** `tb/T2.1_core_trace/T2.1_test_report.md` bolum 4.1
 
 ---
 
@@ -79,6 +101,30 @@ Yani **tam UVM ortami hicbir zaman vaat edilmedi.** Vaat edilenler:
 
 **Sonuc: taahhut karsilandi.** Tam UVM ortami eksikligi bir sapma
 degildir, planlanmis bir tercihtir ve OTR'de gerekcesiyle yazilmistir.
+
+### 24 Agustos 2026 - taahhudun UZERINE cikildi
+
+Sartname §4.2.2 AXI arayuzlerinin UVM ile dogrulanmasini beklediginden,
+OTR'de vaat edilmemis olmasina ragmen gercek bir UVM ortami kuruldu:
+`tb/uvm/axil_uvm_pkg.sv` - sequence_item, monitor, scoreboard, agent, env
+ve test. Agent **passive**; tasarim zaten gercek trafikle suruluyor ve o
+trafik self-checking testlerle dogrulaniyor.
+
+SVA denetleyicisi KALDIRILMADI. Ikisi farkli seviyede calisir: SVA sinyal
+ve cevrim duzeyinde, UVM islem duzeyinde. EK-3 de tam bunu oneriyor
+("butun veri akisini paketlere bolecegi icin...").
+
+NPU motorunun AXI4-Lite master hattinda tam sistem kosumu sonucu:
+
+| Olcum | Deger |
+|---|---|
+| Paketlenen islem | **81 032** |
+| Protokol ihlali | **0** |
+| Monitor'un dusurdugu islem | **0** (bagimsiz capraz kontrol) |
+
+Regresyona **`uvm_axi_agent`** testi olarak eklendi.
+
+**Kanit:** `evidence/dogrulama/UVM_AXI_AGENT.md`
 
 ---
 

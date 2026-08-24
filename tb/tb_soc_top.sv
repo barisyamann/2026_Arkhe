@@ -1,4 +1,12 @@
 `timescale 1ns / 1ps
+
+// UVM passive agent yalnizca -d UVM_AXI ile derlendiginde devreye girer.
+// Paket importu da kosullu: normal regresyon kosumlari uvm kutuphanesine
+// baglanmak zorunda kalmaz.
+`ifdef UVM_AXI
+import uvm_pkg::*;
+import axil_uvm_pkg::*;
+`endif
 // Description: Testbench to verify Arkhe SoC Top Integration in Vivado.
 //              Generates a 50 MHz clock, handles system reset, and mocks
 //              external peripheral pins to verify early CPU boot cycles.
@@ -392,7 +400,17 @@ module tb_soc_top;
       `ifndef REAL_BOOT
         // app_sim.hex: ARKHE_SIM ile derlenmis - cikarimlar arasi bekleme
         // 3 s yerine 2 ms. REUSE testi icin sart; baska fark yok.
+`ifdef CORE_TEST
+        // CEKIRDEK TESTI - Spike ISS karsilastirmasi
+        //
+        // core_test.c yalnizca cekirdek ve bellek kullanir; hicbir cevre
+        // birimine dokunmaz. Spike bizim SoC'umuzu degil ciplak bir RISC-V
+        // cekirdegini modelledigi icin ancak boyle bir program BASTAN SONA
+        // karsilastirilabilir. main.c ilk UART yaziminda ayrisirdi.
+        $readmemh("core_test.hex", uut.u_instruction_ram.ram);
+`else
         $readmemh("app_sim.hex", uut.u_instruction_ram.ram);
+`endif
 
         // ---------------------------------------------------------------
         // HIZLI ACILIS YUKLEYICIYI ATLADIGI ICIN ONUN ISINI TAKLIT ET
@@ -439,6 +457,42 @@ module tb_soc_top;
     `endif
 
         log_print($sformatf("[%0t] Reset kaldırıldı. İşlemci çalışıyor...", $time));
+
+`ifdef CORE_TEST
+        // =====================================================================
+        // CEKIRDEK TESTI - cevre birimi denetimleri ATLANIR
+        //
+        // core_test.c yalnizca cekirdek ve bellek kullanir; UART/DMA/NPU
+        // denetimleri burada zaman asimina duserdi. Amac tek sey: programi
+        // kosturup cv32e40p_tracer'in komut izini uretmesini saglamak.
+        //
+        // Program bittiginde crt0 sonsuz donguye girer. Sabit bir sure
+        // bekleyip bitiriyoruz; iz karsilastirmasi dongudeki tekrarlari
+        // zaten atiyor (scripts/spike_karsilastir.py).
+        //
+        // Sonuclarin D-RAM'e yazildigini de dogruluyoruz - imza 0xC0DE0001.
+        // =====================================================================
+        log_print("[TB] CEKIRDEK TESTI: core_test.hex kosuluyor, iz aliniyor");
+        #(200_000);                       // 200 us - program bitmis olur
+
+        begin
+            logic [31:0] imza;
+            imza = uut.u_data_ram.ram[13'h400 + 31];   // 0x20001000 + 31*4
+            if (imza === 32'hC0DE0001) begin
+                log_print("      [OK]   core_test D-RAM imzasi dogru: 0xC0DE0001");
+            end else begin
+                error_count++;
+                log_print($sformatf("      [HATA] core_test imzasi yanlis: 0x%08h", imza));
+            end
+        end
+
+        log_print("================================================================");
+        if (error_count != 0)
+            $fatal(1, "CEKIRDEK TESTI BASARISIZ - %0d hata", error_count);
+        log_print(" CEKIRDEK TESTI GECTI - iz trace_core_00000000.log dosyasinda");
+        log_print("================================================================");
+        $finish;
+`endif
 
         // =====================================================================
         // UART-STREAM VERI YOLU (Sartname EK-1 s.21)
@@ -1122,5 +1176,182 @@ module tb_soc_top;
         log_print(" JTAG PORTU DOGRULAMA TESTI TAMAMLANDI");
         log_print("================================================================");
     endtask
+
+
+// =============================================================================
+//  CV32E40P KOMUT IZI (Spike ISS karsilastirmasi icin)
+//
+//  Sartname s.569 ve EK-3 "Cekirdek Testleri": komut izlerinin Spike ISS ile
+//  TUR ve SIRA bakimindan eslesip eslesmedigini gormek.
+//
+//  Tracer cekirdegin KENDI bhv/ dizininden gelir (ucuncu parti, degistirilmedi)
+//  ve trace_core_<hart>.log uretir. Yalnizca -d CV32E40P_TRACE_EXECUTION ile
+//  derlendiginde baglanir; normal regresyon kosumlarina maliyeti yoktur.
+//
+//  Hiyerarsi upstream ornekten uyarlandi:
+//      cv32e40p_top_i.core_i.*   ->   uut.u_core.*
+// =============================================================================
+`ifdef CV32E40P_TRACE_EXECUTION
+    cv32e40p_tracer #(
+        .FPU  (0),
+        .ZFINX(0)
+    ) tracer_i (
+        .clk_i(uut.u_core.clk_i),  // always-running clock for tracing
+        .rst_n(uut.u_core.rst_ni),
+
+        .hart_id_i(uut.u_core.hart_id_i),
+
+        .pc                (uut.u_core.id_stage_i.pc_id_i),
+        .instr             (uut.u_core.id_stage_i.instr),
+        .controller_state_i(uut.u_core.id_stage_i.controller_i.ctrl_fsm_cs),
+        .compressed        (uut.u_core.id_stage_i.is_compressed_i),
+        .id_valid          (uut.u_core.id_stage_i.id_valid_o),
+        .is_decoding       (uut.u_core.id_stage_i.is_decoding_o),
+        .is_illegal        (uut.u_core.id_stage_i.illegal_insn_dec),
+        .trigger_match     (uut.u_core.id_stage_i.trigger_match_i),
+        .rs1_value         (uut.u_core.id_stage_i.operand_a_fw_id),
+        .rs2_value         (uut.u_core.id_stage_i.operand_b_fw_id),
+        .rs3_value         (uut.u_core.id_stage_i.alu_operand_c),
+        .rs2_value_vec     (uut.u_core.id_stage_i.alu_operand_b),
+
+        .rs1_is_fp(uut.u_core.id_stage_i.regfile_fp_a),
+        .rs2_is_fp(uut.u_core.id_stage_i.regfile_fp_b),
+        .rs3_is_fp(uut.u_core.id_stage_i.regfile_fp_c),
+        .rd_is_fp (uut.u_core.id_stage_i.regfile_fp_d),
+
+        .ex_valid    (uut.u_core.ex_valid),
+        .ex_reg_addr (uut.u_core.regfile_alu_waddr_fw),
+        .ex_reg_we   (uut.u_core.regfile_alu_we_fw),
+        .ex_reg_wdata(uut.u_core.regfile_alu_wdata_fw),
+
+        .ex_data_addr   (uut.u_core.data_addr_o),
+        .ex_data_req    (uut.u_core.data_req_o),
+        .ex_data_gnt    (uut.u_core.data_gnt_i),
+        .ex_data_we     (uut.u_core.data_we_o),
+        .ex_data_wdata  (uut.u_core.data_wdata_o),
+        .data_misaligned(uut.u_core.data_misaligned),
+
+        .ebrk_insn(uut.u_core.id_stage_i.ebrk_insn_dec),
+        .debug_mode(uut.u_core.debug_mode),
+        .ebrk_force_debug_mode(uut.u_core.id_stage_i.controller_i.ebrk_force_debug_mode),
+
+        .wb_bypass(uut.u_core.ex_stage_i.branch_in_ex_i),
+
+        .wb_valid    (uut.u_core.wb_valid),
+        .wb_reg_addr (uut.u_core.regfile_waddr_fw_wb_o),
+        .wb_reg_we   (uut.u_core.regfile_we_wb),
+        .wb_reg_wdata(uut.u_core.regfile_wdata),
+
+        .imm_u_type       (uut.u_core.id_stage_i.imm_u_type),
+        .imm_uj_type      (uut.u_core.id_stage_i.imm_uj_type),
+        .imm_i_type       (uut.u_core.id_stage_i.imm_i_type),
+        .imm_iz_type      (uut.u_core.id_stage_i.imm_iz_type[11:0]),
+        .imm_z_type       (uut.u_core.id_stage_i.imm_z_type),
+        .imm_s_type       (uut.u_core.id_stage_i.imm_s_type),
+        .imm_sb_type      (uut.u_core.id_stage_i.imm_sb_type),
+        .imm_s2_type      (uut.u_core.id_stage_i.imm_s2_type),
+        .imm_s3_type      (uut.u_core.id_stage_i.imm_s3_type),
+        .imm_vs_type      (uut.u_core.id_stage_i.imm_vs_type),
+        .imm_vu_type      (uut.u_core.id_stage_i.imm_vu_type),
+        .imm_shuffle_type (uut.u_core.id_stage_i.imm_shuffle_type),
+        .imm_clip_type    (uut.u_core.id_stage_i.instr[11:7]),
+        .apu_en_i         (1'b0),   // FPU=0, APU kullanilmiyor
+        .apu_singlecycle_i(uut.u_core.ex_stage_i.apu_singlecycle),
+        .apu_multicycle_i (uut.u_core.ex_stage_i.apu_multicycle),
+        .apu_rvalid_i     (uut.u_core.ex_stage_i.apu_valid)
+    );
+`endif
+
+
+// =============================================================================
+//  UVM PASSIVE AGENT - NPU motor AXI4-Lite hatti
+//
+//  Sartname §4.2.2: "...cevre birimlerinin ve YZ hizlandiricinin {AXI veya
+//  AXI-Lite} arayuzlerinin SystemVerilog HDL ve UVM kullanilarak
+//  dogrulanmasi beklenecektir."
+//
+//  §5.2 (odul esigi): "...EN AZINDAN protocol check duzeyinde AXI
+//  agent'lariyla dogrulanmasi."
+//
+//  NEDEN BU ARAYUZ SECILDI
+//
+//    Sartname YZ hizlandiricinin arayuzunu ozellikle aniyor. Motor <-> TCM
+//    hatti, hizlandiricinin veri trafiginin TAMAMINI tasir: her girdi
+//    okumasi, her agirlik okumasi, her sonuc yazimi buradan gecer.
+//
+//  MEVCUT SVA KORUNUR
+//
+//    axil_protocol_checker (5 arayuzde) calismaya devam eder. Ikisi FARKLI
+//    seviyede denetler:
+//        SVA - sinyal/cevrim duzeyi
+//        UVM - islem duzeyi (paketlenmis transaction)
+//    EK-3 tam olarak bu birlikteligi oneriyor.
+//
+//  -d UVM_AXI ile derlendiginde etkinlesir; normal kosumlara maliyeti yok.
+// =============================================================================
+`ifdef UVM_AXI
+    // DIKKAT - saat/reset isimleri: burasi TESTBENCH kapsami, sinyaller
+    // 'clk' ve 'rst_n'. Asagidaki 'bind soc_top' bloklari ise SOC kapsaminda
+    // calisir, orada ayni sinyallerin PORT isimleri 'clk_i'/'rst_ni'dir.
+    // Ilk yazimda bind'lardan kopyalanan clk_i/rst_ni kullanilmisti; Verilog
+    // bunlari ORTUK WIRE olarak yaratti, saat hic toggle etmedi ve monitor
+    // sessizce SIFIR islem yakaladi (derleme hatasi vermez).
+    axil_if npu_eng_if (.clk(clk), .rst_n(rst_n));
+
+    // Tasarim sinyallerini arayuze bagla (yalnizca gozlem)
+    assign npu_eng_if.awaddr  = uut.u_npu.eng_awaddr;
+    assign npu_eng_if.awvalid = uut.u_npu.eng_awvalid;
+    assign npu_eng_if.awready = uut.u_npu.eng_awready;
+    assign npu_eng_if.wdata   = uut.u_npu.eng_wdata_axi;
+    assign npu_eng_if.wstrb   = uut.u_npu.eng_wstrb;
+    assign npu_eng_if.wvalid  = uut.u_npu.eng_wvalid;
+    assign npu_eng_if.wready  = uut.u_npu.eng_wready;
+    assign npu_eng_if.bresp   = uut.u_npu.eng_bresp;
+    assign npu_eng_if.bvalid  = uut.u_npu.eng_bvalid;
+    assign npu_eng_if.bready  = uut.u_npu.eng_bready;
+    assign npu_eng_if.araddr  = uut.u_npu.eng_araddr;
+    assign npu_eng_if.arvalid = uut.u_npu.eng_arvalid;
+    assign npu_eng_if.arready = uut.u_npu.eng_arready;
+    assign npu_eng_if.rdata   = uut.u_npu.eng_rdata_axi;
+    assign npu_eng_if.rresp   = uut.u_npu.eng_rresp;
+    assign npu_eng_if.rvalid  = uut.u_npu.eng_rvalid;
+    assign npu_eng_if.rready  = uut.u_npu.eng_rready;
+
+    initial begin
+        uvm_pkg::uvm_config_db#(axil_uvm_pkg::axil_vif)::set(
+            null, "uvm_test_top.env.agent.mon", "vif", npu_eng_if);
+        uvm_pkg::run_test("axil_passive_test");
+    end
+
+    // BAGIMSIZ CAPRAZ KONTROL
+    //
+    // UVM monitor'unun islem DUSURMEDIGINI kanitlar. Ham sinyal duzeyinde
+    // el sikismalari sayilir ve kosum sonunda monitor sayaclariyla
+    // karsilastirilir. Tutmuyorsa monitor eksik yakaliyor demektir - bu tam
+    // olarak bir kez yasandi (tek slotlu bayrak 2680 okuma dusurmustu).
+    int ham_cevrim = 0, ham_ar = 0, ham_r = 0, ham_b = 0, ham_rst = 0;
+    always @(posedge npu_eng_if.clk) begin
+        ham_cevrim++;
+        if (npu_eng_if.rst_n) ham_rst++;
+        if (npu_eng_if.arvalid && npu_eng_if.arready) ham_ar++;
+        if (npu_eng_if.rvalid  && npu_eng_if.rready)  ham_r++;
+        if (npu_eng_if.bvalid  && npu_eng_if.bready)  ham_b++;
+    end
+
+    // $finish'te MUTLAKA kosar - UVM report_phase'ine guvenilemez.
+    final begin
+        void'(axil_uvm_pkg::axil_ozet_yaz());
+        $display("  capraz kontrol (ham sinyal sayimi):");
+        $display("    R  el sikismasi  : %0d   monitor okuma : %0d",
+                 ham_r, axil_uvm_pkg::axil_monitor::okuma_sayisi);
+        $display("    B  el sikismasi  : %0d   monitor yazma : %0d",
+                 ham_b, axil_uvm_pkg::axil_monitor::yazma_sayisi);
+        if (ham_r != axil_uvm_pkg::axil_monitor::okuma_sayisi ||
+            ham_b != axil_uvm_pkg::axil_monitor::yazma_sayisi)
+            $display("  [HATA] UVM monitor islem DUSURDU - sayimlar tutmuyor");
+        else
+            $display("  [OK]   monitor hicbir islemi kacirmadi (ham sayim tutuyor)");
+    end
+`endif
 
 endmodule

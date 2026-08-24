@@ -51,14 +51,27 @@
 /* Sonuclarin yazilacagi D-RAM bolgesi. Spike'ta da RTL'de de ayni adres. */
 #define SONUC_TABAN  ((volatile unsigned int *)0x20001000)
 
-/* Derleyicinin islemi sabit katlamasini (constant folding) ENGELLER.
-   Aksi halde Spike ve RTL ayni sonucu uretir ama hicbir ARITMETIK BUYRUK
-   kosulmaz - test bos kalir. */
-static volatile unsigned int tohum = 0x12345678u;
-static volatile int          itohum = -1234567;
-
 int main(void)
 {
+    /* Tohumlar YEREL volatile - .data bolumune KONMAZ.
+     *
+     * Ilk yazimda 'static volatile' global degiskenlerdi. Bu, degerlerin
+     * .data bolumunde durmasi ve crt0 tarafindan I-RAM'den D-RAM'e
+     * KOPYALANMASI demekti. Spike ELF'i dogrudan yukledigi icin degerler
+     * onda bastan hazirdi; RTL'de ise kopyalama zincirine bagliydi.
+     *
+     * Sonuc: iz karsilastirmasinda dallanma sonuclari ayrisiyordu -
+     * cekirdek hatasi degil, ORTAM FARKI.
+     *
+     * Yerel volatile ile degerler BUYRUKTAN gelir (li/lui+addi), bellege
+     * hic dokunulmaz. Iki ortam birebir ayni baslar.
+     *
+     * volatile yine sart: derleyici sabit katlama yaparsa hicbir aritmetik
+     * buyruk kosulmaz ve test bos kalir.
+     */
+    volatile unsigned int tohum  = 0x12345678u;
+    volatile int          itohum = -1234567;
+
     volatile unsigned int *s = SONUC_TABAN;
     unsigned int a = tohum;
     unsigned int b = 0x9ABCDEF0u;

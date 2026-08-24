@@ -181,8 +181,8 @@ C ile. Agirliklar TCM'de (16 kB FC agirligi 8 kB D-RAM'e sigmaz).
 | | Cevrim | 50 MHz'de | Cikarim/saniye |
 |---|---|---|---|
 | **Yazilim (CV32E40P)** | 64.423.245 | **1,29 s** | 0,78 |
-| **Donanim (NPU)** | 72.583 | **1,45 ms** | 689 |
-| **HIZLANMA** | | | **888x** |
+| **Donanim (NPU)** | 81.583 | **1,63 ms** | 613 |
+| **HIZLANMA** | | | **790x** |
 
 Metodoloji onemli: ilk denemede `cevrim / N * 4000` kullanildi ve **eksik
 sonuc verdi**. Olculen ilk N piksel tamamen `t=0` bolgesindedir, orada
@@ -315,7 +315,7 @@ konu birbirine baglidir.
 - Aritmetik dogrulugu 5 vektorde bit-birebir
 
 - Gercek ses on isleme zinciri yazildi; yes/no regresyonda
-- Yazilim/donanim hizlanma orani olculdu: **888x**
+- Yazilim/donanim hizlanma orani olculdu: **790x**
 
 **Acik**
 - `fc_weights` yonlendirmeyi kilitliyor → **A2 (16'ya bolme) onerilir**

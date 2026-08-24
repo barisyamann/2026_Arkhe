@@ -84,11 +84,32 @@ Tam cikarimdaki gecerli tap sayisi:
 | | Cevrim | 50 MHz'de | Cikarim/saniye |
 |---|---|---|---|
 | **Yazilim (CV32E40P)** | 64.423.245 | **1,29 s** | 0,78 |
-| **Donanim (NPU)** | 72.583 | **1,45 ms** | 689 |
-| **HIZLANMA** | | | **888x** |
+| **Donanim (NPU)** | 81.583 | **1,63 ms** | 613 |
+| **HIZLANMA** | | | **790x** |
+
+### Cevrim sayisi neden 72.583'ten 81.583'e cikti
+
+ASIC zamanlama kapanisi icin CONV boru hattina IKI ASAMA eklendi:
+
+1. **SRAM cikisinin yazmaclanmasi** (CONV_MAC 3 asamali oldu). sky130 SRAM
+   makrosunun Liberty dosyasi dout icin `timing_type: falling_edge` bildirir;
+   veri dusen kenarda cikar ve MAC'e dogrudan girdiginde kalan butce yarim
+   cevrime dusuyordu.
+2. **Adres asamasinin yazmaclanmasi** (asama 0), boru hatti 4 derinlige cikti.
+
+Her biri piksel basina +1 cevrim getirdi: 500 piksel x 2 = +1000 cevrim.
+Toplam 80.583 -> 81.583.
+
+Bu, nominal-tt kosesindeki 130 zamanlama ihlalini (WNS -4,00 ns) **sifira**
+indirdi. Kayip %12,4 cevrim; kazanc kapanmis bir kose. Ayrintilar:
+`evidence/asic/ZAMANLAMA_ANALIZI_RAPORU.md`.
+
+**Olcum:** sistem testi kutugunden dogrudan, iki cikarim icin ozdes:
+`(41876650000 - 40244990000) ps / 20000 ps = 81.583 cevrim`
+
 
 Sartname EK-1'in istedigi "yazilim gerceklemesine kiyasla hizlanma"
-**888 kat** olarak gosterilmistir.
+**790 kat** olarak gosterilmistir.
 
 ---
 
