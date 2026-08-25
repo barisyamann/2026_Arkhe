@@ -72,8 +72,9 @@ TESTLER = [
     dict(
         ad="sync_fifo",
         top="tb_sync_fifo",
-        kaynak=[RTL/"Cevre_Birimleri"/"files_1"/"sync_fifo.sv"],
-        ek_kaynak=[TB/"tb_sync_fifo.sv"],
+        kaynak=[RTL/"Cevre_Birimleri"/"files_1"/"sync_fifo.sv",
+                TB/"tb_sync_fifo.sv"],
+        mem=[],
     ),
     dict(
         ad="i2c",

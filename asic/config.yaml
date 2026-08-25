@@ -506,41 +506,39 @@ MAGIC_DRC_USE_GDS: false
 # -----------------------------------------------------------------------------
 RUN_POST_GRT_RESIZER_TIMING: true
 
-# Yonlendirme sonrasi hold marji.
+# YONLENDIRME SONRASI HOLD MARJI
 #
-# 8. kosumda 0,05 -> 0,10 yapilmisti ve tt koselerini temizlemisti.
-# 9. kosumda SYNTH_STRATEGY: AREA 3'e gecince tablo degisti: strateji
-# kritik yollardaki kapilari buyutuyor (upsize -c), veri DAHA ERKEN
-# variyor, setup duzeliyor ama HOLD bozuluyor. Klasik takas.
+# 10. KOSUM DENEYI VE GERI ALINMASI (25 Agustos 2026)
 #
-#   reg->reg hold ihlali   8. kosum 109  ->  9. kosum 687
-#   en kotu hold           -0,162        ->  -0,396 ns
+# 9. kosumda AREA 3'un upsize -c adimi setup'i kazandirirken hold'u
+# bozmustu (reg->reg ihlal 109 -> 687, en kotu -0,396 ns). 10. kosumda
+# hold onarimi guclendirildi:
+#     GRT_RESIZER_HOLD_SLACK_MARGIN  0,1 -> 0,30
+#     PL_RESIZER_HOLD_SLACK_MARGIN   0,1 -> 0,20
+#     GRT/PL_RESIZER_FIX_HOLD_FIRST  false -> true
 #
-# Setup tarafinda artik bol payimiz var (nom_tt +1,371), bir kismini
-# hold'a vermek mantikli.
+# SONUC: IKISINI BIRDEN KAYBETTIK.
 #
-# Marj 0,30 seciliyor. En kotu ihlal -0,396 ns; onarici hedefi ihlalin
-# uzerinde tutmali ki yalnizca sinira degil PAYLA kapatsin. Cok buyuk marj
-# (0,45+) gereksiz tampon siskinligi ve yeni sikisiklik uretir.
+#     [INFO RSZ-0032] Inserted 11749 hold buffers.
 #
-# STOP KURALI: bu ayarla nom_tt veya max_tt setup NEGATIFE duserse ayar
-# kabul edilmez. Zamanlama kapanisi tek metrigi yesile boyama oyunu degil;
-# setup kazanimini hold icin feda etmek geri adim olur.
-GRT_RESIZER_HOLD_SLACK_MARGIN: 0.3
-
-# Yerlestirme asamasi hold marji da yukseltiliyor - onarim ne kadar
-# erken baslarsa yonlendirmeye o kadar az is kalir.
-PL_RESIZER_HOLD_SLACK_MARGIN: 0.2
-
-# ONCE HOLD, SONRA SETUP
+#     Kose        setup 9. kosum -> 10. kosum   hold reg->reg ihlal
+#     nom_ss        -6,665  ->  -15,269          687 -> 1147
+#     max_ss        -8,026  ->  -17,619
+#     max_tt        +0,915  ->   +0,531
 #
-# Varsayilan false: onarici once setup'i kovaliyor, hold'a kalan payla
-# bakiyor. 9. kosumda setup zaten fazlasiyla iyi (tt koselerinin ucu de
-# artida), sorun hold. Siralamayi tersine ceviriyoruz.
+# Mekanizma: FIX_HOLD_FIRST boyutlandiriciya "once hold" dedirtti, o da
+# veri yollarina 11.749 geciktirme tamponu ekledi. Her tampon gecikme
+# demek; ss setup 8,6 ns coktu. Hold da duzelmedi cunku sonradan kosan
+# setup onarimi o tamponlarin bir kismini geri aldi.
 #
-# Risk: setup bir miktar geriler. +1,371 ns payimiz var, kaldirir.
-GRT_RESIZER_FIX_HOLD_FIRST: true
-PL_RESIZER_FIX_HOLD_FIRST: true
+# DERS: FIX_HOLD_FIRST, hold'un BASKIN sorun oldugu tasarimlar icindir.
+# Bizde setup ss'te zaten zorda; hold'a mutlak oncelik vermek yanlisti.
+#
+# 9. kosum degerlerine donuluyor. Hold ayri ve DAHA OLCULU ele alinacak:
+# once marji tek basina (0,15-0,20) denemek, FIX_HOLD_FIRST'e hic
+# dokunmamak.
+GRT_RESIZER_HOLD_SLACK_MARGIN: 0.1
+PL_RESIZER_HOLD_SLACK_MARGIN: 0.1
 
 # -----------------------------------------------------------------------------
 # BOYUTLANDIRICI KOSELERI
