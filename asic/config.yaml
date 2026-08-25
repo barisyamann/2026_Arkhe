@@ -115,6 +115,29 @@ MACROS:
     spice:
       - macros/sky130_sram_2kbyte_1rw1r_32x512_8/spice/sky130_sram_2kbyte_1rw1r_32x512_8.spice
     instances:
+      # -----------------------------------------------------------------------
+      # MAKRO YERLESIMI - GRUPLAR BIR ARADA  (9. kosum, 25 Agustos 2026)
+      #
+      # ONCEKI DURUM: 4x6 izgara SIRAYLA dolduruluyordu, grup sinirlarina
+      # bakilmiyordu. Sonuc: I-RAM'in 4 makrosundan biri sag ucta (2899,
+      # 2100), diger ucu bir alt sirada solda kaliyordu. D-RAM'de aynisi.
+      # Her iki bellek grubu CIPIN TAM GENISLIGINE (3,3 mm) yayilmisti ve
+      # denetleyicileri makrolarina ulasmak icin cipi kat ediyordu.
+      #
+      # tt kosesindeki en kotu yol tam da 'u_data_ram SRAM -> CPU' idi.
+      #
+      # YENI DUZEN - her grup kompakt:
+      #     sira 1-3 : NPU TCM  (12)
+      #     sira 4   : NPU TCM  ( 3) + bos yuva
+      #     sira 5-6 : I-RAM 2x2 (sol) | D-RAM 2x2 (sag)
+      #
+      # Bos yuva 6. siranin sagindan 4. siranin sagina tasindi; 23 makro
+      # 24 yuvaya asal sayi oldugu icin bir bosluk kacinilmaz.
+      #
+      # DEGISMEYENLER: cip boyutu, kanal genisligi (200 um), halo (30 um),
+      # yonelim (hepsi N). Yalnizca hangi makronun hangi yuvaya gidecegi
+      # degisti - pin erisim kosullari aynen korunuyor.
+      # -----------------------------------------------------------------------
       'u_npu.u_npu_sram.g_sram[0].u_macro':
         location: [250.00, 250.00]
         orientation: N
@@ -161,28 +184,28 @@ MACROS:
         location: [2016.20, 2099.62]
         orientation: N
       'u_instruction_ram.g_sram[0].u_macro':
-        location: [2899.30, 2099.62]
-        orientation: N
-      'u_instruction_ram.g_sram[1].u_macro':
         location: [250.00, 2716.16]
         orientation: N
-      'u_instruction_ram.g_sram[2].u_macro':
+      'u_instruction_ram.g_sram[1].u_macro':
         location: [1133.10, 2716.16]
         orientation: N
-      'u_instruction_ram.g_sram[3].u_macro':
-        location: [2016.20, 2716.16]
-        orientation: N
-      'u_data_ram.g_sram[0].u_macro':
-        location: [2899.30, 2716.16]
-        orientation: N
-      'u_data_ram.g_sram[1].u_macro':
+      'u_instruction_ram.g_sram[2].u_macro':
         location: [250.00, 3332.70]
         orientation: N
-      'u_data_ram.g_sram[2].u_macro':
+      'u_instruction_ram.g_sram[3].u_macro':
         location: [1133.10, 3332.70]
         orientation: N
-      'u_data_ram.g_sram[3].u_macro':
+      'u_data_ram.g_sram[0].u_macro':
+        location: [2016.20, 2716.16]
+        orientation: N
+      'u_data_ram.g_sram[1].u_macro':
+        location: [2899.30, 2716.16]
+        orientation: N
+      'u_data_ram.g_sram[2].u_macro':
         location: [2016.20, 3332.70]
+        orientation: N
+      'u_data_ram.g_sram[3].u_macro':
+        location: [2899.30, 3332.70]
         orientation: N
 
 # -----------------------------------------------------------------------------
