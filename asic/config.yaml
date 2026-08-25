@@ -468,9 +468,26 @@ GRT_RESIZER_HOLD_SLACK_MARGIN: 0.1
 #
 # tt : imza hedefimiz (50 MHz), setup onarimi buraya odaklanmali
 # ff : hold ihlalleri BURADA - hold onarimi hizli koseyi gormek zorunda
+# 8. KOSUM SONRASI GERI ALINDI: nom_ss LISTEYE YENIDEN EKLENDI
+#
+# 7. kosum baslarken boyutlandiricinin ss kosesinde donmesini "bosuna
+# efor" sanip ss'i cikarmistim. Gozlem penceresi cok darkti:
+#     iterasyon 1140 -> 1220 arasi WNS -5,936 -> -5,802
+# Iterasyon basina kazanc kucuktu, ama BIRIKIMLI etkisi buyukmus.
+#
+# 8. kosum olcumu: ss'siz optimizasyonla nom_ss setup -16,37 ns cikti.
+# 6. kosumda (RSZ_CORNERS tanimsiz, yani ss dahil) ayni deger -5,45 idi.
+# Kaybettigimiz: 11 ns.
+#
+# En kotu ss yolu: u_npu.u_npu_engine.d_out[0] -> rq_ab[63]
+# (requantization 32x32 isaretli carpma, 152 hucre derinliginde).
+# Boyutlandirici bu yoldaki hucreleri buyuterek 11 ns kazandiriyormus.
+#
+# Bedeli kosum suresi; kazanci 11 ns. Alinir.
 RSZ_CORNERS:
   - nom_tt_025C_1v80
   - nom_ff_n40C_1v95
+  - nom_ss_100C_1v60
 
 # -----------------------------------------------------------------------------
 # ZAMANLAMA ODAKLI YERLESTIRME  (Talha'nin 6. kosum incelemesi - §5)
@@ -555,3 +572,31 @@ RUN_POST_GRT_DESIGN_REPAIR: true
 # tutmaya gerek yok.
 # -----------------------------------------------------------------------------
 MAX_FANOUT_CONSTRAINT: 20
+
+# -----------------------------------------------------------------------------
+# GECIS SURESI SINIRI  (8. kosum sonrasi - 25 Agustos 2026)
+#
+# LibreLane'in sky130 varsayilani 0,75 ns; sky130_fd_sc_hd kutuphanesinin
+# KENDI max_transition degeri 1,5 ns. Yani varsayilan, kutuphane sinirindan
+# IKI KAT siki.
+#
+# 7. ve 8. kosumda bu siki sinir repair_design'a 13.955 tampon ektirdi.
+# Tamponlar veri yollarinda ve gecikme ekliyor. Bedeli olculdu:
+#
+#   nom_tt setup WNS   6. kosum +0,947  ->  8. kosum -1,300   (2,2 ns kayip)
+#   en kotu tt yolu    u_data_ram SRAM -> CPU, 92 hucre
+#
+# tt kosesi RSZ_CORNERS'ta oldugu halde kotulesti - yani sebep optimizasyon
+# eksikligi degil, eklenen tamponlarin kendisi.
+#
+# TAKAS DEGERLENDIRMESI
+#   Kazanc : gercek slew ihlali (1,5 ns sinirinda) nom_tt'de 1842 -> 159
+#   Bedel  : setup 2,2 ns
+#   1,5 ns'in altindaki slew degerleri kutuphanenin karakterize ettigi
+#   araligin ICINDE; zamanlama modelleri gecerli. Setup ihlali ise dogrudan
+#   frekans kaybi. Bu takas kotu.
+#
+# 1,0 ns orta yol: reset agacindaki 2,69 ns'lik patolojik kenarlari hala
+# yakalar, ama her marjinal agi tamponlamaya zorlamaz.
+# -----------------------------------------------------------------------------
+MAX_TRANSITION_CONSTRAINT: 1.0
