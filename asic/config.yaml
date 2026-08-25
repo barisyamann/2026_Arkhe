@@ -272,7 +272,48 @@ PDN_VERTICAL_HALO: 30
 # -----------------------------------------------------------------------------
 # Sentez
 # -----------------------------------------------------------------------------
-SYNTH_STRATEGY: "AREA 0"
+# SENTEZ STRATEJISI - OLCUMLE SECILDI  (25 Agustos 2026)
+#
+# 'AREA 0' varsayilandi ve problemimizin TERSI yonde optimize ediyordu:
+# alanimiz bol (standart hucre dolulugu %12,7) ama kritik yollarimiz
+# MANTIK DERINLIGI baskin (tt'de 92 hucre, ss'te 152 hucrelik 32x32 carpma).
+#
+# LibreLane'in synthesisexploration akisiyla dokuz strateji olculdu
+# (sentez + PnR oncesi STA, ayni SDC ve kisitlarla):
+#
+#   STRATEJI    nom_tt    nom_ss    hucre
+#   AREA 3     +3,9027   -8,3425   106460   <-- SECILEN
+#   AREA 1     +1,8766   -9,9979    69023
+#   AREA 0     +1,5024   -9,3385    69337   <-- onceki
+#   DELAY 0    +0,1556  -14,2930    78204
+#   DELAY 1    -1,3889  -15,4865    ~78000
+#   AREA 2     -2,6410  -12,7225    69423
+#   (DELAY 2/3/4 olculemedi - bkz. asagidaki not)
+#
+# NEDEN AREA 3
+#   Adi yaniltici; kaynak koda bakinca ORFS'in betigi cikiyor:
+#       strash / dch / map -B 0.9 / topo / stime -c
+#       buffer -c -N {MAX_FANOUT_CONSTRAINT}
+#       upsize -c / dnsize -c
+#   Yani "alan icin esle, sonra zamanlamayi KAPI BOYUTLANDIRMASIYLA duzelt".
+#   Hem daha buyuk hem daha hizli olmasinin sebebi bu. buffer -c -N satiri
+#   bizim MAX_FANOUT_CONSTRAINT: 20 degerini sentezde de kullaniyor.
+#
+#   PnR bedeli olculdu: 8. kosumda AREA 0 PnR oncesi +1,502 verirken PnR
+#   sonrasi -1,300'e dustu, yani ~2,8 ns. Ayni bedeli uygularsak AREA 3'un
+#   PnR sonrasi ~+1,1 vermesi beklenir - tt kosesinde 50 MHz imzalanabilir
+#   tek strateji bu.
+#
+# RISK: hucre sayisi %53 artiyor (69k -> 106k), toplam yerlesen ornekte
+# ~%17. Sikisiklik bizim baglayici kisitimiz. Iki telafi ayni kosumda
+# devrede: MAX_TRANSITION 0,75 -> 1,0 (DRV tamponlari azalir) ve makro
+# gruplamasi (I-RAM/D-RAM ayak izi yariya indi).
+#
+# NOT - EKSIK OLCUM: DELAY 2/3/4 sonuclari alinamadi; kesif dizini bir
+# otomasyon hatasiyla silindi. DELAY 0 (+0,16) ve DELAY 1 (-1,39) AREA 3'un
+# cok gerisinde kaldigi icin DELAY ailesinin one gecmesi beklenmiyor, ama
+# bu bir varsayimdir. Vakit kalirsa kesif tekrarlanmali.
+SYNTH_STRATEGY: "AREA 3"
 
 # -----------------------------------------------------------------------------
 # Lint
