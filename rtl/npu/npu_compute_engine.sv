@@ -69,7 +69,11 @@ module npu_compute_engine import npu_weights_pkg::*; (
         // FC weight artik buyuk kombinasyonel ROM'dan degil,
         // TCM/SRAM icinden okunacak.
         FC_WEIGHT_REQ   = 5'd25,
-        FC_WEIGHT_WAIT  = 5'd26
+        FC_WEIGHT_WAIT  = 5'd26,
+        // Operand secimi ile 32x32 carpani ayiran ek asamalar.
+        // d_out -> conv_acc mux -> multiplier -> rq_ab yolunu ikiye boler.
+        CONV_RQ_MUL     = 5'd27,
+        FC_RQ_MUL       = 5'd28
     } state_t;
 
     state_t state;
@@ -211,6 +215,8 @@ module npu_compute_engine import npu_weights_pkg::*; (
     // Hem depthwise (CONV_*) hem FC (FC_RQ_*) yolunda kullanilir;
     // ikisi hicbir zaman ayni anda aktif olmaz.
     logic signed [63:0] rq_ab;      // 32x32 carpim sonucu
+    logic signed [31:0] rq_x;       // yazmaclanmis carpilan
+    logic signed [31:0] rq_m;       // yazmaclanmis multiplier
     logic               rq_ovf;     // 0x80000000 * 0x80000000 ozel durumu
     logic [31:0]        rq_shift;   // sag kaydirma miktari
     logic signed [31:0] rq_srhm;    // sat_round_high_mul sonucu
@@ -576,6 +582,8 @@ endfunction
 
             // Requantization boru hatti yazmaclari
             rq_ab       <= '0;
+            rq_x        <= '0;
+            rq_m        <= '0;
             rq_ovf      <= 1'b0;
             rq_shift    <= '0;
             rq_srhm     <= '0;
@@ -632,6 +640,8 @@ endfunction
 
             // Requantization boru hatti yazmaclari
             rq_ab       <= '0;
+            rq_x        <= '0;
+            rq_m        <= '0;
             rq_ovf      <= 1'b0;
             rq_shift    <= '0;
             rq_srhm     <= '0;
@@ -794,19 +804,32 @@ endfunction
                 end
 
                 // ============================================================
-                // Depthwise requantization - Asama 1: 32x32 carpma (DSP)
+                // Depthwise requantization - Asama 1: operand secimi
+                //
+                // 11. ASIC kosumunda en kotu max_ss yolu d_out[0]'dan
+                // rq_ab yazmacina gidiyordu. Kanal secimi, conv_acc mux'u,
+                // multiplier secimi ve 32x32 carpma ayni cevrimdeydi.
+                // Operandlari burada yazmaclayip carpimi bir sonraki state'e
+                // tasimak bu uzun kombinasyonel yolu ikiye boler.
                 // ============================================================
                 CONV_ReLU_FC: begin
                     logic signed [31:0] m;
 
                     m        = get_dw_multiplier(d_out[2:0]);
-                    rq_ab    <= $signed(conv_acc[d_out[2:0]]) * $signed(m);
+                    rq_x     <= conv_acc[d_out[2:0]];
+                    rq_m     <= m;
                     rq_ovf   <= (conv_acc[d_out[2:0]] == 32'sh80000000) && (m == 32'sh80000000);
                     rq_shift <= get_dw_rshift(d_out[2:0]);
+                    state    <= CONV_RQ_MUL;
+                end
+
+                // Asama 2: yalnizca 32x32 signed carpma
+                CONV_RQ_MUL: begin
+                    rq_ab <= $signed(rq_x) * $signed(rq_m);
                     state    <= CONV_RQ_NUDGE;
                 end
 
-                // Asama 2: nudge ekleme + 2^31'e bolme
+                // Asama 3: nudge ekleme + 2^31'e bolme
                 CONV_RQ_NUDGE: begin
                     logic signed [63:0] nudge;
                     logic signed [63:0] r64;
@@ -822,13 +845,13 @@ endfunction
                     state <= CONV_RQ_SHIFT;
                 end
 
-                // Asama 3: rounding_divide_by_pot (degisken kaydirma)
+                // Asama 4: rounding_divide_by_pot (degisken kaydirma)
                 CONV_RQ_SHIFT: begin
                     rq_scaled <= rounding_divide_by_pot(rq_srhm, rq_shift);
                     state     <= CONV_RELU;
                 end
 
-                // Asama 4: ReLU + INT8 doygunluk + FC indeks hesabi
+                // Asama 5: ReLU + INT8 doygunluk + FC indeks hesabi
                 // Depthwise cikis zero-point = -128, centered deger 0..255.
                 CONV_RELU: begin
                     if (rq_scaled < 32'sd0)
@@ -919,7 +942,7 @@ endfunction
                 end
 
                 // ============================================================
-                // FC requantization - Asama 1: 32x32 carpma
+                // FC requantization - Asama 1: operandlari yazmacla
                 //
                 // real multiplier    ~ 0.000439331661
                 // integer multiplier = 1932201080
@@ -927,11 +950,18 @@ endfunction
                 // output zero-point  = 14
                 // ============================================================
                 FC_REQUANT: begin
-                    rq_ab <= $signed(fc_acc[fc_q_idx]) * 32'sd1932201080;
+                    rq_x  <= fc_acc[fc_q_idx];
+                    rq_m  <= 32'sd1932201080;
+                    state <= FC_RQ_MUL;
+                end
+
+                // Asama 2: yalnizca 32x32 signed carpma
+                FC_RQ_MUL: begin
+                    rq_ab <= $signed(rq_x) * $signed(rq_m);
                     state <= FC_RQ_NUDGE;
                 end
 
-                // Asama 2: nudge ekleme + 2^31'e bolme
+                // Asama 3: nudge ekleme + 2^31'e bolme
                 FC_RQ_NUDGE: begin
                     logic signed [63:0] nudge;
                     logic signed [63:0] r64;
@@ -943,13 +973,13 @@ endfunction
                     state   <= FC_RQ_SHIFT;
                 end
 
-                // Asama 3: sabit 11 bit saga kaydirma + yuvarlama
+                // Asama 4: sabit 11 bit saga kaydirma + yuvarlama
                 FC_RQ_SHIFT: begin
                     rq_scaled <= rounding_divide_by_pot(rq_srhm, 11);
                     state     <= FC_RQ_SAT;
                 end
 
-                // Asama 4: zero-point ekleme + INT8 doygunluk + sonraki sinif
+                // Asama 5: zero-point ekleme + INT8 doygunluk + sonraki sinif
                 FC_RQ_SAT: begin
                     logic signed [31:0] quant_fc;
 
