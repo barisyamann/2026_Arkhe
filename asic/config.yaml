@@ -506,10 +506,41 @@ MAGIC_DRC_USE_GDS: false
 # -----------------------------------------------------------------------------
 RUN_POST_GRT_RESIZER_TIMING: true
 
-# Yonlendirme sonrasi hold marji 0,05 -> 0,10 ns.
-# En kotu ihlal -0,0622 ns; 0,05'lik marj onu kapatmaya yetmiyordu.
-# 0,10 hem mevcut ihlalleri hem de kucuk kosum farklarini kapsar.
-GRT_RESIZER_HOLD_SLACK_MARGIN: 0.1
+# Yonlendirme sonrasi hold marji.
+#
+# 8. kosumda 0,05 -> 0,10 yapilmisti ve tt koselerini temizlemisti.
+# 9. kosumda SYNTH_STRATEGY: AREA 3'e gecince tablo degisti: strateji
+# kritik yollardaki kapilari buyutuyor (upsize -c), veri DAHA ERKEN
+# variyor, setup duzeliyor ama HOLD bozuluyor. Klasik takas.
+#
+#   reg->reg hold ihlali   8. kosum 109  ->  9. kosum 687
+#   en kotu hold           -0,162        ->  -0,396 ns
+#
+# Setup tarafinda artik bol payimiz var (nom_tt +1,371), bir kismini
+# hold'a vermek mantikli.
+#
+# Marj 0,30 seciliyor. En kotu ihlal -0,396 ns; onarici hedefi ihlalin
+# uzerinde tutmali ki yalnizca sinira degil PAYLA kapatsin. Cok buyuk marj
+# (0,45+) gereksiz tampon siskinligi ve yeni sikisiklik uretir.
+#
+# STOP KURALI: bu ayarla nom_tt veya max_tt setup NEGATIFE duserse ayar
+# kabul edilmez. Zamanlama kapanisi tek metrigi yesile boyama oyunu degil;
+# setup kazanimini hold icin feda etmek geri adim olur.
+GRT_RESIZER_HOLD_SLACK_MARGIN: 0.3
+
+# Yerlestirme asamasi hold marji da yukseltiliyor - onarim ne kadar
+# erken baslarsa yonlendirmeye o kadar az is kalir.
+PL_RESIZER_HOLD_SLACK_MARGIN: 0.2
+
+# ONCE HOLD, SONRA SETUP
+#
+# Varsayilan false: onarici once setup'i kovaliyor, hold'a kalan payla
+# bakiyor. 9. kosumda setup zaten fazlasiyla iyi (tt koselerinin ucu de
+# artida), sorun hold. Siralamayi tersine ceviriyoruz.
+#
+# Risk: setup bir miktar geriler. +1,371 ns payimiz var, kaldirir.
+GRT_RESIZER_FIX_HOLD_FIRST: true
+PL_RESIZER_FIX_HOLD_FIRST: true
 
 # -----------------------------------------------------------------------------
 # BOYUTLANDIRICI KOSELERI

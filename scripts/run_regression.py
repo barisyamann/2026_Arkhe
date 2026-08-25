@@ -51,6 +51,30 @@ TESTLER = [
                 F1/"uart_stream_peripheral.sv", F1/"uart_tb.sv"],
         mem=[],
     ),
+    # -------------------------------------------------------------------------
+    # SYNC_FIFO BLOK TESTI
+    #
+    # 9. ASIC kosumunda ss kosesinin en kotu yolu bu FIFO'nun icindeydi:
+    #     u_uart2.u_rx_fifo.rd_ptr_r[0] -> u_uart2.u_rx_fifo.mem[25][0]
+    #     98 hucre, -8,026 ns
+    # En kotu SEKIZ bitis noktasinin tamami ayni FIFO'nun mem[...] hucreleriydi.
+    #
+    # Kok neden: o_full kombinasyonel olarak (wr_ptr - rd_ptr) cikarmasindan
+    # geliyor, sonra 256x8 = 2048 flip-flop'un yazma iznini besliyordu.
+    # Duzeltme: dolu/bos tespiti cikaricidan ayrildi ve bayraklar yazmaclandi.
+    #
+    # Zamanlama duzeltmesi islevi bozarsa kazanim anlamsizdir. Bu test
+    # FIFO'nun davranis sozlesmesini dogrudan sinar: reset, tek yaz/oku,
+    # fill-to-full, drain-to-empty, wraparound, es zamanli R/W, full+read,
+    # empty+write. Sistem testleri FIFO'yu dolayli kullanir; bu test sinir
+    # kosullarini acikca zorlar.
+    # -------------------------------------------------------------------------
+    dict(
+        ad="sync_fifo",
+        top="tb_sync_fifo",
+        kaynak=[RTL/"Cevre_Birimleri"/"files_1"/"sync_fifo.sv"],
+        ek_kaynak=[TB/"tb_sync_fifo.sv"],
+    ),
     dict(
         ad="i2c",
         top="i2c_peripheral_tb",
