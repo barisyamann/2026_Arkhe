@@ -1,0 +1,944 @@
+# =============================================================================
+# 19. KOSUM - HOLD'U KAPATMA KOSUMU
+#
+# Bu dosya config.yaml'dan turetilmistir; farki iki satirdir. Ikisi de
+# 15./16./17. kosumlarin OLCUMLERINDEN hesaplanmistir, tahmin degildir.
+#
+# 1) GRT_RESIZER_HOLD_SLACK_MARGIN  0,15 -> 0,80
+#
+#    Marj ile boyutlandiricinin GRT'de birakabildigi pay BIREBIR ortusuyor:
+#
+#        kosum  marj    GRT'de ulasilan   signoff max_ff   kayip
+#          15   0,15        +0,148           -0,083        0,23
+#          16   0,28        +0,269           -0,455        0,72
+#          17   0,15        +0,150           -0,581        0,73
+#
+#    (16. kosumda "marj etkisiz" diye not dusulmustu; o kayit YANLISTI,
+#     kutuk kesilerek okunmustu. Marj dogrudan calisiyor.)
+#
+#    Yonlendirmeden SONRAKI kayip, temiz cekirdekli iki kosumda da 0,72 ns.
+#    Yani GRT'de en az 0,72 birakmak gerekiyor. Emniyetle 0,80.
+#    Beklenti: GRT'de +0,80 -> signoff'ta ~+0,08.
+#
+# 2) CLOCK_PERIOD  20,0 -> 31,0 ns  (32,3 MHz)
+#
+#    17. kosumun max_ss setup degeri -9,597 ns. Kapanmasi icin 29,6 ns
+#    yeterli; 31 ns'de +1,4 ns pay kalir. Fazladan pay bilincli: marj 0,80
+#    ile eklenecek hold tamponlari setup'tan bir miktar yiyecek.
+#
+#    Asil sebep bu degil ama: boyutlandirici SETUP'I BOZACAK hold
+#    duzeltmelerini reddeder. ss setup negatifken o yollara hold tamponu
+#    koyamiyor. 31 ns'de dokuz kosenin dokuzunda da setup pozitif olur ve
+#    hold onarimi serbest kalir.
+#
+#    Sartnamede frekans zorunlulugu yoktur. 50 MHz bir HEDEFTI; dokuz
+#    PVT kosesinde temiz signoff, tt'de 50 MHz + ss'te 10 ns ihlalden
+#    daha savunulabilir bir sonuctur.
+#
+# DOKUNULMAYANLAR
+#    PL_RESIZER_HOLD_SLACK_MARGIN  0,1  - 10. kosumda 0,20 ile birlikte
+#                                         FIX_HOLD_FIRST felakete yol acti
+#    *_RESIZER_FIX_HOLD_FIRST      false - asla acilmaz (bkz. README 9.x)
+#    CTS_OBSTRUCTION_AWARE / CTS_BALANCE_LEVELS - 17. kosumda setup'i
+#                                         belirgin iyilestirdi, kaliyor
+#
+# ERKEN UYARI: marj 0,80 kabaca 20 bin hold tamponu koydurabilir. 7. kosum
+# 18 430 tamponla GRT sikisikligindan dusmustu (ama fanout 10 ile; simdi 20
+# ve yonlendirme kullanimi %23 / tasma 0). GRT adiminda GRT-0116 gorulurse
+# kosum durdurulup marj 0,55'e indirilmelidir.
+# =============================================================================
+
+# =============================================================================
+#  config.yaml - LibreLane Classic akisi ana yapilandirmasi
+#  TEKNOFEST 2026 - Takim Arkhe / Arkhe SoC
+# =============================================================================
+
+DESIGN_NAME: soc_top
+
+# -----------------------------------------------------------------------------
+# RTL kaynaklari
+#
+# LibreLane dosya-listesi dosyasini dogrudan kabul etmiyor; yalnizca
+# VERILOG_FILES adinda bir liste bekliyor. TEK DOGRULUK KAYNAGI filelist.f'tir;
+# asagidaki blok ondan URETILIR:
+#
+#     make sources     bloku yeniden uret
+#     make check       filelist.f ile tutarliligi denetle
+#
+# Sartname bu donusumu ongoruyor: "Gerekli donusum veya yapilandirma
+# islemleri asic/Makefile ya da asic/scripts/ altindaki betiklerle
+# yapilmalidir."
+# -----------------------------------------------------------------------------
+
+# SystemVerilog paket import'lari modul basliklarinda kullanildigi icin
+# Yosys'in varsayilan on-isleyicisi yetersiz kaliyor; slang gerekiyor.
+#   (ornek: module uart_stream_peripheral import uart_pkg::*; #(...))
+USE_SLANG: true
+
+VERILOG_INCLUDE_DIRS:
+  - ../rtl/cv32e40p-master/rtl/include
+  - ../rtl/Memory
+  - ../rtl/Cevre_Birimleri/files_1
+
+# -----------------------------------------------------------------------------
+# Saat
+# -----------------------------------------------------------------------------
+CLOCK_PORT: clk_i
+CLOCK_NET: clk_i
+CLOCK_PERIOD: 20.0          # 50 MHz - slew deneyi
+
+# -----------------------------------------------------------------------------
+# Kisitlar
+# -----------------------------------------------------------------------------
+PNR_SDC_FILE: constraints/design.sdc
+SIGNOFF_SDC_FILE: constraints/design.sdc
+
+# -----------------------------------------------------------------------------
+# SRAM MAKROLARI
+#
+# Makro : sky130_sram_2kbyte_1rw1r_32x512_8
+#         512 kelime x 32 bit = 2 kB, bayt granuler yazma maskesi
+#         Port 0 (RW) + Port 1 (R)  -> tasarimin port yapisiyla birebir
+#         Fiziksel boyut: 683,1 x 416,54 um  = 0,285 mm2
+#
+# Kullanim (23 ornekleme):
+#     u_soc/u_npu/u_npu_sram   NPU TCM   30 kB  -> 15 makro
+#     u_soc/u_iram             I-RAM      8 kB  ->  4 makro
+#     u_soc/u_dram             D-RAM      8 kB  ->  4 makro
+#
+# USE_SRAM_MACRO tanimi RTL'deki kosullu yolu acar; tanimsizken cikarimsal
+# dizi kullanilir (FPGA Block RAM cikarimi icin).
+#
+# Sartname: makro sentezde optimize edilip KALDIRILMAMALI, nihai netlist,
+# DEF ve GDSII ciktilarinda bulunmalidir.
+# -----------------------------------------------------------------------------
+VERILOG_DEFINES:
+  - USE_SRAM_MACRO
+
+# Makronun Verilog modeli - lint ve sentez icin KARA KUTU tanimi.
+#
+# MACROS yapisi fiziksel gorunumleri (gds/lef/lib/spice) ve yerlesimi
+# tasir ama Verilog modelini VERMEZ. MACROS'a gecerken bu satiri
+# kaldirmistim ve Verilator modulu bulamadi:
+#   %Error-MODMISSING: Cannot find file containing module:
+#                      'sky130_sram_2kbyte_1rw1r_32x512_8'
+#
+# Ikisi birlikte gerekiyor: MACROS -> nereye konacak,
+#                           EXTRA_VERILOG_MODELS -> arayuzu ne.
+EXTRA_VERILOG_MODELS:
+  - macros/sky130_sram_2kbyte_1rw1r_32x512_8/verilog/sky130_sram_2kbyte_1rw1r_32x512_8.v
+
+
+# -----------------------------------------------------------------------------
+# MAKRO TANIMLARI VE YERLESIMI
+#
+# EXTRA_LEFS/EXTRA_GDS makronun GORUNUMLERINI verir ama NEREYE konacagini
+# soylemez. Ilk denemede akis PDN adiminda durdu:
+#     [PDN-0235] Design has unplaced macros.
+#
+# MACROS yapisi hem gorunumleri hem her instance'in konumunu tasir.
+#
+# YERLESIM PLANI  -  4 sutun x 6 satir izgara
+#   makro       : 683.1 x 416.5 um
+#   kanal       : 200 um  (makrolar arasi yonlendirme icin)
+#   kenar payi  : 250 um
+#   die         : 3832.4 x 3999.2 um = 15.33 mm2
+#   makro doluluk: %42.7
+#
+# Sira: once 15 TCM makrosu, sonra 4 I-RAM, sonra 4 D-RAM. Ayni bellege
+# ait makrolar bitisik kalsin diye satir-oncelikli dizildi; boylece adres
+# kod cozucu ve okuma coklayicisi kisa tellerle baglanir.
+# -----------------------------------------------------------------------------
+MACROS:
+  sky130_sram_2kbyte_1rw1r_32x512_8:
+    gds:
+      - macros/sky130_sram_2kbyte_1rw1r_32x512_8/gds/sky130_sram_2kbyte_1rw1r_32x512_8.gds
+    lef:
+      - macros/sky130_sram_2kbyte_1rw1r_32x512_8/lef/sky130_sram_2kbyte_1rw1r_32x512_8.lef
+    lib:
+      # NOT: kose anahtarinin degeri LISTE olmali, tek dize degil:
+      #   "Refusing to automatically convert string at ...lib.* to list"
+      # "*" tum zamanlama koselerini kapsar. Makronun yalnizca TT modeli
+      # oldugu icin uc kosede de ayni dosya okunur (bkz. THIRD_PARTY.md).
+      "*":
+        - macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib
+    spice:
+      - macros/sky130_sram_2kbyte_1rw1r_32x512_8/spice/sky130_sram_2kbyte_1rw1r_32x512_8.spice
+    instances:
+      # -----------------------------------------------------------------------
+      # MAKRO YERLESIMI - GRUPLAR BIR ARADA  (9. kosum, 25 Agustos 2026)
+      #
+      # ONCEKI DURUM: 4x6 izgara SIRAYLA dolduruluyordu, grup sinirlarina
+      # bakilmiyordu. Sonuc: I-RAM'in 4 makrosundan biri sag ucta (2899,
+      # 2100), diger ucu bir alt sirada solda kaliyordu. D-RAM'de aynisi.
+      # Her iki bellek grubu CIPIN TAM GENISLIGINE (3,3 mm) yayilmisti ve
+      # denetleyicileri makrolarina ulasmak icin cipi kat ediyordu.
+      #
+      # tt kosesindeki en kotu yol tam da 'u_data_ram SRAM -> CPU' idi.
+      #
+      # YENI DUZEN - her grup kompakt:
+      #     sira 1-3 : NPU TCM  (12)
+      #     sira 4   : NPU TCM  ( 3) + bos yuva
+      #     sira 5-6 : I-RAM 2x2 (sol) | D-RAM 2x2 (sag)
+      #
+      # Bos yuva 6. siranin sagindan 4. siranin sagina tasindi; 23 makro
+      # 24 yuvaya asal sayi oldugu icin bir bosluk kacinilmaz.
+      #
+      # DEGISMEYENLER: cip boyutu, kanal genisligi (200 um), halo (30 um),
+      # yonelim (hepsi N). Yalnizca hangi makronun hangi yuvaya gidecegi
+      # degisti - pin erisim kosullari aynen korunuyor.
+      # -----------------------------------------------------------------------
+      'u_npu.u_npu_sram.g_sram[0].u_macro':
+        location: [250.00, 250.00]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[1].u_macro':
+        location: [1133.10, 250.00]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[2].u_macro':
+        location: [2016.20, 250.00]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[3].u_macro':
+        location: [2899.30, 250.00]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[4].u_macro':
+        location: [250.00, 866.54]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[5].u_macro':
+        location: [1133.10, 866.54]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[6].u_macro':
+        location: [2016.20, 866.54]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[7].u_macro':
+        location: [2899.30, 866.54]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[8].u_macro':
+        location: [250.00, 1483.08]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[9].u_macro':
+        location: [1133.10, 1483.08]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[10].u_macro':
+        location: [2016.20, 1483.08]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[11].u_macro':
+        location: [2899.30, 1483.08]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[12].u_macro':
+        location: [250.00, 2099.62]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[13].u_macro':
+        location: [1133.10, 2099.62]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[14].u_macro':
+        location: [2016.20, 2099.62]
+        orientation: N
+      'u_instruction_ram.g_sram[0].u_macro':
+        location: [250.00, 2716.16]
+        orientation: N
+      'u_instruction_ram.g_sram[1].u_macro':
+        location: [1133.10, 2716.16]
+        orientation: N
+      'u_instruction_ram.g_sram[2].u_macro':
+        location: [250.00, 3332.70]
+        orientation: N
+      'u_instruction_ram.g_sram[3].u_macro':
+        location: [1133.10, 3332.70]
+        orientation: N
+      'u_data_ram.g_sram[0].u_macro':
+        location: [2016.20, 2716.16]
+        orientation: N
+      'u_data_ram.g_sram[1].u_macro':
+        location: [2899.30, 2716.16]
+        orientation: N
+      'u_data_ram.g_sram[2].u_macro':
+        location: [2016.20, 3332.70]
+        orientation: N
+      'u_data_ram.g_sram[3].u_macro':
+        location: [2899.30, 3332.70]
+        orientation: N
+
+# -----------------------------------------------------------------------------
+# Floorplan
+#
+# DIE_AREA makro izgarasindan HESAPLANDI (yukaridaki yerlesim planina bakin).
+# Otomatik boyutlandirma (FP_SIZING: relative) makrolarin sigacagi alani
+# garanti etmiyor; acik deger veriyoruz.
+# -----------------------------------------------------------------------------
+FP_SIZING: absolute
+DIE_AREA: [0, 0, 3832.40, 4249.24]
+
+# -----------------------------------------------------------------------------
+# MAKRO GUC BAGLANTISI
+#
+# Ilk kosumda PDN adimi 46 uyari verdi (23 makro x 2 pin):
+#     [PDN-0231] u_data_ram.g_sram[0].u_macro is not connected to any
+#                power/ground nets.
+#     [PDN-0189] Supply pin ...u_macro/vccd1 is not connected to any net.
+#
+# PDN_CONNECT_MACROS_TO_GRID varsayilan olarak true, ama tek basina
+# yetmiyor: OpenROAD makronun HANGI pininin hangi ust seviye aga
+# baglanacagini bilmiyor. Esleme acikca verilmelidir.
+#
+# Bicim:  <ornek_adi_regex> <vdd_agi> <gnd_agi> <vdd_pini> <gnd_pini>
+#
+#   ust seviye aglar : VPWR / VGND   (DEF SPECIALNETS bolumunden okundu)
+#   makro pinleri    : vccd1 / vssd1 (makro LEF'inden)
+#
+# Bu baglanti olmadan makrolarin fiziksel tasarimda GUCU YOKTUR ve LVS
+# gecmez. RTL'de guc pinlerinin bagli olmamasi dogrudur (sabite baglamak
+# elektriksel kisa devre olurdu); baglanti tam da burada yapilir.
+# -----------------------------------------------------------------------------
+PDN_CONNECT_MACROS_TO_GRID: true
+PDN_MACRO_CONNECTIONS:
+  - ".*u_macro VPWR VGND vccd1 vssd1"
+
+# -----------------------------------------------------------------------------
+# MAKRO HALO (kenar bosluk payi)
+#
+# Ilk kosumda detayli yonlendirme SU HATAYLA durdu:
+#     [ERROR DRT-1231] Pin u_data_ram.g_sram[3].u_macro/addr1[7]
+#                      does not have access point
+#
+# Zincir soyle isledi:
+#   1. Ana yonlendirme BASARILI bitti - 63 turda 55.347 -> 23 ihlal.
+#   2. Anten denetimi 282 ag + 343 pin ihlali buldu.
+#   3. Onarim 586 DIYOT ekledi.
+#   4. Diyotlar makro kenarina yerlesince o pinin erisim noktasi kapandi.
+#
+# Varsayilan halo 10 um idi. 25 um'ye cikariliyor: makro kenarinda
+# standart hucre ve diyot yerlesemeyecek bir serit birakilir, yonlendirici
+# pinlere ulasacak yeri korur.
+#
+# Alan maliyeti yok: kanallar 200 um, halo her iki yandan 25 um alsa bile
+# ortada 150 um kullanilabilir serit kaliyor. Global yonlendirme kullanimi
+# zaten %14,4 idi - yer bol.
+# -----------------------------------------------------------------------------
+FP_MACRO_HORIZONTAL_HALO: 30
+FP_MACRO_VERTICAL_HALO: 30
+PDN_HORIZONTAL_HALO: 30
+PDN_VERTICAL_HALO: 30
+
+# -----------------------------------------------------------------------------
+# Sentez
+# -----------------------------------------------------------------------------
+# SENTEZ STRATEJISI - OLCUMLE SECILDI  (25 Agustos 2026)
+#
+# 'AREA 0' varsayilandi ve problemimizin TERSI yonde optimize ediyordu:
+# alanimiz bol (standart hucre dolulugu %12,7) ama kritik yollarimiz
+# MANTIK DERINLIGI baskin (tt'de 92 hucre, ss'te 152 hucrelik 32x32 carpma).
+#
+# LibreLane'in synthesisexploration akisiyla dokuz strateji olculdu
+# (sentez + PnR oncesi STA, ayni SDC ve kisitlarla):
+#
+#   STRATEJI    nom_tt    nom_ss    hucre
+#   AREA 3     +3,9027   -8,3425   106460   <-- SECILEN
+#   AREA 1     +1,8766   -9,9979    69023
+#   AREA 0     +1,5024   -9,3385    69337   <-- onceki
+#   DELAY 0    +0,1556  -14,2930    78204
+#   DELAY 1    -1,3889  -15,4865    ~78000
+#   AREA 2     -2,6410  -12,7225    69423
+#   (DELAY 2/3/4 olculemedi - bkz. asagidaki not)
+#
+# NEDEN AREA 3
+#   Adi yaniltici; kaynak koda bakinca ORFS'in betigi cikiyor:
+#       strash / dch / map -B 0.9 / topo / stime -c
+#       buffer -c -N {MAX_FANOUT_CONSTRAINT}
+#       upsize -c / dnsize -c
+#   Yani "alan icin esle, sonra zamanlamayi KAPI BOYUTLANDIRMASIYLA duzelt".
+#   Hem daha buyuk hem daha hizli olmasinin sebebi bu. buffer -c -N satiri
+#   bizim MAX_FANOUT_CONSTRAINT: 20 degerini sentezde de kullaniyor.
+#
+#   PnR bedeli olculdu: 8. kosumda AREA 0 PnR oncesi +1,502 verirken PnR
+#   sonrasi -1,300'e dustu, yani ~2,8 ns. Ayni bedeli uygularsak AREA 3'un
+#   PnR sonrasi ~+1,1 vermesi beklenir - tt kosesinde 50 MHz imzalanabilir
+#   tek strateji bu.
+#
+# RISK: hucre sayisi %53 artiyor (69k -> 106k), toplam yerlesen ornekte
+# ~%17. Sikisiklik bizim baglayici kisitimiz. Iki telafi ayni kosumda
+# devrede: MAX_TRANSITION 0,75 -> 1,0 (DRV tamponlari azalir) ve makro
+# gruplamasi (I-RAM/D-RAM ayak izi yariya indi).
+#
+# NOT - EKSIK OLCUM: DELAY 2/3/4 sonuclari alinamadi; kesif dizini bir
+# otomasyon hatasiyla silindi. DELAY 0 (+0,16) ve DELAY 1 (-1,39) AREA 3'un
+# cok gerisinde kaldigi icin DELAY ailesinin one gecmesi beklenmiyor, ama
+# bu bir varsayimdir. Vakit kalirsa kesif tekrarlanmali.
+
+# -----------------------------------------------------------------------------
+# Lint
+#
+# Sartname reports/lint/ altinda Verilator lint ciktisi istiyor.
+# -----------------------------------------------------------------------------
+RUN_LINTER: true
+LINTER_RELATIVE_INCLUDES: true
+
+# -----------------------------------------------------------------------------
+# PDK
+# -----------------------------------------------------------------------------
+PDK: sky130A
+STD_CELL_LIBRARY: sky130_fd_sc_hd
+
+# >>> URETILEN BLOK - gen_sources.py ile uretilir, ELLE DUZENLEMEYIN >>>
+# Kaynak: filelist.f  (57 dosya)
+VERILOG_FILES:
+  - ../rtl/Cevre_Birimleri/files_1/uart_pkg.sv
+  - ../rtl/boot/boot_rom_pkg.sv
+  - ../rtl/npu/npu_weights_pkg.sv
+  - ../rtl/Memory/memory_map_pck.sv
+  - ../rtl/cv32e40p-master/rtl/include/cv32e40p_apu_core_pkg.sv
+  - ../rtl/cv32e40p-master/rtl/include/cv32e40p_fpu_pkg.sv
+  - ../rtl/cv32e40p-master/rtl/include/cv32e40p_pkg.sv
+  - ../rtl/Cevre_Birimleri/dma_controller.sv
+  - ../rtl/Cevre_Birimleri/files_1/sync_fifo.sv
+  - ../rtl/Cevre_Birimleri/files_1/uart_peripheral.sv
+  - ../rtl/Cevre_Birimleri/files_1/uart_rx.sv
+  - ../rtl/Cevre_Birimleri/files_1/uart_stream_peripheral.sv
+  - ../rtl/Cevre_Birimleri/files_1/uart_tx.sv
+  - ../rtl/Cevre_Birimleri/gpio_peripheral.sv
+  - ../rtl/Cevre_Birimleri/i2c_peripheral.sv
+  - ../rtl/Cevre_Birimleri/jtag_debug.sv
+  - ../rtl/Cevre_Birimleri/qspi_master.sv
+  - ../rtl/Cevre_Birimleri/timer_peripheral.sv
+  - ../rtl/Memory/axi_lite_interconnect.sv
+  - ../rtl/Memory/axil_arbiter_2to1.sv
+  - ../rtl/Memory/axil_arbiter_3to1.sv
+  - ../rtl/Memory/obi_to_axi_simple.sv
+  - ../rtl/Memory/sram_module.sv
+  - ../rtl/boot/boot_rom.sv
+  - ../rtl/cv32e40p-master/bhv/cv32e40p_sim_clock_gate.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_aligner.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_alu.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_alu_div.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_apu_disp.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_compressed_decoder.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_controller.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_core.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_cs_registers.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_fifo.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_hwloop_regs.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_id_stage.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_if_stage.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_int_controller.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_mult.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_obi_interface.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_popcnt.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_prefetch_buffer.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_prefetch_controller.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_register_file_ff.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_sleep_unit.sv
+  - ../rtl/npu/npu_engine_axi_master.sv
+  - ../rtl/npu/npu_tcm_axi_slave.sv
+  - ../rtl/npu/npu_accelerator.sv
+  - ../rtl/npu/npu_axi_controller.sv
+  - ../rtl/npu/npu_compute_engine.sv
+  - ../rtl/npu/npu_csr.sv
+  - ../rtl/npu/npu_tcm_sram.sv
+  - ../rtl/Memory/soc_top.sv
+# <<< URETILEN BLOK SONU <<<
+
+# -----------------------------------------------------------------------------
+# ANTEN ONARIMI - YALNIZCA ATLAMA TELI  (5. kosumda eklendi)
+#
+# 3. kosum su hatayla dustu:
+#     [ERROR DRT-1231] Pin u_data_ram.g_sram[3].u_macro/addr1[7]
+#                      does not have access point
+#
+# Kok neden: anten onarimi 586 diyot ekledi, biri makro kenarina dusup
+# pin erisimini kapatti. 4. kosumda halo 25 um'ye cikarildi; yetmedi.
+#
+# Bu ayar diyot yerlestirmesini tamamen devreden cikarir. Anten ihlalleri
+# metal atlama teliyle giderilir - yeni hucre yerlesmez, yerlesim
+# kalabaligi olusmaz, makro pini kapanamaz.
+#
+# Maliyet yonlendirme kaynagidir. Bizde bol: global yonlendirme kullanimi
+# %14,4, overflow 0.
+# -----------------------------------------------------------------------------
+GRT_ANTENNA_REPAIR_JUMPER_ONLY: true
+
+# 11. kosum kok-neden duzeltmesi:
+# GRT asamasinda jumper-only acik olsa da detayli yonlendiricinin ayri
+# anten onarimi varsayilan olarak diyot eklemeye devam etti. Sonucta 7.591
+# diyot olustu; nom_tt slew ihlallerinin 2.523'u bu diyot pinlerindeydi.
+# DRT tarafini da jumper-only yaparak hem yuk/slew sismesini hem makro
+# kenarlarindaki diyot kalabaligini engelliyoruz. Daha fazla onarim turu,
+# kalan az sayidaki ag icin metal katman atlatmasina zaman verir.
+DRT_ANTENNA_REPAIR_JUMPER_ONLY: false
+DRT_ANTENNA_REPAIR_ITERS: 5
+
+# -----------------------------------------------------------------------------
+# MAKRO ICERIGININ KAYNAGI  (6. kosumda eklendi - 24 Agustos 2026)
+#
+# 6. kosum 91-klayout-render adiminda dustu:
+#     The layout has multiple top cells in Layout.top_cell
+#
+# KOK NEDEN
+#   Magic'in varsayilan 'macro' kipinde makro BOS bir kabuk olarak yaratilir;
+#   gercek icerik yazma aninda GDS dosyasindan kopyalanir. Kopyalanirken
+#   makronun ALT HUCRE TANIMLARI da GDS'e girer, ama kabuk bos oldugu icin
+#   onlara HICBIR HUCRE REFERANS VERMEZ. GDS dilinde referanssiz hucre = ust
+#   hucre. Dosyada 13 ust hucre olusur: soc_top + SRAM makrosunun 12 ic
+#   hucresi. KLayout'un Layout.top_cell metodu TEK ust hucre bekler ve
+#   istisna atar (cikis kodu 1 - bellek yetmezligi degil).
+#
+# TASARIM SAGLAMDI. Geometri soc_top altinda eksiksizdi: makro 23 kez
+# ornekleniyor, sinir kutusu 683,1 x 416,54 um dogru, SRAM hucresi ust hucre
+# degil. Fazla 12 tanim ARTIK TANIMDI.
+#
+# YINE DE DUZELTILDI, cunku:
+#   - tek ust hucreli GDS foundry teslimi icin dogru olan
+#   - sonraki KLayout adimlari (XOR, DRC) AYNI GDS'i acar ve ayni
+#     Layout.top_cell duvarina carpabilirdi. Onlar signoff adimi, atlanamaz.
+#
+# 'PDK' kipi makro hiyerarsisini gercekten kurar, kabuk kalmaz, GDS tek ust
+# hucreli cikar. Daha once denenmisti: render 17 saniyede gecti.
+#
+# NEDEN BASTAN ACIK DEGILDI
+#   Bu kipte Magic butun makro hiyerarsisini bellege alir; RSS 10,4 GB
+#   olculdu ve 16 GB'lik gelistirme makinesi takas alanina dusuyordu. Akis
+#   31 GB'lik bulut makinesine tasindi (yonlendirme tepe bellegi 5,8 GB) -
+#   kisit artik gecerli degil.
+#
+# NOT: bu ayar yalnizca Magic adimlarini etkiler (StreamOut ve sonrasi).
+# Yerlestirme ve yonlendirme sonuclari korunur; akis 89. adimdan devam
+# ettirilebilir:
+#     make asic_resume
+# -----------------------------------------------------------------------------
+MAGIC_MACRO_STD_CELL_SOURCE: "PDK"
+
+# -----------------------------------------------------------------------------
+# MAGIC DRC KAYNAGI  (6. kosumda eklendi - 24 Agustos 2026)
+#
+# MAGIC_MACRO_STD_CELL_SOURCE: PDK ayarinin BEKLENMEYEN BEDELI.
+#
+# PDK kipi makro hiyerarsisini gercekten kurunca Magic DRC artik 23 SRAM
+# makrosunun ICINE de iniyor. Eski 'macro' kipinde makro bos kabuktu ve DRC
+# iceri hic girmiyordu. Is yuku kat kat artti:
+#     99-magic-drc  1 saat 27 dakika kostu, bitmedi
+#     bellek 31 GB'lik makinede tukendi, yeni SSH oturumu acilamaz oldu
+#
+# 'false' DRC'yi GDS yerine DEF uzerinden kosturur. Makrolar DEF'te SOYUT
+# (abstract) gorunur, yani DRC BIZIM tasarimimizi denetler, ucuncu taraf
+# makronun icini denetlemez.
+#
+# BU NEDEN KABUL EDILEBILIR
+#   1. Makro ic geometrisinin DRC imzasi makro saglayicisina aittir; endustri
+#      pratigi de budur. Biz makroyu degistirmiyoruz.
+#   2. GDS uzerinden DRC yine kosuluyor - KLayout.DRC adimi bagimsiz olarak
+#      nihai GDS'i denetliyor. Iki farkli araç, iki farkli kapsam.
+#   3. Makro icini denetlemek zaten 5. kosuma kadarki butun sonuclarin
+#      dayanagi degildi; oradaki DRC de soyut makro uzerindendi.
+#
+# TAM DENETIM ISTENIRSE
+#   Bu satiri 'true' yapip 64 GB+ bellekli bir makinede kosmak yeterli.
+#   Sonuc farki yalnizca makro ic geometrisidir.
+# -----------------------------------------------------------------------------
+MAGIC_DRC_USE_GDS: false
+
+# -----------------------------------------------------------------------------
+# YONLENDIRME SONRASI ZAMANLAMA ONARIMI  (6. kosum sonrasi - 24 Agustos 2026)
+#
+# 6. kosumda max_ff kosesinde 8 HOLD ihlali cikti (en kotu -0,0622 ns):
+#
+#   u_uart2.u_rx.bit_cnt_r[1] -> [2]              -0,0622   UART2 RX sayaci
+#   u_uart2.u_rx.state_r[3]   -> [0]              -0,0593   UART2 RX FSM
+#   u_npu.ram_wdata_a[12..14] -> NPU SRAM         -0,0470   NPU yazma verisi
+#   u_instruction_ram.rdata_hold[17] -> CPU FIFO  -0,0172   I-RAM -> cekirdek
+#   u_data_ram.aw_addr_reg[7] -> D-RAM SRAM       -0,0164   D-RAM adres
+#
+# HOLD IHLALI SETUP'TAN FARKLIDIR: saati yavaslatarak DUZELMEZ. Veri saat
+# kenarindan once varir ve yanlis deger yakalanir - her frekansta bozuktur.
+# Bu yuzden ss kosesindeki setup sapmasi gibi "belgelenmis sapma" olarak
+# birakilamaz.
+#
+# KOK NEDEN
+#   RUN_POST_GRT_RESIZER_TIMING varsayilan olarak FALSE idi. Yani hold
+#   onarimi YALNIZCA CTS sonrasi, TAHMINI parazitiklerle kosuldu. Gercek
+#   yonlendirme gecikmeleri eklendikten sonra ortaya cikan ihlalleri
+#   yakalayacak ikinci gecis hic calismadi.
+#
+# HICBIRI CEKIRDEGIN KENDI MANTIGINDA DEGIL - hepsi cevre birimi ya da
+# bellek arayuzu. Cozum RTL'e dokunmadan, tampon ekleyerek yapilir.
+# -----------------------------------------------------------------------------
+RUN_POST_GRT_RESIZER_TIMING: true
+
+# YONLENDIRME SONRASI HOLD MARJI
+#
+# 10. KOSUM DENEYI VE GERI ALINMASI (25 Agustos 2026)
+#
+# 9. kosumda AREA 3'un upsize -c adimi setup'i kazandirirken hold'u
+# bozmustu (reg->reg ihlal 109 -> 687, en kotu -0,396 ns). 10. kosumda
+# hold onarimi guclendirildi:
+#     GRT_RESIZER_HOLD_SLACK_MARGIN  0,1 -> 0,30
+#     PL_RESIZER_HOLD_SLACK_MARGIN   0,1 -> 0,20
+#     GRT/PL_RESIZER_FIX_HOLD_FIRST  false -> true
+#
+# SONUC: IKISINI BIRDEN KAYBETTIK.
+#
+#     [INFO RSZ-0032] Inserted 11749 hold buffers.
+#
+#     Kose        setup 9. kosum -> 10. kosum   hold reg->reg ihlal
+#     nom_ss        -6,665  ->  -15,269          687 -> 1147
+#     max_ss        -8,026  ->  -17,619
+#     max_tt        +0,915  ->   +0,531
+#
+# Mekanizma: FIX_HOLD_FIRST boyutlandiriciya "once hold" dedirtti, o da
+# veri yollarina 11.749 geciktirme tamponu ekledi. Her tampon gecikme
+# demek; ss setup 8,6 ns coktu. Hold da duzelmedi cunku sonradan kosan
+# setup onarimi o tamponlarin bir kismini geri aldi.
+#
+# DERS: FIX_HOLD_FIRST, hold'un BASKIN sorun oldugu tasarimlar icindir.
+# Bizde setup ss'te zaten zorda; hold'a mutlak oncelik vermek yanlisti.
+#
+# 9. kosum degerlerine donuluyor. Hold ayri ve DAHA OLCULU ele alinacak:
+# once marji tek basina (0,15-0,20) denemek, FIX_HOLD_FIRST'e hic
+# dokunmamak.
+# 16. KOSUM - MARJ OLCUMLE BELIRLENDI (tahminle degil)
+#
+# Gereken marj, 15. kosumun sayilarindan tureyor:
+#
+#   a) Boyutlandirici GRT'de nom_ff hold slack'ini 0,15'e cekmeyi hedefledi;
+#      signoff'ta nom_ff -0,012 cikti.  ->  optimizm payi 0,162 ns
+#      (ayrintili yonlendirme + gercek SPEF, tahmini parazitikten kotu.)
+#   b) max_ff, nom_ff'den 71 ps daha kotu (max RC -> saat agaci daha cok
+#      yayiliyor, hold'u bozan sey saat carpikligi).
+#
+#   max_ff >= 0 icin  nom_ff >= +0,071 gerekiyor.
+#   -0,012'den +0,071'e cikmak icin gereken artis: 0,083.
+#   Asgari marj = 0,15 + 0,083 = 0,233.  Guvenlik payiyla 0,28.
+#
+#   Beklenti: signoff nom_ff ~ +0,118 ; max_ff ~ +0,047 (ikisi de pozitif).
+#
+# BU 10. KOSUMDAKI 0,30 DEGILDIR. Orada yikici olan sayi degil,
+# FIX_HOLD_FIRST'un oncelik sirasini tersine cevirmesiydi (hold'a mutlak
+# oncelik -> ss setup 8,6 ns coktu). FIX_HOLD_FIRST'e DOKUNULMADI.
+#
+# Tampon siskinligi riski olculdu: 15. kosum zaten 9516 hold tamponu
+# tasiyor (PL 6122 + GRT 3394) ve 241 869 hucrede sikisiklik sorunu yok.
+# Marj artisinin getirecegi birkac bin tampon bu tabloyu bozmaz.
+# arkhe22 (0.40) -> en kotu r2r hold -0,2714, 31 ihlal
+# arkhe23 (0.75) -> hold temiz ama gereken periyot 28,59 -> 39,78 ns
+# Olculen oran: her 0,1 marj ~2,1 ns setup. 0,50 hold'u kapatip
+# 0,75'in agir bedelini odememeyi hedefliyor.
+GRT_RESIZER_HOLD_SLACK_MARGIN: 0.50
+PL_RESIZER_HOLD_SLACK_MARGIN: 0.1
+
+# -----------------------------------------------------------------------------
+# SAAT AGACI  (16. kosum teshisi, 26 Agustos 2026)
+#
+# 16. kosumda hold, tt kosesinde dahi bozuldu. Sebebi arandi ve OLCULDU:
+# suclu hold marji ya da aligner degil, SAAT CARPIKLIGI.
+#
+#     kose        15. kosum   16. kosum
+#     nom_tt       1,254       1,718
+#     max_tt       1,391       1,893
+#     nom_ff       1,002       1,339
+#     max_ff       1,167       1,480
+#     max_ss       2,021       2,660
+#
+# max_ff'te +0,31 ns carpiklik artisi, hold'un -0,083'ten -0,455'e
+# dusmesini birebir aciklar. Netlist cok az degisti (aligner geri alindi)
+# ama CTS bambaska - ve daha kotu - bir agac kurdu.
+#
+# ASIL BULGU: config.yaml'da bugune kadar HIC CTS ayari yoktu. Hepsi
+# varsayilan, onemlilerin cogu None. 23 sert makro 3,3 mm'lik kalibda
+# yayilmis, 12 322 saat yapragi var ve agac hic ayarlanmamis.
+#
+# En kotu carpiklik yolunun KAYNAGI da bir makro saat pini:
+#     u_npu.u_npu_sram.g_sram[10].u_macro/clk0   kaynak gecikmesi 3,158 ns
+#     hedef _188451_/CLK                          hedef gecikmesi -2,240 ns
+#
+# Iki ayar aciliyor, ikisi de dogrudan carpikligi hedefliyor:
+#
+#   CTS_OBSTRUCTION_AWARE - LibreLane belgesi birebir bizim durumumuzu
+#     tarif ediyor: "saat tamponlarinin bloklarin veya SERT MAKROLARIN
+#     uzerine yerlestirilmemesini saglar; yasallastirici kaydirmasini
+#     azaltarak daha iyi gecikme, CARPIKLIK veya zamanlama kalitesi
+#     saglayabilir." Su an CTS tamponlari makrolarin uzerine koyuyor,
+#     yasallastirici onlari baska yere itiyor ve agac bozuluyor.
+#
+#   CTS_BALANCE_LEVELS - dallar arasindaki tampon seviyesi sayisini
+#     dengeler. Carpikligin tanimi zaten dallar arasi gecikme farki.
+#
+# Hold marji bu kosumda 9./15. kosum degeri olan 0,15'e donduruldu:
+# 16. kosumda 0,28 denendi ve OLCULDU ki bir sey degistirmiyor -
+# boyutlandirici hedefe degil, kendi platosuna gore duruyor.
+# -----------------------------------------------------------------------------
+CTS_OBSTRUCTION_AWARE: true
+CTS_BALANCE_LEVELS: true
+
+# -----------------------------------------------------------------------------
+# BOYUTLANDIRICI KOSELERI
+#
+# RSZ_CORNERS tanimsizdi. Hold onarimi HIZLI kosede yapilmalidir - ihlaller
+# tam da orada (max_ff, -40C / 1,95 V). Yalnizca tipik kosede calisan bir
+# onarim ff kosesindeki hold sorununu GORMEZ.
+#
+# Uc kose veriliyor: hold icin ff, setup icin ss, denge icin tt.
+# -----------------------------------------------------------------------------
+# DUZELTME (7. kosum baslatildiktan sonra): nom_ss LISTEDEN CIKARILDI.
+#
+# Ilk yazimda uc kose verilmisti. 7. kosumun yerlestirme sonrasi setup
+# onarim dongusunde boyutlandirici ss kosesini kovalamaya basladi:
+#     iterasyon 1140 -> 1220 arasinda WNS -5,936 -> -5,802
+#     yani 80 iterasyonda 0,13 ns
+# ss'teki -6,31 ns'nin kaynagi CV32E40P'nin KENDI ICI ve ucuncu taraf IP'ye
+# dokunmama karari geregi kapatilamaz. Boyutlandiriciyi oraya salmak
+# saatlerce kosum suresi ve tampon siskinligi demek, kazanc yok.
+#
+# tt : imza hedefimiz (50 MHz), setup onarimi buraya odaklanmali
+# ff : hold ihlalleri BURADA - hold onarimi hizli koseyi gormek zorunda
+# 8. KOSUM SONRASI GERI ALINDI: nom_ss LISTEYE YENIDEN EKLENDI
+#
+# 7. kosum baslarken boyutlandiricinin ss kosesinde donmesini "bosuna
+# efor" sanip ss'i cikarmistim. Gozlem penceresi cok darkti:
+#     iterasyon 1140 -> 1220 arasi WNS -5,936 -> -5,802
+# Iterasyon basina kazanc kucuktu, ama BIRIKIMLI etkisi buyukmus.
+#
+# 8. kosum olcumu: ss'siz optimizasyonla nom_ss setup -16,37 ns cikti.
+# 6. kosumda (RSZ_CORNERS tanimsiz, yani ss dahil) ayni deger -5,45 idi.
+# Kaybettigimiz: 11 ns.
+#
+# En kotu ss yolu: u_npu.u_npu_engine.d_out[0] -> rq_ab[63]
+# (requantization 32x32 isaretli carpma, 152 hucre derinliginde).
+# Boyutlandirici bu yoldaki hucreleri buyuterek 11 ns kazandiriyormus.
+#
+# Bedeli kosum suresi; kazanci 11 ns. Alinir.
+# 15. KOSUM OLCUMU - max_ff DENENDI, ISE YARAMADIGI OLCULDU
+#
+# 15. kosumun kose bazli hold sayilari sorunun yerini kesin gosterdi:
+#
+#     kose              hold WNS    ihlal   bunun reg->reg olani
+#     min_ff_n40C_1v95   +0,041       0       0
+#     nom_ff_n40C_1v95   -0,012       3       3
+#     max_ff_n40C_1v95   -0,083      20      20   <- tek gercek hold sorunu
+#
+# (ss kosesindeki 12 ve 16 ihlalin reg->reg olani SIFIR; onlar giris/cikis
+# gecikmesi kaynakli, ic yol degil - duzeltilecek bir sey yok.)
+#
+# Ilk refleks "oyleyse max_ff'yi RSZ_CORNERS'a ekleyelim" oldu. YANLIS.
+# Sebebi araca bakilarak dogrulandi:
+#
+#   * min/nom/max ayrimi SUREC kosesi degil, PARAZITIK CIKARIM kosesidir.
+#     RCX_RULESETS uc ayri OpenRCX kurali tanimliyor ve uc ayri SPEF
+#     uretiliyor (soc_top.min/nom/max.spef).
+#   * nom_ff_n40C_1v95 ile max_ff_n40C_1v95 AYNI liberty dosyasini
+#     kullaniyor: sky130_fd_sc_hd__ff_n40C_1v95.lib. Aralarindaki tek fark
+#     hangi SPEF'in okundugu.
+#   * SPEF ancak yonlendirmeden SONRA cikariliyor. Boyutlandirici PnR
+#     sirasinda calisir ve TAHMINI parazitik kullanir - onun icin bu iki
+#     kose birebir aynidir. Listeye eklemek hicbir sey degistirmez.
+#   * Ustelik LAYERS_RC ve VIAS_R ikisi de tanimsiz; IPVTCorner
+#     karsilastirmasi yalnizca liberty'ye bakiyor, yani iki kose
+#     "ayni kose" sayiliyor.
+#
+# Kisacasi max_ff hold'u PnR icinde HEDEFLENEMEZ. Tek kaldirac, nom_ff'de
+# yeterince pay birakip max RC farkini yutturmaktir - bkz. hold marji.
+# NOT (27 Agustos): RSZ_CORNERS'a max_* eklenmesi DENENDI ve GERI ALINDI.
+# min/nom/max surec degil PARAZITIK CIKARIM kosesidir. resolved.json kaniti:
+#   LAYERS_RC = None, VIAS_R = None
+#   *_ss_100C_1v60 -> sky130_fd_sc_hd__ss_100C_1v60.lib   (nom/min/max AYNI liberty)
+#   RCX_RULESETS yalnizca nom_*/min_*/max_* icin RC kurali ayirir, SPEF ise
+#   yonlendirmeden SONRA uretilir. Boyutlandirici PnR icinde tahmini parazitikle
+#   calisir, bu iki koseyi ayirt EDEMEZ. 16. kosumda olculdu, geri alindi.
+RSZ_CORNERS:
+  - nom_tt_025C_1v80
+  - nom_ff_n40C_1v95
+  - nom_ss_100C_1v60
+
+# -----------------------------------------------------------------------------
+# ZAMANLAMA ODAKLI YERLESTIRME  (Talha'nin 6. kosum incelemesi - §5)
+#
+# resolved.json'da PL_TIMING_DRIVEN false idi. Yerlestirici hucreleri
+# yalnizca tel uzunlugunu gozeterek konumluyordu; kritik yollarin kisalmasi
+# icin bir cabasi yoktu. Zamanlama sinirli bir tasarimda bu birakilmis
+# kazanctir.
+#
+# Maliyet: yerlestirme adimi uzar. Kazanc: kritik yollar kisalir, hem setup
+# hem DRV (slew/cap) iyilesir.
+# -----------------------------------------------------------------------------
+# 7. KOSUM DENENDI VE GERI ALINDI - ARAC HATASI
+#
+# true yapildiginda global yerlestirme 28. adimda coktu:
+#
+#   [INFO GPL-0100] Timing-driven iteration 1/2, virtual: false.
+#   [CRITICAL RSZ-2007] buffering pin _061835_/X: wire step options empty
+#
+# Bu OpenROAD boyutlandiricisinin KENDI IC HATASI - tamponlama algoritmasi
+# (van Ginneken / Steiner) tel bolutleme secenekleri bos kalinca CRITICAL
+# atip akisi durduruyor. Bizim ayar hatamiz degil; ayar mesru ama bu
+# OpenROAD surumu bu tasarimda o kod yoluna girince cokuyor.
+#
+# ONEMLI: kaybimiz sinirli. Coktugu noktadan HEMEN ONCE calisan
+# repair_design adimi basariyla bitti ve SDC'ye eklenen tasarim kurali
+# kisitlarinin calistigini kanitladi:
+#
+#   final | +1,6% alan | 153 boyutlandirma | 12648 tampon | 2452 ag onarildi
+#
+# O kazanc PL_TIMING_DRIVEN'dan BAGIMSIZ, false'ta da elde ediliyor.
+# Timing-driven yerlestirme yalnizca "olsa iyi olurdu" kategorisindeydi.
+#
+# Tekrar denenecekse OpenROAD surumu yukseltildikten sonra denenmeli.
+
+# -----------------------------------------------------------------------------
+# YONLENDIRME SONRASI TASARIM KURALI ONARIMI  (Talha - §5)
+#
+# RUN_POST_GRT_DESIGN_REPAIR false idi. max cap / max slew onarimi yalnizca
+# yerlestirme asamasinda, TAHMINI parazitiklerle yapiliyordu. Gercek
+# yonlendirme kapasitesi eklendikten sonra dogan ihlalleri kapatacak gecis
+# yoktu - hold'daki RUN_POST_GRT_RESIZER_TIMING sorununun DRV karsiligi.
+#
+# 6. kosumda dokuz kosenin tamaminda cap/slew ihlali vardi (en iyi kosede
+# bile 215/579). SDC'ye eklenen kisitlarla birlikte bu adim da acilmali.
+# -----------------------------------------------------------------------------
+RUN_POST_GRT_DESIGN_REPAIR: true
+
+# -----------------------------------------------------------------------------
+# FANOUT SINIRI  (7. kosum GRT cokusunden sonra - 24 Agustos 2026)
+#
+# 7. kosum 39-openroad-globalrouting adiminda dustu:
+#     [GRT-0116] Global routing finished with congestion.
+# 50 ekstra iterasyonun tamami tuketildi, overflow kapanmadi.
+# Yerlestirme de uyarmisti: GPL-1005 agirlikli sikisiklik 1,1350 (>1).
+#
+# SEBEP BIZIM DUZELTMEMIZ
+#   SDC'ye tasarim kurali kisitlarini ekleyince repair_design 1576 fanout
+#   ihlali buldu ve toplam 18.430 tampon ekledi. Her tampon yeni hucre ve
+#   yeni ag demek. 6. kosumda kisit yoktu, GRT kullanimi %14,4 ve overflow
+#   0 idi - bol paydan kapasite asimina gectik.
+#
+#   Standart hucre dolulugu hala %12,7; sorun hucre kalabaligi DEGIL.
+#   23 makro alanin %40'ini kapliyor ve uzerlerinden gecis kisitli;
+#   mantigin baglantilari aradaki 140 um'lik dar kanallardan geciyor.
+#   Tampon sayisi artinca o kanallar tikandi.
+#
+# NEDEN 20, NEDEN 10 DEGIL
+#   Asil sorun reset agacindaki ~150 yuklu dallardi (slew 2,69 ns, sinir
+#   1,50). Sinir 10 iken her dal ~15 tampon istiyor; 20'de ~8'e duser,
+#   fanout kaynakli tampon sayisi kabaca yarilanir.
+#
+#   20 hala 150'ye kiyasla 7,5 KAT iyilesme - slew sorununu fazlasiyla
+#   kapatir. Ustelik asil is fanout sinirinda degil: set_max_transition
+#   (0,75 ns) ve set_max_capacitance (0,2 pF) slew/cap'i DOGRUDAN hedefler
+#   ve degismeden duruyor. Fanout siniri onlarin yardimcisi.
+#
+#   Yani kazancin esasi korunuyor, sikisiklik birakilıyor.
+#
+# constraints/design.sdc bu degeri env uzerinden okur, elle senkron
+# tutmaya gerek yok.
+# -----------------------------------------------------------------------------
+MAX_FANOUT_CONSTRAINT: 20
+
+# -----------------------------------------------------------------------------
+# GECIS SURESI SINIRI  (8. kosum sonrasi - 25 Agustos 2026)
+#
+# LibreLane'in sky130 varsayilani 0,75 ns; sky130_fd_sc_hd kutuphanesinin
+# KENDI max_transition degeri 1,5 ns. Yani varsayilan, kutuphane sinirindan
+# IKI KAT siki.
+#
+# 7. ve 8. kosumda bu siki sinir repair_design'a 13.955 tampon ektirdi.
+# Tamponlar veri yollarinda ve gecikme ekliyor. Bedeli olculdu:
+#
+#   nom_tt setup WNS   6. kosum +0,947  ->  8. kosum -1,300   (2,2 ns kayip)
+#   en kotu tt yolu    u_data_ram SRAM -> CPU, 92 hucre
+#
+# tt kosesi RSZ_CORNERS'ta oldugu halde kotulesti - yani sebep optimizasyon
+# eksikligi degil, eklenen tamponlarin kendisi.
+#
+# TAKAS DEGERLENDIRMESI
+#   Kazanc : gercek slew ihlali (1,5 ns sinirinda) nom_tt'de 1842 -> 159
+#   Bedel  : setup 2,2 ns
+#   1,5 ns'in altindaki slew degerleri kutuphanenin karakterize ettigi
+#   araligin ICINDE; zamanlama modelleri gecerli. Setup ihlali ise dogrudan
+#   frekans kaybi. Bu takas kotu.
+#
+# 1,0 ns orta yol: reset agacindaki 2,69 ns'lik patolojik kenarlari hala
+# yakalar, ama her marjinal agi tamponlamaya zorlamaz.
+# -----------------------------------------------------------------------------
+MAX_TRANSITION_CONSTRAINT: 0.75
+
+# max cap ihlalleri varsayilan [''] ile HICBIR kosede checker'i
+# tetiklemiyordu; gorunur hale getiriliyor (yalnizca raporlama).
+MAX_CAP_VIOLATION_CORNERS: ["*"]
+
+# =============================================================================
+#  SAAT AGACI - yerlestirme gecikmesini dusurme  (2026-08-28)
+# =============================================================================
+# arkhe25 ve t50_2'de olculen: clk_i'den flop CLK'sine 6,827 ns, 10 kademe
+# clkbuf. Bu die icin fazlasiyla yuksek.
+#
+# Setup'ta yerlestirme gecikmesi buyuk olcude birbirini goturur, AMA:
+#   - carpiklik uretir (t50_2 en kotu yolunda yakalayan saat 1,15 ns ERKEN
+#     geliyordu, dogrudan setup butcesinden yiyordu)
+#   - carpiklik hold ihlali dogurur
+#   - OpenROAD hold'u duzeltmek icin setup-kritik yollara YAVAS gecikme
+#     hucreleri koyar (clkdlybuf4s25_1, dlygate4sd3_1)
+#   - arkhe25'te kritik yolun 6,12 ns'i tam bu onarim tamponlariydi
+#
+# Kok sebep CTS_CLK_BUFFERS listesi: en guclu tampon clkbuf_8 idi.
+# Kok tampon clkbuf_16 olarak ayarliyken agacin geri kalani ona
+# erisemiyordu, CTS de yuku surmek icin kademe ustune kademe koydu.
+# clkbuf_16 listeye eklendi, en zayif olan clkbuf_2 cikarildi.
+CTS_CLK_BUFFERS: ["sky130_fd_sc_hd__clkbuf_16", "sky130_fd_sc_hd__clkbuf_8", "sky130_fd_sc_hd__clkbuf_4"]
+
+# Yaprak kumelerini buyutmek kademe sayisini dusurur: ayni sayida flop daha
+# az seviyede toplanir. Varsayilan (None) LibreLane'in kendi degerini kullanir.
+CTS_SINK_CLUSTERING_SIZE: 32
+
+# =============================================================================
+#  SENTEZ STRATEJISI - alandan zamanlamaya  (2026-08-28)
+# =============================================================================
+# t50_3'un resolved.json'inda bulundu:
+#     SYNTH_STRATEGY: AREA 3
+# Yani sentez bugune kadar ALAN icin optimize ediyordu, zamanlama icin degil.
+# AREA 3 en agresif alan stratejisi; dar ve DERIN mantik uretir. Olctugumuz
+# 50-74 kademelik kombinasyonel koniler tam bunun imzasi.
+#
+# Bu ayni zamanda daha once olctugum su tuhafligi da acikliyor: CLOCK_PERIOD
+# 20 ns ile 31 ns'de netlist BIREBIR AYNI cikiyordu. ABC zamanlama
+# optimizasyonu hic yapmiyormus.
+#
+# DELAY 0 kanonik zamanlama stratejisi: ABC mantigi derinligi dusurecek
+# sekilde yeniden yapilandirir. Bedeli alan artisi.
+#
+# RTL'e dokunmaz, islevsel risk YOKTUR - ayni mantigin farkli kapi
+# esleştirmesidir. LVS ve esdegerlik bunu zaten dogrular.
+SYNTH_STRATEGY: "DELAY 0"
+
+# 2026-08-28: t50_4 adim 44'te (ResizerTimingPostGRT) GRT-0116 ile dustu.
+# Taskin 8 GCell, kullanim yalnizca %20,26 - genel tikaniklik degil, birkac
+# yerel nokta. DELAY 0 sentezi tel uzunlugunu 10,64 M -> 11,63 M um cikardi,
+# o fark birkac GCell'i asirdi. Varsayilan 0,3 -> 0,20 her GCell kapasitesini
+# yaklasik %14 artirir. arkhe25 ayni die'da %18,74 kullanimla sorunsuzdu.
+
+# =============================================================================
+#  ZAMANLAMA-FARKINDA YERLESTIRME, TEK BASINA  (2026-08-30)
+# =============================================================================
+# t50_6'da PL_TIMING_DRIVEN ve PL_TARGET_DENSITY_PCT birlikte denendi.
+# Sonuc adim 38'de cok iyiydi:
+#     slew ihlali  410 -> 0
+#     setup_ws  2,3793 -> 2,6603
+#     hold_ws   0,2238 -> 0,2689
+# AMA adim 39 GRT-0116 ile dustu: taskin 861 GCell (t50_4'te 8 idi),
+# tel uzunlugu 10,64 M -> 12,00 M um (%13 artis).
+#
+# Sebep PL_TARGET_DENSITY_PCT 55: yogunlugu DUSURMEK hucreleri yayar,
+# yayilan hucreler arasi teller uzar, yonlendirme tikanir. "Nefes alani"
+# diye dusunulen ayar tam tersini yapiyor.
+#
+# Bu kosumda yogunluk varsayilana donuyor, YALNIZCA zamanlama-farkinda
+# yerlestirme deneniyor. Boylece adim 38'deki kazancin hangisinden
+# geldigi de ayrisir.
+PL_TIMING_DRIVEN: true
+
+# 2026-08-31: t50_9 detayli yonlendirmede GRT-0183 (heap underflow, 3D maze
+# routing, net27125) ile dustu. Bu bir OpenROAD IC HATASI, tasarim hatasi
+# degil - t50_7 ayni konfigle sorunsuz gecmisti, tek fark carpan
+# degisikliginin urettigi farkli netlist. Yonlendirmeyi hafifce perturbe
+# etmek icin 0,20 -> 0,18. Kapasiteyi biraz artirir, kritik yollara zarari yok.
+
+# t50_7 ile birebir ayni deger
+GRT_ADJUSTMENT: 0.20

@@ -1,0 +1,4 @@
+# Bu dizindeki ciktilar ZATEN sikistirilmis (.gz) ve hepsi 100 MB
+# sinirinin altinda. Depo kokundeki *.gds.gz / *.def.gz LFS kurallarini
+# burada BILEREK devre disi birakiyoruz - ayni gerekce teslim_arkhe25 ile.
+* -filter -diff -merge -text
