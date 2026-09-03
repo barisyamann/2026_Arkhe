@@ -15,14 +15,54 @@
 # -----------------------------------------------------------------------------
 set clk_name   clk_i
 set clk_port   clk_i
-set clk_period 20.0
+
+# -----------------------------------------------------------------------------
+# SAAT PERIYODU YAPILANDIRMADAN OKUNUR
+#
+# 18. KOSUM BUNUN ICIN BOSA GITTI (27 Agustos 2026).
+#
+# Burada "set clk_period 20.0" SABIT yaziliydi. config.yaml'daki
+# CLOCK_PERIOD degeri resolved.json'a giriyor, ortam degiskeni olarak
+# OpenROAD'a geciyor - ama BU DOSYA onu hic okumuyordu. Sonuc: 18. kosum
+# CLOCK_PERIOD 28,571 (35 MHz) ile baslatildi, SDC yine 20,0 uretti ve
+# kosum 17. kosumun BIREBIR AYNISI cikti. Uc saat.
+#
+# Belirti kolay kaciyor: resolved.json dogru degeri gosteriyor, yalnizca
+# uretilen soc_top.sdc icinde "-period 20.0000" yaziyor. Frekans degistiren
+# her kosumda DOGRULANMASI gereken yer orasi:
+#     grep create_clock run/<etiket>/*/soc_top.sdc
+#
+# Artik yapilandirmadan okunuyor; degisken tanimsizsa 20,0'a duser.
+# -----------------------------------------------------------------------------
+if {[info exists ::env(CLOCK_PERIOD)]} {
+    set clk_period $::env(CLOCK_PERIOD)
+} else {
+    set clk_period 20.0
+}
+puts "design.sdc: clk_period = $clk_period ns"
 
 create_clock -name $clk_name -period $clk_period [get_ports $clk_port]
 
 # Saat belirsizligi ve gecis suresi
 # LibreLane bunlari yapilandirmadan da alabilir; burada acikca veriliyor ki
 # SDC tek basina okundugunda da tam olsun.
-set_clock_uncertainty 0.25 [get_clocks $clk_name]
+# -----------------------------------------------------------------------------
+# SAAT BELIRSIZLIGI SETUP VE HOLD ICIN AYRI VERILIR
+#
+# Onceden tek satirdi: set_clock_uncertainty 0.25 - yani ayni deger hem
+# setup hem HOLD hesabina giriyordu. Hold raporunda dogrudan slack'ten
+# dusuluyordu:
+#     -0.250000 clock uncertainty
+#
+# Bu fazla muhafazakar. Iki buyuklugun icerigi farklidir:
+#   setup belirsizligi = jitter + modellenmemis skew payi  -> 0,25 makul
+#   hold  belirsizligi = yalnizca jitter                    -> 0,05-0,10
+#
+# Ikisine ayni degeri vermek olagandisi olan. Ayirmak her hold yolunda
+# 0,15 ns kazandirir ve standart pratiktir.
+# -----------------------------------------------------------------------------
+set_clock_uncertainty -setup 0.25 [get_clocks $clk_name]
+set_clock_uncertainty -hold  0.10 [get_clocks $clk_name]
 set_clock_transition  0.15 [get_clocks $clk_name]
 
 # -----------------------------------------------------------------------------
