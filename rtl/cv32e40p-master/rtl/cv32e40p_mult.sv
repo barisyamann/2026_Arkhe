@@ -108,57 +108,7 @@ module cv32e40p_mult
   assign short_op_c = mulh_active_o ? $signed({mulh_carry_q, op_c_i}) : $signed(op_c_i);
 
   assign short_mul = $signed(short_op_a) * $signed(short_op_b);
-
-  // ---------------------------------------------------------------------------
-  // MULH ICIN CARPIM ON-HESAPLAMA  (2026-08-30, 50 MHz calismasi)
-  //
-  // t50_7 imzalamasinda en kotu 1000 setup yolunun 461'i (%46) mulh_CS'ten
-  // cikiyordu, max_ss'de -4,589 ns, 64 kademe. Yol:
-  //     mulh_CS -> kontrol coz -> operand yarim secimi -> 17x17 CARPMA
-  //             -> 34-bit uc girisli toplama -> degisken kaydirici -> kayit
-  //
-  // MULH'un adim sirasi SABITTIR: STEP0 subword 00, STEP1 10, STEP2 01,
-  // FINISH 11. Dolayisiyla bir sonraki adimin carpimi BU adimda hesaplanip
-  // kaydedilebilir. Boylece carpma kritik yoldan cikar ve MULH'un cevrim
-  // sayisi DEGISMEZ - saf kazanc.
-  //
-  // Akumulasyon dongusu (op_c -> topla -> kaydir -> result -> op_c) carpimdan
-  // bagimsizdir; carpim yalnizca op_a_i/op_b_i ve duruma baglidir. Bu yuzden
-  // bir cevrim onceden hesaplamak guvenlidir.
-  //
-  // MULH DISI islemler (MUL_I, MUL_IR) tek cevrimlik kalir: asagidaki secim
-  // mulh_active_o ile yapilir.
-  // ---------------------------------------------------------------------------
-  logic [ 1:0] nxt_subword;
-  logic [ 1:0] nxt_signed;
-  logic [16:0] nxt_op_a;
-  logic [16:0] nxt_op_b;
-  logic [33:0] short_mul_q;
-
-  always_comb begin
-    case (mulh_NS)
-      STEP0:   begin nxt_subword = 2'b00; nxt_signed = 2'b00;                        end
-      STEP1:   begin nxt_subword = 2'b10; nxt_signed = {short_signed_i[1], 1'b0};     end
-      STEP2:   begin nxt_subword = 2'b01; nxt_signed = {1'b0, short_signed_i[0]};     end
-      FINISH:  begin nxt_subword = 2'b11; nxt_signed = short_signed_i;                end
-      default: begin nxt_subword = 2'b00; nxt_signed = 2'b00;                        end
-    endcase
-  end
-
-  assign nxt_op_a[15:0] = nxt_subword[0] ? op_a_i[31:16] : op_a_i[15:0];
-  assign nxt_op_b[15:0] = nxt_subword[1] ? op_b_i[31:16] : op_b_i[15:0];
-  assign nxt_op_a[16]   = nxt_signed[0] & nxt_op_a[15];
-  assign nxt_op_b[16]   = nxt_signed[1] & nxt_op_b[15];
-
-  always_ff @(posedge clk, negedge rst_n) begin
-    if (~rst_n) short_mul_q <= '0;
-    else        short_mul_q <= $signed(nxt_op_a) * $signed(nxt_op_b);
-  end
-
-  // MULH'ta on-hesaplanan carpim, digerlerinde kombinasyonel carpim
-  logic [33:0] short_mul_eff;
-  assign short_mul_eff = mulh_active_o ? short_mul_q : short_mul;
-  assign short_mac = $signed(short_op_c) + $signed(short_mul_eff) + $signed(short_round);
+  assign short_mac = $signed(short_op_c) + $signed(short_mul) + $signed(short_round);
 
   //we use only short_signed_i[0] as it cannot be short_signed_i[1] 1 and short_signed_i[0] 0
   assign short_result = $signed(
