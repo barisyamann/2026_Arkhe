@@ -89,18 +89,31 @@ module sram_module #(
 
 
     // --- AXI Okuma Kontrol Yazmaçları (Async reset içerir) ---
+    // rd_pend: istek kabul edildi, veri henuz hazir degil (bir cevrimlik bekleme)
+    logic rd_pend;
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             s_axil_arready <= 1'b0;
             s_axil_rvalid  <= 1'b0;
             s_axil_rresp   <= RESP_OKAY;
+            rd_pend        <= 1'b0;
         end else begin
-            if (s_axil_arvalid && !s_axil_rvalid) begin
+            // Okuma coklayicisi yakalamadan sonraya tasindigi icin veri bir
+            // cevrim GEC hazir oluyor (bkz. asagidaki dout_q blogu). rd_pend
+            // o bir cevrimi tutar: istek kabul edilir, rvalid bir sonraki
+            // cevrimde kalkar. Ikisi birlikte degistirilmelidir.
+            s_axil_arready <= 1'b0;
+
+            if (s_axil_arvalid && !s_axil_rvalid && !rd_pend) begin
                 s_axil_arready <= 1'b1;
-                s_axil_rvalid  <= 1'b1;
+                rd_pend        <= 1'b1;
                 s_axil_rresp   <= RESP_OKAY;
-            end else begin
-                s_axil_arready <= 1'b0;
+            end
+
+            if (rd_pend) begin
+                rd_pend       <= 1'b0;
+                s_axil_rvalid <= 1'b1;
             end
 
             // Okuma kanalı el sıkışması
@@ -122,7 +135,10 @@ module sram_module #(
     assign raddr = s_axil_araddr[$clog2(RAM_DEPTH)+1 : 2];
     assign waddr = aw_addr_reg  [$clog2(RAM_DEPTH)+1 : 2];
     assign wr_en = aw_active && w_active && !s_axil_bvalid;
-    assign rd_en = s_axil_arvalid && !s_axil_rvalid;
+    // rd_pend de dislanmali: istek kabul edildikten sonraki bekleme
+    // cevriminde rvalid henuz kalkmamis olur, aksi halde ayni istek
+    // ikinci kez makroya gonderilirdi.
+    assign rd_en = s_axil_arvalid && !s_axil_rvalid && !rd_pend;
 
     assign s_axil_rdata = ram_rdata;
 
@@ -249,13 +265,45 @@ module sram_module #(
     // Sonuc: yukleyici I-RAM'e yazdigi buyruklari geri okuyamadi, CPU hic
     // baslayamadi. Ilk makro kosumu 8 hata verdi.
     // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // OKUMA COKLAYICISI YAKALAMADAN SONRAYA TASINDI  (50 MHz calismasi)
+    //
+    // 30 Agustos'ta yapilmis ama hicbir dala commit edilmemis, kaynagi
+    // silinen calisma kopyasiyla kaybolmustu; teslim paketinin
+    // README'sindeki tarife gore 3 Eylul'de yeniden yazildi.
+    //
+    // ONCEKI HALI:  ram_rdata = rd_en_q ? dout_r[rsel_q] : rdata_hold
+    //   Makro cikisi (dout1) gec gelir; uzerine 4'e-1 coklayici ve cipi
+    //   kat eden tel biniyordu. Hepsi AYNI cevrimde olup bitmek
+    //   zorundaydi, yani yol yarim cevrimlik bir butceyle calisiyordu ve
+    //   yapisal olarak kisaltilamiyordu.
+    //
+    // YENI HALI: makro cikislari once oldugu gibi yakalanir (makrodan
+    //   yanindaki flop'a kisa yol), coklayici bir sonraki cevrimde
+    //   YAZMACLANMIS veri uzerinde calisir. Boylece hem makro cikisi hem
+    //   coklayici + uzun tel kendi tam cevrimini alir.
+    //
+    // BEDELI: okuma gecikmesi bir cevrim artar. Okuma kontrol makinesi
+    //   (yukarida, rd_pend) rvalid'i buna gore bir cevrim geciktirir;
+    //   ikisi birlikte degistirilmelidir.
+    // -------------------------------------------------------------------------
+    logic [31:0]      dout_q [MACRO_COUNT];
+    logic [SEL_W-1:0] rsel_q2;
+    logic             rd_en_q2;
+
+    always_ff @(posedge clk) begin
+        for (int i = 0; i < MACRO_COUNT; i++) dout_q[i] <= dout_r[i];
+        rsel_q2  <= rsel_q;
+        rd_en_q2 <= rd_en_q;
+    end
+
     logic [31:0] rdata_hold;
 
     always_ff @(posedge clk) begin
-        if (rd_en_q) rdata_hold <= dout_r[rsel_q];
+        if (rd_en_q2) rdata_hold <= dout_q[rsel_q2];
     end
 
-    assign ram_rdata = rd_en_q ? dout_r[rsel_q] : rdata_hold;
+    assign ram_rdata = rd_en_q2 ? dout_q[rsel_q2] : rdata_hold;
 
 `else
     // =========================================================================
