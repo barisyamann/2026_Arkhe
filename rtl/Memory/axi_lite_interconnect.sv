@@ -303,21 +303,61 @@ module axi_lite_interconnect (
 );
 
     // Slave ID çözme fonksiyonu
+    // PARALEL ADRES KOD COZUCU
+    //
+    // 50 MHz calismasinin RTL degisikliklerinden biri. 30 Agustos'ta
+    // yapilmis ama hicbir dala commit edilmemis, kaynagi 3 Eylul'de
+    // silinen calisma kopyasiyla birlikte kaybolmustu; burada teslim
+    // paketinin README'sindeki tarife gore yeniden yazildi.
+    //
+    // ONCEKI HALI: 13 ardisik "addr >= X && addr <= Y" karsilastirmasi.
+    // Sentez bunu 13 kademeli bir oncelik zincirine ve 26 adet 32-bit
+    // buyukluk karsilastiricisina cevirir; son slave'in kod cozumu
+    // butun zincirin sonucunu beklemek zorunda kalir.
+    //
+    // YENI HALI: bolgelerin tamami 2'nin kuvveti hizali oldugu icin
+    // (tek istisna NPU bellegi) her biri UST BIT ESITLIGI ile tek
+    // kademede sinanir. On uc isabet paralel hesaplanir.
+    //
+    // NPU bellegi 30 kB (0x7800) ve 2'nin kuvveti DEGIL; ust 16 bit
+    // esitligi + 16-bit sinir karsilastirmasiyla cozuluyor.
+    //
+    // Bolgeler ayriktir, isabetler birbirini disler. Yine de davranis
+    // birebir korunsun diye secim ayni sirayla yapiliyor; fark su ki
+    // zincir artik 32-bit karsilastiricilar uzerinde degil, onceden
+    // hesaplanmis tek bitlik isabetler uzerinde calisiyor.
     function automatic int get_slave_id(input logic [31:0] addr);
-        if (addr >= 32'h0000_0000 && addr <= 32'h0000_03FF) return 0;  // Boot ROM
-        if (addr >= 32'h0100_0000 && addr <= 32'h0100_1FFF) return 1;  // Instruction RAM
-        if (addr >= 32'h2000_0000 && addr <= 32'h2000_1FFF) return 2;  // Data RAM
-        if (addr >= 32'h4000_0000 && addr <= 32'h4000_0FFF) return 3;  // GPIO
-        if (addr >= 32'h4001_0000 && addr <= 32'h4001_0FFF) return 4;  // Timer
-        if (addr >= 32'h4002_0000 && addr <= 32'h4002_0FFF) return 5;  // UART General
-        if (addr >= 32'h4003_0000 && addr <= 32'h4003_0FFF) return 6;  // UART Stream
-        if (addr >= 32'h4004_0000 && addr <= 32'h4004_0FFF) return 7;  // I2C Master
-        if (addr >= 32'h4005_0000 && addr <= 32'h4005_0FFF) return 8;  // QSPI Master
-        if (addr >= 32'h4006_0000 && addr <= 32'h4006_0FFF) return 9;  // NPU CSR
-        if (addr >= 32'h2001_0000 && addr <= 32'h2001_77FF) return 10; // NPU Memory (30 kB)
-        if (addr >= 32'h4007_0000 && addr <= 32'h4007_0FFF) return 11; // DMA CSR
-        if (addr >= 32'h4008_0000 && addr <= 32'h4008_0FFF) return 12; // JTAG CSR
-        return 13; // Hatalı Adres (Default Slave)
+        logic [12:0] hit;
+
+        hit[0]  = (addr[31:10] == 22'h000000);                  // 0x0000_0000  1 kB   Boot ROM
+        hit[1]  = (addr[31:13] == 19'h00800);                   // 0x0100_0000  8 kB   Instruction RAM
+        hit[2]  = (addr[31:13] == 19'h10000);                   // 0x2000_0000  8 kB   Data RAM
+        hit[3]  = (addr[31:12] == 20'h40000);                   // 0x4000_0000  4 kB   GPIO
+        hit[4]  = (addr[31:12] == 20'h40010);                   // 0x4001_0000  4 kB   Timer
+        hit[5]  = (addr[31:12] == 20'h40020);                   // 0x4002_0000  4 kB   UART General
+        hit[6]  = (addr[31:12] == 20'h40030);                   // 0x4003_0000  4 kB   UART Stream
+        hit[7]  = (addr[31:12] == 20'h40040);                   // 0x4004_0000  4 kB   I2C Master
+        hit[8]  = (addr[31:12] == 20'h40050);                   // 0x4005_0000  4 kB   QSPI Master
+        hit[9]  = (addr[31:12] == 20'h40060);                   // 0x4006_0000  4 kB   NPU CSR
+        hit[10] = (addr[31:16] == 16'h2001) &&
+                  (addr[15:0]  <= 16'h77FF);                    // 0x2001_0000 30 kB   NPU Memory
+        hit[11] = (addr[31:12] == 20'h40070);                   // 0x4007_0000  4 kB   DMA CSR
+        hit[12] = (addr[31:12] == 20'h40080);                   // 0x4008_0000  4 kB   JTAG CSR
+
+        if (hit[0])  return 0;
+        if (hit[1])  return 1;
+        if (hit[2])  return 2;
+        if (hit[3])  return 3;
+        if (hit[4])  return 4;
+        if (hit[5])  return 5;
+        if (hit[6])  return 6;
+        if (hit[7])  return 7;
+        if (hit[8])  return 8;
+        if (hit[9])  return 9;
+        if (hit[10]) return 10;
+        if (hit[11]) return 11;
+        if (hit[12]) return 12;
+        return 13; // Hatali Adres (Default Slave)
     endfunction
 
     // Seçilen Slave Yazmaçları (Outstanding istekleri takip etmek için)
