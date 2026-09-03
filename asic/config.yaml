@@ -703,3 +703,36 @@ MAX_FANOUT_CONSTRAINT: 20
 # yakalar, ama her marjinal agi tamponlamaya zorlamaz.
 # -----------------------------------------------------------------------------
 MAX_TRANSITION_CONSTRAINT: 1.5
+
+# -----------------------------------------------------------------------------
+# SAAT AGACI TAMPON HAVUZU - t50_12, 03 Eylul 2026
+#
+# t50_7'de olculmus en kotu setup yolunun tamami tek bir saat agaci
+# yapisindan besleniyor: clk_i -> flop CLK 10 kademe, 6,827 ns yerlestirme
+# gecikmesi (bkz. evidence/asic'teki t50_7 STA dokumu). Bu die icin cok
+# yuksek; hedef 2-3 ns. 50 MHz butcesinde (20 ns) bu tek basina 3,5-4 ns
+# acik demek.
+#
+# KOK NEDEN (varsayim, olculmedi)
+#   CTS_CLK_BUFFERS tanimsizken TritonCTS varsayilan olarak yalnizca kucuk
+#   tamponlari (clkbuf_1/2/4) kullaniyor. Yuksek fanout'lu saat agacinda
+#   (23 SRAM makrosu + tum tasarim) kucuk tamponlarla hedef skew'e
+#   ulasmak icin fazla sayida kademe gerekiyor - kademe basi ek gecikme
+#   birikip 6,83 ns'e cikiyor.
+#
+# DENEME: saat agacina daha guclu tamponlar (clkbuf_8, clkbuf_16) acmak.
+# TritonCTS root'a ve yuksek fanoutlu ic dugumlere daha buyuk suruculer
+# secebilir, ayni fanout'u daha az kademede karsilar - toplam yerlesme
+# gecikmesi dusmesi beklenir. Skew hedefi (200 ps varsayilan) korunuyor.
+#
+# RISK: buyuk tamponlar daha fazla alan/guc harcar ve yerlesim sikisikligini
+# artirabilir (bu die zaten yonlendirilebilirlik sinirinda). SONUC
+# OLCULMEDEN KABUL EDILMEMELI - bu koşumun asil amaci bu varsayimi
+# sinamak. Kotulesirse (WNS dusuşu ya da GRT congestion) geri alinacak.
+# -----------------------------------------------------------------------------
+CTS_CLK_BUFFERS:
+  - sky130_fd_sc_hd__clkbuf_1
+  - sky130_fd_sc_hd__clkbuf_2
+  - sky130_fd_sc_hd__clkbuf_4
+  - sky130_fd_sc_hd__clkbuf_8
+  - sky130_fd_sc_hd__clkbuf_16

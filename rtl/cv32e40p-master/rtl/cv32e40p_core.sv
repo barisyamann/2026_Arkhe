@@ -1054,7 +1054,30 @@ module cv32e40p_core
   assign csr_wdata = alu_operand_a_ex;
   assign csr_op = csr_op_ex;
 
-  assign csr_addr_int = csr_num_e'(csr_access_ex ? alu_operand_b_ex[11:0] : '0);
+  // -------------------------------------------------------------------------
+  // 50 MHz calismasi: CSR adres kapisi KALDIRILDI  (sunucuda t50_11'de
+  // uygulanmisti, commit edilmemis kalmisti - t50_12'ye buradan tasindi)
+  //
+  // Ozgun hali:
+  //     csr_addr_int = csr_access_ex ? alu_operand_b_ex[11:0] : '0
+  //
+  // arkhe25 imzalamasinda en kotu 1000 setup ihlalinin %58'i (583 yol)
+  // csr_access_ex flop'undan cikiyordu, en kotusu max_ss'de -9,231 ns.
+  // Ayrica %2'si (25 yol) alu_operand_b_ex'ten cikiyordu - ayni koni.
+  // Kapi, gec gelen csr_access_ex'i cs_registers'in buyuk adres kod
+  // cozucusunun ONUNE koyuyor; kod cozucu ancak o sinyal geldikten sonra
+  // calismaya basliyor.
+  //
+  // Kapi islevsel olarak GEREKSIZ: cs_registers icinde yazmalar
+  // csr_we_int ile korunuyor (o da csr_op_i'den turuyor, adresten degil),
+  // okumalar ise yan etkisiz saf aramadir. CSR disi buyruklarda kod
+  // cozucu csr_op'u CSR_OP_READ birakir, dolayisiyla csr_we_int = 0 olur.
+  // mie_bypass_o da ayrica csr_mie_we ile korunmustur.
+  //
+  // Kapi kalkinca kod cozucu dogrudan bir kayit cikisindan (alu_operand_b_ex)
+  // baslar; csr_access_ex kritik yoldan tamamen cikar.
+  // -------------------------------------------------------------------------
+  assign csr_addr_int = csr_num_e'(alu_operand_b_ex[11:0]);
 
   //  Floating-Point registers write
   assign fregs_we     = (FPU == 1 & ZFINX == 0) ? ((regfile_alu_we_fw && regfile_alu_waddr_fw[5]) ||
