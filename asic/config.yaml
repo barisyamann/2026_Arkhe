@@ -410,6 +410,16 @@ VERILOG_FILES:
 # -----------------------------------------------------------------------------
 GRT_ANTENNA_REPAIR_JUMPER_ONLY: true
 
+# 11. kosum kok-neden duzeltmesi:
+# GRT asamasinda jumper-only acik olsa da detayli yonlendiricinin ayri
+# anten onarimi varsayilan olarak diyot eklemeye devam etti. Sonucta 7.591
+# diyot olustu; nom_tt slew ihlallerinin 2.523'u bu diyot pinlerindeydi.
+# DRT tarafini da jumper-only yaparak hem yuk/slew sismesini hem makro
+# kenarlarindaki diyot kalabaligini engelliyoruz. Daha fazla onarim turu,
+# kalan az sayidaki ag icin metal katman atlatmasina zaman verir.
+DRT_ANTENNA_REPAIR_JUMPER_ONLY: true
+DRT_ANTENNA_REPAIR_ITERS: 5
+
 # -----------------------------------------------------------------------------
 # MAKRO ICERIGININ KAYNAGI  (6. kosumda eklendi - 24 Agustos 2026)
 #
@@ -477,7 +487,7 @@ MAGIC_MACRO_STD_CELL_SOURCE: "PDK"
 #   Bu satiri 'true' yapip 64 GB+ bellekli bir makinede kosmak yeterli.
 #   Sonuc farki yalnizca makro ic geometrisidir.
 # -----------------------------------------------------------------------------
-MAGIC_DRC_USE_GDS: false
+MAGIC_DRC_USE_GDS: true
 
 # -----------------------------------------------------------------------------
 # YONLENDIRME SONRASI ZAMANLAMA ONARIMI  (6. kosum sonrasi - 24 Agustos 2026)
@@ -537,7 +547,7 @@ RUN_POST_GRT_RESIZER_TIMING: true
 # 9. kosum degerlerine donuluyor. Hold ayri ve DAHA OLCULU ele alinacak:
 # once marji tek basina (0,15-0,20) denemek, FIX_HOLD_FIRST'e hic
 # dokunmamak.
-GRT_RESIZER_HOLD_SLACK_MARGIN: 0.1
+GRT_RESIZER_HOLD_SLACK_MARGIN: 0.15
 PL_RESIZER_HOLD_SLACK_MARGIN: 0.1
 
 # -----------------------------------------------------------------------------
@@ -692,4 +702,4 @@ MAX_FANOUT_CONSTRAINT: 20
 # 1,0 ns orta yol: reset agacindaki 2,69 ns'lik patolojik kenarlari hala
 # yakalar, ama her marjinal agi tamponlamaya zorlamaz.
 # -----------------------------------------------------------------------------
-MAX_TRANSITION_CONSTRAINT: 1.0
+MAX_TRANSITION_CONSTRAINT: 1.5

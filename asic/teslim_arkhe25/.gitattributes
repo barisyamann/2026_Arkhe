@@ -1,0 +1,5 @@
+# Bu dizindeki ciktilar ZATEN sikistirilmis (.gz) ve hepsi 100 MB sinirinin
+# altinda. Depo kokundeki *.gds.gz / *.def.gz LFS kurallarini burada
+# BILEREK devre disi birakiyoruz: GitHub ucretsiz LFS kotasi 1 GB ve mevcut
+# LFS deposu zaten 957 MB. Normal git nesnesi olarak saklamak kotayi korur.
+* -filter -diff -merge -text
