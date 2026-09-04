@@ -21,7 +21,7 @@ Tasarımımıza ait doğrulama testleri, hem Vivado GUI arayüzü hem de Vivado 
 #### A. Ortam Hazırlığı ve Vivado Projesinin Açılması
 Öncelikle Vivado TCL Konsolu üzerinden veya GUI yardımıyla ana SoC projesi açılır:
 ```tcl
-open_project c:/Arkhe_2026/vivado/vivado_project/Arkhe_SoC.xpr
+open_project vivado/vivado_project/Arkhe_SoC.xpr
 ```
 
 #### B. YZ Hızlandırıcı (NPU) Blok Seviyesi Testi (T1.1)
@@ -41,7 +41,7 @@ NPU'nun matematiksel ve donanımsal fonksiyonlarının tekil doğrulanması içi
 3.  **Üretilen Çıktılar:** Test tamamlandığında, `tb/T1.1_npu_block_level/simulation.log` dosyası otomatik oluşturulur ve konsolda YES, NO, SILENCE durumlarının başarı raporları listelenir.
 
 #### C. SoC Sistem Seviyesi, SVA ve JTAG Testlerinin Yürütülmesi (T1.2, T1.3, T2.1, T3.1)
-SoC entegrasyonu, AXI protokol doğrulamaları, buyruk izleme (Core Trace) ve JTAG debug fonksiyonlarının tamamı sistem seviyesi bütünleşik testbench ([tb_soc_top.sv](file:///c:/Arkhe_2026/tb/tb_soc_top.sv)) ile test edilir:
+SoC entegrasyonu, AXI protokol doğrulamaları, buyruk izleme (Core Trace) ve JTAG debug fonksiyonlarının tamamı sistem seviyesi bütünleşik testbench ([tb_soc_top.sv](tb_soc_top.sv)) ile test edilir:
 1.  **TCL Konsolu Üzerinden Çalıştırma:**
     ```tcl
     # Sistem testbench'ini en üst modül olarak ata
@@ -72,17 +72,17 @@ Simülasyon koşumları sırasında kod kapsama veritabanını toplamak ve rapor
     Simülasyon sonlandıktan sonra veritabanı (xsim.covdb) HTML formatına dönüştürülür:
     ```tcl
     # Kapsama raporunu HTML olarak kaydet
-    xreport -html c:/Arkhe_2026/tb/T3.1_jtag_debug/coverage_report -db xsim.covdb
+    xreport -html tb/T3.1_jtag_debug/coverage_report -db xsim.covdb
     ```
 
 ---
 
 ## 2. Çekirdek Komut İzleme ve Spike ISS Uyumluluğu (ÖTR 3.7 / Çekirdek Testleri)
 
-İşlemci çekirdeğinin ([CV32E40P](file:///c:/Arkhe_2026/rtl/CPU/cv32e40p_core.sv)) komut seti ve execution pipeline doğruluğu, referans model olarak **Spike ISS (Instruction Set Simulator)** ve C/Assembly test programları kullanılarak doğrulanmıştır.
+İşlemci çekirdeğinin ([CV32E40P](../rtl/cv32e40p-master/rtl/cv32e40p_core.sv)) komut seti ve execution pipeline doğruluğu, referans model olarak **Spike ISS (Instruction Set Simulator)** ve C/Assembly test programları kullanılarak doğrulanmıştır.
 
-*   **Testbench İzleme Mekanizması:** [tb_soc_top.sv](file:///c:/Arkhe_2026/tb/T2.1_core_trace/tb_soc_top.sv) testbench'i içerisinde yer alan izleme bloğu, her saat çevriminde işlemci çekirdeğinin iç register dosyasını (`register_file_i.mem`) ve o anki PC adresini (`pc_id_i`) takip ederek [simulation.log](file:///c:/Arkhe_2026/tb/T2.1_core_trace/simulation.log) dosyasına kaydeder.
-*   **Trace Karşılaştırma Betiği:** Çekirdeğin yürüttüğü gerçek komut izlerinin, referans derleyici ve Spike ISS çıktısıyla eşleştiğini doğrulamak için [compare_trace.py](file:///c:/Arkhe_2026/tb/T2.1_core_trace/compare_trace.py) otomatik analiz aracı geliştirilmiştir.
+*   **Testbench İzleme Mekanizması:** [tb_soc_top.sv](tb_soc_top.sv) testbench'i içerisinde yer alan izleme bloğu, her saat çevriminde işlemci çekirdeğinin iç register dosyasını (`register_file_i.mem`) ve o anki PC adresini (`pc_id_i`) takip ederek [simulation.log](../evidence/sim/tb_soc_top_PASS.log) dosyasına kaydeder.
+*   **Trace Karşılaştırma Betiği:** Çekirdeğin yürüttüğü gerçek komut izlerinin, referans derleyici ve Spike ISS çıktısıyla eşleştiğini doğrulamak için [compare_trace.py](T2.1_core_trace/trace_check.py) otomatik analiz aracı geliştirilmiştir.
 *   **Komut İzleme Filtrelemesi:** Simülasyon loglarında kirliliği önlemek amacıyla, NPU'nun tamamlanmasını bekleyen polling döngüsü adresleri (`0x0100002c`, `0x01000030`, `0x01000034`) komut izleme logunun dışarısında tutulmuştur.
 *   **Uyum Sonuçları:** Yapılan test koşumları sonrasında donanım komut izleri referans model ile %100 uyumlu şekilde çalışmıştır. İlk 20 komut adımına ait karşılaştırma tablosu aşağıda verilmiştir:
 
@@ -115,7 +115,7 @@ Simülasyon koşumları sırasında kod kapsama veritabanını toplamak ve rapor
 
 ## 3. YZ Hızlandırıcı (NPU) Tekil Testleri (Şartname YZ Hızlandırıcı Testleri)
 
-YZ Hızlandırıcı (NPU) donanım modülünün ([npu_compute_engine.sv](file:///c:/Arkhe_2026/rtl/npu/npu_compute_engine.sv)) işlevsel ve matematiksel doğruluğu, bağımsız bir blok seviyesi testbench ortamında ([tb_npu_compute_engine.sv](file:///c:/Arkhe_2026/tb/T1.1_npu_block_level/tb_npu_compute_engine.sv)) test edilmiştir.
+YZ Hızlandırıcı (NPU) donanım modülünün ([npu_compute_engine.sv](../rtl/npu/npu_compute_engine.sv)) işlevsel ve matematiksel doğruluğu, bağımsız bir blok seviyesi testbench ortamında ([tb_npu_compute_engine.sv](tb_npu_compute_engine.sv)) test edilmiştir.
 
 ### 3.1. Bellek ve ROM Konfigürasyonu
 Donanım motorunun gerçek bir TinyConv/TFLite modeline yakınsaması ve DTR'de doğrulanabilir olması için inline mock fonksiyonlar kaldırılmış; evrişim ve tam bağlantılı (Fully Connected) katmanı ağırlık ve bias değerleri harici sentezlenebilir ROM dosyalarından (`$readmemh` yardımıyla) donanıma yüklenmiştir:
@@ -183,7 +183,7 @@ Yapılan blok düzeyindeki tekil testler, YZ Hızlandırıcı (NPU) alt modülle
 
 SoC genelindeki entegrasyon bütünlüğünü doğrulamak amacıyla, işlemcinin ve hızlandırıcının birlikte çalıştığı donanım/yazılım eş-tasarımı (hardware/software co-design) simüle edilmiştir.
 
-*   **Testbench Kodu:** [tb_soc_top.sv](file:///c:/Arkhe_2026/tb/T1.2_soc_system_level/tb_soc_top.sv)
+*   **Testbench Kodu:** [tb_soc_top.sv](tb_soc_top.sv)
 *   **Yazılım Akışı (C Kodu):** İşlemci, QSPI Shadowing aşamasıyla bootloader yardımıyla ayağa kalkar, I-RAM'e kopyalanan ana YZ yazılımını yürütür, MMIO üzerinden NPU CSR registers'ı (START, RESET) kurar, TCM SRAM'e spektrogram girdisini basar ve çıkarım bitene kadar NPU kesme hattını (`done_sticky`) polling yöntemiyle takip eder.
 *   **Sayısal Zaman Çizelgesi (Timeline of System Simulation):**
 
@@ -216,7 +216,7 @@ gantt
 
 ## 5. AXI4-Lite Protokol Denetimleri (ÖTR 3.9 / Protokol Kontrolleri)
 
-Bileşenler (CPU, AXI Interconnect, NPU AXI Controller, TCM SRAM) arasındaki AXI el sıkışmalarının protokol doğruluğu, SystemVerilog Assertion (SVA) tabanlı bir pasif VIP ([axil_protocol_checker.sv](file:///c:/Arkhe_2026/rtl/Memory/axil_protocol_checker.sv)) ile denetlenmiştir.
+Bileşenler (CPU, AXI Interconnect, NPU AXI Controller, TCM SRAM) arasındaki AXI el sıkışmalarının protokol doğruluğu, SystemVerilog Assertion (SVA) tabanlı bir pasif VIP ([axil_protocol_checker.sv](../rtl/Memory/axil_protocol_checker.sv)) ile denetlenmiştir.
 
 *   **Doğrulama Sonuçları:** 19.3 ms simülasyon süresi (**964,828 saat çevrimi**) boyunca AXI el sıkışma kanallarında tetiklenen assertion sayıları ve hata durumları aşağıda listelenmiştir:
 
@@ -265,12 +265,12 @@ Vivado Simulator (XSim) kod kapsaması aracı çalıştırılarak tüm SoC genel
 
 | Modül / Seviye | Statement (Satır) | Branch (Dallanma) | Condition (Koşul) | Toggle (Geçiş) | Rapor Dosya Linki |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Genel SoC Düzeyi** | **%46.58** | **%30.14** | **%45.70** | **%21.50** | [dashboard.html](file:///c:/Arkhe_2026/tb/T3.1_jtag_debug/coverage_report/dashboard.html) |
-| `jtag_debug` | %100.00 | %95.00 | %100.00 | %92.00 | [modules.html](file:///c:/Arkhe_2026/tb/T3.1_jtag_debug/coverage_report/modules.html) |
-| `npu_axi_controller`| %98.40 | %96.20 | %100.00 | %90.50 | [modules.html](file:///c:/Arkhe_2026/tb/T3.1_jtag_debug/coverage_report/modules.html) |
-| `npu_tcm_sram` | %100.00 | %100.00 | %100.00 | %94.00 | [modules.html](file:///c:/Arkhe_2026/tb/T3.1_jtag_debug/coverage_report/modules.html) |
-| `npu_csr` | %100.00 | %97.00 | %100.00 | %91.00 | [modules.html](file:///c:/Arkhe_2026/tb/T3.1_jtag_debug/coverage_report/modules.html) |
-| `npu_compute_engine`| %95.80 | %92.00 | %93.00 | %85.00 | [modules.html](file:///c:/Arkhe_2026/tb/T3.1_jtag_debug/coverage_report/modules.html) |
+| **Genel SoC Düzeyi** | **%46.58** | **%30.14** | **%45.70** | **%21.50** | [dashboard.html](T3.1_jtag_debug/coverage_report/dashboard.html) |
+| `jtag_debug` | %100.00 | %95.00 | %100.00 | %92.00 | [modules.html](T3.1_jtag_debug/coverage_report/modules.html) |
+| `npu_axi_controller`| %98.40 | %96.20 | %100.00 | %90.50 | [modules.html](T3.1_jtag_debug/coverage_report/modules.html) |
+| `npu_tcm_sram` | %100.00 | %100.00 | %100.00 | %94.00 | [modules.html](T3.1_jtag_debug/coverage_report/modules.html) |
+| `npu_csr` | %100.00 | %97.00 | %100.00 | %91.00 | [modules.html](T3.1_jtag_debug/coverage_report/modules.html) |
+| `npu_compute_engine`| %95.80 | %92.00 | %93.00 | %85.00 | [modules.html](T3.1_jtag_debug/coverage_report/modules.html) |
 
 > [!NOTE]
 > Genel SoC düzeyinde Statement Coverage'ın %46.58 olmasının nedeni, sistemde bulunan kullanılmayan büyük donanım bloklarının (DMA, I2C, SPI, UART, FPU vb.) bu spesifik JTAG/NPU test senaryolarında aktif uyarılmamasıdır. Ancak test edilen `jtag_debug` ve `npu_axi_controller` modüllerinin kendi içindeki kapsama oranları **%90-%100** aralığında gerçekleşmiştir.
@@ -306,10 +306,10 @@ Testbench ve wrapper modülleri arasındaki el sıkışma (handshake) senaryosu 
 4.  **Cevap Mesajı ("Hello World!"):** İşlemci, UART RX'ten `A` karakterini aldığında, UART TX üzerinden **`"Hello World!"`** karakter dizisini gönderir. Testbench bu diziyi alıp beklenen veriyle karşılaştırarak testi sonlandırır.
 
 *   **Testbench ve Dosya Bağlantıları:**
-    *   Testbench Kodu: [teknotest_tb.sv](file:///c:/Arkhe_2026/teknotest/tb/teknotest_tb.sv)
-    *   Wrapper Modülü: [teknotest_wrapper.sv](file:///c:/Arkhe_2026/teknotest/user_files/teknotest_wrapper.sv)
-    *   TCL Derleme Dosyası: [compile_user_design.tcl](file:///c:/Arkhe_2026/teknotest/user_files/compile_user_design.tcl)
-    *   Yazılım Makine Kodu ROM Dosyası: [helloworld.mem](file:///c:/Arkhe_2026/teknotest/sw/build/helloworld.mem)
+    *   Testbench Kodu: [teknotest_tb.sv](../teknotest/tb/teknotest_tb.sv)
+    *   Wrapper Modülü: [teknotest_wrapper.sv](../teknotest/user_files/teknotest_wrapper.sv)
+    *   TCL Derleme Dosyası: [compile_user_design.tcl](../teknotest/user_files/compile_user_design.tcl)
+    *   Yazılım Makine Kodu ROM Dosyası: [helloworld.mem](../teknotest/sw/build/helloworld.mem)
 
 ### 8.2. Simülasyon Zamanlama ve Karar Analizi
 *   **Çalışma Frekansı:** 50 MHz (Saat periyodu: 20 ns)
@@ -366,7 +366,7 @@ Yarışma komitesinin (DDK) DTR değerlendirme kuralları gereğince, hazırlana
 
 ## 9. FPGA Donanım Üzerinde Doğrulama ve Programlama Kılavuzu
 
-Tasarımımızın fiziksel FPGA donanımı üzerindeki (Nexys 4 DDR / Nexys A7 - Artix-7 XC7A100T-1CSG324C) entegrasyon doğruluğu ve kararlılığı, sentezlenebilir üst seviye sarmalayıcı modülü ([nexys_top.sv](file:///c:/Arkhe_2026/rtl/Memory/nexys_top.sv)) ve fiziksel zamanlama/pin kısıt dosyası ([nexys4ddr.xdc](file:///c:/Arkhe_2026/rtl/nexys4ddr.xdc)) ile doğrulanmıştır.
+Tasarımımızın fiziksel FPGA donanımı üzerindeki (Nexys 4 DDR / Nexys A7 - Artix-7 XC7A100T-1CSG324C) entegrasyon doğruluğu ve kararlılığı, sentezlenebilir üst seviye sarmalayıcı modülü ([nexys_top.sv](../rtl/Memory/nexys_top.sv)) ve fiziksel zamanlama/pin kısıt dosyası ([nexys4ddr.xdc](../rtl/nexys4ddr.xdc)) ile doğrulanmıştır.
 
 ### 9.1. Donanım Hazırlıkları ve Zamanlama Güvenceleri
 Tasarımın fiziksel FPGA kartında hatasız çalışmasını sağlamak için şu donanım mekanizmaları entegre edilmiştir:
@@ -388,7 +388,7 @@ Bitstream dosyasını (`.bit`) Vivado ortamında üretmek için şu adımlar tak
     source ./scripts/build_nexys.tcl
     ```
     Bu komut, otomatik olarak sentez (synthesis), yerleştirme (implementation) ve bitstream yazma (write_bitstream) adımlarını yürüterek şu hedef dosyasını üretir:
-    `c:/Arkhe_2026/vivado/vivado_nexys_project/Arkhe_SoC_Nexys.runs/impl_1/nexys_top.bit`
+    `vivado/vivado_nexys_project/Arkhe_SoC_Nexys.runs/impl_1/nexys_top.bit`
 
 ### 9.3. FPGA Kartını Programlama ve Fiziksel Test Senaryoları
 Üretilen bitstream dosyası kart üzerine yüklenerek aşağıdaki fiziksel testler icra edilir:
@@ -411,9 +411,9 @@ Bitstream dosyasını (`.bit`) Vivado ortamında üretmek için şu adımlar tak
 
 ### 9.4. Sentez ve Uygulama (Implementation) Sayısal Sonuçları
 Tasarımımızın Vivado 2025.2 ortamında tamamlanan sentez, yerleştirme ve zamanlama analizi sonrasında elde edilen resmi metrikleri aşağıda listelenmiştir. Raporların orijinallerine aşağıdaki bağlantılardan erişebilirsiniz:
-*   Kaynak Rapor Dosyası: [utilization_report.rpt](file:///c:/Arkhe_2026/tb/FPGA_Reports/utilization_report.rpt)
-*   Zamanlama Rapor Dosyası: [timing_report.rpt](file:///c:/Arkhe_2026/tb/FPGA_Reports/timing_report.rpt)
-*   Güç Rapor Dosyası: [power_report.rpt](file:///c:/Arkhe_2026/tb/FPGA_Reports/power_report.rpt)
+*   Kaynak Rapor Dosyası: [utilization_report.rpt](FPGA_Reports/utilization_impl.rpt)
+*   Zamanlama Rapor Dosyası: [timing_report.rpt](FPGA_Reports/timing_impl.rpt)
+*   Güç Rapor Dosyası: [power_report.rpt](FPGA_Reports/power_impl.rpt)
 
 #### A. Donanım Kaynak Kullanım Tablosu (Resource Utilization)
 Nexys 4 DDR (XC7A100TCSG324-1) çipi üzerinde elde edilen fiziksel donanım kaynak tüketimi:

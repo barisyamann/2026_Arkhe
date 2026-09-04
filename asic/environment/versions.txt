@@ -10,12 +10,18 @@
 # =============================================================================
 
 [Ortam]
-Isletim sistemi        : Windows 11 Pro 26200 + WSL2 (Ubuntu)
+Isletim sistemi        : Ubuntu (bulut sunucusu, 62 GB RAM)
+                       # 4 Eylul 2026'da DUZELTILDI. Onceden "Windows 11 +
+                       # WSL2" ve kosum dizini olarak "~/arkhe/asic (WSL
+                       # yerel diski)" yaziyordu. Teslim edilen kosumlar
+                       # WSL'de degil, bulut sunucusunda alindi; WSL yalnizca
+                       # gelistirme sirasinda kullanilmisti.
 Nix                    : 2.35.2                      # nix --version
 Nix profili            : ~/.nix-profile/bin/librelane
-Kosum dizini           : ~/arkhe/asic  (WSL yerel diski)
-                       # Depo /mnt/c'de; akis /mnt/c uzerinden 3x yavas
-                       # kosuyordu, kosum dizini WSL diskine tasindi.
+Kosum dizini           : ~/arkhe_exp/asic
+                       # Depo /mnt/c'de tutuldugunda akis 3x yavas
+                       # kosuyordu; bu yuzden kosum dizini her zaman yerel
+                       # diskte olmalidir.
 
 [LibreLane]
 Surum                  : v3.0.6                      # librelane --version
@@ -101,6 +107,23 @@ Hedef saat             : 50 MHz (20 ns)
 Cekirdek               : CV32E40P, RV32IMC (FPU = 0)
                        # ÖTR/DTR'de RV32IMFC yaziyor; sapma gerekcesi
                        # evidence/fpga/fpu_karar_olcumu.md dosyasindadir.
-Die alani              : 3832,40 x 3999,24 um = 15,33 mm2
-Standart hucre         : 47.926
-Flip-flop              : 10.908
+Die alani              : 3832,40 x 4249,24 um = 16,28 mm2
+                       # 4 Eylul 2026'da DUZELTILDI. Onceden ikinci boyut
+                       # 3999,24 ve alan 15,33 mm2 yaziyordu; ikisi de eski
+                       # bir floorplan'dan kalmaydi. Dogru degerler
+                       # config.yaml'daki DIE_AREA [0,0,3832.40,4249.24] ve
+                       # kosumun metrics.csv'sindeki design__die__area
+                       # (1,62848E+7 um2) ile birebir ortusuyor.
+Standart hucre         : 248.330      # metrics.csv design__instance__count__stdcell
+Ardisik hucre          : 12.275       # ...__class:sequential_cell
+Doldurma hucresi       : 1.829.712    # ...__class:fill_cell
+Tap hucresi            : 113.500      # ...__class:tap_cell
+Makro                  : 23           # ...__macros
+Toplam ornek           : 2.078.065    # design__instance__count
+                       # 4 Eylul 2026'da DUZELTILDI. Onceden "Standart hucre
+                       # 47.926 / Flip-flop 10.908" yaziyordu; o sayilar
+                       # SYNTH_STRATEGY AREA 3'e gecilmeden onceki bir
+                       # kosumdan kalmaydi ve teslim edilen kosumla
+                       # ortusmuyordu. Yukaridakiler arkhe25'in OLCULMUS
+                       # degerleridir; teslim edilen kosum degisirse
+                       # metrics.csv'den yeniden alinmalidir.

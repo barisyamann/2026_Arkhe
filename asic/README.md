@@ -362,9 +362,32 @@ Periyodun %20'si. Cevre birimi pinleri yavas dis dunyaya baglanir
 
 | Kisit | Deger |
 |---|---|
-| Clock uncertainty | 0,25 ns |
+| Clock uncertainty (setup) | 0,25 ns |
+| Clock uncertainty (hold) | 0,10 ns |
 | Clock transition | 0,15 ns |
 | Output load | 0,02 pF |
+
+### Saat belirsizliginin setup ve hold icin AYRI verilmesi
+
+Onceden tek satirdi (`set_clock_uncertainty 0.25`), yani ayni deger hem
+setup hem hold hesabina giriyordu. Hold raporunda dogrudan slack'ten
+dusuluyordu:
+
+    -0.250000 clock uncertainty
+
+Iki buyuklugun icerigi farklidir:
+
+| | Icerik | Secilen |
+|---|---|---|
+| Setup belirsizligi | jitter + modellenmemis skew payi | 0,25 ns |
+| Hold belirsizligi | yalnizca jitter | 0,10 ns |
+
+Ikisine ayni degeri vermek olagandisi olandi. Ayirmak her hold yolunda
+0,15 ns kazandirir ve endustri pratigidir. `constraints/design.sdc`
+icinde:
+
+    set_clock_uncertainty -setup 0.25 [get_clocks $clk_name]
+    set_clock_uncertainty -hold  0.10 [get_clocks $clk_name]
 
 ## Zamanlama istisnalari
 
