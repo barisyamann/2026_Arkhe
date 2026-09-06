@@ -2,20 +2,6 @@
 //  i2c_peripheral.sv - I2C Master Peripheral with AXI4-Lite Slave Interface
 // ============================================================================
 //  TEKNOFEST 2026 Chip Design Competition
-//
-//  Features:
-//    - AXI4-Lite Slave for CPU register access (8-bit addr, 32-bit data)
-//    - I2C Master with open-drain SDA/SCL
-//    - Parameterised system clock (default 48 MHz) and I2C frequency (400 kHz)
-//    - Hardware race-condition protection (TX/RX mutual exclusion)
-//    - Single always_ff for all registers + FSM (no multiple-driver issues)
-//
-//  Register Map:
-//    0x00  I2C_NBY  [RW]  Number of bytes to transfer (1..4, clamped)
-//    0x04  I2C_ADR  [RW]  7-bit slave address in [6:0]
-//    0x08  I2C_RDR  [RO]  Read data (1-4 bytes, LSB-first packing)
-//    0x0C  I2C_TDR  [RW]  Transmit data (1-4 bytes, LSB-first packing)
-//    0x10  I2C_CFG  [RW]  [0] TX_EN  [1] TX_DONE  [2] RX_EN  [3] RX_DONE
 // ============================================================================
 
 module i2c_peripheral #(
@@ -70,18 +56,37 @@ module i2c_peripheral #(
     // ----------------------------------------------------------------
     // I2C Physical Interface (active-low open-drain)
     // ----------------------------------------------------------------
-    inout  wire         sda,
-    inout  wire         scl
+    output logic        sda_o,
+    output logic        sda_oe,
+    input  wire         sda_i,
+    output logic        scl_o,
+    output logic        scl_oe,
+    input  wire         scl_i,
+
+    // ----------------------------------------------------------------
+    // Interrupt Output
+    // ----------------------------------------------------------------
+    output logic        i2c_irq
 );
 
     // ================================================================
     //  Local Parameters
     // ================================================================
-    // Divide each SCL period into 4 equal quarters (phases 0-3).
-    //   Phases 0,3 : SCL LOW   |  Phases 1,2 : SCL HIGH
-    //   Phase 0    : SDA setup |  Phase 2    : SDA sample point
-    localparam int QUARTER = SYS_CLK_FREQ / (4 * I2C_FREQ);  // 30 @ 48 MHz
+    localparam int QUARTER = SYS_CLK_FREQ / (4 * I2C_FREQ);
     localparam int CW      = $clog2(QUARTER) > 0 ? $clog2(QUARTER) : 1;
+
+    // ================================================================
+    //  Lint İzolasyonu: Kullanılmayan sinyaller
+    // ================================================================
+    logic unused_ok;
+    assign unused_ok = &{1'b0,
+                         s_axi_awprot,
+                         s_axi_arprot,
+                         s_axi_awaddr[7:5], s_axi_awaddr[1:0],
+                         s_axi_araddr[7:5], s_axi_araddr[1:0],
+                         scl_i,
+                         cfg_wr_full[31:4],
+                         1'b0};
 
     // ================================================================
     //  I2C FSM States
@@ -101,40 +106,47 @@ module i2c_peripheral #(
     // ================================================================
     //  Internal Signals
     // ================================================================
+    logic [31:0] reg_nby;
+    logic [31:0] wr_mask;
 
-    // -- Peripheral registers --
-    logic [31:0] reg_nby;           // 0x00
-    logic [31:0] reg_adr;           // 0x04
-    logic [31:0] reg_rdr;           // 0x08
-    logic [31:0] reg_tdr;           // 0x0C
-    logic [3:0]  reg_cfg;           // 0x10  (only bits [3:0] used)
+    assign wr_mask = {{8{s_axi_wstrb[3]}}, {8{s_axi_wstrb[2]}},
+                      {8{s_axi_wstrb[1]}}, {8{s_axi_wstrb[0]}}};
+
+    function automatic logic [31:0] wr_val(input logic [31:0] old_v);
+        wr_val = (old_v & ~wr_mask) | (s_axi_wdata & wr_mask);
+    endfunction
+
+    logic [31:0] reg_adr;
+    logic [31:0] reg_rdr;
+    logic [31:0] reg_tdr;
+    logic [3:0]  reg_cfg;
+
+    logic [31:0] cfg_wr_full;
+    logic [3:0]  cfg_wr;
+    assign cfg_wr_full = ({28'd0, reg_cfg} & ~wr_mask) | (s_axi_wdata & wr_mask);
+    assign cfg_wr      = cfg_wr_full[3:0];
 
     // -- I2C FSM --
     state_t      state;
-    logic [2:0]  bit_cnt;           // 0..7  bit position in current byte
-    logic [2:0]  byte_cnt;          // 0..3  current byte index
-    logic [7:0]  shift_out;         // TX shift register (MSB sent first)
-    logic [7:0]  shift_in;          // RX shift register (MSB received first)
-    logic        op_rw;             // Latched direction: 0 = write, 1 = read
-    logic [2:0]  op_nby;            // Latched byte count (1..4)
-    logic [6:0]  op_addr;           // Latched 7-bit slave address
-    logic [31:0] op_tdr;            // Latched transmit data
-    logic [31:0] rx_data;           // Accumulated received bytes
-    logic        sda_sampled;       // SDA captured at sample point
+    logic [2:0]  bit_cnt;
+    logic [2:0]  byte_cnt;
+    logic [7:0]  shift_out;
+    logic [7:0]  shift_in;
+    logic        op_rw;
+    logic [2:0]  op_nby;
+    logic [6:0]  op_addr;
+    logic [31:0] op_tdr;
+    logic [31:0] rx_data;
+    logic        sda_sampled;
 
     // -- I2C timing --
-    logic [CW-1:0] tick_cnt;        // Counts clk cycles within a quarter
-    logic [1:0]    phase;           // SCL quarter-phase (0..3)
+    logic [CW-1:0] tick_cnt;
+    logic [1:0]    phase;
     logic          i2c_active;
-    logic          bit_done;        // Pulse: end of a full SCL bit period
-    logic          sample;          // Pulse: SDA sample point (mid SCL-high)
+    logic          bit_done;
+    logic          sample;
 
-    // -- I2C bus control --
-    logic          sda_oe;          // 1 = drive SDA low, 0 = release
-    logic          scl_oe;          // 1 = drive SCL low, 0 = release
-    logic          sda_in;          // SDA bus read-back
-
-    // -- AXI internal --
+    logic          sda_in;
     logic          axi_wr_en;
     logic          axi_rd_en;
     logic [31:0]   rd_mux;
@@ -142,12 +154,13 @@ module i2c_peripheral #(
     // ================================================================
     //  Open-Drain Bus Assignments
     // ================================================================
-    assign sda    = sda_oe ? 1'b0 : 1'bz;   // Drive low or release
-    assign scl    = scl_oe ? 1'b0 : 1'bz;   // Drive low or release
-    assign sda_in = sda;                     // Read-back (external pull-up)
+    assign sda_o   = 1'b0;
+    assign scl_o   = 1'b0;
+    assign sda_in  = sda_i;
+    assign i2c_irq = reg_cfg[1] | reg_cfg[3];
 
     // ================================================================
-    //  I2C Timing Generator
+    //  I2C Timing Generator (WIDTHEXPAND çözüldü)
     // ================================================================
     assign i2c_active = (state != ST_IDLE);
     assign bit_done   = i2c_active &&
@@ -155,7 +168,7 @@ module i2c_peripheral #(
                         (tick_cnt == CW'(QUARTER - 1));
     assign sample     = i2c_active &&
                         (phase    == 2'd2) &&
-                        (tick_cnt == {CW{1'b0}});
+                        (tick_cnt == '0);
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -167,9 +180,9 @@ module i2c_peripheral #(
         end else begin
             if (tick_cnt == CW'(QUARTER - 1)) begin
                 tick_cnt <= '0;
-                phase    <= phase + 2'd1;   // wraps 3 -> 0
+                phase    <= phase + 2'd1;
             end else begin
-                tick_cnt <= tick_cnt + CW'(1);
+                tick_cnt <= tick_cnt + 1'b1;
             end
         end
     end
@@ -178,24 +191,15 @@ module i2c_peripheral #(
     //  SCL / SDA Combinational Output Logic
     // ================================================================
     always_comb begin
-        // Default: bus released (pulled high externally)
         sda_oe = 1'b0;
         scl_oe = 1'b0;
 
         case (state)
-            // ----------------------------------------------------------
             ST_IDLE: begin
                 sda_oe = 1'b0;
                 scl_oe = 1'b0;
             end
 
-            // ----------------------------------------------------------
-            // START: SDA falls while SCL is high
-            //   Ph0: SDA=H SCL=H (bus-free hold)
-            //   Ph1: SDA=L SCL=H (START event)
-            //   Ph2: SDA=L SCL=L (prepare for data)
-            //   Ph3: SDA=L SCL=L
-            // ----------------------------------------------------------
             ST_START: begin
                 case (phase)
                     2'd0: begin sda_oe = 1'b0; scl_oe = 1'b0; end
@@ -205,13 +209,9 @@ module i2c_peripheral #(
                 endcase
             end
 
-            // ----------------------------------------------------------
-            // Transmit a bit (address or data):  MSB of shift_out
-            //   SCL: low -> high -> high -> low
-            // ----------------------------------------------------------
             ST_ADDR_BIT,
             ST_WR_BIT: begin
-                sda_oe = ~shift_out[7];       // 1-bit -> oe (inverted for open-drain)
+                sda_oe = ~shift_out[7];
                 case (phase)
                     2'd0: scl_oe = 1'b1;
                     2'd1: scl_oe = 1'b0;
@@ -220,13 +220,9 @@ module i2c_peripheral #(
                 endcase
             end
 
-            // ----------------------------------------------------------
-            // Slave ACK check (after address or write-data byte)
-            //   Release SDA so slave can pull it low (ACK)
-            // ----------------------------------------------------------
             ST_ADDR_ACK,
             ST_WR_ACK: begin
-                sda_oe = 1'b0;               // Release for slave
+                sda_oe = 1'b0;
                 case (phase)
                     2'd0: scl_oe = 1'b1;
                     2'd1: scl_oe = 1'b0;
@@ -235,10 +231,6 @@ module i2c_peripheral #(
                 endcase
             end
 
-            // ----------------------------------------------------------
-            // Receive a data bit from slave
-            //   Release SDA; slave drives it
-            // ----------------------------------------------------------
             ST_RD_BIT: begin
                 sda_oe = 1'b0;
                 case (phase)
@@ -249,13 +241,7 @@ module i2c_peripheral #(
                 endcase
             end
 
-            // ----------------------------------------------------------
-            // Master ACK / NACK after receiving a byte
-            //   ACK  (SDA=L) for all bytes except the last
-            //   NACK (SDA=H) for the last byte
-            // ----------------------------------------------------------
             ST_RD_ACK: begin
-                // ACK if more bytes remain; NACK on the final byte
                 sda_oe = ((byte_cnt + 3'd1) < op_nby) ? 1'b1 : 1'b0;
                 case (phase)
                     2'd0: scl_oe = 1'b1;
@@ -265,13 +251,6 @@ module i2c_peripheral #(
                 endcase
             end
 
-            // ----------------------------------------------------------
-            // STOP: SDA rises while SCL is high
-            //   Ph0: SDA=L SCL=L
-            //   Ph1: SDA=L SCL=H  (release SCL first)
-            //   Ph2: SDA=H SCL=H  (STOP event)
-            //   Ph3: SDA=H SCL=H  (bus free)
-            // ----------------------------------------------------------
             ST_STOP: begin
                 case (phase)
                     2'd0: begin sda_oe = 1'b1; scl_oe = 1'b1; end
@@ -281,7 +260,6 @@ module i2c_peripheral #(
                 endcase
             end
 
-            // ----------------------------------------------------------
             default: begin
                 sda_oe = 1'b0;
                 scl_oe = 1'b0;
@@ -292,12 +270,10 @@ module i2c_peripheral #(
     // ================================================================
     //  AXI4-Lite Slave - Write Channel
     // ================================================================
-    // Accept AW + W together; respond with BRESP.
-    // awprot / wstrb are accepted but not used (simple peripheral).
     assign axi_wr_en     = s_axi_awvalid && s_axi_wvalid && !s_axi_bvalid;
     assign s_axi_awready = axi_wr_en;
     assign s_axi_wready  = axi_wr_en;
-    assign s_axi_bresp   = 2'b00;                    // OKAY
+    assign s_axi_bresp   = 2'b00;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n)
@@ -313,9 +289,8 @@ module i2c_peripheral #(
     // ================================================================
     assign axi_rd_en     = s_axi_arvalid && !s_axi_rvalid;
     assign s_axi_arready = axi_rd_en;
-    assign s_axi_rresp   = 2'b00;                    // OKAY
+    assign s_axi_rresp   = 2'b00;
 
-    // Register read multiplexer
     always_comb begin
         case (s_axi_araddr[4:2])
             3'd0:    rd_mux = reg_nby;
@@ -340,21 +315,15 @@ module i2c_peripheral #(
     end
 
     // ================================================================
-    //  Register File + I2C Master FSM   (single always_ff)
-    //
-    //  Priority order within this block:
-    //    1. SW register writes   (lower  - appear first)
-    //    2. HW / FSM updates     (higher - appear last, win on conflict)
+    //  Register File + I2C Master FSM
     // ================================================================
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            // -- Registers --
             reg_nby     <= 32'd1;
             reg_adr     <= 32'd0;
             reg_rdr     <= 32'd0;
             reg_tdr     <= 32'd0;
             reg_cfg     <= 4'd0;
-            // -- FSM --
             state       <= ST_IDLE;
             bit_cnt     <= 3'd0;
             byte_cnt    <= 3'd0;
@@ -368,70 +337,46 @@ module i2c_peripheral #(
             sda_sampled <= 1'b1;
         end else begin
 
-            // ========================================================
-            // (A) Software Register Writes via AXI4-Lite
-            // ========================================================
             if (axi_wr_en) begin
                 case (s_axi_awaddr[4:2])
-                    // 0x00 - I2C_NBY : clamp to [1,4]
                     3'd0: begin
-                        if (s_axi_wdata == 32'd0)
+                        if (wr_val(reg_nby) == 32'd0)
                             reg_nby <= 32'd1;
-                        else if (s_axi_wdata > 32'd4)
+                        else if (wr_val(reg_nby) > 32'd4)
                             reg_nby <= 32'd4;
                         else
-                            reg_nby <= s_axi_wdata;
+                            reg_nby <= wr_val(reg_nby);
                     end
 
-                    // 0x04 - I2C_ADR : store only [6:0]
-                    3'd1: reg_adr <= {25'd0, s_axi_wdata[6:0]};
+                    3'd1: if (s_axi_wstrb[0]) reg_adr <= {25'd0, s_axi_wdata[6:0]};
 
-                    // 0x08 - I2C_RDR : read-only, ignore
-                    3'd2: ; // no-op
+                    3'd2: ;
 
-                    // 0x0C - I2C_TDR
-                    3'd3: reg_tdr <= s_axi_wdata;
+                    3'd3: reg_tdr <= wr_val(reg_tdr);
 
-                    // 0x10 - I2C_CFG
                     3'd4: begin
-                        // -- Enable bits [0],[2]: race-condition guard --
-                        if (s_axi_wdata[0] && s_axi_wdata[2]) begin
-                            // Both requested -> prioritise TX, ignore RX
+                        if (cfg_wr[0] && cfg_wr[2]) begin
                             reg_cfg[0] <= 1'b1;
                             reg_cfg[2] <= 1'b0;
                         end else begin
-                            reg_cfg[0] <= s_axi_wdata[0];
-                            reg_cfg[2] <= s_axi_wdata[2];
+                            reg_cfg[0] <= cfg_wr[0];
+                            reg_cfg[2] <= cfg_wr[2];
                         end
-                        // -- Completion bits [1],[3]: SW can only CLEAR --
-                        if (!s_axi_wdata[1]) reg_cfg[1] <= 1'b0;
-                        if (!s_axi_wdata[3]) reg_cfg[3] <= 1'b0;
+                        if (!cfg_wr[1]) reg_cfg[1] <= 1'b0;
+                        if (!cfg_wr[3]) reg_cfg[3] <= 1'b0;
                     end
 
-                    default: ; // undefined address - ignored
+                    default: ;
                 endcase
             end
 
-            // ========================================================
-            // (B) SDA Sampling  (captured at midpoint of SCL-high)
-            // ========================================================
             if (sample) begin
                 sda_sampled <= sda_in;
             end
 
-            // ========================================================
-            // (C) I2C Master FSM
-            //     HW writes appear AFTER SW writes so they win on
-            //     conflicting bits (non-blocking last-assignment rule).
-            // ========================================================
             case (state)
-
-                // ====================================================
-                // IDLE - wait for TX_EN or RX_EN
-                // ====================================================
                 ST_IDLE: begin
                     if (reg_cfg[0]) begin
-                        // -- Start Transmit --
                         op_rw     <= 1'b0;
                         op_addr   <= reg_adr[6:0];
                         op_nby    <= (reg_nby[2:0] == 3'd0) ? 3'd1 :
@@ -441,7 +386,6 @@ module i2c_peripheral #(
                         byte_cnt  <= 3'd0;
                         state     <= ST_START;
                     end else if (reg_cfg[2]) begin
-                        // -- Start Receive --
                         op_rw     <= 1'b1;
                         op_addr   <= reg_adr[6:0];
                         op_nby    <= (reg_nby[2:0] == 3'd0) ? 3'd1 :
@@ -453,20 +397,14 @@ module i2c_peripheral #(
                     end
                 end
 
-                // ====================================================
-                // START - generate I2C START condition
-                // ====================================================
                 ST_START: begin
                     if (bit_done) begin
-                        shift_out <= {op_addr, op_rw};  // {A6..A0, R/W}
+                        shift_out <= {op_addr, op_rw};
                         bit_cnt   <= 3'd0;
                         state     <= ST_ADDR_BIT;
                     end
                 end
 
-                // ====================================================
-                // ADDR_BIT - clock out 8 address bits (MSB first)
-                // ====================================================
                 ST_ADDR_BIT: begin
                     if (bit_done) begin
                         if (bit_cnt == 3'd7) begin
@@ -478,19 +416,13 @@ module i2c_peripheral #(
                     end
                 end
 
-                // ====================================================
-                // ADDR_ACK - check slave acknowledgement
-                // ====================================================
                 ST_ADDR_ACK: begin
                     if (bit_done) begin
                         if (sda_sampled) begin
-                            // NACK -> abort, issue STOP
                             state <= ST_STOP;
                         end else begin
-                            // ACK received
                             bit_cnt <= 3'd0;
                             if (!op_rw) begin
-                                // Write: load first data byte
                                 case (byte_cnt[1:0])
                                     2'd0: shift_out <= op_tdr[7:0];
                                     2'd1: shift_out <= op_tdr[15:8];
@@ -499,7 +431,6 @@ module i2c_peripheral #(
                                 endcase
                                 state <= ST_WR_BIT;
                             end else begin
-                                // Read: prepare to receive
                                 shift_in <= 8'd0;
                                 state    <= ST_RD_BIT;
                             end
@@ -507,9 +438,6 @@ module i2c_peripheral #(
                     end
                 end
 
-                // ====================================================
-                // WR_BIT - clock out 8 data bits (MSB first)
-                // ====================================================
                 ST_WR_BIT: begin
                     if (bit_done) begin
                         if (bit_cnt == 3'd7) begin
@@ -521,16 +449,11 @@ module i2c_peripheral #(
                     end
                 end
 
-                // ====================================================
-                // WR_ACK - check slave ACK after each data byte
-                // ====================================================
                 ST_WR_ACK: begin
                     if (bit_done) begin
                         if (sda_sampled) begin
-                            // NACK -> STOP
                             state <= ST_STOP;
                         end else if ((byte_cnt + 3'd1) < op_nby) begin
-                            // More bytes to send
                             byte_cnt <= byte_cnt + 3'd1;
                             bit_cnt  <= 3'd0;
                             case (byte_cnt[1:0] + 2'd1)
@@ -541,23 +464,17 @@ module i2c_peripheral #(
                             endcase
                             state <= ST_WR_BIT;
                         end else begin
-                            // All bytes sent -> STOP
                             state <= ST_STOP;
                         end
                     end
                 end
 
-                // ====================================================
-                // RD_BIT - clock in 8 data bits from slave (MSB first)
-                // ====================================================
                 ST_RD_BIT: begin
-                    // Shift in at the sample point
                     if (sample) begin
                         shift_in <= {shift_in[6:0], sda_in};
                     end
                     if (bit_done) begin
                         if (bit_cnt == 3'd7) begin
-                            // Store completed byte into accumulator
                             case (byte_cnt[1:0])
                                 2'd0: rx_data[7:0]   <= shift_in;
                                 2'd1: rx_data[15:8]  <= shift_in;
@@ -571,46 +488,34 @@ module i2c_peripheral #(
                     end
                 end
 
-                // ====================================================
-                // RD_ACK - master sends ACK or NACK
-                // ====================================================
                 ST_RD_ACK: begin
                     if (bit_done) begin
                         if ((byte_cnt + 3'd1) < op_nby) begin
-                            // More bytes to receive
                             byte_cnt <= byte_cnt + 3'd1;
                             shift_in <= 8'd0;
                             bit_cnt  <= 3'd0;
                             state    <= ST_RD_BIT;
                         end else begin
-                            // Last byte done -> STOP
                             state <= ST_STOP;
                         end
                     end
                 end
 
-                // ====================================================
-                // STOP - generate I2C STOP condition, set done flags
-                // ====================================================
                 ST_STOP: begin
                     if (bit_done) begin
                         if (!op_rw) begin
-                            // TX completed
-                            reg_cfg[0] <= 1'b0;       // Clear TX enable
-                            reg_cfg[1] <= 1'b1;       // Set   TX done
+                            reg_cfg[0] <= 1'b0;
+                            reg_cfg[1] <= 1'b1;
                         end else begin
-                            // RX completed
-                            reg_cfg[2] <= 1'b0;       // Clear RX enable
-                            reg_cfg[3] <= 1'b1;       // Set   RX done
-                            reg_rdr    <= rx_data;     // Publish received data
+                            reg_cfg[2] <= 1'b0;
+                            reg_cfg[3] <= 1'b1;
+                            reg_rdr    <= rx_data;
                         end
                         state <= ST_IDLE;
                     end
                 end
 
-                // ====================================================
                 default: state <= ST_IDLE;
-
             endcase
         end
     end
