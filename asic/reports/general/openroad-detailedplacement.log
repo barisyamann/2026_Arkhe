@@ -1,0 +1,62 @@
+Reading timing models for corner nom_tt_025C_1v80…
+Reading timing library for the 'nom_tt_025C_1v80' corner at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib'…
+Reading timing library for the 'nom_tt_025C_1v80' corner at 'macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib'…
+Reading OpenROAD database at '/home/tatua7806/arkhe/asic/run/arkhe/64-openroad-repairdesignpostgpl/soc_top.odb'…
+Reading design constraints file at 'constraints/design.sdc'…
+[INFO] No information on clock propagation in input SDC file-- propagating all clocks.
++ detailed_placement -max_displacement  500 100 
+Placement Analysis
+---------------------------------
+total displacement          0.0 u
+average displacement        0.0 u
+max displacement            0.0 u
+original HPWL         5474400.2 u
+legalized HPWL        5526657.6 u
+delta HPWL                    1 %
+
+[INFO DPL-0020] Mirrored 23716 instances
+[INFO DPL-0021] HPWL before          5526657.6 u
+[INFO DPL-0022] HPWL after           5474400.7 u
+[INFO DPL-0023] HPWL delta               -0.9 %
+Setting global connections for newly added cells…
+[INFO] Setting global connections...
+.*u_macro matched with u_data_ram.g_sram\[0\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[1\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[2\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[3\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[0\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[1\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[2\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[3\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[0\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[10\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[11\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[12\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[13\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[14\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[1\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[2\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[3\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[4\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[5\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[6\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[7\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[8\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[9\].u_macro
+[INFO ODB-0403] 0 connections made, 0 conflicts skipped.
+Updating metrics…
+Cell type report:                       Count       Area
+  Macro                                    23 6544384.90
+  Fill cell                             11220   42115.39
+  Tap cell                             113470  141973.66
+  Buffer                                    2      10.01
+  Timing Repair Buffer                   6236   69047.47
+  Inverter                               1200    4610.67
+  Sequential cell                       12209  289505.16
+  Multi-Input combinational cell        56145  566688.50
+  Total                                200505 7658335.77
+Writing OpenROAD database to '/home/tatua7806/arkhe/asic/run/arkhe/66-openroad-detailedplacement/soc_top.odb'…
+Writing netlist to '/home/tatua7806/arkhe/asic/run/arkhe/66-openroad-detailedplacement/soc_top.nl.v'…
+Writing powered netlist to '/home/tatua7806/arkhe/asic/run/arkhe/66-openroad-detailedplacement/soc_top.pnl.v'…
+Writing layout to '/home/tatua7806/arkhe/asic/run/arkhe/66-openroad-detailedplacement/soc_top.def'…
+Writing timing constraints to '/home/tatua7806/arkhe/asic/run/arkhe/66-openroad-detailedplacement/soc_top.sdc'…

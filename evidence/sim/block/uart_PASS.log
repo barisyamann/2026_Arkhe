@@ -1,0 +1,77 @@
+#-----------------------------------------------------------
+# xsim v2025.2 (64-bit)
+# SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+# IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+# SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+# Start of session at: Tue Aug 18 19:50:53 2026
+# Process ID         : 30116
+# Current directory  : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb
+# Command line       : xsim.exe -log u_sim.log -mode tcl -source {xsim.dir/u_snap/xsim_script.tcl}
+# Log file           : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb/u_sim.log
+# Journal file       : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb\xsim.jou
+# Running On         : baris
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 26200
+# Processor Detail   : AMD Ryzen 5 6600H with Radeon Graphics         
+# CPU Frequency      : 3294 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 16310 MB
+# Swap memory        : 16106 MB
+# Total Virtual      : 32416 MB
+# Available Virtual  : 11156 MB
+#-----------------------------------------------------------
+source xsim.dir/u_snap/xsim_script.tcl
+# xsim {u_snap} -autoloadwcfg -tclbatch {run.tcl}
+Time resolution is 1 ps
+source run.tcl
+## run all
+=======================================================
+  TEKNOFEST 2026 - UART Ã‡evre Birimi DoÄŸrulama Testi   
+=======================================================
+
+--- Test 1: CPB Yazma/Okuma ---
+[PASS] CPB = 50 (1Mbps)
+[PASS] CPB = 434 (115200bps)
+
+--- Test 2: Stop Bit KonfigÃ¼rasyonu ---
+[PASS] STP = 00 (1 stop bit)
+[PASS] STP = 01 (1.5 stop bit)
+[PASS] STP = 10 (2 stop bit)
+
+--- Test 3: TXâ†’RX Loopback (0xaa) ---
+[PASS] TX_DONE bayraÿÿÿ± kuruldu
+[PASS] RX_DONE bayraÿÿÿ± kuruldu
+[PASS] AlÄ±nan veri doÄŸru (0xaa)
+
+--- Test 3: TXâ†’RX Loopback (0x55) ---
+[PASS] TX_DONE bayraÿÿÿ± kuruldu
+[PASS] RX_DONE bayraÿÿÿ± kuruldu
+[PASS] AlÄ±nan veri doÄŸru (0x55)
+
+--- Test 3: TXâ†’RX Loopback (0xff) ---
+[PASS] TX_DONE bayraÿÿÿ± kuruldu
+[PASS] RX_DONE bayraÿÿÿ± kuruldu
+[PASS] AlÄ±nan veri doÄŸru (0xff)
+
+--- Test 3: TXâ†’RX Loopback (0x00) ---
+[PASS] TX_DONE bayraÿÿÿ± kuruldu
+[PASS] RX_DONE bayraÿÿÿ± kuruldu
+[PASS] AlÄ±nan veri doÄŸru (0x00)
+
+--- Test 3: TXâ†’RX Loopback (0x5a) ---
+[PASS] TX_DONE bayraÿÿÿ± kuruldu
+[PASS] RX_DONE bayraÿÿÿ± kuruldu
+[PASS] AlÄ±nan veri doÄŸru (0x5a)
+
+--- Test 4: Kesme Ãœretimi ---
+[PASS] IRQ sinyaÿÿÿÃ¼retildi
+
+=======================================================
+  SONUÃ‡: 21 PASS, 0 FAIL
+=======================================================
+  UART TESTI GECTI - 21 denetim, 0 hata
+=======================================================
+$finish called at time : 65030 ns : File "C:/Users/ybari/2026_Arkhe/rtl/Cevre_Birimleri/files_1/uart_tb.sv" Line 345
+## quit
+INFO: [Common 17-206] Exiting xsim at Tue Aug 18 19:50:55 2026...

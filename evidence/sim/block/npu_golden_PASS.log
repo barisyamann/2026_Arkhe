@@ -1,0 +1,41 @@
+#-----------------------------------------------------------
+# xsim v2025.2 (64-bit)
+# SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+# IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+# SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+# Start of session at: Tue Aug 18 19:15:13 2026
+# Process ID         : 17280
+# Current directory  : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb
+# Command line       : xsim.exe -log g_sim.log -mode tcl -source {xsim.dir/g_snap/xsim_script.tcl}
+# Log file           : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb/g_sim.log
+# Journal file       : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb\xsim.jou
+# Running On         : baris
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 26200
+# Processor Detail   : AMD Ryzen 5 6600H with Radeon Graphics         
+# CPU Frequency      : 3294 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 16310 MB
+# Swap memory        : 16106 MB
+# Total Virtual      : 32416 MB
+# Available Virtual  : 11087 MB
+#-----------------------------------------------------------
+source xsim.dir/g_snap/xsim_script.tcl
+# xsim {g_snap} -autoloadwcfg -tclbatch {run.tcl}
+Time resolution is 1 ps
+source run.tcl
+## run all
+[130000] [NPU_ENGINE] Starting upgraded NPU computation: in_addr=0x0000, out_addr=0x0400
+[1451790000] [NPU_ENGINE] Upgraded NPU computation done. Selected Class=3
+            fc_acc: [0]=-566992, [1]=149030, [2]=156762, [3]=216460
+            probs:  [0]=0, [1]=225, [2]=326, [3]=3543
+NPU cycles  = 72583
+fc_acc      = [-566992, 149030, 156762, 216460]
+fc_logits   = [-128, 79, 83, 109]
+probs Q0.12 = [0, 225, 326, 3543]
+class       = 3
+PASS: RTL deterministic golden test basarili.
+$finish called at time : 1451810 ns : File "C:/Users/ybari/2026_Arkhe/tb/npu_golden/tb_npu_golden.sv" Line 138
+## quit
+INFO: [Common 17-206] Exiting xsim at Tue Aug 18 19:15:15 2026...

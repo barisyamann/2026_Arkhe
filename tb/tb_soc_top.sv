@@ -1,0 +1,1357 @@
+`timescale 1ns / 1ps
+
+// UVM passive agent yalnizca -d UVM_AXI ile derlendiginde devreye girer.
+// Paket importu da kosullu: normal regresyon kosumlari uvm kutuphanesine
+// baglanmak zorunda kalmaz.
+`ifdef UVM_AXI
+import uvm_pkg::*;
+import axil_uvm_pkg::*;
+`endif
+// Description: Testbench to verify Arkhe SoC Top Integration in Vivado.
+//              Generates a 50 MHz clock, handles system reset, and mocks
+//              external peripheral pins to verify early CPU boot cycles.
+//
+//              Self-checking: error_count + check() + $fatal
+//              PC trace `ifdef TRACE_ON ile acilir (varsayilan: kapali)
+
+module tb_soc_top;
+
+    // --- Sinyal Tanımlamaları ---
+    // -------------------------------------------------------------------------
+    // UART cozucu bayraklari
+    //
+    // Bunlar asagida (~satir 390) `wait (uart_saw_stream_ready)` ile
+    // kullaniliyor ama bildirimleri dosyanin sonundaydi. Vivado proje kipi
+    // buna goz yumuyordu; xvlog dogrudan cagrildiginda reddediyor:
+    //     [VRFC 10-3380] identifier 'uart_saw_stream_ready' is used before
+    //                    its declaration
+    // Bildirimler kullanimdan ONCEYE tasindi.
+    // -------------------------------------------------------------------------
+    string uart_line             = "";
+    bit    uart_saw_irq          = 1'b0;
+    bit    uart_saw_stream_ready = 1'b0;
+    bit    uart_saw_dma_done     = 1'b0;
+    string uart_rdr_line         = "";
+    string uart_fault_line       = "";
+    string uart_i2c_line         = "";
+
+    logic        clk;
+    logic        rst_n;
+
+    // GPIO
+    logic [15:0] gpio_i;
+    logic [15:0] gpio_o;
+    logic [15:0] gpio_tx_en_o;
+
+    // UART1
+    logic        uart1_rxd;
+    logic        uart1_txd;
+
+    // UART2
+    logic        uart2_rxd;
+    logic        uart2_txd;
+
+    // I2C
+    wire         i2c_sda;
+    wire         i2c_scl;
+
+    // QSPI
+    logic        qspi_sck;
+    logic        qspi_cs_n;
+    wire         qspi_io0;
+    wire         qspi_io1;
+    wire         qspi_io2;
+    wire         qspi_io3;
+
+    // JTAG Debug
+    logic        jtag_tms;
+    logic        jtag_tck;
+    logic        jtag_tdi;
+    logic        jtag_tdo;
+    logic        jtag_trst_n;
+
+    // --- I2C ve QSPI için Pull-up direnç simülasyonları ---
+    assign (weak1, weak0) i2c_sda  = 1'b1;
+    assign (weak1, weak0) i2c_scl  = 1'b1;
+    assign (weak1, weak0) qspi_io0 = 1'b1;
+    assign (weak1, weak0) qspi_io1 = 1'b1;
+    assign (weak1, weak0) qspi_io2 = 1'b1;
+    assign (weak1, weak0) qspi_io3 = 1'b1;
+
+    // =========================================================================
+    // Ucdurumlu surucu halkasi
+    //
+    // soc_top artik cift yonlu pin icermiyor (ASIC akisinda tri-state yalnizca
+    // pad halkasinda olabilir); cikis / cikis-etkin / giris uclusu veriyor.
+    // Kart uzerinde bu isi nexys_top yapiyor, burada testbench yapiyor.
+    // =========================================================================
+    wire       i2c_sda_o_w, i2c_sda_oe_w;
+    wire       i2c_scl_o_w, i2c_scl_oe_w;
+    wire [3:0] qspi_io_o_w, qspi_io_oe_w;
+    wire [3:0] qspi_io_w;
+
+    assign i2c_sda = i2c_sda_oe_w ? i2c_sda_o_w : 1'bz;
+    assign i2c_scl = i2c_scl_oe_w ? i2c_scl_o_w : 1'bz;
+
+    assign qspi_io_w = {qspi_io3, qspi_io2, qspi_io1, qspi_io0};
+
+    assign qspi_io0 = qspi_io_oe_w[0] ? qspi_io_o_w[0] : 1'bz;
+    assign qspi_io1 = qspi_io_oe_w[1] ? qspi_io_o_w[1] : 1'bz;
+    assign qspi_io2 = qspi_io_oe_w[2] ? qspi_io_o_w[2] : 1'bz;
+    assign qspi_io3 = qspi_io_oe_w[3] ? qspi_io_o_w[3] : 1'bz;
+
+    // --- UUT (Unit Under Test) ---
+    soc_top uut (
+        .clk_i        (clk),
+        .rst_ni       (rst_n),
+
+        .gpio_i       (gpio_i),
+        .gpio_o       (gpio_o),
+        .gpio_tx_en_o (gpio_tx_en_o),
+
+        .uart1_rxd    (uart1_rxd),
+        .uart1_txd    (uart1_txd),
+
+        .uart2_rxd    (uart2_rxd),
+        .uart2_txd    (uart2_txd),
+
+        .i2c_sda_o    (i2c_sda_o_w),
+        .i2c_sda_oe   (i2c_sda_oe_w),
+        .i2c_sda_i    (i2c_sda),
+        .i2c_scl_o    (i2c_scl_o_w),
+        .i2c_scl_oe   (i2c_scl_oe_w),
+        .i2c_scl_i    (i2c_scl),
+
+        .qspi_sck     (qspi_sck),
+        .qspi_cs_n    (qspi_cs_n),
+        .qspi_io_o    (qspi_io_o_w),
+        .qspi_io_oe   (qspi_io_oe_w),
+        .qspi_io_i    (qspi_io_w),
+
+        .jtag_tms     (jtag_tms),
+        .jtag_tck     (jtag_tck),
+        .jtag_tdi     (jtag_tdi),
+        .jtag_tdo     (jtag_tdo),
+        .jtag_trst_n  (jtag_trst_n)
+        );
+    // --- QSPI Flash Modeli ---
+    // Sartname s.16: sistem QSPI flash'tan boot olur. Yukleyici (boot.hex)
+    // uygulamayi (app.hex) buradan okuyup I-RAM'e yazar.
+    //
+    // APP_OFS: F2 karari (23 Agustos 2026) sonrasi uygulama, kart ustu
+    // flash'in BASINDA DEGIL 0x800000'de duruyor - orasi FPGA
+    // bitstream'inin uzerinde kalan ilk guvenli sinir. Yukleyici de
+    // (bootloader.S / APP_FLASH_OFS) oradan okuyor.
+    //
+    // Simulasyonun bunu birebir modellemesi sart: aksi halde test,
+    // gercek donanimda kosacak olandan BASKA bir adresten boot etmis
+    // olurdu ve ofset hatasi FPGA'ye kadar gorunmezdi.
+    //
+    // flash.hex = uygulama + NPU FC agirliklari, tek imaj.
+    // Uretimi: python sw_nexys/scripts/gen_flash_image.py
+    //
+    //     0x800000  uygulama         2048 kelime (8 kB ayrildi)
+    //     0x802000  FC agirliklari   4000 kelime (16 kB)
+    //
+    // Agirliklar buradan TCM'e YUKLEYICI tarafindan kopyalanir; testbench
+    // artik onlari TCM'e onyuklemez. Boylece simulasyon, uretilmis cipte
+    // olacak seyin AYNISINI kosar.
+    spi_flash_model #(
+        .APP_OFS    (32'h0080_0000),
+        .INIT_FILE  ("flash_sim.hex"),
+        .WORD_COUNT (6048)
+    ) u_flash (
+        .sck   (qspi_sck),
+        .cs_n  (qspi_cs_n),
+        .io0   (qspi_io0),
+        .io1   (qspi_io1),
+        .io2   (qspi_io2),
+        .io3   (qspi_io3)
+    );
+
+    // --- SystemVerilog Functional Coverage (Kapsama) Tanımları ---
+    covergroup cg_soc_verification @(posedge clk);
+        option.per_instance = 1;
+
+        // GPIO çıkışlarının fonksiyonel kapsaması
+        cov_gpio: coverpoint gpio_o {
+            bins idle     = {16'h0000};
+            bins cls_yes  = {16'h5555};
+            bins cls_no   = {16'hAAAA};
+            bins cls_sil  = {16'h0F0F};
+            bins cls_unk  = {16'hFFFF};
+        }
+
+
+        // JTAG TMS pininin geçişleri
+        cov_jtag_tms: coverpoint jtag_tms {
+            bins low  = {1'b0};
+            bins high = {1'b1};
+        }
+
+        // AXI-Lite el sıkışma (handshake) kapsaması
+        cov_axi_aw: coverpoint (uut.u_npu.u_npu_axi_ctrl.mem_awvalid && uut.u_npu.u_npu_axi_ctrl.mem_awready) {
+            bins hit = {1'b1};
+        }
+        cov_axi_w: coverpoint (uut.u_npu.u_npu_axi_ctrl.mem_wvalid && uut.u_npu.u_npu_axi_ctrl.mem_wready) {
+            bins hit = {1'b1};
+        }
+        cov_axi_ar: coverpoint (uut.u_npu.u_npu_axi_ctrl.mem_arvalid && uut.u_npu.u_npu_axi_ctrl.mem_arready) {
+            bins hit = {1'b1};
+        }
+        cov_axi_r: coverpoint (uut.u_npu.u_npu_axi_ctrl.mem_rvalid && uut.u_npu.u_npu_axi_ctrl.mem_rready) {
+            bins hit = {1'b1};
+        }
+
+        // =====================================================================
+        // R3 - Islevsel kapsama genisletmesi
+        //
+        // Denetimdeki oranlar (statement %46,6 / branch %30,1 / toggle %21,5)
+        // DMA, UART-stream ve kesmeler hic calismazken olculmustu. Bugun
+        // hepsi gercek veriyle uyariliyor; asagidaki noktalar bunu OLCULEBILIR
+        // hale getiriyor.
+        //
+        // Denetimin hakli elestirisi soyleydi: dusuk kapsami "kullanilmayan
+        // bloklar" diye savunmak yanlis, cunku o bloklar sartnamenin zorunlu
+        // tuttugu cevre birimleri. Dolayisiyla kapsama noktalari zorunlu
+        // birimlerin GERCEKTEN calistigini gostermeli.
+        // =====================================================================
+
+        // Her kesme kaynagi en az bir kez tetiklendi mi?
+        cov_irq_npu:   coverpoint uut.npu_irq        { bins fired = {1'b1}; }
+        cov_irq_timer: coverpoint uut.timer_irq      { bins fired = {1'b1}; }
+        cov_irq_dma:   coverpoint uut.dma_irq        { bins fired = {1'b1}; }
+        cov_irq_fault: coverpoint uut.bus_fault_irq  { bins fired = {1'b1}; }
+
+        // DMA durum makinesinin tum durumlari gezildi mi?
+        cov_dma_state: coverpoint uut.u_dma.dma_state {
+            bins idle       = {3'd0};
+            bins read_req   = {3'd1};
+            bins read_wait  = {3'd2};
+            bins write_req  = {3'd3};
+            bins write_wait = {3'd4};
+            bins done       = {3'd5};
+        }
+
+        // UART-stream FIFO doluluk bolgeleri - akis kontrolunun
+        // gercekten calistigini gosterir
+        cov_uart2_fifo: coverpoint uut.u_uart2.fifo_level {
+            bins bos     = {0};
+            bins az      = {[1:63]};
+            bins orta    = {[64:191]};
+            bins cok     = {[192:255]};
+            bins dolu    = {256};
+        }
+
+        // NPU sinif cikisi
+        cov_npu_class: coverpoint uut.u_npu.class_sig {
+            bins silence = {2'd0};
+            bins unknown = {2'd1};
+            bins yes     = {2'd2};
+            bins no      = {2'd3};
+        }
+
+        // Veri yolu hata kaynagi - hangi kopru bildirdi
+        cov_fault_src: coverpoint {uut.instr_bus_err, uut.data_bus_err} {
+            bins yok        = {2'b00};
+            bins veri_kopru = {2'b01};
+            bins buyruk_kopru = {2'b10};
+        }
+
+        // AXI yanit kodlari - SLVERR bilerek uretiliyor (Boot ROM yazmasi)
+        cov_axi_resp: coverpoint uut.u_data_bridge.axil_bresp_i
+            iff (uut.u_data_bridge.axil_bvalid_i) {
+            bins okay   = {2'b00};
+            bins slverr = {2'b10};
+            bins decerr = {2'b11};
+        }
+
+        // Kesme x sinif caprazi: dogru sinif dogru kesmeyle mi bildirildi
+        cross cov_irq_npu, cov_npu_class;
+    endgroup
+
+    cg_soc_verification cg_inst = new();
+
+    // --- Saat Üreteci (50 MHz -> 20ns Periyot) ---
+    always begin
+        clk = 1'b0;
+        #10;
+        clk = 1'b1;
+        #10;
+    end
+
+    // --- Log Dosyası Yazma Altyapısı ---
+    int log_file;
+
+    function automatic void log_print(input string msg);
+        $display("%s", msg);
+        if (log_file != 0) begin
+            $fdisplay(log_file, "%s", msg);
+        end
+    endfunction
+
+    // =========================================================================
+    // Zaman asimi payi - acilis moduna gore
+    //
+    // GERCEK BOOT'ta yukleyici 8 kB uygulamayi QSPI flash'tan okur.
+    // Prescaler 4'te SCK = 50 MHz / (2 x 5) = 5 MHz, yani
+    //   8192 bayt x 8 bit / 5 MHz ~ 13 ms
+    // Hizli acilista bu sure yok. Sabit zaman asimlari gercek boot'ta
+    // yaniltici "basarisiz" uretiyordu - islev dogruydu, sure yetmiyordu.
+    // =========================================================================
+// USE_SRAM_MACRO kipi de gercek boot kullanir (I-RAM makrolara dagilmis
+// oldugu icin dogrudan $readmemh yapilamaz), dolayisiyla ayni payi alir.
+// Ilk makro kosumunda bu atlanmisti: "Stream ready" ASLINDA yazdirilmisti
+// ama 20 ms'lik zaman asimi ondan once dolmustu - islev dogru, sure yetersiz.
+`ifdef REAL_BOOT
+    localparam int BOOT_PAYI_NS = 40_000_000;   // 40 ms
+`elsif USE_SRAM_MACRO
+    localparam int BOOT_PAYI_NS = 40_000_000;   // 40 ms - makro kipi gercek boot
+`else
+    localparam int BOOT_PAYI_NS = 0;
+`endif
+
+    // =========================================================================
+    // Self-checking altyapisi
+    // =========================================================================
+    int error_count = 0;
+
+    task automatic check(input string        ad,
+                         input logic [63:0]  gercek,
+                         input logic [63:0]  beklenen);
+        if (gercek !== beklenen) begin
+            error_count++;
+            log_print($sformatf("      [HATA] %s: beklenen=0x%h gercek=0x%h", ad, beklenen, gercek));
+        end else begin
+            log_print($sformatf("      [OK]   %s = 0x%h", ad, gercek));
+        end
+    endtask
+
+    // --- Test Akışı ---
+    initial begin
+        log_file = $fopen("simulation.log", "w");
+        if (log_file == 0) begin
+            $display("HATA: simulation.log dosyası açılamadı!");
+        end
+
+        log_print($sformatf("[%0t] SoC Simülasyonu Başlatıldı.", $time));
+
+        // Başlangıç Değerleri
+        rst_n       = 1'b0;
+        gpio_i      = 16'h0000;
+        uart1_rxd   = 1'b1;
+        uart2_rxd   = 1'b1;
+        jtag_tms    = 1'b0;
+        jtag_tck    = 1'b0;
+        jtag_tdi    = 1'b0;
+        jtag_trst_n = 1'b0;  // JTAG reset aktif
+
+        // JTAG resetini kaldır
+        #50;
+        jtag_trst_n = 1'b1;
+
+        // Reset Süreci
+        #100;
+        @ (posedge clk);
+        rst_n = 1'b1;
+
+        #1;
+        // ---------------------------------------------------------------------
+        // Bellekleri sifirla - simulasyonda X/U belirsizligini onler
+        //
+        // Iki gerceklemede bellek FARKLI yerde duruyor:
+        //   varsayilan       -> u_npu_sram.ram[]          (cikarimsal dizi)
+        //   USE_SRAM_MACRO   -> g_sram[i].u_macro.mem[]   (15 makro)
+        // ---------------------------------------------------------------------
+`ifndef USE_SRAM_MACRO
+        for (int idx = 0; idx < 7680; idx = idx + 1) begin
+            uut.u_npu.u_npu_sram.ram[idx] = 32'h0;
+        end
+`endif
+        // Makro kipinde sifirlama modullerin KENDI icinde yapiliyor
+        // (npu_tcm_sram / sram_module, generate blogu icinde). Testbench'ten
+        // g_sram[m].u_macro yoluna degisken indisle erismek cozumlenmiyor.
+
+        // =====================================================================
+        // ACILIS SECIMI
+        //
+        // Gercek iki asamali boot (Boot ROM -> QSPI flash -> I-RAM) calisir
+        // durumda ve ayri olarak dogrulanmaktadir. Ancak QSPI aktarimi
+        // simulasyonda cok yavas oldugu icin sistem seviyesi testlerinin bu
+        // bedeli her kosumda odemesi gereksizdir.
+        //
+        // Varsayilan: I-RAM dogrudan doldurulur ve Boot ROM'un ilk iki komutu
+        //             I-RAM'e atlayacak sekilde degistirilir.
+        // Gercek boot zinciri icin derlemeye  -d REAL_BOOT  ekleyin.
+        //
+        // MAKRO KIPINDE HIZLI ACILIS YAPILAMAZ:
+        // USE_SRAM_MACRO tanimliyken I-RAM tek bir dizi degil, dort ayri SRAM
+        // makrosudur. Dogrudan $readmemh yapilacak bir 'ram' dizisi yoktur.
+        // Bu yuzden makro kipi gercek QSPI boot zincirini kullanir - ki bu
+        // aslinda daha guclu bir dogrulamadir: veri gercekten flash'tan
+        // okunup makrolara YAZILIR.
+        // =====================================================================
+    // NOT: Vivado on-isleyicisi `if !defined(...) sozdizimini desteklemiyor;
+    // ic ice `ifdef kullaniliyor.
+    `ifdef USE_SRAM_MACRO
+        log_print("[TB] GERCEK BOOT: uygulama QSPI flash'tan yuklenecek.");
+        log_print("[TB] SRAM MAKRO KIPI: bellekler 23 adet sky130 makrosu.");
+    `else
+      `ifndef REAL_BOOT
+        // app_sim.hex: ARKHE_SIM ile derlenmis - cikarimlar arasi bekleme
+        // 3 s yerine 2 ms. REUSE testi icin sart; baska fark yok.
+`ifdef CORE_TEST
+        // CEKIRDEK TESTI - Spike ISS karsilastirmasi
+        //
+        // core_test.c yalnizca cekirdek ve bellek kullanir; hicbir cevre
+        // birimine dokunmaz. Spike bizim SoC'umuzu degil ciplak bir RISC-V
+        // cekirdegini modelledigi icin ancak boyle bir program BASTAN SONA
+        // karsilastirilabilir. main.c ilk UART yaziminda ayrisirdi.
+        $readmemh("core_test.hex", uut.u_instruction_ram.ram);
+`else
+        $readmemh("app_sim.hex", uut.u_instruction_ram.ram);
+`endif
+
+        // ---------------------------------------------------------------
+        // HIZLI ACILIS YUKLEYICIYI ATLADIGI ICIN ONUN ISINI TAKLIT ET
+        //
+        // Gercek acilista yukleyici (bootloader.S) iki is yapar:
+        //   1. uygulamayi flash'tan I-RAM'e kopyalar   <- yukaridaki satir
+        //   2. FC agirliklarini flash'tan TCM'e kopyalar ve
+        //      npu_csr CTRL.WEIGHTS_READY bitini kurar
+        //
+        // Hizli acilis yalnizca (1)'i taklit ediyordu. (2) olmadan NPU
+        // sifir agirlikla kosardi - ve WEIGHTS_READY korumasi eklendikten
+        // sonra hic BASLAMAZ. Ikisi de burada taklit ediliyor.
+        //
+        // Not: bu, gercek boot zincirinin dogrulanmadigini gostermez -
+        // sistem_gercek_boot testi (-d REAL_BOOT) tam zinciri kosar.
+        // ---------------------------------------------------------------
+        $readmemh("fc_weights_packed32.mem", uut.u_npu.u_npu_sram.ram, 3584, 7583);
+
+        // CTRL bit 4 = WEIGHTS_READY (yapiskan)
+        force uut.u_npu.u_npu_csr.reg_weights_ready = 1'b1;
+        #1;
+        release uut.u_npu.u_npu_csr.reg_weights_ready;
+
+        // HIZLI ACILIS - CPU'nun ACILIS ADRESI zorlanir.
+        //
+        // Onceden Boot ROM'un ilk iki komutu yazilarak I-RAM'e atlaniyordu:
+        //     uut.u_boot_rom.rom_mem[0] = 32'h010002B7;  // lui t0, 0x01000
+        //     uut.u_boot_rom.rom_mem[1] = 32'h00028067;  // jr  t0
+        //
+        // Bu artik MUMKUN DEGIL: ROM icerigi RTL'e gomuldu ve `rom_mem` bir
+        // localparam oldu (bkz. rtl/boot/boot_rom_pkg.sv). Sabite yazilamaz.
+        //
+        // Yerine cekirdegin `boot_addr_i` girisi zorlaniyor. Sonuc ayni -
+        // yukleyici atlanip dogrudan I-RAM'den baslaniyor - ama tasarima
+        // hicbir test kancasi eklenmiyor ve ROM icerigi el degmemis kaliyor.
+        force uut.u_core.boot_addr_i = 32'h0100_0000;
+
+        log_print("[TB] HIZLI ACILIS: I-RAM dogrudan yuklendi, acilis adresi");
+        log_print("[TB]               0x01000000'a zorlandi, yukleyici atlandi.");
+        log_print("[TB] Gercek QSPI boot icin derlemeye -d REAL_BOOT ekleyin.");
+      `else
+        log_print("[TB] GERCEK BOOT: uygulama QSPI flash'tan yuklenecek.");
+      `endif
+    `endif
+
+        log_print($sformatf("[%0t] Reset kaldırıldı. İşlemci çalışıyor...", $time));
+
+`ifdef CORE_TEST
+        // =====================================================================
+        // CEKIRDEK TESTI - cevre birimi denetimleri ATLANIR
+        //
+        // core_test.c yalnizca cekirdek ve bellek kullanir; UART/DMA/NPU
+        // denetimleri burada zaman asimina duserdi. Amac tek sey: programi
+        // kosturup cv32e40p_tracer'in komut izini uretmesini saglamak.
+        //
+        // Program bittiginde crt0 sonsuz donguye girer. Sabit bir sure
+        // bekleyip bitiriyoruz; iz karsilastirmasi dongudeki tekrarlari
+        // zaten atiyor (scripts/spike_karsilastir.py).
+        //
+        // Sonuclarin D-RAM'e yazildigini de dogruluyoruz - imza 0xC0DE0001.
+        // =====================================================================
+        log_print("[TB] CEKIRDEK TESTI: core_test.hex kosuluyor, iz aliniyor");
+        #(200_000);                       // 200 us - program bitmis olur
+
+        begin
+            logic [31:0] imza;
+            imza = uut.u_data_ram.ram[13'h400 + 31];   // 0x20001000 + 31*4
+            if (imza === 32'hC0DE0001) begin
+                log_print("      [OK]   core_test D-RAM imzasi dogru: 0xC0DE0001");
+            end else begin
+                error_count++;
+                log_print($sformatf("      [HATA] core_test imzasi yanlis: 0x%08h", imza));
+            end
+        end
+
+        log_print("================================================================");
+        if (error_count != 0)
+            $fatal(1, "CEKIRDEK TESTI BASARISIZ - %0d hata", error_count);
+        log_print(" CEKIRDEK TESTI GECTI - iz trace_core_00000000.log dosyasinda");
+        log_print("================================================================");
+        $finish;
+`endif
+
+        // =====================================================================
+        // UART-STREAM VERI YOLU (Sartname EK-1 s.21)
+        //
+        // CPU, UART2'yi 1 Mbps'e ayarlayip DMA'yi kurduktan sonra UART1'den
+        // "Stream ready" yazar. Senkronizasyon gercek arayuz uzerinden
+        // kuruluyor - stream FIFO'su 256 bayt oldugu icin erken gonderim
+        // tasmaya yol acardi.
+        // =====================================================================
+        fork : wait_stream_ready
+            wait (uart_saw_stream_ready);
+            #(20_000_000 + BOOT_PAYI_NS);   // 20 ms + boot payi
+        join_any
+        disable wait_stream_ready;
+
+        if (!uart_saw_stream_ready) begin
+            error_count++;
+            log_print("      [HATA] CPU 'Stream ready' yazmadi - UART-stream/DMA kurulumu basarisiz");
+        end else begin
+            log_print("      [OK]   CPU UART-stream ve DMA'yi kurdu");
+            uart2_send_tensor(8'h55);
+        end
+
+        // =====================================================================
+        // UART_RDR bayt okuma yolu (EK-2, offset 0x08)
+        //
+        // DMA yolu UARTS_RDR32'yi kullandigi icin bayt yazmaci sistem
+        // testinde hic uyarilmiyordu. CPU, DMA bittikten sonra dort bayt
+        // okuyup "RDR: A1B2C3D4" yaziyor. Bu ayni anda iki seyi dogrular:
+        //   - FIFO okuma gecikmesi dogru ele aliniyor (eskiden bir onceki
+        //     bayt donuyordu)
+        //   - UARTS_RDR32 toplayicisi artik bayt calmiyor
+        // =====================================================================
+        fork : wait_dma_done
+            wait (uart_saw_dma_done);
+            #(2_000_000 + BOOT_PAYI_NS);
+        join_any
+        disable wait_dma_done;
+
+        if (uart_saw_dma_done) begin
+            log_print("[TB] UART_RDR testi: A1 B2 C3 D4 gonderiliyor");
+            uart2_send_byte(8'hA1);
+            uart2_send_byte(8'hB2);
+            uart2_send_byte(8'hC3);
+            uart2_send_byte(8'hD4);
+        end
+
+        // NPU donanım motorunun hesaplamayı bitirmesini dinamik olarak bekle
+        log_print($sformatf("[%0t] NPU donanım motorunun tamamlanması bekleniyor...", $time));
+
+        // Zaman asimi sart: bu bekleme eskiden cipsizdi ve NPU hic
+        // baslamazsa simulasyon sonsuza kadar asili kaliyordu. 18 Agustos'ta
+        // tam olarak bu oldu, kosum elle durdurulmak zorunda kalindi.
+        // NPU hesaplamasi ~20 ms surer, 60 ms rahat bir ust sinir.
+        fork : wait_npu
+            wait (uut.u_npu.u_npu_engine.done_o == 1'b1);
+            #(60_000_000 + BOOT_PAYI_NS);
+        join_any
+        disable wait_npu;
+
+        if (uut.u_npu.u_npu_engine.done_o !== 1'b1) begin
+            error_count++;
+            log_print("      [HATA] NPU zaman asimi - DONE sinyali 60 ms icinde gelmedi");
+        end else begin
+            log_print($sformatf("[%0t] NPU donanım motoru DONE sinyalini verdi!", $time));
+        end
+
+        // =====================================================================
+        // KONTROL 1: CPU sinif sonucunu okuyup GPIO'ya yazdi mi?
+        //
+        // Sinifin 2 mi 3 mu oldugunu burada kontrol etmiyoruz; gercek
+        // agirliklarla bu girdinin hangi sinifa dustugu ayrica olculecek.
+        // Burada kanitlanan sey: CPU -> NPU -> CPU -> GPIO zinciri calisiyor.
+        //
+        // CPU once UART'tan "Class: N" yazdirdigi icin (~1.3 ms) zaman asimli
+        // bekleme kullaniyoruz.
+        // =====================================================================
+        // ---------------------------------------------------------------------
+        // BEKLENEN SINIF DENETLENIR - yalnizca "bir sinif geldi" YETMEZ
+        //
+        // 23 Agustos 2026'da bulunan bosluk: bu denetim eskiden UC deseni
+        // birden kabul ediyordu (0x5555 YES / 0xAAAA NO / 0x0F0F SILENCE).
+        // Yani NPU'nun HANGI sinifi verdigi hic denetlenmiyordu.
+        //
+        // Bunun somut bedeli vardi: FC agirliklari TCM'e tasindiktan sonra
+        // testbench onlari yuklemiyordu, dolayisiyla NPU SIFIR AGIRLIKLA
+        // kosuyordu - ve test yine geciyordu. Sessiz bir yanlis sonuc.
+        //
+        // Girdi: UART-stream'den 1960 bayt 0x55 (uart2_send_tensor).
+        // Bu girdi icin beklenen sonuc, resmi TFLite yorumlayicisina capali
+        // referans modelimizden (tb/npu_audio/npu_ref_model.py) alindi:
+        //
+        //     fc_acc = [-985885, 242268, 240758, 387226]
+        //     logits = [-128, 120, 120, 127]
+        //     sinif  = 3  (NO)   ->  GPIO deseni 0xAAAA
+        //
+        // Girdi deseni degistirilirse bu beklenti de yeniden hesaplanmalidir.
+        // ---------------------------------------------------------------------
+        fork : wait_gpio
+            wait (gpio_o == 16'h5555 || gpio_o == 16'hAAAA ||
+                  gpio_o == 16'h0F0F || gpio_o == 16'hFFFF);
+            #(5_000_000 + BOOT_PAYI_NS);   // 5 ms + boot payi
+        join_any
+        disable wait_gpio;
+
+        if (gpio_o == 16'hAAAA) begin
+            log_print("      [OK]   NPU beklenen sinifi verdi: 3 (NO), GPIO 0xAAAA");
+        end else if (gpio_o == 16'h5555 || gpio_o == 16'h0F0F ||
+                     gpio_o == 16'hFFFF) begin
+            error_count++;
+            log_print($sformatf(
+                "      [HATA] NPU YANLIS sinif verdi - GPIO 0x%h, beklenen 0xAAAA (sinif 3 / NO)",
+                gpio_o));
+            log_print("             Olasi sebep: FC agirliklari TCM'e yuklenmemis.");
+        end else begin
+            error_count++;
+            log_print($sformatf("      [HATA] GPIO 5 ms icinde yazilmadi: 0x%h", gpio_o));
+        end
+
+        // =====================================================================
+        // REUSE - GLOBAL RESET OLMADAN IKINCI CIKARIM
+        //
+        // Sartname 4.2.2.1: sistem, global reset gerekmeden tekrar
+        // kullanilabilmelidir.
+        //
+        // Bu denetim SIFIRDAN yoktu. Bir cikarim calisiyor diye ikincisinin
+        // de calisacagi varsayilamaz: DMA isaretcileri, NPU done_sticky,
+        // UART-stream FIFO ve ISR bayraklari ilk kosumdan sonra takili
+        // kalabilir.
+        //
+        // AYIRT EDILEBILIRLIK: ikinci tensor FARKLI desen (0x80) gonderiliyor.
+        // Ayni deseni gondermek yaniltici olurdu - GPIO zaten 0xAAAA'da
+        // kalirdi ve ikinci cikarim hic olmasa bile test gecerdi.
+        //
+        //   0x55 -> sinif 3 (NO)      -> GPIO 0xAAAA   (ilk)
+        //   0x80 -> sinif 0 (SILENCE) -> GPIO 0x0F0F   (ikinci)
+        //
+        // Beklenen sinif yine resmi TFLite'a capali referans modelden
+        // (tb/npu_audio/npu_ref_model.py) alindi.
+        //
+        // NOT: uygulama ARKHE_SIM ile derlendiginde cikarimlar arasi bekleme
+        // 3 s yerine 2 ms'dir; baska hicbir fark yoktur.
+        // =====================================================================
+        log_print("  -- REUSE: global reset olmadan ikinci cikarim");
+
+        // ---------------------------------------------------------------------
+        // YARISA DAYANIKLI SENKRONIZASYON
+        //
+        // Iki yanlis deneme yapildi, ikisi de ogreticiydi:
+        //
+        //  1) "gpio_o != 0xAAAA" beklendi. YANLIS: uygulama GPIO'yu
+        //     cikarimlar ARASINDA degistirmez, yalnizca her cikarimin
+        //     sonunda yazar. Beklenen olay ancak ikinci cikarim BITTIKTEN
+        //     sonra olusurdu - tensor gonderilmeden once.
+        //
+        //  2) Bayrak temizlenip TEK bir "Stream ready" beklendi. YANLIS:
+        //     uygulama serbest kosuyor ve ARKHE_SIM ile 2 ms'de bir yeni
+        //     tura giriyor. Bayragi temizledigimizde o turun mesaji coktan
+        //     gecmis olabiliyor; tensor bir sonraki tura yetisiyor ve
+        //     aradaki cikarim SIFIR girdiyle kosuyordu.
+        //
+        //     Bunu sifir girdinin de sinif 3 vermesi gizliyordu:
+        //         0x00 -> sinif 3 (NO)   0x55 -> sinif 3 (NO)
+        //     yani "tensor ulasmadi" ile "ilk sonuc duruyor" ayni gorunuyordu.
+        //
+        // Dogru cozum: her "Stream ready" gorulusunde tensoru gonder ve
+        // sonucu bekle; olmazsa tekrar dene. Boylece hangi tura denk
+        // geldigimiz onemsiz olur.
+        // ---------------------------------------------------------------------
+        begin
+            int deneme;
+            bit tur_gorundu;
+
+            tur_gorundu = 1'b0;
+
+            for (deneme = 0; deneme < 4 && gpio_o != 16'h0F0F; deneme++) begin
+                uart_saw_stream_ready = 1'b0;
+
+                fork : bekle_tur
+                    wait (uart_saw_stream_ready);
+                    #(30_000_000);
+                join_any
+                disable bekle_tur;
+
+                if (!uart_saw_stream_ready) begin
+                    log_print($sformatf("      [BILGI] deneme %0d: 'Stream ready' gelmedi", deneme));
+                end else begin
+                    tur_gorundu = 1'b1;
+                    uart2_send_tensor(8'h80);
+
+                    // UYGULAMA HER TURDA 4 BAYT DAHA BEKLER
+                    //
+                    // main.c, DMA bittikten sonra UART_RDR bayt okuma
+                    // yolunu denetliyor:
+                    //     while ((*UARTS_LEVEL & 0x1FF) < 4) { }
+                    //
+                    // Ilk turda testbench bu dort bayti gonderiyor. Ikinci
+                    // turda gonderilmeyince uygulama "DMA done"dan sonra
+                    // ASILI KALIYORDU - log tam orada duruyordu ve disaridan
+                    // "NPU yanlis sinif verdi" gibi gorunuyordu.
+                    uart2_send_byte(8'hA1);
+                    uart2_send_byte(8'hB2);
+                    uart2_send_byte(8'hC3);
+                    uart2_send_byte(8'hD4);
+
+                    fork : bekle_sonuc
+                        wait (gpio_o == 16'h0F0F);
+                        #(30_000_000);
+                    join_any
+                    disable bekle_sonuc;
+                end
+            end
+
+            if (!tur_gorundu) begin
+                error_count++;
+                log_print("      [HATA] Uygulama ikinci tura hic girmedi");
+            end else begin
+                log_print("      [OK]   Uygulama reset olmadan yeni tura girdi");
+            end
+
+            if (gpio_o == 16'h0F0F) begin
+                log_print("      [OK]   Ikinci cikarim RESET OLMADAN dogru sonuc verdi: 0 (SILENCE)");
+            end else begin
+                error_count++;
+                log_print($sformatf(
+                    "      [HATA] Ikinci cikarim basarisiz - GPIO 0x%h, beklenen 0x0F0F (sinif 0)",
+                    gpio_o));
+            end
+        end
+
+                // ISR gercekten calisip UART'tan yazdirdi mi?
+        // Sartname s.16: "... sonuclari UART arayuzu uzerinden yazdirmalidir."
+        // DMA, UART-stream'den TCM'e tasimayi tamamladi mi?
+        // Sartname EK-1 s.21: veri UART-stream uzerinden hizlandirici
+        // bellegine yazilmali.
+        if (uart_saw_dma_done) begin
+            log_print("      [OK]   DMA UART-stream verisini TCM'e tasidi");
+        end else begin
+            error_count++;
+            log_print("      [HATA] DMA tamamlanmadi - UART-stream veri yolu calismiyor");
+        end
+
+        // Veri yolu hata kesmesi (R8): Boot ROM'a yapilan kasitli yazma
+        // SLVERR dondurdu mu, kopru yakaladi mi, ISR dogru adresi gordu mu?
+        if (uart_fault_line == "Bus fault @ 0x00000100 ST=0x05") begin
+            log_print("      [OK]   Veri yolu hatasi yakalandi, adres ve kaynak dogru");
+        end else begin
+            error_count++;
+            log_print($sformatf("      [HATA] Veri yolu hata kesmesi yanlis - beklenen \"Bus fault @ 0x00000100 ST=0x05\", gelen \"%s\"",
+                                uart_fault_line));
+        end
+
+        // I2C: kole yokken protokol motoru NACK gorup kendini sonlandirdi mi?
+        // Beklenen CFG = 0x02  -> TX_EN dustu (bit0=0), TX_DONE kuruldu (bit1=1)
+        if (uart_i2c_line == "I2C CFG=0x02") begin
+            log_print("      [OK]   I2C protokol motoru NACK ile dogru sonlandi");
+        end else begin
+            error_count++;
+            log_print($sformatf("      [HATA] I2C yanlis - beklenen \"I2C CFG=0x02\", gelen \"%s\"",
+                                uart_i2c_line));
+        end
+
+        // UART_RDR bayt yolu: gonderilen dort bayt aynen okundu mu?
+        if (uart_rdr_line == "RDR: A1B2C3D4") begin
+            log_print("      [OK]   UART_RDR bayt okuma dogru: A1B2C3D4");
+        end else begin
+            error_count++;
+            log_print($sformatf("      [HATA] UART_RDR yanlis - beklenen \"RDR: A1B2C3D4\", gelen \"%s\"",
+                                uart_rdr_line));
+        end
+
+        if (uart_saw_irq) begin
+            log_print("      [OK]   ISR sonucu UART'tan yazdirdi");
+        end else begin
+            error_count++;
+            log_print("      [HATA] ISR'in UART ciktisi gorulmedi");
+        end
+
+        // GPIO Pinlerini Değiştirip Test Etme
+        @ (posedge clk);
+        gpio_i = 16'hA5A5;
+        log_print($sformatf("[%0t] GPIO girişleri 0xA5A5 olarak ayarlandı.", $time));
+
+        #5000;
+        run_jtag_test();
+        log_print($sformatf("[%0t] SoC Simülasyonu Tamamlandı.", $time));
+
+        // =====================================================================
+        // Sonuc ozeti - hem ekrana hem log dosyasina yazilir
+        // =====================================================================
+        log_print("================================================================");
+        if (error_count != 0) begin
+            log_print($sformatf(" TEST BASARISIZ - %0d hata bulundu", error_count));
+        end else begin
+            log_print(" TUM TESTLER GECTI - 0 hata");
+        end
+        log_print("================================================================");
+
+        if (log_file != 0) begin
+            $fclose(log_file);
+            log_file = 0;
+        end
+
+        // Makine-okunabilir sonuc: simulator cikis kodu
+        if (error_count != 0) begin
+            $fatal(1, "Dogrulama basarisiz");
+        end else begin
+            $finish;
+        end
+
+    end
+
+    // =========================================================================
+    // İzleme (Monitoring)
+    //
+    // Cevrim basina PC trace varsayilan olarak KAPALI. Acmak icin Vivado
+    // simulasyon derleme secenegine  -d TRACE_ON  ekleyin.
+    // (T2.1 Spike trace karsilastirmasi bu logu kullanir.)
+    // =========================================================================
+`ifdef TRACE_ON
+    logic [31:0] last_pc = 32'h0;
+    always @(posedge clk) begin
+        if (rst_n) begin
+            if (uut.u_core.id_stage_i.pc_id_i !== last_pc) begin
+                last_pc <= uut.u_core.id_stage_i.pc_id_i;
+                // Polling döngüsünü log kirliliğini önlemek için filtrele
+                if (uut.u_core.id_stage_i.pc_id_i != 32'h0100002c &&
+                    uut.u_core.id_stage_i.pc_id_i != 32'h01000030 &&
+                    uut.u_core.id_stage_i.pc_id_i != 32'h01000034) begin
+                    log_print($sformatf("[%0t] PC_ID=0x%h | x10(a0)=0x%h | x12(a2)=0x%h | x13(a3)=0x%h | x14(a4)=0x%h | x15(a5)=0x%h | awaddr=0x%h | awvalid=%b | rx_wr=%0d | rx_rd=%0d | rx_empty=%0b",
+                             $time,
+                             uut.u_core.id_stage_i.pc_id_i,
+                             uut.u_core.id_stage_i.register_file_i.mem[10],
+                             uut.u_core.id_stage_i.register_file_i.mem[12],
+                             uut.u_core.id_stage_i.register_file_i.mem[13],
+                             uut.u_core.id_stage_i.register_file_i.mem[14],
+                             uut.u_core.id_stage_i.register_file_i.mem[15],
+                             uut.data_axil_awaddr,
+                             uut.data_axil_awvalid,
+                             uut.u_qspi.rx_wr_ptr,
+                             uut.u_qspi.rx_rd_ptr,
+                             uut.u_qspi.rx_empty));
+                end
+            end
+        end
+    end
+`endif
+
+    always @(gpio_o) begin
+        log_print($sformatf("[%0t] GPIO Çıkışı Değişti: gpio_o = 16'h%h", $time, gpio_o));
+    end
+        // =========================================================================
+    // UART TX izleyici
+    //
+    // Islemcinin uart1_txd hattina bastigi bitleri cozup karakterlere
+    // cevirir ve satir satir loga yazar. Iki ise yariyor:
+    //   1) ISR'in urettigi cikti gorunur olur
+    //   2) UART TX yolu ilk kez dogrulanmis olur - bugune kadar hicbir
+    //      test bu hatti okumuyordu
+    //
+    // 115200 baud, 8N1. main.c'de CPB = 434, sistem saati 50 MHz:
+    //   bit suresi = 434 x 20 ns = 8680 ns
+    // =========================================================================
+    localparam int UART_BIT_NS = 8680;
+
+
+    task automatic uart_monitor();
+        logic [7:0] ch;
+        forever begin
+            @(negedge uart1_txd);               // start biti
+            #(UART_BIT_NS / 2);                 // bit ortasina git
+            if (uart1_txd !== 1'b0) continue;   // gecersiz start, yoksay
+
+            for (int i = 0; i < 8; i++) begin   // 8 veri biti, LSB once
+                #(UART_BIT_NS);
+                ch[i] = uart1_txd;
+            end
+            #(UART_BIT_NS);                     // stop biti
+
+            if (ch == 8'h0A) begin              // satir sonu
+                log_print($sformatf("[UART] %s", uart_line));
+                if (uart_line.len() >= 5 && uart_line.substr(0,4) == "[IRQ]")
+                    uart_saw_irq = 1'b1;
+                if (uart_line == "Stream ready")
+                    uart_saw_stream_ready = 1'b1;
+                if (uart_line == "DMA done")
+                    uart_saw_dma_done = 1'b1;
+                if (uart_line.len() >= 5 && uart_line.substr(0,4) == "RDR: ")
+                    uart_rdr_line = uart_line;
+                if (uart_line.len() >= 14 && uart_line.substr(0,13) == "Bus fault @ 0x")
+                    uart_fault_line = uart_line;
+                // substr(a,b) SystemVerilog'da HER IKI UCU da kapsar: substr(0,6) yedi
+                // karakter dondurur. Onceki surumde substr(0,7) yazilmisti ve
+                // sekiz karakterle ("I2C CFG=") karsilastirdigi icin hic eslesmedi.
+                if (uart_line.len() >= 7 && uart_line.substr(0,6) == "I2C CFG")
+                    uart_i2c_line = uart_line;
+                uart_line = "";
+            end else if (ch != 8'h0D) begin     // \r yoksay
+                uart_line = {uart_line, ch};
+            end
+        end
+    endtask
+
+    initial begin
+        wait (rst_n === 1'b1);
+        #1000;
+        uart_monitor();
+    end
+
+    // =========================================================================
+    // UART-stream gonderici
+    //
+    // Sartname EK-1 s.21: "UART-stream cevresel birimi cikarim yapilacak
+    // veriyi iletecek ve bu veri istenilen hizlandirici bellek adresine
+    // yazilacaktir."
+    //
+    // 1 Mbps, 8N1. main.c UART2'yi CPB = 50 ile yapilandiriyor
+    // (50 MHz / 1 Mbps), yani bit suresi 50 x 20 ns = 1000 ns.
+    // Genel UART 115200'de kaldigi icin "en az iki farkli baud hizi"
+    // isteri de karsilanmis olur (EK-2 s.22).
+    // =========================================================================
+    localparam int UART2_BIT_NS = 1000;
+
+    task automatic uart2_send_byte(input logic [7:0] b);
+        uart2_rxd = 1'b0;                 // start biti
+        #(UART2_BIT_NS);
+        for (int i = 0; i < 8; i++) begin
+            uart2_rxd = b[i];             // LSB once
+            #(UART2_BIT_NS);
+        end
+        uart2_rxd = 1'b1;                 // stop biti
+        #(UART2_BIT_NS);
+    endtask
+
+    task automatic uart2_send_tensor(input logic [7:0] pattern);
+        log_print($sformatf("[TB] UART-stream'den 1960 bayt gonderiliyor (0x%02h)", pattern));
+        for (int i = 0; i < 1960; i++) begin
+            uart2_send_byte(pattern);
+        end
+        log_print("[TB] UART-stream gonderimi tamamlandi");
+    endtask
+
+    // Kesme izleyicileri - KENAR tetikli.
+    //
+    // Seviye tetikli olsalardi kesme hatti yuksek kaldigi her cevrimde
+    // satir basarlardi: DMA kesmesi ISR onu temizleyene kadar ~190 cevrim
+    // ayakta kaldi ve log okunamaz hale geldi. Yalnizca yukselen kenari
+    // bildirmek hem dogru bilgiyi verir hem de kesmenin gercekten
+    // temizlendigini gormeyi saglar.
+    logic dma_irq_d, i2c_irq_d;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            dma_irq_d <= 1'b0;
+            i2c_irq_d <= 1'b0;
+        end else begin
+            dma_irq_d <= uut.dma_irq;
+            i2c_irq_d <= uut.i2c_irq;
+
+            if (uut.dma_irq && !dma_irq_d)
+                log_print($sformatf("[%0t] *** DMA Transfer Tamamlandı - IRQ aktif ***", $time));
+            if (!uut.dma_irq && dma_irq_d)
+                log_print($sformatf("[%0t] *** DMA kesmesi temizlendi ***", $time));
+
+            if (uut.i2c_irq && !i2c_irq_d)
+                log_print($sformatf("[%0t] *** I2C İşlemi Tamamlandı - IRQ aktif ***", $time));
+        end
+    end
+
+    // --- AXI4-Lite Protokol Denetleyicisi Bağlantısı (SVA) ---
+    bind soc_top axil_protocol_checker u_protocol_checker (
+        .clk      (clk_i),
+        .rst_n    (rst_ni),
+        .awaddr   (merged_m_awaddr),
+        .awvalid  (merged_m_awvalid),
+        .awready  (merged_m_awready),
+        .wdata    (merged_m_wdata),
+        .wstrb    (merged_m_wstrb),
+        .wvalid   (merged_m_wvalid),
+        .wready   (merged_m_wready),
+        .bresp    (merged_m_bresp),
+        .bvalid   (merged_m_bvalid),
+        .bready   (merged_m_bready),
+        .araddr   (merged_m_araddr),
+        .arvalid  (merged_m_arvalid),
+        .arready  (merged_m_arready),
+        .rdata    (merged_m_rdata),
+        .rresp    (merged_m_rresp),
+        .rvalid   (merged_m_rvalid),
+        .rready   (merged_m_rready)
+    );
+
+    // -------------------------------------------------------------------------
+    // EK PROTOKOL DENETLEYICILERI - master portlari (22 Agustos 2026)
+    //
+    // Yukaridaki denetleyici YALNIZCA birlesik master arayuzunu izliyordu
+    // (arbiter cikisi -> interconnect). Master portlarinin KENDILERI
+    // izlenmiyordu; yani bir master AXI kuralini ihlal etse bile arbiter
+    // cikisinda duzelmis gorunebiliyordu.
+    //
+    // Somut ornek: DMA'nin yazma kanali AW ve W'nin AYNI cevrimde kabulunu
+    // sart kosuyordu (bkz. evidence/veriyolu_incelemesi.md, bulgu V1).
+    // Duzeltildi, ama regresyonda KORUNMUYORDU cunku DMA master portu
+    // izlenmiyordu. Artik izleniyor.
+    //
+    // Sartname Bolum 5.2 (odul icin asgari basari kriteri):
+    //   "Cevre birimleri ve YZ hizlandiricinin {AXI or AXI-Lite}
+    //    arayuzlerinin en azindan protocol check duzeyinde AXI
+    //    agent'lariyla dogrulanmasi."
+    // -------------------------------------------------------------------------
+
+    // M2 - DMA master portu
+    bind soc_top axil_protocol_checker u_pc_dma (
+        .clk      (clk_i),
+        .rst_n    (rst_ni),
+        .awaddr   (dma_m_awaddr),   .awvalid (dma_m_awvalid), .awready (dma_m_awready),
+        .wdata    (dma_m_wdata),    .wstrb   (dma_m_wstrb),
+        .wvalid   (dma_m_wvalid),   .wready  (dma_m_wready),
+        .bresp    (dma_m_bresp),    .bvalid  (dma_m_bvalid),  .bready  (dma_m_bready),
+        .araddr   (dma_m_araddr),   .arvalid (dma_m_arvalid), .arready (dma_m_arready),
+        .rdata    (dma_m_rdata),    .rresp   (dma_m_rresp),
+        .rvalid   (dma_m_rvalid),   .rready  (dma_m_rready)
+    );
+
+    // -------------------------------------------------------------------------
+    // NPU HESAPLAMA MOTORU <-> TCM AXI4-Lite HATTI  (23 Agustos 2026)
+    //
+    // Sartname s.549-554 verinin bellekten AXI arayuzu uzerinden
+    // hizlandiriciya cekilmesini ve sonucun yine AXI ile geri yazilmasini
+    // istiyor. Motor artik npu_engine_axi_master uzerinden gercek AXI4-Lite
+    // islemleri uretiyor.
+    //
+    // Bu bind, o hattin PROTOKOL UYUMUNU denetler. Boylece "AXI kullaniyoruz"
+    // iddiasi beyan degil, her regresyon kosumunda dogrulanan bir olgu olur.
+    //
+    // NOT: bu, npu_accelerator icindeki hiyerarsiye baglanir - soc_top
+    // seviyesinden gorunen ad u_npu.u_eng_axi_master cevresindeki hatlardir.
+    // -------------------------------------------------------------------------
+    bind npu_accelerator axil_protocol_checker u_pc_npu_eng (
+        .clk      (clk),
+        .rst_n    (rst_n),
+        .awaddr   (eng_awaddr),     .awvalid (eng_awvalid),  .awready (eng_awready),
+        .wdata    (eng_wdata_axi),  .wstrb   (eng_wstrb),
+        .wvalid   (eng_wvalid),     .wready  (eng_wready),
+        .bresp    (eng_bresp),      .bvalid  (eng_bvalid),   .bready  (eng_bready),
+        .araddr   (eng_araddr),     .arvalid (eng_arvalid),  .arready (eng_arready),
+        .rdata    (eng_rdata_axi),  .rresp   (eng_rresp),
+        .rvalid   (eng_rvalid),     .rready  (eng_rready)
+    );
+
+    // M1 - JTAG/Debug master portu
+    bind soc_top axil_protocol_checker u_pc_jtag (
+        .clk      (clk_i),
+        .rst_n    (rst_ni),
+        .awaddr   (jtag_m_awaddr),  .awvalid (jtag_m_awvalid), .awready (jtag_m_awready),
+        .wdata    (jtag_m_wdata),   .wstrb   (jtag_m_wstrb),
+        .wvalid   (jtag_m_wvalid),  .wready  (jtag_m_wready),
+        .bresp    (jtag_m_bresp),   .bvalid  (jtag_m_bvalid),  .bready  (jtag_m_bready),
+        .araddr   (jtag_m_araddr),  .arvalid (jtag_m_arvalid), .arready (jtag_m_arready),
+        .rdata    (jtag_m_rdata),   .rresp   (jtag_m_rresp),
+        .rvalid   (jtag_m_rvalid),  .rready  (jtag_m_rready)
+    );
+
+    // M0 - CPU veri portu (OBI -> AXI koprusu cikisi)
+    bind soc_top axil_protocol_checker u_pc_cpu (
+        .clk      (clk_i),
+        .rst_n    (rst_ni),
+        .awaddr   (data_axil_awaddr),  .awvalid (data_axil_awvalid), .awready (data_axil_awready),
+        .wdata    (data_axil_wdata),   .wstrb   (data_axil_wstrb),
+        .wvalid   (data_axil_wvalid),  .wready  (data_axil_wready),
+        .bresp    (data_axil_bresp),   .bvalid  (data_axil_bvalid),  .bready  (data_axil_bready),
+        .araddr   (data_axil_araddr),  .arvalid (data_axil_arvalid), .arready (data_axil_arready),
+        .rdata    (data_axil_rdata),   .rresp   (data_axil_rresp),
+        .rvalid   (data_axil_rvalid),  .rready  (data_axil_rready)
+    );
+
+    // =========================================================================
+    // JTAG Sürücü Yardımcı Görevleri (Tasks)
+    // =========================================================================
+
+    // TCK darbesi üret
+    task automatic jtag_clock();
+        jtag_tck = 1'b0;
+        #100;
+        jtag_tck = 1'b1;
+        #100;
+        jtag_tck = 1'b0;
+    endtask
+
+    // JTAG TAP reset durumuna getir
+    task automatic jtag_reset();
+        log_print("     [JTAG] TAP Reset yapiliyor...");
+        jtag_trst_n = 1'b0;
+        #100;
+        jtag_trst_n = 1'b1;
+        jtag_tms = 1'b1;
+        repeat (5) jtag_clock();
+        jtag_tms = 1'b0;
+        jtag_clock(); // TAP_IDLE durumuna geç
+    endtask
+
+    // IR (Instruction Register) Shift et
+    task automatic jtag_shift_ir(input logic [3:0] ir_in);
+        jtag_tms = 1'b1; jtag_clock(); // -> SELECT_DR_SCAN
+        jtag_tms = 1'b1; jtag_clock(); // -> SELECT_IR_SCAN
+        jtag_tms = 1'b0; jtag_clock(); // -> CAPTURE_IR
+        jtag_tms = 1'b0; jtag_clock(); // -> SHIFT_IR
+
+        for (int i = 0; i < 4; i++) begin
+            jtag_tdi = ir_in[i];
+            jtag_tms = (i == 3) ? 1'b1 : 1'b0;   // Son bitte EXIT1_IR
+            jtag_clock();
+        end
+
+        jtag_tms = 1'b1; jtag_clock(); // -> UPDATE_IR
+        jtag_tms = 1'b0; jtag_clock(); // -> RUN_TEST_IDLE
+    endtask
+
+    // DR (Data Register) Shift et
+    task automatic jtag_shift_dr(input  logic [63:0] dr_in,
+                                 input  int          len,
+                                 output logic [63:0] dr_out);
+        jtag_tms = 1'b1; jtag_clock(); // -> SELECT_DR_SCAN
+        jtag_tms = 1'b0; jtag_clock(); // -> CAPTURE_DR
+        jtag_tms = 1'b0; jtag_clock(); // -> SHIFT_DR
+
+        for (int i = 0; i < len; i++) begin
+            jtag_tdi = dr_in[i];
+            jtag_tms = (i == len - 1) ? 1'b1 : 1'b0;   // Son bitte EXIT1_DR
+            jtag_clock();
+            dr_out[i] = jtag_tdo;
+        end
+
+        jtag_tms = 1'b1; jtag_clock(); // -> UPDATE_DR
+        jtag_tms = 1'b0; jtag_clock(); // -> RUN_TEST_IDLE
+    endtask
+
+    // Ana JTAG Test Senaryosu
+    task automatic run_jtag_test();
+        logic [63:0] jtag_rdata;
+        log_print("\n================================================================");
+        log_print(" JTAG HATA AYIKLAMA (DEBUG) PORTU DOGRULAMA TESTI BASLATILDI");
+        log_print("================================================================");
+
+        jtag_reset();
+
+        // 1. IDCODE OKUMA
+        log_print(" ---> JTAG IDCODE okunuyor...");
+        jtag_shift_ir(4'h1); // IR_IDCODE
+        jtag_shift_dr(64'h0, 32, jtag_rdata);
+        check("JTAG IDCODE", jtag_rdata[31:0], 32'h41524B48);
+
+        // 2. CPU HALT (DURDURMA)
+        log_print(" ---> CPU'ya HALT istegi gonderiliyor...");
+        jtag_shift_ir(4'h4); // IR_DBG_CTRL
+        jtag_shift_dr(64'h1, 64, jtag_rdata);
+        #100;
+        check("CPU halt (debug_req_o)", uut.u_jtag.debug_req_o, 1'b1);
+
+        // 3. JTAG BELLEK YAZMA (TCM SRAM'e yaz)
+        log_print(" ---> JTAG uzerinden TCM SRAM adresine veri yaziliyor (0x20011000 = 0xDEADBEEF)...");
+        jtag_shift_ir(4'h3); // IR_MEM_WRITE
+        jtag_shift_dr({32'hDEADBEEF, 32'h20011000}, 64, jtag_rdata);
+        #500;
+
+        // 4. JTAG BELLEK OKUMA (TCM SRAM'den oku)
+        log_print(" ---> JTAG uzerinden TCM SRAM adresi okunuyor (0x20011000)...");
+        jtag_shift_ir(4'h2); // IR_MEM_READ
+        jtag_shift_dr({32'h0, 32'h20011000}, 64, jtag_rdata);
+        #500;
+        jtag_shift_dr(64'h0, 64, jtag_rdata);   // veri bir sonraki shift'te TDO'dan gelir
+        check("JTAG bellek okuma/yazma", jtag_rdata[63:32], 32'hDEADBEEF);
+
+        // 5. CPU RESUME (DEVAM ETTİRME)
+        log_print(" ---> CPU Resume ediliyor...");
+        jtag_shift_ir(4'h4); // IR_DBG_CTRL
+        jtag_shift_dr(64'h0, 64, jtag_rdata);
+        #100;
+        check("CPU resume (debug_req_o)", uut.u_jtag.debug_req_o, 1'b0);
+
+        log_print("================================================================");
+        log_print(" JTAG PORTU DOGRULAMA TESTI TAMAMLANDI");
+        log_print("================================================================");
+    endtask
+
+
+// =============================================================================
+//  CV32E40P KOMUT IZI (Spike ISS karsilastirmasi icin)
+//
+//  Sartname s.569 ve EK-3 "Cekirdek Testleri": komut izlerinin Spike ISS ile
+//  TUR ve SIRA bakimindan eslesip eslesmedigini gormek.
+//
+//  Tracer cekirdegin KENDI bhv/ dizininden gelir (ucuncu parti, degistirilmedi)
+//  ve trace_core_<hart>.log uretir. Yalnizca -d CV32E40P_TRACE_EXECUTION ile
+//  derlendiginde baglanir; normal regresyon kosumlarina maliyeti yoktur.
+//
+//  Hiyerarsi upstream ornekten uyarlandi:
+//      cv32e40p_top_i.core_i.*   ->   uut.u_core.*
+// =============================================================================
+`ifdef CV32E40P_TRACE_EXECUTION
+    cv32e40p_tracer #(
+        .FPU  (0),
+        .ZFINX(0)
+    ) tracer_i (
+        .clk_i(uut.u_core.clk_i),  // always-running clock for tracing
+        .rst_n(uut.u_core.rst_ni),
+
+        .hart_id_i(uut.u_core.hart_id_i),
+
+        .pc                (uut.u_core.id_stage_i.pc_id_i),
+        .instr             (uut.u_core.id_stage_i.instr),
+        .controller_state_i(uut.u_core.id_stage_i.controller_i.ctrl_fsm_cs),
+        .compressed        (uut.u_core.id_stage_i.is_compressed_i),
+        .id_valid          (uut.u_core.id_stage_i.id_valid_o),
+        .is_decoding       (uut.u_core.id_stage_i.is_decoding_o),
+        .is_illegal        (uut.u_core.id_stage_i.illegal_insn_dec),
+        .trigger_match     (uut.u_core.id_stage_i.trigger_match_i),
+        .rs1_value         (uut.u_core.id_stage_i.operand_a_fw_id),
+        .rs2_value         (uut.u_core.id_stage_i.operand_b_fw_id),
+        .rs3_value         (uut.u_core.id_stage_i.alu_operand_c),
+        .rs2_value_vec     (uut.u_core.id_stage_i.alu_operand_b),
+
+        .rs1_is_fp(uut.u_core.id_stage_i.regfile_fp_a),
+        .rs2_is_fp(uut.u_core.id_stage_i.regfile_fp_b),
+        .rs3_is_fp(uut.u_core.id_stage_i.regfile_fp_c),
+        .rd_is_fp (uut.u_core.id_stage_i.regfile_fp_d),
+
+        .ex_valid    (uut.u_core.ex_valid),
+        .ex_reg_addr (uut.u_core.regfile_alu_waddr_fw),
+        .ex_reg_we   (uut.u_core.regfile_alu_we_fw),
+        .ex_reg_wdata(uut.u_core.regfile_alu_wdata_fw),
+
+        .ex_data_addr   (uut.u_core.data_addr_o),
+        .ex_data_req    (uut.u_core.data_req_o),
+        .ex_data_gnt    (uut.u_core.data_gnt_i),
+        .ex_data_we     (uut.u_core.data_we_o),
+        .ex_data_wdata  (uut.u_core.data_wdata_o),
+        .data_misaligned(uut.u_core.data_misaligned),
+
+        .ebrk_insn(uut.u_core.id_stage_i.ebrk_insn_dec),
+        .debug_mode(uut.u_core.debug_mode),
+        .ebrk_force_debug_mode(uut.u_core.id_stage_i.controller_i.ebrk_force_debug_mode),
+
+        .wb_bypass(uut.u_core.ex_stage_i.branch_in_ex_i),
+
+        .wb_valid    (uut.u_core.wb_valid),
+        .wb_reg_addr (uut.u_core.regfile_waddr_fw_wb_o),
+        .wb_reg_we   (uut.u_core.regfile_we_wb),
+        .wb_reg_wdata(uut.u_core.regfile_wdata),
+
+        .imm_u_type       (uut.u_core.id_stage_i.imm_u_type),
+        .imm_uj_type      (uut.u_core.id_stage_i.imm_uj_type),
+        .imm_i_type       (uut.u_core.id_stage_i.imm_i_type),
+        .imm_iz_type      (uut.u_core.id_stage_i.imm_iz_type[11:0]),
+        .imm_z_type       (uut.u_core.id_stage_i.imm_z_type),
+        .imm_s_type       (uut.u_core.id_stage_i.imm_s_type),
+        .imm_sb_type      (uut.u_core.id_stage_i.imm_sb_type),
+        .imm_s2_type      (uut.u_core.id_stage_i.imm_s2_type),
+        .imm_s3_type      (uut.u_core.id_stage_i.imm_s3_type),
+        .imm_vs_type      (uut.u_core.id_stage_i.imm_vs_type),
+        .imm_vu_type      (uut.u_core.id_stage_i.imm_vu_type),
+        .imm_shuffle_type (uut.u_core.id_stage_i.imm_shuffle_type),
+        .imm_clip_type    (uut.u_core.id_stage_i.instr[11:7]),
+        .apu_en_i         (1'b0),   // FPU=0, APU kullanilmiyor
+        .apu_singlecycle_i(uut.u_core.ex_stage_i.apu_singlecycle),
+        .apu_multicycle_i (uut.u_core.ex_stage_i.apu_multicycle),
+        .apu_rvalid_i     (uut.u_core.ex_stage_i.apu_valid)
+    );
+`endif
+
+
+// =============================================================================
+//  UVM PASSIVE AGENT - NPU motor AXI4-Lite hatti
+//
+//  Sartname §4.2.2: "...cevre birimlerinin ve YZ hizlandiricinin {AXI veya
+//  AXI-Lite} arayuzlerinin SystemVerilog HDL ve UVM kullanilarak
+//  dogrulanmasi beklenecektir."
+//
+//  §5.2 (odul esigi): "...EN AZINDAN protocol check duzeyinde AXI
+//  agent'lariyla dogrulanmasi."
+//
+//  NEDEN BU ARAYUZ SECILDI
+//
+//    Sartname YZ hizlandiricinin arayuzunu ozellikle aniyor. Motor <-> TCM
+//    hatti, hizlandiricinin veri trafiginin TAMAMINI tasir: her girdi
+//    okumasi, her agirlik okumasi, her sonuc yazimi buradan gecer.
+//
+//  MEVCUT SVA KORUNUR
+//
+//    axil_protocol_checker (5 arayuzde) calismaya devam eder. Ikisi FARKLI
+//    seviyede denetler:
+//        SVA - sinyal/cevrim duzeyi
+//        UVM - islem duzeyi (paketlenmis transaction)
+//    EK-3 tam olarak bu birlikteligi oneriyor.
+//
+//  -d UVM_AXI ile derlendiginde etkinlesir; normal kosumlara maliyeti yok.
+// =============================================================================
+`ifdef UVM_AXI
+    // DIKKAT - saat/reset isimleri: burasi TESTBENCH kapsami, sinyaller
+    // 'clk' ve 'rst_n'. Asagidaki 'bind soc_top' bloklari ise SOC kapsaminda
+    // calisir, orada ayni sinyallerin PORT isimleri 'clk_i'/'rst_ni'dir.
+    // Ilk yazimda bind'lardan kopyalanan clk_i/rst_ni kullanilmisti; Verilog
+    // bunlari ORTUK WIRE olarak yaratti, saat hic toggle etmedi ve monitor
+    // sessizce SIFIR islem yakaladi (derleme hatasi vermez).
+    axil_if periph_bus_if (.clk(clk), .rst_n(rst_n));
+
+// Çevre birimleri & sistem veriyolu bağlantısı (Arbiter -> Interconnect)
+assign periph_bus_if.awaddr  = uut.merged_m_awaddr;
+assign periph_bus_if.awvalid = uut.merged_m_awvalid;
+assign periph_bus_if.awready = uut.merged_m_awready;
+assign periph_bus_if.wdata   = uut.merged_m_wdata;
+assign periph_bus_if.wstrb   = uut.merged_m_wstrb;
+assign periph_bus_if.wvalid  = uut.merged_m_wvalid;
+assign periph_bus_if.wready  = uut.merged_m_wready;
+assign periph_bus_if.bresp   = uut.merged_m_bresp;
+assign periph_bus_if.bvalid  = uut.merged_m_bvalid;
+assign periph_bus_if.bready  = uut.merged_m_bready;
+assign periph_bus_if.araddr  = uut.merged_m_araddr;
+assign periph_bus_if.arvalid = uut.merged_m_arvalid;
+assign periph_bus_if.arready = uut.merged_m_arready;
+assign periph_bus_if.rdata   = uut.merged_m_rdata;
+assign periph_bus_if.rresp   = uut.merged_m_rresp;
+assign periph_bus_if.rvalid  = uut.merged_m_rvalid;
+assign periph_bus_if.rready  = uut.merged_m_rready;
+
+initial begin
+    uvm_pkg::uvm_config_db#(axil_uvm_pkg::axil_vif)::set(
+        null, "uvm_test_top.env.agent.mon", "vif", periph_bus_if);
+    uvm_pkg::run_test("axil_passive_test");
+end
+
+    // BAGIMSIZ CAPRAZ KONTROL
+    //
+    // UVM monitor'unun islem DUSURMEDIGINI kanitlar. Ham sinyal duzeyinde
+    // el sikismalari sayilir ve kosum sonunda monitor sayaclariyla
+    // karsilastirilir. Tutmuyorsa monitor eksik yakaliyor demektir - bu tam
+    // olarak bir kez yasandi (tek slotlu bayrak 2680 okuma dusurmustu).
+    int ham_cevrim = 0, ham_ar = 0, ham_r = 0, ham_b = 0, ham_rst = 0;
+    always @(posedge periph_bus_if.clk) begin
+    ham_cevrim++;
+    if (periph_bus_if.rst_n) ham_rst++;
+    if (periph_bus_if.arvalid && periph_bus_if.arready) ham_ar++;
+    if (periph_bus_if.rvalid  && periph_bus_if.rready)  ham_r++;
+    if (periph_bus_if.bvalid  && periph_bus_if.bready)  ham_b++;
+end
+
+    // $finish'te MUTLAKA kosar - UVM report_phase'ine guvenilemez.
+    final begin
+        void'(axil_uvm_pkg::axil_ozet_yaz());
+        $display("  capraz kontrol (ham sinyal sayimi):");
+        $display("    R  el sikismasi  : %0d   monitor okuma : %0d",
+                 ham_r, axil_uvm_pkg::axil_monitor::okuma_sayisi);
+        $display("    B  el sikismasi  : %0d   monitor yazma : %0d",
+                 ham_b, axil_uvm_pkg::axil_monitor::yazma_sayisi);
+        if (ham_r != axil_uvm_pkg::axil_monitor::okuma_sayisi ||
+            ham_b != axil_uvm_pkg::axil_monitor::yazma_sayisi)
+            $display("  [HATA] UVM monitor islem DUSURDU - sayimlar tutmuyor");
+        else
+            $display("  [OK]   monitor hicbir islemi kacirmadi (ham sayim tutuyor)");
+    end
+`endif
+
+endmodule

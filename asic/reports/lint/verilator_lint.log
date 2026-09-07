@@ -1,0 +1,311 @@
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv:48:27: Operator ASSIGNW expects 5 bits on the Assign RHS, but Assign RHS's UNSIGNED generates 32 bits.
+                                                                        : ... note: In instance 'soc_top.u_core.ex_stage_i.alu_i.ff_one_i'
+   48 |       assign index_lut[j] = $unsigned(j);
+      |                           ^
+                     ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.032
+                     ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:893:59: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                          : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+  893 |                     cv32e40p_fpu_pkg::FP16    : apu_lat_o = (C_LAT_FP16<2)    ? C_LAT_FP16+1    : 2'h3;
+      |                                                           ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:894:59: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                          : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+  894 |                     cv32e40p_fpu_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<2) ? C_LAT_FP16ALT+1 : 2'h3;
+      |                                                           ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:895:59: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                          : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+  895 |                     cv32e40p_fpu_pkg::FP8     : apu_lat_o = (C_LAT_FP8<2)     ? C_LAT_FP8+1     : 2'h3;
+      |                                                           ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1135:15: Logical operator IF expects 1 bit on the If, but If's SEL generates 2 bits.
+                                                                           : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+ 1135 |               if (instr_rdata_i[24:23]) illegal_insn_o = 1'b1;
+      |               ^~
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1239:15: Logical operator IF expects 1 bit on the If, but If's SEL generates 4 bits.
+                                                                           : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+ 1239 |               if (instr_rdata_i[24:21]) illegal_insn_o = 1'b1;    
+      |               ^~
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1249:15: Logical operator IF expects 1 bit on the If, but If's SEL generates 4 bits.
+                                                                           : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+ 1249 |               if (instr_rdata_i[24:21]) illegal_insn_o = 1'b1;    
+      |               ^~
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1281:15: Logical operator IF expects 1 bit on the If, but If's SEL generates 5 bits.
+                                                                           : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+ 1281 |               if (instr_rdata_i[24:20]) illegal_insn_o = 1'b1;
+      |               ^~
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1349:55: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                           : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+ 1349 |                 cv32e40p_fpu_pkg::FP64    : apu_lat_o = (C_LAT_FP64<2)    ? C_LAT_FP64+1    : 2'h3;
+      |                                                       ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1350:55: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                           : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+ 1350 |                 cv32e40p_fpu_pkg::FP16    : apu_lat_o = (C_LAT_FP16<2)    ? C_LAT_FP16+1    : 2'h3;
+      |                                                       ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1351:55: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                           : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+ 1351 |                 cv32e40p_fpu_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<2) ? C_LAT_FP16ALT+1 : 2'h3;
+      |                                                       ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1352:55: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                           : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+ 1352 |                 cv32e40p_fpu_pkg::FP8     : apu_lat_o = (C_LAT_FP8<2)     ? C_LAT_FP8+1     : 2'h3;
+      |                                                       ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1479:51: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                           : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+ 1479 |             cv32e40p_fpu_pkg::FP64    : apu_lat_o = (C_LAT_FP64<2)    ? C_LAT_FP64+1    : 2'h3;
+      |                                                   ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1480:51: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                           : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+ 1480 |             cv32e40p_fpu_pkg::FP16    : apu_lat_o = (C_LAT_FP16<2)    ? C_LAT_FP16+1    : 2'h3;
+      |                                                   ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1481:51: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                           : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+ 1481 |             cv32e40p_fpu_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<2) ? C_LAT_FP16ALT+1 : 2'h3;
+      |                                                   ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1482:51: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                           : ... note: In instance 'soc_top.u_core.id_stage_i.decoder_i'
+ 1482 |             cv32e40p_fpu_pkg::FP8     : apu_lat_o = (C_LAT_FP8<2)     ? C_LAT_FP8+1     : 2'h3;
+      |                                                   ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:312:28: Operator ASSIGNW expects 16 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 17 bits.
+                                                                       : ... note: In instance 'soc_top.u_core.ex_stage_i.mult_i'
+  312 |   assign clpx_shift_result = $signed(dot_short_result[31:15]) >>> clpx_shift_i;
+      |                            ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_int_controller.sv:122:58: Operator ASSIGN expects 5 bits on the Assign RHS, but Assign RHS's VARREF 'CSR_MEIX_BIT' generates 32 bits.
+                                                                                 : ... note: In instance 'soc_top.u_core.id_stage_i.int_controller_i'
+  122 |     else if (irq_local_qual[CSR_MEIX_BIT]) irq_id_ctrl_o = CSR_MEIX_BIT;   
+      |                                                          ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_int_controller.sv:123:58: Operator ASSIGN expects 5 bits on the Assign RHS, but Assign RHS's VARREF 'CSR_MSIX_BIT' generates 32 bits.
+                                                                                 : ... note: In instance 'soc_top.u_core.id_stage_i.int_controller_i'
+  123 |     else if (irq_local_qual[CSR_MSIX_BIT]) irq_id_ctrl_o = CSR_MSIX_BIT;   
+      |                                                          ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_int_controller.sv:124:58: Operator ASSIGN expects 5 bits on the Assign RHS, but Assign RHS's VARREF 'CSR_MTIX_BIT' generates 32 bits.
+                                                                                 : ... note: In instance 'soc_top.u_core.id_stage_i.int_controller_i'
+  124 |     else if (irq_local_qual[CSR_MTIX_BIT]) irq_id_ctrl_o = CSR_MTIX_BIT;   
+      |                                                          ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_int_controller.sv:147:24: Operator ASSIGN expects 5 bits on the Assign RHS, but Assign RHS's VARREF 'CSR_MTIX_BIT' generates 32 bits.
+                                                                                 : ... note: In instance 'soc_top.u_core.id_stage_i.int_controller_i'
+  147 |     else irq_id_ctrl_o = CSR_MTIX_BIT;   
+      |                        ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:275:35: Operator ASSIGN expects 16 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 17 bits.
+                                                                      : ... note: In instance 'soc_top.u_core.ex_stage_i.alu_i'
+  275 |         shift_right_result[31:16] = $signed(
+      |                                   ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:278:34: Operator ASSIGN expects 16 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 17 bits.
+                                                                      : ... note: In instance 'soc_top.u_core.ex_stage_i.alu_i'
+  278 |         shift_right_result[15:0] = $signed(
+      |                                  ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:284:35: Operator ASSIGN expects 8 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 9 bits.
+                                                                      : ... note: In instance 'soc_top.u_core.ex_stage_i.alu_i'
+  284 |         shift_right_result[31:24] = $signed(
+      |                                   ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:287:35: Operator ASSIGN expects 8 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 9 bits.
+                                                                      : ... note: In instance 'soc_top.u_core.ex_stage_i.alu_i'
+  287 |         shift_right_result[23:16] = $signed(
+      |                                   ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:290:34: Operator ASSIGN expects 8 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 9 bits.
+                                                                      : ... note: In instance 'soc_top.u_core.ex_stage_i.alu_i'
+  290 |         shift_right_result[15:8] = $signed(
+      |                                  ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:293:33: Operator ASSIGN expects 8 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 9 bits.
+                                                                      : ... note: In instance 'soc_top.u_core.ex_stage_i.alu_i'
+  293 |         shift_right_result[7:0] = $signed(
+      |                                 ^
+%Warning-WIDTHTRUNC: ../rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:300:28: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's SHIFTR generates 64 bits.
+                                                                      : ... note: In instance 'soc_top.u_core.ex_stage_i.alu_i'
+  300 |         shift_right_result = shift_op_a_32 >> shift_amt_int[4:0];
+      |                            ^
+%Warning-WIDTHTRUNC: ../rtl/Memory/axi_lite_interconnect.sv:373:29: Operator ASSIGN expects 4 bits on the Assign RHS, but Assign RHS's FUNCREF 'get_slave_id' generates 32 bits.
+                                                                  : ... note: In instance 'soc_top.u_interconnect'
+  373 |                 write_sel_d = get_slave_id(m_awaddr);
+      |                             ^
+%Warning-WIDTHTRUNC: ../rtl/Memory/axi_lite_interconnect.sv:515:28: Operator ASSIGN expects 4 bits on the Assign RHS, but Assign RHS's FUNCREF 'get_slave_id' generates 32 bits.
+                                                                  : ... note: In instance 'soc_top.u_interconnect'
+  515 |                 read_sel_d = get_slave_id(m_araddr);
+      |                            ^
+%Warning-UNSIGNED: ../rtl/Memory/axi_lite_interconnect.sv:307:18: Comparison is constant due to unsigned arithmetic
+                                                                : ... note: In instance 'soc_top.u_interconnect'
+  307 |         if (addr >= 32'h0000_0000 && addr <= 32'h0000_03FF) return 0;   
+      |                  ^~
+%Warning-CASEINCOMPLETE: ../rtl/cv32e40p-master/rtl/cv32e40p_aligner.sv:102:5: Case values incompletely covered (example pattern 0x4)
+  102 |     case (state)
+      |     ^~~~
+%Warning-CASEINCOMPLETE: ../rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:139:7: Case values incompletely covered (example pattern 0x0)
+  139 |       case (vector_mode_i)
+      |       ^~~~
+%Warning-CASEINCOMPLETE: ../rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:153:7: Case values incompletely covered (example pattern 0x0)
+  153 |       case (vector_mode_i)
+      |       ^~~~
+%Warning-CASEINCOMPLETE: ../rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:752:5: Case values incompletely covered (example pattern 0x0)
+  752 |     case (operator_i)
+      |     ^~~~
+%Warning-CASEINCOMPLETE: ../rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:140:5: Case values incompletely covered (example pattern 0x5)
+  140 |     case (mulh_CS)
+      |     ^~~~
+%Warning-CASEINCOMPLETE: ../rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:332:7: Case values incompletely covered (example pattern 0x2)
+  332 |       case (data_type_ex_i)
+      |       ^~~~
+%Warning-CASEINCOMPLETE: ../rtl/cv32e40p-master/rtl/cv32e40p_cs_registers.sv:920:7: Case values incompletely covered (example pattern 0x0)
+  920 |       case (csr_addr_i)
+      |       ^~~~
+%Warning-COMBDLY: ../rtl/cv32e40p-master/bhv/cv32e40p_sim_clock_gate.sv:29:31: Non-blocking assignment '<=' in combinational logic process
+                                                                             : ... This will be executed as a blocking assignment '='!
+   29 |     if (clk_i == 1'b0) clk_en <= en_i | scan_cg_en_i;
+      |                               ^~
+                  *** See https://verilator.org/warn/COMBDLY before disabling this,
+                  else you may end up with different sim results.
+%Warning-UNOPTFLAT: ../rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv:37:45: Signal unoptimizable: Circular combinational logic: 'soc_top.u_core.ex_stage_i.alu_i.ff_one_i.sel_nodes'
+   37 |   logic [2**NUM_LEVELS-1:0]                 sel_nodes;
+      |                                             ^~~~~~~~~
+                    ../rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv:37:45:      Example path: soc_top.u_core.ex_stage_i.alu_i.ff_one_i.sel_nodes
+                    ../rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv:64:86:      Example path: ASSIGNW
+                    ../rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv:38:45:      Example path: soc_top.u_core.ex_stage_i.alu_i.ff_one_i.index_nodes
+                    ../rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv:64:86:      Example path: ASSIGNW
+%Warning-UNOPTFLAT: ../rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv:38:45: Signal unoptimizable: Circular combinational logic: 'soc_top.u_core.ex_stage_i.alu_i.ff_one_i.index_nodes'
+   38 |   logic [2**NUM_LEVELS-1:0][NUM_LEVELS-1:0] index_nodes;
+      |                                             ^~~~~~~~~~~
+                    ../rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv:38:45:      Example path: soc_top.u_core.ex_stage_i.alu_i.ff_one_i.index_nodes
+                    ../rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv:64:86:      Example path: ASSIGNW
+                    ../rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv:38:45:      Example path: soc_top.u_core.ex_stage_i.alu_i.ff_one_i.index_nodes
+%Warning-UNOPTFLAT: ../rtl/Memory/soc_top.sv:294:70: Signal unoptimizable: Circular combinational logic: 'soc_top.merged_m_wvalid'
+  294 |     logic [31:0] merged_m_wdata;   logic [3:0] merged_m_wstrb; logic merged_m_wvalid; logic merged_m_wready;
+      |                                                                      ^~~~~~~~~~~~~~~
+                    ../rtl/Memory/soc_top.sv:294:70:      Example path: soc_top.merged_m_wvalid
+                    ../rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:67:      Example path: soc_top.merged_m_awready
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:224:18:      Example path: soc_top.data_axil_awready
+                    ../rtl/Memory/obi_to_axi_simple.sv:99:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:223:18:      Example path: soc_top.data_axil_awvalid
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:42:      Example path: soc_top.merged_m_awvalid
+                    ../rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+%Warning-UNOPTFLAT: ../rtl/Memory/soc_top.sv:293:42: Signal unoptimizable: Circular combinational logic: 'soc_top.merged_m_awvalid'
+  293 |     logic [31:0] merged_m_awaddr;  logic merged_m_awvalid;  logic merged_m_awready;
+      |                                          ^~~~~~~~~~~~~~~~
+                    ../rtl/Memory/soc_top.sv:293:42:      Example path: soc_top.merged_m_awvalid
+                    ../rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:67:      Example path: soc_top.merged_m_awready
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:224:18:      Example path: soc_top.data_axil_awready
+                    ../rtl/Memory/obi_to_axi_simple.sv:99:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:223:18:      Example path: soc_top.data_axil_awvalid
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:42:      Example path: soc_top.merged_m_awvalid
+%Warning-UNOPTFLAT: ../rtl/Memory/soc_top.sv:296:42: Signal unoptimizable: Circular combinational logic: 'soc_top.merged_m_arvalid'
+  296 |     logic [31:0] merged_m_araddr;  logic merged_m_arvalid;  logic merged_m_arready;
+      |                                          ^~~~~~~~~~~~~~~~
+                    ../rtl/Memory/soc_top.sv:296:42:      Example path: soc_top.merged_m_arvalid
+                    ../rtl/Memory/axi_lite_interconnect.sv:490:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:296:67:      Example path: soc_top.merged_m_arready
+                    ../rtl/Memory/axil_arbiter_3to1.sv:139:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:234:18:      Example path: soc_top.data_axil_arready
+                    ../rtl/Memory/obi_to_axi_simple.sv:99:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:223:18:      Example path: soc_top.data_axil_awvalid
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:42:      Example path: soc_top.merged_m_awvalid
+                    ../rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:67:      Example path: soc_top.merged_m_awready
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:224:18:      Example path: soc_top.data_axil_awready
+                    ../rtl/Memory/obi_to_axi_simple.sv:99:5:      Example path: ALWAYS
+%Warning-UNOPTFLAT: ../rtl/Memory/soc_top.sv:386:53: Signal unoptimizable: Circular combinational logic: 'soc_top.s7_awready'
+  386 |     logic [31:0] s7_awaddr; logic s7_awvalid; logic s7_awready;
+      |                                                     ^~~~~~~~~~
+                    ../rtl/Memory/soc_top.sv:386:53:      Example path: soc_top.s7_awready
+                    ../rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:67:      Example path: soc_top.merged_m_awready
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:224:18:      Example path: soc_top.data_axil_awready
+                    ../rtl/Memory/obi_to_axi_simple.sv:99:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:223:18:      Example path: soc_top.data_axil_awvalid
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:42:      Example path: soc_top.merged_m_awvalid
+                    ../rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+%Warning-UNOPTFLAT: ../rtl/Memory/soc_top.sv:365:53: Signal unoptimizable: Circular combinational logic: 'soc_top.s4_awready'
+  365 |     logic [31:0] s4_awaddr; logic s4_awvalid; logic s4_awready;
+      |                                                     ^~~~~~~~~~
+                    ../rtl/Memory/soc_top.sv:365:53:      Example path: soc_top.s4_awready
+                    ../rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:67:      Example path: soc_top.merged_m_awready
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:224:18:      Example path: soc_top.data_axil_awready
+                    ../rtl/Memory/obi_to_axi_simple.sv:99:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:223:18:      Example path: soc_top.data_axil_awvalid
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:42:      Example path: soc_top.merged_m_awvalid
+                    ../rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+%Warning-UNOPTFLAT: ../rtl/Memory/soc_top.sv:358:53: Signal unoptimizable: Circular combinational logic: 'soc_top.s3_awready'
+  358 |     logic [31:0] s3_awaddr; logic s3_awvalid; logic s3_awready;
+      |                                                     ^~~~~~~~~~
+                    ../rtl/Memory/soc_top.sv:358:53:      Example path: soc_top.s3_awready
+                    ../rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:67:      Example path: soc_top.merged_m_awready
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:224:18:      Example path: soc_top.data_axil_awready
+                    ../rtl/Memory/obi_to_axi_simple.sv:99:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:223:18:      Example path: soc_top.data_axil_awvalid
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:42:      Example path: soc_top.merged_m_awvalid
+                    ../rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+%Warning-UNOPTFLAT: ../rtl/Memory/soc_top.sv:389:53: Signal unoptimizable: Circular combinational logic: 'soc_top.s7_arready'
+  389 |     logic [31:0] s7_araddr; logic s7_arvalid; logic s7_arready;
+      |                                                     ^~~~~~~~~~
+                    ../rtl/Memory/soc_top.sv:389:53:      Example path: soc_top.s7_arready
+                    ../rtl/Memory/axi_lite_interconnect.sv:490:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:296:67:      Example path: soc_top.merged_m_arready
+                    ../rtl/Memory/axil_arbiter_3to1.sv:139:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:234:18:      Example path: soc_top.data_axil_arready
+                    ../rtl/Memory/obi_to_axi_simple.sv:99:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:223:18:      Example path: soc_top.data_axil_awvalid
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:42:      Example path: soc_top.merged_m_awvalid
+                    ../rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:67:      Example path: soc_top.merged_m_awready
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:224:18:      Example path: soc_top.data_axil_awready
+                    ../rtl/Memory/obi_to_axi_simple.sv:99:5:      Example path: ALWAYS
+%Warning-UNOPTFLAT: ../rtl/Memory/soc_top.sv:347:53: Signal unoptimizable: Circular combinational logic: 'soc_top.s1_arready'
+  347 |     logic [31:0] s1_araddr; logic s1_arvalid; logic s1_arready;
+      |                                                     ^~~~~~~~~~
+                    ../rtl/Memory/soc_top.sv:347:53:      Example path: soc_top.s1_arready
+                    ../rtl/Memory/axi_lite_interconnect.sv:490:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:296:67:      Example path: soc_top.merged_m_arready
+                    ../rtl/Memory/axil_arbiter_3to1.sv:139:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:234:18:      Example path: soc_top.data_axil_arready
+                    ../rtl/Memory/obi_to_axi_simple.sv:99:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:223:18:      Example path: soc_top.data_axil_awvalid
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:42:      Example path: soc_top.merged_m_awvalid
+                    ../rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:67:      Example path: soc_top.merged_m_awready
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:224:18:      Example path: soc_top.data_axil_awready
+                    ../rtl/Memory/obi_to_axi_simple.sv:99:5:      Example path: ALWAYS
+%Warning-UNOPTFLAT: ../rtl/Memory/soc_top.sv:340:53: Signal unoptimizable: Circular combinational logic: 'soc_top.s0_arready'
+  340 |     logic [31:0] s0_araddr; logic s0_arvalid; logic s0_arready;
+      |                                                     ^~~~~~~~~~
+                    ../rtl/Memory/soc_top.sv:340:53:      Example path: soc_top.s0_arready
+                    ../rtl/Memory/axi_lite_interconnect.sv:490:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:296:67:      Example path: soc_top.merged_m_arready
+                    ../rtl/Memory/axil_arbiter_3to1.sv:139:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:234:18:      Example path: soc_top.data_axil_arready
+                    ../rtl/Memory/obi_to_axi_simple.sv:99:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:223:18:      Example path: soc_top.data_axil_awvalid
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:42:      Example path: soc_top.merged_m_awvalid
+                    ../rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:293:67:      Example path: soc_top.merged_m_awready
+                    ../rtl/Memory/axil_arbiter_3to1.sv:68:5:      Example path: ALWAYS
+                    ../rtl/Memory/soc_top.sv:224:18:      Example path: soc_top.data_axil_awready
+                    ../rtl/Memory/obi_to_axi_simple.sv:99:5:      Example path: ALWAYS
+%Warning-UNOPTFLAT: ../rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:71:16: Signal unoptimizable: Circular combinational logic: 'soc_top.u_core.ex_stage_i.mult_i.short_op_a'
+   71 |   logic [16:0] short_op_a;
+      |                ^~~~~~~~~~
+                    ../rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:71:16:      Example path: soc_top.u_core.ex_stage_i.mult_i.short_op_a
+                    ../rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:102:46:      Example path: ASSIGNW
+                    ../rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:71:16:      Example path: soc_top.u_core.ex_stage_i.mult_i.short_op_a
+%Warning-UNOPTFLAT: ../rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:72:16: Signal unoptimizable: Circular combinational logic: 'soc_top.u_core.ex_stage_i.mult_i.short_op_b'
+   72 |   logic [16:0] short_op_b;
+      |                ^~~~~~~~~~
+                    ../rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:72:16:      Example path: soc_top.u_core.ex_stage_i.mult_i.short_op_b
+                    ../rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:103:46:      Example path: ASSIGNW
+                    ../rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:72:16:      Example path: soc_top.u_core.ex_stage_i.mult_i.short_op_b
+%Error: Exiting due to 52 warning(s)

@@ -1,0 +1,100 @@
+#-----------------------------------------------------------
+# xsim v2025.2 (64-bit)
+# SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+# IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+# SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+# Start of session at: Tue Aug 18 19:36:44 2026
+# Process ID         : 2448
+# Current directory  : C:/Users/ybari/2026_Arkhe/vivado/vivado_nexys_project/Arkhe_SoC_Nexys.sim/sim_1/behav/xsim
+# Command line       : xsim.exe -log sim_rb.log -mode tcl -source {xsim.dir/tb_rb/xsim_script.tcl}
+# Log file           : C:/Users/ybari/2026_Arkhe/vivado/vivado_nexys_project/Arkhe_SoC_Nexys.sim/sim_1/behav/xsim/sim_rb.log
+# Journal file       : C:/Users/ybari/2026_Arkhe/vivado/vivado_nexys_project/Arkhe_SoC_Nexys.sim/sim_1/behav/xsim\xsim.jou
+# Running On         : baris
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 26200
+# Processor Detail   : AMD Ryzen 5 6600H with Radeon Graphics         
+# CPU Frequency      : 3294 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 16310 MB
+# Swap memory        : 16106 MB
+# Total Virtual      : 32416 MB
+# Available Virtual  : 11170 MB
+#-----------------------------------------------------------
+source xsim.dir/tb_rb/xsim_script.tcl
+# xsim {tb_rb} -autoloadwcfg -tclbatch {run_all_batch.tcl}
+Time resolution is 1 ps
+source run_all_batch.tcl
+## run all
+[SPI_FLASH] 8192 bayt yuklendi: app.hex
+[0] SoC Simülasyonu Başlatıldı.
+WARNING: 0ns : none of the conditions were true for unique case from File:C:/Users/ybari/2026_Arkhe/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:419
+[0] GPIO Çıkışı Değişti: gpio_o = 16'h0000
+[TB] GERCEK BOOT: uygulama QSPI flash'tan yuklenecek.
+[151000] Reset kaldırıldı. İşlemci çalışıyor...
+[UART] 
+[UART] *** ARKHE FPGA TEST ***
+[UART] Timer test
+[UART] Timer OK
+[UART] Bus fault test
+[UART] Bus fault @ 0x00000100 ST=0x05
+[UART] I2C test
+[14900570000] *** I2C İşlemi Tamamlandı - IRQ aktif ***
+[UART] I2C CFG=0x02
+[UART] 
+[UART] Run: 1
+[UART] Clear TCM
+[UART] Stream ready
+      [OK]   CPU UART-stream ve DMA'yi kurdu
+[TB] UART-stream'den 1960 bayt gonderiliyor (0x55)
+[22337030000] [DMA] Transfer başladı: src=0x40030020, dst=0x20010000, len=490 words
+[41930850000] [DMA] Transfer tamamlandı.
+[41930870000] *** DMA Transfer Tamamlandı - IRQ aktif ***
+[TB] UART-stream gonderimi tamamlandi
+[41934610000] *** DMA kesmesi temizlendi ***
+[UART] DMA done
+[TB] UART_RDR testi: A1 B2 C3 D4 gonderiliyor
+[42860430000] NPU donanım motorunun tamamlanması bekleniyor...
+[UART] RDR: A1B2C3D4
+[UART] Start NPU
+[45203070000] [NPU_ENGINE] Starting upgraded NPU computation: in_addr=0x0000, out_addr=0x1dac
+[46654730000] [NPU_ENGINE] Upgraded NPU computation done. Selected Class=3
+            fc_acc: [0]=-985885, [1]=242268, [2]=240758, [3]=387226
+            probs:  [0]=0, [1]=1050, [2]=1050, [3]=1995
+[46654730000] NPU donanım motoru DONE sinyalini verdi!
+[UART] [IRQ] Class: 3
+[UART] -> NO
+[48710570000] GPIO Çıkışı Değişti: gpio_o = 16'haaaa
+      [OK]   CPU sinif sonucunu GPIO'ya yazdi: 0xaaaa
+      [OK]   DMA UART-stream verisini TCM'e tasidi
+      [OK]   Veri yolu hatasi yakalandi, adres ve kaynak dogru
+      [OK]   I2C protokol motoru NACK ile dogru sonlandi
+      [OK]   UART_RDR bayt okuma dogru: A1B2C3D4
+      [OK]   ISR sonucu UART'tan yazdirdi
+[48710590000] GPIO girişleri 0xA5A5 olarak ayarlandı.
+
+================================================================
+ JTAG HATA AYIKLAMA (DEBUG) PORTU DOGRULAMA TESTI BASLATILDI
+================================================================
+     [JTAG] TAP Reset yapiliyor...
+ ---> JTAG IDCODE okunuyor...
+      [OK]   JTAG IDCODE = 0x0000000041524b48
+ ---> CPU'ya HALT istegi gonderiliyor...
+      [OK]   CPU halt (debug_req_o) = 0x0000000000000001
+ ---> JTAG uzerinden TCM SRAM adresine veri yaziliyor (0x20011000 = 0xDEADBEEF)...
+ ---> JTAG uzerinden TCM SRAM adresi okunuyor (0x20011000)...
+      [OK]   JTAG bellek okuma/yazma = 0x00000000deadbeef
+ ---> CPU Resume ediliyor...
+      [OK]   CPU resume (debug_req_o) = 0x0000000000000000
+================================================================
+ JTAG PORTU DOGRULAMA TESTI TAMAMLANDI
+================================================================
+[48804490000] SoC Simülasyonu Tamamlandı.
+================================================================
+ TUM TESTLER GECTI - 0 hata
+================================================================
+$finish called at time : 48804490 ns : File "C:/Users/ybari/2026_Arkhe/tb/tb_soc_top.sv" Line 503
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:01:37 . Memory (MB): peak = 205.289 ; gain = 0.000
+## quit
+INFO: xsimkernel Simulation Memory Usage: 474172 KB (Peak: 474172 KB), Simulation CPU Usage: 96702 ms
+INFO: [Common 17-206] Exiting xsim at Tue Aug 18 19:38:23 2026...

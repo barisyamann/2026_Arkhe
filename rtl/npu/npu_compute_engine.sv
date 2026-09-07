@@ -1,0 +1,1175 @@
+`timescale 1ns / 1ps
+// Description: Synthesizable hardware engine for NPU Compute Engine.
+//              Implements the full TinyConv / TFLite Micro Speech pipeline:
+//              1) Reshape input 1960 INT8 array into 49x40x1 3D tensor via address mapping.
+//              2) 10x8 DepthwiseConv2D layer with stride 2x2, 8 channels (SAME padding).
+//              3) ReLU activation: max(0, acc).
+//              4) Streaming Flatten & FullyConnected matrix multiply-accumulate to 4 output classes.
+//              5) Stable Softmax probability scaling (Q0.12 format) using iterative divider.
+//              6) Argmax class selection.
+//
+//              NOT: Hem depthwise requantization + FC MAC yolu (CONV_ReLU_FC ...
+//              FC_MAC3) hem de FC requantization yolu (FC_REQUANT ... FC_RQ_SAT)
+//              zamanlama kapatmak icin boru hattina ayrilmistir.
+//              Aritmetik degistirilmemistir; sadece cevrimlere yayilmistir.
+
+module npu_compute_engine import npu_weights_pkg::*; (
+    input  logic        clk,
+    input  logic        rst_n,
+
+    // --- CSR Arayüz Kontrol Sinyalleri ---
+    input  logic        start_i,
+    input  logic        npu_reset_i,
+    input  logic [12:0] in_addr_i,
+    input  logic [12:0] out_addr_i,
+
+    // --- CSR Durum Sinyalleri ---
+    output logic        busy_o,
+    output logic        done_o,
+    output logic [1:0]  class_o,
+
+    // --- Port B TCM Bellek Arayüzü ---
+    output logic        mem_en_b,
+    output logic [3:0]  mem_we_b,
+    output logic [12:0] mem_addr_b,
+    output logic [31:0] mem_wdata_b,
+    input  logic [31:0] mem_rdata_b
+);
+
+    // FSM Durum Tanımları
+    typedef enum logic [4:0] {
+        IDLE            = 5'd0,
+        INIT            = 5'd1,
+        CONV_READ_REQ   = 5'd2,
+        CONV_READ_WAIT  = 5'd3,
+        CONV_MAC        = 5'd4,
+        CONV_ReLU_FC    = 5'd5,
+        SOFTMAX_INIT    = 5'd6,
+        SOFTMAX_DIV_REQ = 5'd7,
+        SOFTMAX_DIV_WAIT= 5'd8,
+        WRITE_OUT_0     = 5'd9,
+        WRITE_OUT_1     = 5'd10,
+        WRITE_OUT_2     = 5'd11,
+        WRITE_OUT_3     = 5'd12,
+        DONE            = 5'd13,
+        FC_REQUANT      = 5'd14,
+        // --- Depthwise requantization + FC MAC boru hatti ---
+        CONV_RQ_NUDGE   = 5'd15,
+        CONV_RQ_SHIFT   = 5'd16,
+        CONV_RELU       = 5'd17,
+        FC_MAC0         = 5'd18,
+        FC_MAC1         = 5'd19,
+        FC_MAC2         = 5'd20,
+        FC_MAC3         = 5'd21,
+        // --- FC requantization boru hatti ---
+        FC_RQ_NUDGE     = 5'd22,
+        FC_RQ_SHIFT     = 5'd23,
+        FC_RQ_SAT       = 5'd24,
+
+        // FC weight artik buyuk kombinasyonel ROM'dan degil,
+        // TCM/SRAM icinden okunacak.
+        FC_WEIGHT_REQ   = 5'd25,
+        FC_WEIGHT_WAIT  = 5'd26,
+        // Operand secimi ile 32x32 carpani ayiran ek asamalar.
+        // d_out -> conv_acc mux -> multiplier -> rq_ab yolunu ikiye boler.
+        CONV_RQ_MUL     = 5'd27,
+        FC_RQ_MUL       = 5'd28
+    } state_t;
+
+    state_t state;
+
+    // Koordinat ve Döngü Sayaçları
+    logic [4:0] t_out;   // 0 .. 24 (Zaman çıkışı)
+    logic [4:0] f_out;   // 0 .. 19 (Frekans çıkışı)
+    logic [3:0] d_out;   // 0 .. 7  (Filtre/Kanal çıkışı)
+    logic [3:0] kh;      // 0 .. 9  (Kernel Yükseklik)
+    logic [3:0] kw;      // 0 .. 7  (Kernel Genişlik)
+
+    // -------------------------------------------------------------------------
+    // R4 - Kanal paylasimi
+    //
+    // Girdi adresi yalnizca (t_out, f_out, kh, kw)'ya baglidir; d_out ADRESE
+    // GIRMEZ. Yani sekiz kanalin hepsi tam olarak ayni girdi piksellerini
+    // okuyordu ve ayni 10x8 pencere sekiz kez taraniyordu.
+    //
+    // Artik pencere BIR KEZ okunuyor, okunan deger sekiz kanala paralel
+    // dagitiliyor. Her kanalin kendi biriktiricisi var.
+    //
+    // Toplama sirasi kanal ICINDE degismedi (kh, kw duzeni ayni) ve kanallar
+    // birbirinden bagimsiz; bu yuzden sonuclar bit-birebir ayni kalmali.
+    // -------------------------------------------------------------------------
+    logic signed [31:0] conv_acc [0:7];
+
+    // -------------------------------------------------------------------------
+    // R4 asama 2 - Okuma boru hatti
+    //
+    // TCM okuma cikisi KAYITLIDIR: adres verildikten bir cevrim sonra veri
+    // gecerli olur. Eski FSM bunu READ_REQ -> READ_WAIT -> MAC seklinde uc
+    // cevrime yayiyordu.
+    //
+    // Artik iki asamali boru hatti var:
+    //   kh/kw      = bu cevrim ADRESI verilen tap  (okuma isaretcisi)
+    //   mac_kh/kw  = bu cevrim VERISI hazir olan tap (bir cevrim gecikmeli)
+    //
+    // Her cevrimde hem bir okuma baslatilir hem de onceki okumanin verisi
+    // islenir. Tap basina 3 cevrim -> 1 cevrim.
+    //
+    // in_bounds ve byte_offset de gecikmeli kopyalanir; cunku bunlar
+    // TUKETILEN tap'a ait olmali, adresi verilene degil.
+    // -------------------------------------------------------------------------
+    logic [3:0] mac_kh;
+    logic [3:0] mac_kw;
+    logic [1:0] mac_bo;      // gecikmeli byte_offset
+    logic       mac_ib;      // gecikmeli in_bounds
+    logic       mac_valid;   // mem_rdata_b gecerli bir tap tasiyor mu
+
+    // -------------------------------------------------------------------------
+    // ASAMA 3 - SRAM CIKISI MAC'TEN ONCE YAZMACLANIR  (23 Agustos 2026)
+    //
+    // NEDEN
+    //
+    //   ASIC (sky130) yerlestirme-sonrasi STA'da en kotu setup yolu buydu:
+    //
+    //     Startpoint: u_npu.u_npu_sram.g_sram[3].u_macro
+    //                 (falling edge-triggered flip-flop clocked by clk_i)
+    //     Endpoint:   u_npu.u_npu_engine.conv_acc[223]
+    //     slack:      -4,00 ns  (tipik kose) / -18,76 ns (yavas kose)
+    //
+    //   SRAM makrosunun Liberty modeli ciktiyi DUSEN kenarda birakiyor
+    //   (timing_type : falling_edge). Yakalayan yazmac yukselen kenarda
+    //   oldugu icin bu yolun yalnizca YARIM cevrimi var - 20 ns yerine
+    //   ~9,6 ns. Makronun kendi erisimi hizli (0,4-0,5 ns); butceyi yiyen
+    //   sey, SRAM cikisindan hemen sonra gelen SEKIZ PARALEL carpma-toplama.
+    //
+    //   Cozum: SRAM verisini once yazmaca al, MAC bir sonraki cevrimde
+    //   KAYITLI degerle calissin. Yol ikiye bolunur:
+    //     SRAM -> rdata_q        yarim cevrim, neredeyse bos (kolay)
+    //     rdata_q -> conv_acc    tam cevrim (MAC'e rahat yer)
+    //
+    // MALIYET
+    //
+    //   Bu bir BORU HATTI oldugu icin ek asama gecikme ekler, verim
+    //   dusurmez: tap basina yine 1 cevrim. Yalnizca her pikselin
+    //   sonunda boru hattini bosaltmak icin +1 cevrim gerekir.
+    //   25 x 20 = 500 piksel -> +500 cevrim (~%0,6).
+    //
+    // BORU HATTI ARTIK UC ASAMALI
+    //
+    //   kh/kw        adresi BU cevrim verilen tap
+    //   mac_*        verisi BU cevrim mem_rdata_b'de olan tap
+    //   mac_*_q      verisi rdata_q'da YAZMACLANMIS, MAC edilen tap
+    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // ASAMA 0 - ADRES YAZMACLANIR  (24 Agustos 2026)
+    //
+    // NEDEN
+    //
+    //   Yerlestirme-sonrasi STA'da (yavas kose) 275 setup ihlali su yolda
+    //   toplandi:  NPU mantik -> NPU TCM SRAM,  en kotu -5,42 ns.
+    //
+    //   Adres zinciri yazmactan cikip TEK CEVRIMDE SRAM adres pinine
+    //   variyordu:
+    //
+    //     t_out -> *2 -+ kh -> sinir denetimi (4 karsilastirma)
+    //                  -> *40 carpma -> +f_in -> >>2 -> +in_addr_i -> SRAM
+    //
+    //   Cozum CONV_MAC'te yapilanin AYNISI, ters yonde: adresi bir cevrim
+    //   ONCEDEN hesaplayip yazmaclamak. SRAM artik hazir bir adres goruyor.
+    //
+    // MALIYET
+    //
+    //   Boru hatti 3 -> 4 asama. Verim degismez (tap basina 1 cevrim),
+    //   yalnizca her pikselin sonunda bosaltma icin +1 cevrim gerekir.
+    //   500 piksel -> +500 cevrim (~%0,6).
+    //
+    // BORU HATTI ARTIK DORT ASAMALI
+    //
+    //   kh/kw      adresi HESAPLANAN tap
+    //   *_q0       adresi SRAM'e VERILEN tap        <-- yeni
+    //   mac_*      verisi mem_rdata_b'de olan tap
+    //   mac_*_q    verisi rdata_q'da olan, MAC edilen tap
+    // -------------------------------------------------------------------------
+    logic [12:0] wo_q0;        // yazmaclanmis word_offset
+    logic [1:0]  bo_q0;
+    logic        ib_q0;
+    logic [3:0]  kh_q0, kw_q0;
+    logic        av_q0;        // adres asamasi gecerli
+
+    logic [31:0] rdata_q;      // yazmaclanmis SRAM cikisi
+    logic [3:0]  mac_kh_q;
+    logic [3:0]  mac_kw_q;
+    logic [1:0]  mac_bo_q;
+    logic        mac_ib_q;
+    logic        mac_valid_q;
+    logic signed [31:0] fc_acc [0:3];
+
+    // TFLite FC katmanının quantized INT8 çıkışları
+    logic signed [7:0] fc_logits [0:3];
+
+    // Hangi sınıfın requantization işleminin yapıldığını tutar
+    logic [1:0] fc_q_idx;
+
+    logic [12:0] probs [0:3];
+
+    // --- Requantization boru hatti ara yazmaclari ---
+    // Hem depthwise (CONV_*) hem FC (FC_RQ_*) yolunda kullanilir;
+    // ikisi hicbir zaman ayni anda aktif olmaz.
+    logic signed [63:0] rq_ab;      // 32x32 carpim sonucu
+    logic signed [31:0] rq_x;       // yazmaclanmis carpilan
+    logic signed [31:0] rq_m;       // yazmaclanmis multiplier
+    logic               rq_ovf;     // 0x80000000 * 0x80000000 ozel durumu
+    logic [31:0]        rq_shift;   // sag kaydirma miktari
+    logic signed [31:0] rq_srhm;    // sat_round_high_mul sonucu
+    logic signed [31:0] rq_scaled;  // multiply_quantized sonucu
+    logic signed [8:0]  fc_y;       // ReLU + doygunluk sonrasi aktivasyon
+    // FC agirlik indeksi. En buyuk deger (24*20+19)*8+7 = 3999 oldugu icin
+    // 12 bit yeterlidir. Onceden 14 bitti; daraltildi cunku fc_weights artik
+    // dort ayri 4.000'lik ROM'a bolundu ve her biri 12 bitlik adres aliyor.
+    logic [11:0]        fc_idx;
+    // ============================================================
+    // FC weight SRAM / TCM yerlesimi
+    //
+    // TCM toplam: 7680 x 32-bit = 30 kB
+    // Ilk 3584 word veri/input/output icin ayrildi.
+    // Sonraki 4000 word FC weightleri icin kullanilir.
+    //
+    // 3584 = 7 x 512 word -> SRAM macro sinirina hizali.
+    // ============================================================
+    localparam logic [12:0] FC_WEIGHT_BASE = 13'd3584;
+    localparam int unsigned FC_WEIGHT_WORDS = 4000;
+    // SRAM'den tek okumada gelen dort sinifin FC weight'i.
+    // [7:0]   = Silence
+    // [15:8]  = Unknown
+    // [23:16] = Yes
+    // [31:24] = No
+    logic [31:0] fc_weight_word;
+    // --- Ağırlık ve Sapma (Weight & Bias) ROM Dizileri ---
+    //
+    // İÇERİK RTL'E GÖMÜLÜDÜR - dosyadan okunmaz.
+    //
+    // Önceden `$readmemh("fc_weights.mem", ...)` gibi ÇIPLAK dosya adlarıyla
+    // okunuyordu. $readmemh dosyayı ÇALIŞMA DİZİNİNE göre arar: Vivado
+    // projeye eklenmiş dosyaları çözebiliyordu, LibreLane ise her adımı
+    // kendi dizininde koşturduğu için (asic/run/arkhe/06-yosys-synthesis/)
+    // hiçbirini bulamıyordu. Beş tablo da tanımsız (X) kalıyor ve Yosys
+    // onları siliyordu:
+    //
+    //     dw_weights: removing const-x lane 0..7
+    //     fc_weights: removing const-x lane 0..7
+    //     ...
+    //
+    // Hata verilmiyordu. ASIC netlist'inde ağırlıklar yoktu; üretilecek çip
+    // NPU'da çöp hesaplardı.
+    //
+    // Paket `scripts/gen_rom_paketleri.py` ile üretilir; aynı betik ürettiği
+    // değerleri kaynak .mem dosyalarıyla tek tek karşılaştırarak doğrular.
+    // Erisim fonksiyonlari npu_weights_pkg icindedir:
+    //     dw_weights(i)   dw_bias(i)   fc_bias(i)   softmax_exp_lut(i)
+    //     fc_weights0(i)  fc_weights1(i)  fc_weights2(i)  fc_weights3(i)
+    //
+    // fc_weights DORDE BOLUNDU. Tek 16.000'lik ROM'un adres cozucusu
+    // fc_idx[3] uzerinde 4.694 FANOUT uretiyordu; onarim adimi bu yuzden
+    // iki saat suruyor, global yonlendirme hic bitmiyordu (olcum:
+    // evidence/asic/DENEY_STUB.md).
+    //
+    // FC katmani zaten dort sinif icin AYRIK araliklardan okuyor:
+    //     sinif 0 ->     0..3999      sinif 2 ->  8000..11999
+    //     sinif 1 ->  4000..7999      sinif 3 -> 12000..15999
+    // Dort ayri 4.000'lik ROM kuruldu; her cozucunun adresi 12 bit ve
+    // taradigi giris 4.000. Cagri yerlerinde toplama da kalkti.
+    //
+    // Tablolar parcali packed vektorde tutulur. UNPACKED localparam dizisi
+    // denendi; lint ve sentez araclari sorunsuz sindirdi ama VIVADO xelab
+    // tek modulde 82 DAKIKA kosup bitiremedi. Packed bicim ayni isi 2,5
+    // saniyede yapiyor.
+    //
+    // Sebep: unpacked dizi elaboratore gore 16.000 AYRI NESNEDIR; packed
+    // vektor tek nesnedir ve dilimleme sentezde adres cozucuye doner.
+    //
+    // NOT: asagidaki satirin basina "Verilator" yazilmamalidir - o kelimeyle
+    // baslayan yorumlar pragma sanilir (%Error-BADVLTPRAGMA).
+
+    // --- Adres ve Sınır Güvenliği Mantığı (Reshape 49x40x1) ---
+    logic signed [31:0] t_in_signed;
+    logic signed [31:0] f_in_signed;
+    assign t_in_signed = $signed({27'b0, t_out}) * 2 - 4 + $signed({28'b0, kh});
+    assign f_in_signed = $signed({27'b0, f_out}) * 2 - 3 + $signed({28'b0, kw});
+
+    logic in_bounds;
+    assign in_bounds = (t_in_signed >= 0 && t_in_signed < 49 && f_in_signed >= 0 && f_in_signed < 40);
+
+    logic [12:0] flat_idx_in;
+    assign flat_idx_in = in_bounds ? (t_in_signed[5:0] * 40 + f_in_signed[5:0]) : 13'b0;
+
+    logic [12:0] word_offset;
+    assign word_offset = flat_idx_in >> 2;
+
+    logic [1:0] byte_offset;
+    assign byte_offset = flat_idx_in[1:0];
+
+// ============================================================
+// TFLite INT8 Depthwise requantization yardımcı fonksiyonları
+// ============================================================
+
+// TFLite benzeri:
+// SaturatingRoundingDoublingHighMul
+function automatic logic signed [31:0] sat_round_high_mul(
+    input logic signed [31:0] a,
+    input logic signed [31:0] b
+);
+    logic signed [63:0] ab;
+    logic signed [63:0] nudge;
+    logic signed [63:0] result64;
+
+    begin
+        // Özel overflow durumu
+        if ((a == 32'sh80000000) &&
+            (b == 32'sh80000000)) begin
+
+            sat_round_high_mul = 32'sh7fffffff;
+
+        end else begin
+
+            ab = $signed(a) * $signed(b);
+
+            if (ab >= 0)
+                nudge = 64'sd1073741824;   // 2^30
+            else
+                nudge = -64'sd1073741823;  // 1 - 2^30
+
+            result64 = (ab + nudge) / 64'sd2147483648; // 2^31
+
+            sat_round_high_mul = result64[31:0];
+        end
+    end
+endfunction
+
+
+// 2^N'e bölme + yuvarlama
+function automatic logic signed [31:0] rounding_divide_by_pot(
+    input logic signed [31:0] x,
+    input integer exponent
+);
+    logic signed [31:0] mask;
+    logic signed [31:0] remainder;
+    logic signed [31:0] threshold;
+
+    begin
+        mask = (32'sd1 <<< exponent) - 1;
+
+        remainder = x & mask;
+
+        threshold =
+            (mask >>> 1) +
+            ((x < 0) ? 32'sd1 : 32'sd0);
+
+        rounding_divide_by_pot =
+            (x >>> exponent) +
+            ((remainder > threshold) ? 32'sd1 : 32'sd0);
+    end
+endfunction
+
+
+// TFLite quantized multiplier
+function automatic logic signed [31:0] multiply_quantized(
+    input logic signed [31:0] x,
+    input logic signed [31:0] multiplier,
+    input integer right_shift
+);
+    logic signed [31:0] temp;
+
+    begin
+        temp = sat_round_high_mul(x, multiplier);
+
+        multiply_quantized =
+            rounding_divide_by_pot(temp, right_shift);
+    end
+endfunction
+
+
+// ============================================================
+// Gerçek TFLite modelinden çıkarılan
+// Depthwise kanal multiplier değerleri
+// ============================================================
+function automatic logic signed [31:0] get_dw_multiplier(
+    input logic [2:0] channel
+);
+    begin
+        case (channel)
+
+            3'd0: get_dw_multiplier = 32'sd1653229999;
+            3'd1: get_dw_multiplier = 32'sd1516545207;
+            3'd2: get_dw_multiplier = 32'sd2000799311;
+            3'd3: get_dw_multiplier = 32'sd1159928266;
+            3'd4: get_dw_multiplier = 32'sd1498403863;
+            3'd5: get_dw_multiplier = 32'sd1285645282;
+            3'd6: get_dw_multiplier = 32'sd2146175029;
+            3'd7: get_dw_multiplier = 32'sd1756589032;
+
+            default:
+                get_dw_multiplier = 32'sd0;
+
+        endcase
+    end
+endfunction
+
+
+// Her kanalın sağa kaydırma miktarı
+function automatic integer get_dw_rshift(
+    input logic [2:0] channel
+);
+    begin
+        case (channel)
+
+            3'd0: get_dw_rshift = 10;
+            3'd1: get_dw_rshift = 12;
+            3'd2: get_dw_rshift = 10;
+            3'd3: get_dw_rshift = 10;
+            3'd4: get_dw_rshift = 10;
+            3'd5: get_dw_rshift = 10;
+            3'd6: get_dw_rshift = 10;
+            3'd7: get_dw_rshift = 10;
+
+            default:
+                get_dw_rshift = 10;
+
+        endcase
+    end
+endfunction
+
+    // --- Softmax Exponent LUT Arayüzü ---
+    // Q0.12 sabit nokta formatında e^(-x) hesaplayan donanım dostu LUT.
+    // ------------------------------------------------------------
+    // diff = max_logit - current_logit
+    // LUT: exp(-diff * FC_OUTPUT_SCALE)
+    // FC_OUTPUT_SCALE = 0.09173192083835602
+    // Çıkış formatı: Q0.12  (4096 = 1.0)
+    // ------------------------------------------------------------
+function automatic logic [12:0] get_exp(
+    input integer diff
+);
+    begin
+
+        if (diff <= 0)
+            get_exp = 13'd4096;
+
+        else if (diff >= 256)
+            get_exp = 13'd0;
+
+        else
+            get_exp = softmax_exp_lut(8'(diff));
+
+    end
+endfunction
+
+    // --- Softmax Bölücü Birimi (Divider) ---
+    logic [12:0] div_num;
+    logic [15:0] div_den;
+    logic        div_start;
+    logic        div_done;
+    logic [15:0] divisor;
+    logic [15:0] dividend_acc;
+    logic [12:0] quotient;
+    logic [3:0]  bit_index;
+    logic        div_active;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            dividend_acc <= '0;
+            divisor      <= '0;
+            quotient     <= '0;
+            bit_index    <= '0;
+            div_active   <= 1'b0;
+            div_done     <= 1'b0;
+        end else if (npu_reset_i) begin
+            dividend_acc <= '0;
+            divisor      <= '0;
+            quotient     <= '0;
+            bit_index    <= '0;
+            div_active   <= 1'b0;
+            div_done     <= 1'b0;
+        end else if (div_start) begin
+            divisor    <= div_den;
+            quotient   <= '0;
+            bit_index  <= 4'd12;
+            div_active <= 1'b1;
+            div_done   <= 1'b0;
+            if (div_num >= div_den) begin
+                quotient[12] <= 1'b1;
+                dividend_acc <= '0;
+            end else begin
+                quotient[12] <= 1'b0;
+                dividend_acc <= {3'b0, div_num};
+            end
+        end else if (div_active) begin
+            logic [16:0] sub_val;
+            logic [15:0] next_acc;
+            next_acc = {dividend_acc[14:0], 1'b0};
+            sub_val = {1'b0, next_acc} - {1'b0, divisor};
+
+            if (sub_val[16] == 1'b0) begin
+                dividend_acc <= sub_val[15:0];
+                quotient[bit_index-1] <= 1'b1;
+            end else begin
+                dividend_acc <= next_acc;
+                quotient[bit_index-1] <= 1'b0;
+            end
+
+            if (bit_index == 4'd1) begin
+                div_active <= 1'b0;
+                div_done   <= 1'b1;
+            end else begin
+                bit_index  <= bit_index - 4'd1;
+            end
+        end else begin
+            div_done <= 1'b0;
+        end
+    end
+
+    // --- FSM Kontrol Mantığı ---
+    logic signed [31:0] max_score;
+    logic [12:0]        exp_val [0:3];
+    logic [1:0]         c_div;
+
+    always_comb begin
+
+        max_score = $signed(fc_logits[0]);
+
+        if ($signed(fc_logits[1]) > max_score)
+            max_score = $signed(fc_logits[1]);
+
+        if ($signed(fc_logits[2]) > max_score)
+            max_score = $signed(fc_logits[2]);
+
+        if ($signed(fc_logits[3]) > max_score)
+            max_score = $signed(fc_logits[3]);
+
+    end
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            state       <= IDLE;
+            busy_o      <= 1'b0;
+            done_o      <= 1'b0;
+            class_o     <= 2'b00;
+            t_out       <= '0;
+            f_out       <= '0;
+            d_out       <= '0;
+            kh          <= '0;
+            kw          <= '0;
+            for (int i = 0; i < 8; i++) conv_acc[i] <= '0;
+            mac_kh      <= '0;
+            mac_kw      <= '0;
+            mac_bo      <= '0;
+            mac_ib      <= 1'b0;
+            mac_valid   <= 1'b0;
+            wo_q0       <= '0;
+            bo_q0       <= '0;
+            ib_q0       <= 1'b0;
+            kh_q0       <= '0;
+            kw_q0       <= '0;
+            av_q0       <= 1'b0;
+            rdata_q     <= '0;
+            mac_kh_q    <= '0;
+            mac_kw_q    <= '0;
+            mac_bo_q    <= '0;
+            mac_ib_q    <= 1'b0;
+            mac_valid_q <= 1'b0;
+            div_start   <= 1'b0;
+            div_num     <= '0;
+            div_den     <= '0;
+            c_div       <= '0;
+
+            // Requantization boru hatti yazmaclari
+            rq_ab       <= '0;
+            rq_x        <= '0;
+            rq_m        <= '0;
+            rq_ovf      <= 1'b0;
+            rq_shift    <= '0;
+            rq_srhm     <= '0;
+            rq_scaled   <= '0;
+            fc_y        <= '0;
+            fc_idx      <= '0;
+            fc_weight_word <= '0;
+            for (int i = 0; i < 4; i++) begin
+                fc_acc[i]    <= '0;
+                fc_logits[i] <= '0;
+                probs[i]     <= '0;
+                exp_val[i]   <= '0;
+            end
+
+            fc_q_idx <= '0;
+
+        end else if (npu_reset_i) begin
+            state       <= IDLE;
+            busy_o      <= 1'b0;
+            done_o      <= 1'b0;
+            class_o     <= 2'b00;
+
+            t_out       <= '0;
+            f_out       <= '0;
+            d_out       <= '0;
+            kh          <= '0;
+            kw          <= '0;
+
+            for (int i = 0; i < 8; i++) conv_acc[i] <= '0;
+            mac_kh      <= '0;
+            mac_kw      <= '0;
+            mac_bo      <= '0;
+            mac_ib      <= 1'b0;
+            mac_valid   <= 1'b0;
+            wo_q0       <= '0;
+            bo_q0       <= '0;
+            ib_q0       <= 1'b0;
+            kh_q0       <= '0;
+            kw_q0       <= '0;
+            av_q0       <= 1'b0;
+            rdata_q     <= '0;
+            mac_kh_q    <= '0;
+            mac_kw_q    <= '0;
+            mac_bo_q    <= '0;
+            mac_ib_q    <= 1'b0;
+            mac_valid_q <= 1'b0;
+
+            div_start   <= 1'b0;
+            div_num     <= '0;
+            div_den     <= '0;
+            c_div       <= '0;
+
+            fc_q_idx    <= '0;
+
+            // Requantization boru hatti yazmaclari
+            rq_ab       <= '0;
+            rq_x        <= '0;
+            rq_m        <= '0;
+            rq_ovf      <= 1'b0;
+            rq_shift    <= '0;
+            rq_srhm     <= '0;
+            rq_scaled   <= '0;
+            fc_y        <= '0;
+            fc_idx      <= '0;
+            fc_weight_word <= '0;
+            for (int i = 0; i < 4; i++) begin
+                fc_acc[i]    <= '0;
+                fc_logits[i] <= '0;
+                probs[i]     <= '0;
+                exp_val[i]   <= '0;
+            end
+
+        end else begin
+            case (state)
+                IDLE: begin
+                    busy_o <= 1'b0;
+                    if (start_i) begin
+                        state       <= INIT;
+                        busy_o      <= 1'b1;
+                        done_o      <= 1'b0;
+                        t_out       <= '0;
+                        f_out       <= '0;
+                        d_out       <= '0;
+                        kh          <= '0;
+                        kw          <= '0;
+                        $display("[%0t] [NPU_ENGINE] Starting upgraded NPU computation: in_addr=0x%h, out_addr=0x%h", $time, in_addr_i, out_addr_i);
+                    end
+                end
+
+                INIT: begin
+                    for (int i = 0; i < 4; i++) begin
+                        fc_acc[i]    <= fc_bias(2'(i));
+                        fc_logits[i] <= '0;
+                    end
+
+                    fc_q_idx <= 2'd0;
+
+                    // Sekiz kanalin biriktiricisi ayni anda baslatilir
+                    for (int i = 0; i < 8; i++) conv_acc[i] <= dw_bias(3'(i));
+                    state <= CONV_READ_REQ;
+                end
+
+                // Boru hattini doldur: tap 0'in adresi bu cevrim veriliyor,
+                // verisi bir sonraki cevrimde gelecek. Okuma isaretcisi
+                // tap 1'e ilerletilir.
+                // Boru hatti doldurma: asama 0 (adres) bu cevrim tap 0'i
+                // yazmacliyor. Veri asamasi (mac_*) bir sonraki cevrimde
+                // asama 0'dan beslenecek.
+                CONV_READ_REQ: begin
+                    wo_q0 <= word_offset;
+                    bo_q0 <= byte_offset;
+                    ib_q0 <= in_bounds;
+                    kh_q0 <= kh;
+                    kw_q0 <= kw;
+                    av_q0 <= 1'b1;
+
+                    mac_valid <= 1'b0;  // veri henuz yok
+
+                    kw    <= 4'd1;      // tap 1 (kh zaten 0)
+                    state <= CONV_MAC;
+                end
+
+                CONV_MAC: begin
+                    logic signed [8:0] x_centered;
+
+                    // =========================================================
+                    // ASAMA 3 - MAC
+                    //
+                    // Artik mem_rdata_b'yi DOGRUDAN kullanmiyor; bir cevrim
+                    // once yakalanmis rdata_q ile calisiyor. Kritik yol
+                    // boylece ikiye bolunuyor (bkz. yukaridaki aciklama).
+                    // =========================================================
+                    if (mac_valid_q) begin
+                        if (mac_ib_q) begin
+                            logic [7:0] raw_byte;
+
+                            raw_byte = (mac_bo_q == 2'd0) ? rdata_q[7:0]   :
+                                       (mac_bo_q == 2'd1) ? rdata_q[15:8]  :
+                                       (mac_bo_q == 2'd2) ? rdata_q[23:16] :
+                                                            rdata_q[31:24];
+
+                            // TFLite input zero-point = -128
+                            // x_centered = x_q - (-128) = x_q + 128
+                            x_centered = $signed({raw_byte[7], raw_byte}) + 9'sd128;
+
+                        end else begin
+                            // SAME padding gerçek değer olarak 0 olmalıdır.
+                            // Zero-point çıkarıldıktan sonra centered değer doğrudan 0'dır.
+                            x_centered = 9'sd0;
+                        end
+
+                        // Okunan tek piksel sekiz kanala paralel dagitilir.
+                        // dw_weights indisleri d icin ARDISIKTIR (kh*64+kw*8+d),
+                        // yani sekiz agirlik bitisik bir blokta duruyor.
+                        for (int d = 0; d < 8; d++) begin
+                            conv_acc[d] <= conv_acc[d] +
+                                x_centered * $signed(dw_weights(10'(int'(mac_kh_q) * 64 + int'(mac_kw_q) * 8 + d)));
+                        end
+                    end
+
+                    // =========================================================
+                    // ASAMA 2 - SRAM cikisini yazmaca al
+                    //
+                    // Bu atama neredeyse bos bir yol: SRAM dout -> rdata_q.
+                    // Yarim cevrimlik butce buna fazlasiyla yeter.
+                    // =========================================================
+                    rdata_q     <= mem_rdata_b;
+                    mac_kh_q    <= mac_kh;
+                    mac_kw_q    <= mac_kw;
+                    mac_bo_q    <= mac_bo;
+                    mac_ib_q    <= mac_ib;
+                    mac_valid_q <= mac_valid;
+
+                    // Asama 0 -> asama 1 (veri asamasi)
+                    mac_kh    <= kh_q0;
+                    mac_kw    <= kw_q0;
+                    mac_bo    <= bo_q0;
+                    mac_ib    <= ib_q0;
+                    mac_valid <= av_q0;
+
+                    // =========================================================
+                    // Cikis ve asama 1 (adres) ilerletme
+                    //
+                    // Cikis kosulu artik ASAMA 3'e bakiyor (mac_*_q): son tap
+                    // MAC edildiginde boru hatti gercekten bosalmistir.
+                    // Asama 1 bir cevrim ONCE durur - son adres verildikten
+                    // sonra yeni adres uretmenin anlami yok.
+                    // =========================================================
+                    if (mac_valid_q && mac_kh_q == 9 && mac_kw_q == 7) begin
+                        // Son tap MAC edildi: boru hatti bosaldi
+                        mac_valid   <= 1'b0;
+                        mac_valid_q <= 1'b0;
+                        kh          <= '0;
+                        kw          <= '0;
+                        d_out       <= '0;    // requant/FC turu kanal 0'dan baslar
+                        state       <= CONV_ReLU_FC;
+                    end else if (av_q0 && kh_q0 == 9 && kw_q0 == 7) begin
+                        // Son tap asama 0'dan cikti; adres uretimi durur.
+                        // Boru hattindaki taplar bosaltilmaya devam eder.
+                        av_q0 <= 1'b0;
+                    end else begin
+                        // Asama 0'i bu cevrimin kh/kw'siyle doldur ve
+                        // okuma isaretcisini ilerlet.
+                        wo_q0 <= word_offset;
+                        bo_q0 <= byte_offset;
+                        ib_q0 <= in_bounds;
+                        kh_q0 <= kh;
+                        kw_q0 <= kw;
+                        av_q0 <= 1'b1;
+
+                        if (kw == 7) begin
+                            kw <= '0;
+                            kh <= kh + 1;
+                        end else begin
+                            kw <= kw + 1;
+                        end
+                    end
+                end
+
+                // ============================================================
+                // Depthwise requantization - Asama 1: operand secimi
+                //
+                // 11. ASIC kosumunda en kotu max_ss yolu d_out[0]'dan
+                // rq_ab yazmacina gidiyordu. Kanal secimi, conv_acc mux'u,
+                // multiplier secimi ve 32x32 carpma ayni cevrimdeydi.
+                // Operandlari burada yazmaclayip carpimi bir sonraki state'e
+                // tasimak bu uzun kombinasyonel yolu ikiye boler.
+                // ============================================================
+                CONV_ReLU_FC: begin
+                    logic signed [31:0] m;
+
+                    m        = get_dw_multiplier(d_out[2:0]);
+                    rq_x     <= conv_acc[d_out[2:0]];
+                    rq_m     <= m;
+                    rq_ovf   <= (conv_acc[d_out[2:0]] == 32'sh80000000) && (m == 32'sh80000000);
+                    rq_shift <= get_dw_rshift(d_out[2:0]);
+                    state    <= CONV_RQ_MUL;
+                end
+
+                // Asama 2: yalnizca 32x32 signed carpma
+                CONV_RQ_MUL: begin
+                    rq_ab <= $signed(rq_x) * $signed(rq_m);
+                    state    <= CONV_RQ_NUDGE;
+                end
+
+                // Asama 3: nudge ekleme + 2^31'e bolme
+                CONV_RQ_NUDGE: begin
+                    logic signed [63:0] nudge;
+                    logic signed [63:0] r64;
+
+                    if (rq_ovf) begin
+                        rq_srhm <= 32'sh7fffffff;
+                    end else begin
+                        nudge   = (rq_ab >= 0) ?  64'sd1073741824    // 2^30
+                                               : -64'sd1073741823;   // 1 - 2^30
+                        r64     = (rq_ab + nudge) / 64'sd2147483648; // 2^31
+                        rq_srhm <= r64[31:0];
+                    end
+                    state <= CONV_RQ_SHIFT;
+                end
+
+                // Asama 4: rounding_divide_by_pot (degisken kaydirma)
+                CONV_RQ_SHIFT: begin
+                    rq_scaled <= rounding_divide_by_pot(rq_srhm, rq_shift);
+                    state     <= CONV_RELU;
+                end
+
+                // Asama 5: ReLU + INT8 doygunluk + FC indeks hesabi
+                // Depthwise cikis zero-point = -128, centered deger 0..255.
+                CONV_RELU: begin
+                    if (rq_scaled < 32'sd0)
+                        fc_y <= 9'sd0;
+                    else if (rq_scaled > 32'sd255)
+                        fc_y <= 9'sd255;
+                    else
+                        fc_y <= rq_scaled[8:0];
+
+                    fc_idx <= 12'((int'(t_out) * 20 + int'(f_out)) * 8 + int'(d_out));
+                    state <= FC_WEIGHT_REQ;
+                end
+
+                // ============================================================
+                // Asama 5-8: dort FC MAC, her cevrimde TEK ROM okumasi
+                // (D9 bulgusu burada kapaniyor)
+                // ============================================================
+                // ============================================================
+                // FC weight TCM/SRAM okuma
+                // ============================================================
+
+                // Bu state'te TCM'ye adres verilir.
+                // Veri TCM cikisinda bir sonraki clock'ta hazir olur.
+                FC_WEIGHT_REQ: begin
+                    state <= FC_WEIGHT_WAIT;
+                end
+
+                // Onceki clock'ta istenen 32-bit weight kelimesini kaydet.
+                FC_WEIGHT_WAIT: begin
+                    fc_weight_word <= mem_rdata_b;
+                    state <= FC_MAC0;
+                end
+                FC_MAC0: begin
+                    fc_acc[0] <= fc_acc[0]
+                        + $signed(fc_y) * $signed(fc_weight_word[7:0]);
+                    state <= FC_MAC1;
+                end
+                FC_MAC1: begin
+                    fc_acc[1] <= fc_acc[1]
+                        + $signed(fc_y) * $signed(fc_weight_word[15:8]);
+                    state <= FC_MAC2;
+                end
+
+                FC_MAC2: begin
+                    fc_acc[2] <= fc_acc[2]
+                        + $signed(fc_y) * $signed(fc_weight_word[23:16]);
+                    state <= FC_MAC3;
+                end
+
+                // Son asama: sayac guncellemeleri burada yapilir.
+                // t_out / f_out / d_out boru hatti boyunca sabit kalmali,
+                // cunku fc_idx ve dw_multiplier onlara bagli.
+                FC_MAC3: begin
+                    fc_acc[3] <= fc_acc[3]
+                        + $signed(fc_y) * $signed(fc_weight_word[31:24]);
+
+                    // R4 sonrasi dongu duzeni:
+                    //   konvolusyon (kh,kw) SEKIZ KANAL ICIN BIR KEZ kosar,
+                    //   ardindan burada kanal kanal requant + FC yapilir.
+                    //
+                    // Bu yuzden d_out < 7 iken CONV_READ_REQ'e DEGIL,
+                    // CONV_ReLU_FC'ye donuyoruz - girdi zaten okundu.
+                    if (d_out == 7) begin
+                        d_out <= '0;
+
+                        // Sonraki piksel icin sekiz biriktirici birden yenilenir
+                        for (int i = 0; i < 8; i++) conv_acc[i] <= dw_bias(3'(i));
+
+                        if (f_out == 19) begin
+                            f_out <= '0;
+
+                            if (t_out == 24) begin
+                                t_out    <= '0;
+                                fc_q_idx <= 2'd0;
+                                state    <= FC_REQUANT;
+                            end else begin
+                                t_out <= t_out + 1;
+                                state <= CONV_READ_REQ;
+                            end
+                        end else begin
+                            f_out <= f_out + 1;
+                            state <= CONV_READ_REQ;
+                        end
+                    end else begin
+                        d_out <= d_out + 1;
+                        state <= CONV_ReLU_FC;   // ayni pikselin sonraki kanali
+                    end
+                end
+
+                // ============================================================
+                // FC requantization - Asama 1: operandlari yazmacla
+                //
+                // real multiplier    ~ 0.000439331661
+                // integer multiplier = 1932201080
+                // right shift        = 11
+                // output zero-point  = 14
+                // ============================================================
+                FC_REQUANT: begin
+                    rq_x  <= fc_acc[fc_q_idx];
+                    rq_m  <= 32'sd1932201080;
+                    state <= FC_RQ_MUL;
+                end
+
+                // Asama 2: yalnizca 32x32 signed carpma
+                FC_RQ_MUL: begin
+                    rq_ab <= $signed(rq_x) * $signed(rq_m);
+                    state <= FC_RQ_NUDGE;
+                end
+
+                // Asama 3: nudge ekleme + 2^31'e bolme
+                FC_RQ_NUDGE: begin
+                    logic signed [63:0] nudge;
+                    logic signed [63:0] r64;
+
+                    nudge   = (rq_ab >= 0) ?  64'sd1073741824
+                                           : -64'sd1073741823;
+                    r64     = (rq_ab + nudge) / 64'sd2147483648;
+                    rq_srhm <= r64[31:0];
+                    state   <= FC_RQ_SHIFT;
+                end
+
+                // Asama 4: sabit 11 bit saga kaydirma + yuvarlama
+                FC_RQ_SHIFT: begin
+                    rq_scaled <= rounding_divide_by_pot(rq_srhm, 11);
+                    state     <= FC_RQ_SAT;
+                end
+
+                // Asama 5: zero-point ekleme + INT8 doygunluk + sonraki sinif
+                FC_RQ_SAT: begin
+                    logic signed [31:0] quant_fc;
+
+                    quant_fc = rq_scaled + 32'sd14;
+
+                    if (quant_fc > 32'sd127)
+                        fc_logits[fc_q_idx] <= 8'sd127;
+
+                    else if (quant_fc < -32'sd128)
+                        fc_logits[fc_q_idx] <= -8'sd128;
+
+                    else
+                        fc_logits[fc_q_idx] <= quant_fc[7:0];
+
+                    // Dort sinifi sirayla isle
+                    if (fc_q_idx == 2'd3) begin
+                        fc_q_idx <= 2'd0;
+                        state    <= SOFTMAX_INIT;
+                    end else begin
+                        fc_q_idx <= fc_q_idx + 2'd1;
+                        state    <= FC_REQUANT;
+                    end
+                end
+
+                SOFTMAX_INIT: begin
+
+                    // FC requantization sonrası gerçek INT8 logits kullanılır.
+                    exp_val[0] <= get_exp(max_score - $signed(fc_logits[0]));
+                    exp_val[1] <= get_exp(max_score - $signed(fc_logits[1]));
+                    exp_val[2] <= get_exp(max_score - $signed(fc_logits[2]));
+                    exp_val[3] <= get_exp(max_score - $signed(fc_logits[3]));
+
+                    c_div <= '0;
+                    state <= SOFTMAX_DIV_REQ;
+
+                end
+
+                SOFTMAX_DIV_REQ: begin
+                    // sum_exp YEREL bir gecicidir: ayni cevrimde hesaplanip
+                    // hemen asagida kullanilir, kayit gerekmez.
+                    //
+                    // Eskiden modul seviyesinde bildirilmis ve reset'te
+                    // <= ile sifirlaniyordu; burada ise = ile atanıyordu.
+                    // Ayni degiskende bloklayan ve bloklamayan atamayi
+                    // karistirmak gecersizdir. Vivado hos gormustu, slang
+                    // (ASIC akisi) reddetti:
+                    //   "blocking assignment to variable 'sum_exp' is not
+                    //    supported after previous non-blocking assignment"
+                    //
+                    // Yerel yapilinca hem hata kalkiyor hem de hic okunmayan
+                    // olu kayit ortadan kalkiyor. Davranis degismiyor.
+                    logic [15:0] sum_exp;
+
+                    // Toplam payda hesabı
+                    sum_exp   = exp_val[0] + exp_val[1] + exp_val[2] + exp_val[3];
+                    div_num   <= exp_val[c_div];
+                    div_den   <= (sum_exp == 16'd0) ? 16'd1 : sum_exp;
+                    div_start <= 1'b1;
+                    state     <= SOFTMAX_DIV_WAIT;
+                end
+
+                SOFTMAX_DIV_WAIT: begin
+                    div_start <= 1'b0;
+                    if (div_done) begin
+                        probs[c_div] <= quotient;
+                        if (c_div == 3) begin
+                            state <= WRITE_OUT_0;
+                        end else begin
+                            c_div <= c_div + 1;
+                            state <= SOFTMAX_DIV_REQ;
+                        end
+                    end
+                end
+
+                WRITE_OUT_0: begin
+                    state <= WRITE_OUT_1;
+                end
+
+                WRITE_OUT_1: begin
+                    state <= WRITE_OUT_2;
+                end
+
+                WRITE_OUT_2: begin
+                    state <= WRITE_OUT_3;
+                end
+
+                WRITE_OUT_3: begin
+                    state <= DONE;
+                    // --------------------------------------------------------
+                    // Sınıf seçimi doğrudan quantized FC logits üzerinden.
+                    // Softmax sıralamayı değiştirmez.
+                    // --------------------------------------------------------
+
+                    if (($signed(fc_logits[0]) >= $signed(fc_logits[1])) &&
+                        ($signed(fc_logits[0]) >= $signed(fc_logits[2])) &&
+                        ($signed(fc_logits[0]) >= $signed(fc_logits[3]))) begin
+
+                        class_o <= 2'd0; // SILENCE
+
+                    end
+                    else if (($signed(fc_logits[1]) >= $signed(fc_logits[2])) &&
+                             ($signed(fc_logits[1]) >= $signed(fc_logits[3]))) begin
+
+                        class_o <= 2'd1; // UNKNOWN
+
+                    end
+                    else if ($signed(fc_logits[2]) >= $signed(fc_logits[3])) begin
+
+                        class_o <= 2'd2; // YES
+
+                    end
+                    else begin
+
+                        class_o <= 2'd3; // NO
+
+                    end
+                end
+
+                DONE: begin
+                    busy_o  <= 1'b0;
+                    done_o  <= 1'b1;
+                    if (!done_o) begin
+                        $display("[%0t] [NPU_ENGINE] Upgraded NPU computation done. Selected Class=%0d", $time, class_o);
+                        $display("            fc_acc: [0]=%0d, [1]=%0d, [2]=%0d, [3]=%0d", fc_acc[0], fc_acc[1], fc_acc[2], fc_acc[3]);
+                        $display("            probs:  [0]=%0d, [1]=%0d, [2]=%0d, [3]=%0d", probs[0], probs[1], probs[2], probs[3]);
+                    end
+
+                    if (start_i || npu_reset_i) begin
+                        state  <= IDLE;
+                        done_o <= 1'b0;
+                    end
+                end
+
+                default: state <= IDLE;
+            endcase
+        end
+    end
+
+    // --- Port B RAM Kontrol Sinyallerinin Kombinasyonel Sürülmesi ---
+    always_comb begin
+        mem_en_b    = 1'b0;
+        mem_we_b    = 4'b0000;
+        mem_addr_b  = 13'b0;
+        mem_wdata_b = 32'b0;
+
+        case (state)
+            // Boru hatti: hem doldurma (READ_REQ) hem akis (MAC) sirasinda
+            // her cevrim bir okuma baslatilir.
+            //
+            // kh == 10 kosulu: son tap'in adresi verildikten sonra okuma
+            // isaretcisi tasar. O cevrimde tuketim hala surer ama yeni
+            // okuma baslatilmamalidir.
+            CONV_READ_REQ, CONV_MAC: begin
+                // Adres artik KOMBINASYONEL degil, asama 0'da yazmaclanmis.
+                // Uzun carpma-karsilastirma zinciri SRAM pininden koptu.
+                if (av_q0 && ib_q0) begin
+                    mem_en_b   = 1'b1;
+                    mem_addr_b = in_addr_i + wo_q0;
+                end
+            end
+            FC_WEIGHT_REQ: begin
+                mem_en_b = 1'b1;
+                mem_addr_b = FC_WEIGHT_BASE + {1'b0, fc_idx};
+            end
+            WRITE_OUT_0: begin
+                mem_en_b    = 1'b1;
+                mem_we_b    = 4'hf;
+                mem_addr_b  = out_addr_i;
+                mem_wdata_b = 32'(probs[0]);
+            end
+            WRITE_OUT_1: begin
+                mem_en_b    = 1'b1;
+                mem_we_b    = 4'hf;
+                mem_addr_b  = out_addr_i + 13'd1;
+                mem_wdata_b = 32'(probs[1]);
+            end
+            WRITE_OUT_2: begin
+                mem_en_b    = 1'b1;
+                mem_we_b    = 4'hf;
+                mem_addr_b  = out_addr_i + 13'd2;
+                mem_wdata_b = 32'(probs[2]);
+            end
+            WRITE_OUT_3: begin
+                mem_en_b    = 1'b1;
+                mem_we_b    = 4'hf;
+                mem_addr_b  = out_addr_i + 13'd3;
+                mem_wdata_b = 32'(probs[3]);
+            end
+            default: ;
+        endcase
+    end
+
+endmodule

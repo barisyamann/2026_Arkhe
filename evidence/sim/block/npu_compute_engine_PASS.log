@@ -1,0 +1,82 @@
+#-----------------------------------------------------------
+# xsim v2025.2 (64-bit)
+# SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+# IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+# SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+# Start of session at: Tue Aug 18 19:23:50 2026
+# Process ID         : 29052
+# Current directory  : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb
+# Command line       : xsim.exe -log n_sim.log -mode tcl -source {xsim.dir/n_snap/xsim_script.tcl}
+# Log file           : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb/n_sim.log
+# Journal file       : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb\xsim.jou
+# Running On         : baris
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 26200
+# Processor Detail   : AMD Ryzen 5 6600H with Radeon Graphics         
+# CPU Frequency      : 3294 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 16310 MB
+# Swap memory        : 16106 MB
+# Total Virtual      : 32416 MB
+# Available Virtual  : 11070 MB
+#-----------------------------------------------------------
+source xsim.dir/n_snap/xsim_script.tcl
+# xsim {n_snap} -autoloadwcfg -tclbatch {run.tcl}
+Time resolution is 1 ps
+source run.tcl
+## run all
+================================================================
+ NPU BLOK ÿÿÿÄ°YESÿ° DÿÿžRULAMA TEÿÿÿ°ÿÿÿÅžLATILDI
+================================================================
+
+---> SENARYO 1 (YES) Baslatiliyor. Giris Deseni: 0x55555555
+[130000] [NPU_ENGINE] Starting upgraded NPU computation: in_addr=0x0000, out_addr=0x1dac
+[1451790000] [NPU_ENGINE] Upgraded NPU computation done. Selected Class=3
+            fc_acc: [0]=-985885, [1]=242268, [2]=240758, [3]=387226
+            probs:  [0]=0, [1]=1050, [2]=1050, [3]=1995
+     [TAMAMLANDI] Secilen Sinif (class_o): 3
+     Softmax Olasiliklari (TCM 7596-7599):
+       Class 0 (Silence): 0
+       Class 1 (Unknown): 1050
+       Class 2 (Yes)    : 1050
+       Class 3 (No)     : 1995
+      [OK]   SENARYO 1 (YES): softmax toplami ~4096 (gelen 4095)
+      [OK]   SENARYO 1 (YES): class_o argmax ile tutarli
+
+---> SENARYO 2 (NO) Baslatiliyor. Giris Deseni: 0xaaaaaaaa
+[1451930000] [NPU_ENGINE] Starting upgraded NPU computation: in_addr=0x0000, out_addr=0x1dac
+[2903590000] [NPU_ENGINE] Upgraded NPU computation done. Selected Class=3
+            fc_acc: [0]=-180951, [1]=43361, [2]=44892, [3]=71199
+            probs:  [0]=0, [1]=802, [2]=879, [3]=2413
+     [TAMAMLANDI] Secilen Sinif (class_o): 3
+     Softmax Olasiliklari (TCM 7596-7599):
+       Class 0 (Silence): 0
+       Class 1 (Unknown): 802
+       Class 2 (Yes)    : 879
+       Class 3 (No)     : 2413
+      [OK]   SENARYO 2 (NO): softmax toplami ~4096 (gelen 4094)
+      [OK]   SENARYO 2 (NO): class_o argmax ile tutarli
+
+---> SENARYO 3 (SILENCE) Baslatiliyor. Giris Deseni: 0x80808080
+[2903730000] [NPU_ENGINE] Starting upgraded NPU computation: in_addr=0x0000, out_addr=0x1dac
+[4355390000] [NPU_ENGINE] Upgraded NPU computation done. Selected Class=0
+            fc_acc: [0]=427, [1]=-518, [2]=-94, [3]=186
+            probs:  [0]=1024, [1]=1024, [2]=1024, [3]=1024
+     [TAMAMLANDI] Secilen Sinif (class_o): 0
+     Softmax Olasiliklari (TCM 7596-7599):
+       Class 0 (Silence): 1024
+       Class 1 (Unknown): 1024
+       Class 2 (Yes)    : 1024
+       Class 3 (No)     : 1024
+      [OK]   SENARYO 3 (SILENCE): softmax toplami ~4096 (gelen 4096)
+      [OK]   SENARYO 3 (SILENCE): class_o argmax ile tutarli
+      [OK]   Senaryo 1 ve 2 farkli sonuc uretti
+      [OK]   Senaryo 1 ve 3 farkli sonuc uretti
+      [OK]   Senaryo 2 ve 3 farkli sonuc uretti
+================================================================
+ NPU BLOK TESTI GECTI - 9 denetim, 0 hata
+================================================================
+$finish called at time : 4355530 ns : File "C:/Users/ybari/2026_Arkhe/tb/tb_npu_compute_engine.sv" Line 214
+## quit
+INFO: [Common 17-206] Exiting xsim at Tue Aug 18 19:23:53 2026...

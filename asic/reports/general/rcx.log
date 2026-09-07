@@ -1,0 +1,98 @@
+Reading technology LEF file at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/techlef/sky130_fd_sc_hd__min.tlef'…
+[INFO ODB-0227] LEF file: /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/techlef/sky130_fd_sc_hd__min.tlef, created 14 layers, 25 vias
+Reading cell LEF file at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_fd_sc_hd.lef'…
+[WARNING ODB-0220] WARNING (LEFPARS-2008): NOWIREEXTENSIONATPIN statement is obsolete in version 5.6 or later.
+The NOWIREEXTENSIONATPIN statement will be ignored. See file /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_fd_sc_hd.lef at line 2.
+
+[INFO ODB-0227] LEF file: /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_fd_sc_hd.lef, created 437 library cells
+Reading cell LEF file at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_ef_sc_hd.lef'…
+[WARNING ODB-0220] WARNING (LEFPARS-2008): NOWIREEXTENSIONATPIN statement is obsolete in version 5.6 or later.
+The NOWIREEXTENSIONATPIN statement will be ignored. See file /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_ef_sc_hd.lef at line 2.
+
+[INFO ODB-0227] LEF file: /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_ef_sc_hd.lef, created 8 library cells
+Reading macro LEF file at 'macros/sky130_sram_2kbyte_1rw1r_32x512_8/lef/sky130_sram_2kbyte_1rw1r_32x512_8.lef'…
+[INFO ODB-0227] LEF file: macros/sky130_sram_2kbyte_1rw1r_32x512_8/lef/sky130_sram_2kbyte_1rw1r_32x512_8.lef, created 1 library cells
+[INFO ODB-0127] Reading DEF file: /home/tatua7806/arkhe/asic/run/arkhe/85-odb-cellfrequencytables/soc_top.def
+[INFO ODB-0128] Design: soc_top
+[INFO ODB-0094] 		Created 100000 Insts
+[INFO ODB-0094] 		Created 200000 Insts
+[INFO ODB-0094] 		Created 300000 Insts
+[INFO ODB-0094] 		Created 400000 Insts
+[INFO ODB-0094] 		Created 500000 Insts
+[INFO ODB-0094] 		Created 600000 Insts
+[INFO ODB-0094] 		Created 700000 Insts
+[INFO ODB-0094] 		Created 800000 Insts
+[INFO ODB-0094] 		Created 900000 Insts
+[INFO ODB-0094] 		Created 1000000 Insts
+[INFO ODB-0094] 		Created 1100000 Insts
+[INFO ODB-0094] 		Created 1200000 Insts
+[INFO ODB-0094] 		Created 1300000 Insts
+[INFO ODB-0094] 		Created 1400000 Insts
+[INFO ODB-0094] 		Created 1500000 Insts
+[INFO ODB-0094] 		Created 1600000 Insts
+[INFO ODB-0094] 		Created 1700000 Insts
+[INFO ODB-0094] 		Created 1800000 Insts
+[INFO ODB-0094] 		Created 1900000 Insts
+[INFO ODB-0094] 		Created 2000000 Insts
+[INFO ODB-0130]     Created 81 pins.
+[INFO ODB-0131]     Created 2080015 components and 8407029 component-terminals.
+[INFO ODB-0132]     Created 2 special nets and 8093074 connections.
+[INFO ODB-0133]     Created 88351 nets and 312652 connections.
+[INFO ODB-0134] Finished DEF file: /home/tatua7806/arkhe/asic/run/arkhe/85-odb-cellfrequencytables/soc_top.def
+Using RCX ruleset '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.tech/openlane/rules.openrcx.sky130A.min.calibre'…
+[INFO RCX-0431] Defined process_corner CURRENT_CORNER with ext_model_index 0
+[INFO RCX-0029] Defined extraction corner CURRENT_CORNER
++ extract_parasitics  -ext_model_file /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.tech/openlane/rules.openrcx.sky130A.min.calibre -lef_res
+[INFO RCX-0435] Reading extraction model file /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.tech/openlane/rules.openrcx.sky130A.min.calibre ...
+[INFO RCX-0436] RC segment generation soc_top (max_merge_res 50.0) ...
+[INFO RCX-0040] Final 390991 rc segments
+[INFO RCX-0439] Coupling Cap extraction soc_top ...
+[INFO RCX-0440] Coupling threshhold is 0.1000 fF, coupling capacitance less than 0.1000 fF will be grounded.
+[INFO RCX-0442] 8% of 791787 wires extracted
+[INFO RCX-0442] 18% of 791787 wires extracted
+[INFO RCX-0442] 26% of 791787 wires extracted
+[INFO RCX-0442] 32% of 791787 wires extracted
+[INFO RCX-0442] 40% of 791787 wires extracted
+[INFO RCX-0442] 52% of 791787 wires extracted
+[INFO RCX-0442] 58% of 791787 wires extracted
+[INFO RCX-0442] 67% of 791787 wires extracted
+[INFO RCX-0442] 83% of 791787 wires extracted
+[INFO RCX-0442] 92% of 791787 wires extracted
+[INFO RCX-0442] 99% of 791787 wires extracted
+[INFO RCX-0045] Extract 88349 nets, 479318 rsegs, 479318 caps, 978374 ccs
+Setting global connections for newly added cells…
+[INFO] Setting global connections...
+.*u_macro matched with u_data_ram.g_sram\[0\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[1\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[2\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[3\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[0\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[1\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[2\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[3\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[0\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[10\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[11\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[12\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[13\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[14\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[1\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[2\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[3\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[4\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[5\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[6\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[7\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[8\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[9\].u_macro
+[INFO ODB-0403] 0 connections made, 0 conflicts skipped.
+Updating metrics…
+Cell type report:                       Count       Area
+  Macro                                    23 6544384.90
+  Fill cell                           1875262 6731360.91
+  Tap cell                             113470  141973.66
+  Antenna cell                           3097    7749.93
+  Standard cell                         88163 1067341.16
+  Total                               2080015 14492810.57
+Writing extracted parasitics to '/home/tatua7806/arkhe/asic/run/arkhe/86-openroad-rcx/min/soc_top.min.spef'…
+[INFO RCX-0443] 88349 nets finished

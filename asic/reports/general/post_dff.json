@@ -1,0 +1,69 @@
+{
+   "creator": "Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)",
+   "invocation": "stat -json -liberty /home/tatua7806/arkhe/asic/run/arkhe/tmp/ffc5da279a104d7989f9ec2e210d3d4a.lib ",
+   "modules": {
+      "\\soc_top": {
+         "num_wires":         85424,
+         "num_wire_bits":     103070,
+         "num_pub_wires":     1000,
+         "num_pub_wire_bits": 18102,
+         "num_ports":         25,
+         "num_port_bits":     79,
+         "num_memories":      0,
+         "num_memory_bits":   0,
+         "num_processes":     0,
+         "num_cells":         98135,
+         "num_submodules":       0,
+         "area":              289273.686400,
+         "sequential_area":    289273.686400,
+         "num_cells_by_type": {
+            "$_ANDNOT_": 21379,
+            "$_AND_": 3172,
+            "$_MUX_": 27797,
+            "$_NAND_": 2095,
+            "$_NOR_": 4053,
+            "$_NOT_": 2431,
+            "$_ORNOT_": 2588,
+            "$_OR_": 10931,
+            "$_XNOR_": 3565,
+            "$_XOR_": 7892,
+            "sky130_fd_sc_hd__dfrtp_2": 5810,
+            "sky130_fd_sc_hd__dfstp_2": 101,
+            "sky130_fd_sc_hd__dfxtp_2": 6298,
+            "sky130_sram_2kbyte_1rw1r_32x512_8": 23
+         }
+      }
+   },
+      "design": {
+         "num_wires":         85424,
+         "num_wire_bits":     103070,
+         "num_pub_wires":     1000,
+         "num_pub_wire_bits": 18102,
+         "num_ports":         25,
+         "num_port_bits":     79,
+         "num_memories":      0,
+         "num_memory_bits":   0,
+         "num_processes":     0,
+         "num_cells":         98135,
+         "num_submodules":       0,
+         "area":              289273.686400,
+         "sequential_area":    289273.686400,
+         "num_cells_by_type": {
+            "$_ANDNOT_": 21379,
+            "$_AND_": 3172,
+            "$_MUX_": 27797,
+            "$_NAND_": 2095,
+            "$_NOR_": 4053,
+            "$_NOT_": 2431,
+            "$_ORNOT_": 2588,
+            "$_OR_": 10931,
+            "$_XNOR_": 3565,
+            "$_XOR_": 7892,
+            "sky130_fd_sc_hd__dfrtp_2": 5810,
+            "sky130_fd_sc_hd__dfstp_2": 101,
+            "sky130_fd_sc_hd__dfxtp_2": 6298,
+            "sky130_sram_2kbyte_1rw1r_32x512_8": 23
+         }
+      }
+}
+

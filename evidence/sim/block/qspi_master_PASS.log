@@ -1,0 +1,41 @@
+#-----------------------------------------------------------
+# xsim v2025.2 (64-bit)
+# SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+# IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+# SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+# Start of session at: Tue Aug 18 19:29:36 2026
+# Process ID         : 26348
+# Current directory  : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb
+# Command line       : xsim.exe -log q_sim.log -mode tcl -source {xsim.dir/q_snap/xsim_script.tcl}
+# Log file           : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb/q_sim.log
+# Journal file       : C:/Users/ybari/AppData/Local/Temp/claude/c--Users-ybari-OneDrive-Desktop-arkhe2/c8134663-b950-49e1-a586-14e59fbb3127/scratchpad/blocktb\xsim.jou
+# Running On         : baris
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 26200
+# Processor Detail   : AMD Ryzen 5 6600H with Radeon Graphics         
+# CPU Frequency      : 3294 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 16310 MB
+# Swap memory        : 16106 MB
+# Total Virtual      : 32416 MB
+# Available Virtual  : 11094 MB
+#-----------------------------------------------------------
+source xsim.dir/q_snap/xsim_script.tcl
+# xsim {q_snap} -autoloadwcfg -tclbatch {run.tcl}
+Time resolution is 1 ps
+source run.tcl
+## run all
+[SPI_FLASH] 32 bayt yuklendi: qspi_test_pattern.hex
+================================================================
+ QSPI MASTER BLOK TESTI - OKUMA (CMD 0x03) YOLU
+================================================================
+      [OK]   QSPI_STA done biti = 0x00000001
+      [OK]   Flash kelime 0 = 0xa5a50000
+      [OK]   Flash kelime 1 = 0xa5a50001
+================================================================
+ QSPI TESTI GECTI - 3 denetim, 0 hata
+================================================================
+$finish called at time : 19990 ns : File "C:/Users/ybari/2026_Arkhe/rtl/Cevre_Birimleri/tb_qspi_mock.sv" Line 195
+## quit
+INFO: [Common 17-206] Exiting xsim at Tue Aug 18 19:29:38 2026...

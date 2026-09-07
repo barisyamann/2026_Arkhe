@@ -1,0 +1,329 @@
+Reading timing models for corner max_tt_025C_1v80…
+Reading timing library for the 'max_tt_025C_1v80' corner at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib'…
+Reading timing library for the 'max_tt_025C_1v80' corner at 'macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib'…
+Reading timing models for corner min_ss_100C_1v60…
+Reading timing library for the 'min_ss_100C_1v60' corner at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib'…
+Reading timing library for the 'min_ss_100C_1v60' corner at 'macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib'…
+[WARNING STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+Reading timing models for corner nom_tt_025C_1v80…
+Reading timing library for the 'nom_tt_025C_1v80' corner at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib'…
+[WARNING STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib line 1, library sky130_fd_sc_hd__tt_025C_1v80 already exists.
+Reading timing library for the 'nom_tt_025C_1v80' corner at 'macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib'…
+[WARNING STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+Reading timing models for corner max_ff_n40C_1v95…
+Reading timing library for the 'max_ff_n40C_1v95' corner at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib'…
+Reading timing library for the 'max_ff_n40C_1v95' corner at 'macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib'…
+[WARNING STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+Reading timing models for corner nom_ff_n40C_1v95…
+Reading timing library for the 'nom_ff_n40C_1v95' corner at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib'…
+[WARNING STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib line 1, library sky130_fd_sc_hd__ff_n40C_1v95 already exists.
+Reading timing library for the 'nom_ff_n40C_1v95' corner at 'macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib'…
+[WARNING STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+Reading timing models for corner max_ss_100C_1v60…
+Reading timing library for the 'max_ss_100C_1v60' corner at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib'…
+[WARNING STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib line 1, library sky130_fd_sc_hd__ss_100C_1v60 already exists.
+Reading timing library for the 'max_ss_100C_1v60' corner at 'macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib'…
+[WARNING STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+Reading timing models for corner min_tt_025C_1v80…
+Reading timing library for the 'min_tt_025C_1v80' corner at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib'…
+[WARNING STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib line 1, library sky130_fd_sc_hd__tt_025C_1v80 already exists.
+Reading timing library for the 'min_tt_025C_1v80' corner at 'macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib'…
+[WARNING STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+Reading timing models for corner nom_ss_100C_1v60…
+Reading timing library for the 'nom_ss_100C_1v60' corner at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib'…
+[WARNING STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_100C_1v60.lib line 1, library sky130_fd_sc_hd__ss_100C_1v60 already exists.
+Reading timing library for the 'nom_ss_100C_1v60' corner at 'macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib'…
+[WARNING STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+Reading timing models for corner min_ff_n40C_1v95…
+Reading timing library for the 'min_ff_n40C_1v95' corner at '/home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib'…
+[WARNING STA-1140] /home/tatua7806/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v95.lib line 1, library sky130_fd_sc_hd__ff_n40C_1v95 already exists.
+Reading timing library for the 'min_ff_n40C_1v95' corner at 'macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib'…
+[WARNING STA-1140] macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib line 1, library sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C_lib already exists.
+Reading OpenROAD database at '/home/tatua7806/arkhe/asic/run/arkhe/66-openroad-detailedplacement/soc_top.odb'…
+Reading design constraints file at 'constraints/design.sdc'…
+[INFO] No information on clock propagation in input SDC file-- propagating all clocks.
+[INFO] Configuring cts characterization…
++ configure_cts_characterization 
+[INFO] Performing clock tree synthesis…
+[INFO] Looking for the following net(s): clk_i
+[INFO] Running Clock Tree Synthesis…
++ clock_tree_synthesis -buf_list sky130_fd_sc_hd__clkbuf_8 sky130_fd_sc_hd__clkbuf_4 sky130_fd_sc_hd__clkbuf_2 -root_buf sky130_fd_sc_hd__clkbuf_16 -sink_clustering_enable -apply_ndr half
+[INFO CTS-0050] Root buffer is sky130_fd_sc_hd__clkbuf_16.
+[INFO CTS-0051] Sink buffer is sky130_fd_sc_hd__clkbuf_8.
+[INFO CTS-0052] The following clock buffers will be used for CTS:
+                    sky130_fd_sc_hd__clkbuf_2
+                    sky130_fd_sc_hd__clkbuf_4
+                    sky130_fd_sc_hd__clkbuf_8
+[INFO CTS-0049] Characterization buffer is sky130_fd_sc_hd__clkbuf_8.
+[INFO CTS-0007] Net "clk_i" found for clock "clk_i".
+[INFO CTS-0011]  Clock net "clk_i" for macros has 46 sinks.
+[INFO CTS-0011]  Clock net "clk_i_regs" for registers has 12055 sinks.
+[INFO CTS-0007] Net "jtag_tck" found for clock "jtag_clk".
+[INFO CTS-0010]  Clock net "jtag_tck" has 154 sinks.
+[INFO CTS-0008] TritonCTS found 3 clock nets.
+[INFO CTS-0097] Characterization used 3 buffer(s) types.
+[INFO CTS-0201] 23 blockages from hard placement blockages and placed macros will be used.
+[INFO CTS-0027] Generating H-Tree topology for net clk_i.
+[INFO CTS-0028]  Total number of sinks: 46.
+[INFO CTS-0029]  Macro  sinks will be clustered in groups of up to 4 and with maximum cluster diameter of 1366.2 um.
+[INFO CTS-0030]  Number of static layers: 0.
+[INFO CTS-0020]  Wire segment unit: 13600  dbu (13 um).
+[INFO CTS-0204] A clustering solution was found from clustering size of 4 and clustering diameter of 1366.
+[INFO CTS-0205] Better solution may be possible if either -sink_clustering_size, -sink_clustering_max_diameter, or both options are omitted to enable automatic clustering.
+[INFO CTS-0019]  Total number of sinks after clustering: 15.
+[INFO CTS-0024]  Normalized sink region: [(18.0103, 44.1132), (245.273, 252.974)].
+[INFO CTS-0025]     Width:  227.2625.
+[INFO CTS-0026]     Height: 208.8603.
+ Level 1
+    Direction: Horizontal
+    Sinks per sub-region: 8
+    Sub-region size: 113.6312 X 208.8603
+[INFO CTS-0034]     Segment length (rounded): 56.
+[INFO CTS-0032]  Stop criterion found. Max number of sinks is 15.
+[INFO CTS-0035]  Number of sinks covered: 15.
+[INFO CTS-0201] 23 blockages from hard placement blockages and placed macros will be used.
+[INFO CTS-0027] Generating H-Tree topology for net clk_i_regs.
+[INFO CTS-0028]  Total number of sinks: 12055.
+[INFO CTS-0090]  Sinks will be clustered based on buffer max cap.
+[INFO CTS-0030]  Number of static layers: 0.
+[INFO CTS-0020]  Wire segment unit: 13600  dbu (13 um).
+[INFO CTS-0206] Best clustering solution was found from clustering size of 30 and clustering diameter of 50.
+[INFO CTS-0019]  Total number of sinks after clustering: 1209.
+[INFO CTS-0024]  Normalized sink region: [(68.0232, 57.68), (241.59, 311)].
+[INFO CTS-0025]     Width:  173.5672.
+[INFO CTS-0026]     Height: 253.3200.
+ Level 1
+    Direction: Vertical
+    Sinks per sub-region: 605
+    Sub-region size: 173.5672 X 126.6600
+[INFO CTS-0034]     Segment length (rounded): 64.
+ Level 2
+    Direction: Horizontal
+    Sinks per sub-region: 303
+    Sub-region size: 86.7836 X 126.6600
+[INFO CTS-0034]     Segment length (rounded): 44.
+ Level 3
+    Direction: Vertical
+    Sinks per sub-region: 152
+    Sub-region size: 86.7836 X 63.3300
+[INFO CTS-0034]     Segment length (rounded): 32.
+ Level 4
+    Direction: Horizontal
+    Sinks per sub-region: 76
+    Sub-region size: 43.3918 X 63.3300
+[INFO CTS-0034]     Segment length (rounded): 22.
+ Level 5
+    Direction: Vertical
+    Sinks per sub-region: 38
+    Sub-region size: 43.3918 X 31.6650
+[INFO CTS-0034]     Segment length (rounded): 16.
+ Level 6
+    Direction: Horizontal
+    Sinks per sub-region: 19
+    Sub-region size: 21.6959 X 31.6650
+[INFO CTS-0034]     Segment length (rounded): 10.
+ Level 7
+    Direction: Vertical
+    Sinks per sub-region: 10
+    Sub-region size: 21.6959 X 15.8325
+[INFO CTS-0034]     Segment length (rounded): 8.
+[INFO CTS-0032]  Stop criterion found. Max number of sinks is 15.
+[INFO CTS-0035]  Number of sinks covered: 1209.
+[INFO CTS-0201] 23 blockages from hard placement blockages and placed macros will be used.
+[INFO CTS-0027] Generating H-Tree topology for net jtag_tck.
+[INFO CTS-0028]  Total number of sinks: 154.
+[INFO CTS-0090]  Sinks will be clustered based on buffer max cap.
+[INFO CTS-0030]  Number of static layers: 0.
+[INFO CTS-0020]  Wire segment unit: 13600  dbu (13 um).
+[INFO CTS-0023]  Original sink region: [(2003565, 3167380), (2277265, 3284460)].
+[INFO CTS-0024]  Normalized sink region: [(147.321, 232.896), (167.446, 241.504)].
+[INFO CTS-0025]     Width:  20.1250.
+[INFO CTS-0026]     Height: 8.6088.
+ Level 1
+    Direction: Horizontal
+    Sinks per sub-region: 77
+    Sub-region size: 10.0625 X 8.6088
+[INFO CTS-0034]     Segment length (rounded): 6.
+ Level 2
+    Direction: Vertical
+    Sinks per sub-region: 39
+    Sub-region size: 10.0625 X 4.3044
+[INFO CTS-0034]     Segment length (rounded): 2.
+ Level 3
+    Direction: Horizontal
+    Sinks per sub-region: 20
+    Sub-region size: 5.0312 X 4.3044
+[INFO CTS-0034]     Segment length (rounded): 2.
+ Level 4
+    Direction: Vertical
+    Sinks per sub-region: 10
+    Sub-region size: 5.0312 X 2.1522
+[INFO CTS-0034]     Segment length (rounded): 1.
+[INFO CTS-0032]  Stop criterion found. Max number of sinks is 15.
+[INFO CTS-0035]  Number of sinks covered: 154.
+[INFO CTS-0018]     Created 18 clock buffers.
+[INFO CTS-0012]     Minimum number of buffers in the clock path: 3.
+[INFO CTS-0013]     Maximum number of buffers in the clock path: 3.
+[INFO CTS-0015]     Created 18 clock nets.
+[INFO CTS-0016]     Fanout distribution for the current clock = 2:2, 3:10, 4:3, 7:1, 8:1..
+[INFO CTS-0017]     Max level of the clock tree: 1.
+[INFO CTS-0018]     Created 1431 clock buffers.
+[INFO CTS-0012]     Minimum number of buffers in the clock path: 8.
+[INFO CTS-0013]     Maximum number of buffers in the clock path: 9.
+[INFO CTS-0015]     Created 1431 clock nets.
+[INFO CTS-0016]     Fanout distribution for the current clock = 2:4, 3:9, 4:16, 5:21, 6:40, 7:64, 8:106, 9:166, 10:306, 11:367, 12:172, 13:45, 14:5, 15:4, 16:4, 17:3, 18:2..
+[INFO CTS-0017]     Max level of the clock tree: 7.
+[INFO CTS-0018]     Created 17 clock buffers.
+[INFO CTS-0012]     Minimum number of buffers in the clock path: 2.
+[INFO CTS-0013]     Maximum number of buffers in the clock path: 2.
+[INFO CTS-0015]     Created 17 clock nets.
+[INFO CTS-0016]     Fanout distribution for the current clock = 5:1, 7:3, 8:2, 9:2, 11:3, 12:4, 13:1..
+[INFO CTS-0017]     Max level of the clock tree: 4.
+[INFO CTS-0098] Clock net "clk_i"
+[INFO CTS-0099]  Sinks 46
+[INFO CTS-0100]  Leaf buffers 15
+[INFO CTS-0101]  Average sink wire length 6170.03 um
+[INFO CTS-0102]  Path depth 3 - 3
+[INFO CTS-0207]  Dummy loads inserted 13
+[INFO CTS-0098] Clock net "clk_i_regs"
+[INFO CTS-0099]  Sinks 13087
+[INFO CTS-0100]  Leaf buffers 1206
+[INFO CTS-0101]  Average sink wire length 2454.50 um
+[INFO CTS-0102]  Path depth 8 - 9
+[INFO CTS-0207]  Dummy loads inserted 1032
+[INFO CTS-0098] Clock net "jtag_tck"
+[INFO CTS-0099]  Sinks 169
+[INFO CTS-0100]  Leaf buffers 0
+[INFO CTS-0101]  Average sink wire length 1187.48 um
+[INFO CTS-0102]  Path depth 2 - 2
+[INFO CTS-0207]  Dummy loads inserted 15
+[INFO CTS-0033] Balancing latency for clock clk_i
+[INFO CTS-0036]  inserted 0 delay buffers
+[INFO] Repairing long wires on clock nets…
+[INFO RSZ-0058] Using max wire length 6884um.
+Setting global connections for newly added cells…
+[INFO] Setting global connections...
+.*u_macro matched with u_data_ram.g_sram\[0\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[1\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[2\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[3\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[0\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[1\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[2\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[3\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[0\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[10\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[11\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[12\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[13\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[14\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[1\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[2\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[3\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[4\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[5\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[6\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[7\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[8\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[9\].u_macro
+[INFO ODB-0403] 10108 connections made, 0 conflicts skipped.
+Updating metrics…
+Cell type report:                       Count       Area
+  Macro                                    23 6544384.90
+  Fill cell                             11220   42115.39
+  Tap cell                             113470  141973.66
+  Buffer                                    2      10.01
+  Clock buffer                           2146   28773.85
+  Timing Repair Buffer                   6236   69047.47
+  Inverter                               1200    4610.67
+  Clock inverter                          381    4668.23
+  Sequential cell                       12209  289505.16
+  Multi-Input combinational cell        56145  566688.50
+  Total                                203032 7691777.84
+Writing OpenROAD database to '/home/tatua7806/arkhe/asic/run/arkhe/67-openroad-cts/soc_top.odb'…
+Writing netlist to '/home/tatua7806/arkhe/asic/run/arkhe/67-openroad-cts/soc_top.nl.v'…
+Writing powered netlist to '/home/tatua7806/arkhe/asic/run/arkhe/67-openroad-cts/soc_top.pnl.v'…
+Writing layout to '/home/tatua7806/arkhe/asic/run/arkhe/67-openroad-cts/soc_top.def'…
+Writing timing constraints to '/home/tatua7806/arkhe/asic/run/arkhe/67-openroad-cts/soc_top.sdc'…
+[INFO] Legalizing…
++ detailed_placement -max_displacement  500 100 
+Placement Analysis
+---------------------------------
+total displacement      17080.1 u
+average displacement        0.1 u
+max displacement           49.0 u
+original HPWL         5657007.3 u
+legalized HPWL        5718539.6 u
+delta HPWL                    1 %
+
+[INFO DPL-0020] Mirrored 24623 instances
+[INFO DPL-0021] HPWL before          5718539.6 u
+[INFO DPL-0022] HPWL after           5661876.3 u
+[INFO DPL-0023] HPWL delta               -1.0 %
+Setting global connections for newly added cells…
+[INFO] Setting global connections...
+.*u_macro matched with u_data_ram.g_sram\[0\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[1\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[2\].u_macro
+.*u_macro matched with u_data_ram.g_sram\[3\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[0\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[1\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[2\].u_macro
+.*u_macro matched with u_instruction_ram.g_sram\[3\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[0\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[10\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[11\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[12\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[13\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[14\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[1\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[2\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[3\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[4\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[5\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[6\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[7\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[8\].u_macro
+.*u_macro matched with u_npu.u_npu_sram.g_sram\[9\].u_macro
+[INFO ODB-0403] 0 connections made, 0 conflicts skipped.
+Updating metrics…
+Cell type report:                       Count       Area
+  Macro                                    23 6544384.90
+  Fill cell                             11220   42115.39
+  Tap cell                             113470  141973.66
+  Buffer                                    2      10.01
+  Clock buffer                           2146   28773.85
+  Timing Repair Buffer                   6236   69047.47
+  Inverter                               1200    4610.67
+  Clock inverter                          381    4668.23
+  Sequential cell                       12209  289505.16
+  Multi-Input combinational cell        56145  566688.50
+  Total                                203032 7691777.84
+Writing OpenROAD database to '/home/tatua7806/arkhe/asic/run/arkhe/67-openroad-cts/soc_top.odb'…
+Writing netlist to '/home/tatua7806/arkhe/asic/run/arkhe/67-openroad-cts/soc_top.nl.v'…
+Writing powered netlist to '/home/tatua7806/arkhe/asic/run/arkhe/67-openroad-cts/soc_top.pnl.v'…
+Writing layout to '/home/tatua7806/arkhe/asic/run/arkhe/67-openroad-cts/soc_top.def'…
+Writing timing constraints to '/home/tatua7806/arkhe/asic/run/arkhe/67-openroad-cts/soc_top.sdc'…
+%OL_CREATE_REPORT cts.rpt
+Total number of Clock Roots: 3.
+Total number of Buffers Inserted: 1466.
+Total number of Clock Subnets: 1466.
+Total number of Sinks: 12255.
+Cells used:
+  sky130_fd_sc_hd__clkbuf_8: 1335
+  sky130_fd_sc_hd__clkbuf_16: 132
+Dummys used:
+  sky130_fd_sc_hd__bufinv_16: 95
+  sky130_fd_sc_hd__clkbuf_2: 1
+  sky130_fd_sc_hd__clkbuf_4: 358
+  sky130_fd_sc_hd__clkbuf_8: 320
+  sky130_fd_sc_hd__clkinv_1: 2
+  sky130_fd_sc_hd__clkinv_2: 172
+  sky130_fd_sc_hd__clkinv_4: 24
+  sky130_fd_sc_hd__clkinv_8: 2
+  sky130_fd_sc_hd__clkinvlp_4: 31
+  sky130_fd_sc_hd__inv_4: 16
+  sky130_fd_sc_hd__inv_6: 29
+  sky130_fd_sc_hd__inv_8: 9
+  sky130_fd_sc_hd__inv_12: 1
+%OL_END_REPORT

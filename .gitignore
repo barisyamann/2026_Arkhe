@@ -1,0 +1,60 @@
+# Vivado/ISE/EDK/SDx/Petalinux/HLS generated paths
+# Standard Vivado gitignore template
+
+# Vivado project work directories
+*.runs/
+*.cache/
+*.hw/
+*.ip_user_files/
+*.sim/
+
+# Vivado log/jou files
+*.log
+*.jou
+*.pb
+*.rpt
+*.dcp
+*.str
+
+# Vivado simulation/compilation folders
+.Xil/
+xsim.dir/
+work/
+msim/
+covhtmlreport/
+
+# SDK/Vitis workspace directories
+.metadata/
+.sdk/
+webtalk/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.xpr
+!tb/FPGA_Reports/*.rpt
+!asic/reports/**/*.rpt
+!asic/reports/**/*.log
+
+# Kanit paketi: log ve rapor dosyalari surum kontrolunde tutulur
+!evidence/
+!evidence/**
+
+# LibreLane kosum ciktilari (yuzlerce MB ara dosya)
+asic/*/runs/
+
+# Regresyon calisma dizini (her kosumda yeniden uretilir)
+build/regression/
+
+# ASIC akisi gecici calisma alani (yeniden uretilir)
+asic/run/
+__pycache__/
+*.pyc
+
+# Tum gecici derleme/simulasyon calisma dizinleri
+build/
+
+# Tam SoC kapsama raporu - 41 MB, cogu CV32E40P kaynak dokumu ve her
+# kosumda tumuyle yeniden uretiliyor. Sayilari evidence/KAPSAMA_RAPORU.md
+# icinde; yeniden uretmek icin: python scripts/run_regression.py --coverage
+evidence/coverage_sistem/

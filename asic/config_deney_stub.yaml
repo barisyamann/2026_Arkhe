@@ -1,0 +1,367 @@
+# =============================================================================
+#  config.yaml - LibreLane Classic akisi ana yapilandirmasi
+#  TEKNOFEST 2026 - Takim Arkhe / Arkhe SoC
+# =============================================================================
+
+DESIGN_NAME: soc_top
+
+# -----------------------------------------------------------------------------
+# RTL kaynaklari
+#
+# LibreLane dosya-listesi dosyasini dogrudan kabul etmiyor; yalnizca
+# VERILOG_FILES adinda bir liste bekliyor. TEK DOGRULUK KAYNAGI filelist.f'tir;
+# asagidaki blok ondan URETILIR:
+#
+#     make sources     bloku yeniden uret
+#     make check       filelist.f ile tutarliligi denetle
+#
+# Sartname bu donusumu ongoruyor: "Gerekli donusum veya yapilandirma
+# islemleri asic/Makefile ya da asic/scripts/ altindaki betiklerle
+# yapilmalidir."
+# -----------------------------------------------------------------------------
+
+# SystemVerilog paket import'lari modul basliklarinda kullanildigi icin
+# Yosys'in varsayilan on-isleyicisi yetersiz kaliyor; slang gerekiyor.
+#   (ornek: module uart_stream_peripheral import uart_pkg::*; #(...))
+USE_SLANG: true
+
+VERILOG_INCLUDE_DIRS:
+  - ../rtl/cv32e40p-master/rtl/include
+  - ../rtl/Memory
+  - ../rtl/Cevre_Birimleri/files_1
+
+# -----------------------------------------------------------------------------
+# Saat
+# -----------------------------------------------------------------------------
+CLOCK_PORT: clk_i
+CLOCK_NET: clk_i
+CLOCK_PERIOD: 20.0          # 50 MHz - FPGA ile ayni hedef
+
+# -----------------------------------------------------------------------------
+# Kisitlar
+# -----------------------------------------------------------------------------
+PNR_SDC_FILE: constraints/design.sdc
+SIGNOFF_SDC_FILE: constraints/design.sdc
+
+# -----------------------------------------------------------------------------
+# SRAM MAKROLARI
+#
+# Makro : sky130_sram_2kbyte_1rw1r_32x512_8
+#         512 kelime x 32 bit = 2 kB, bayt granuler yazma maskesi
+#         Port 0 (RW) + Port 1 (R)  -> tasarimin port yapisiyla birebir
+#         Fiziksel boyut: 683,1 x 416,54 um  = 0,285 mm2
+#
+# Kullanim (23 ornekleme):
+#     u_soc/u_npu/u_npu_sram   NPU TCM   30 kB  -> 15 makro
+#     u_soc/u_iram             I-RAM      8 kB  ->  4 makro
+#     u_soc/u_dram             D-RAM      8 kB  ->  4 makro
+#
+# USE_SRAM_MACRO tanimi RTL'deki kosullu yolu acar; tanimsizken cikarimsal
+# dizi kullanilir (FPGA Block RAM cikarimi icin).
+#
+# Sartname: makro sentezde optimize edilip KALDIRILMAMALI, nihai netlist,
+# DEF ve GDSII ciktilarinda bulunmalidir.
+# -----------------------------------------------------------------------------
+VERILOG_DEFINES:
+  - USE_SRAM_MACRO
+  - NPU_WEIGHTS_STUB   # DENEY - teslim yapilandirmasi DEGIL
+
+# Makronun Verilog modeli - lint ve sentez icin KARA KUTU tanimi.
+#
+# MACROS yapisi fiziksel gorunumleri (gds/lef/lib/spice) ve yerlesimi
+# tasir ama Verilog modelini VERMEZ. MACROS'a gecerken bu satiri
+# kaldirmistim ve Verilator modulu bulamadi:
+#   %Error-MODMISSING: Cannot find file containing module:
+#                      'sky130_sram_2kbyte_1rw1r_32x512_8'
+#
+# Ikisi birlikte gerekiyor: MACROS -> nereye konacak,
+#                           EXTRA_VERILOG_MODELS -> arayuzu ne.
+EXTRA_VERILOG_MODELS:
+  - macros/sky130_sram_2kbyte_1rw1r_32x512_8/verilog/sky130_sram_2kbyte_1rw1r_32x512_8.v
+
+
+# -----------------------------------------------------------------------------
+# MAKRO TANIMLARI VE YERLESIMI
+#
+# EXTRA_LEFS/EXTRA_GDS makronun GORUNUMLERINI verir ama NEREYE konacagini
+# soylemez. Ilk denemede akis PDN adiminda durdu:
+#     [PDN-0235] Design has unplaced macros.
+#
+# MACROS yapisi hem gorunumleri hem her instance'in konumunu tasir.
+#
+# YERLESIM PLANI  -  4 sutun x 6 satir izgara
+#   makro       : 683.1 x 416.5 um
+#   kanal       : 200 um  (makrolar arasi yonlendirme icin)
+#   kenar payi  : 250 um
+#   die         : 3832.4 x 3999.2 um = 15.33 mm2
+#   makro doluluk: %42.7
+#
+# Sira: once 15 TCM makrosu, sonra 4 I-RAM, sonra 4 D-RAM. Ayni bellege
+# ait makrolar bitisik kalsin diye satir-oncelikli dizildi; boylece adres
+# kod cozucu ve okuma coklayicisi kisa tellerle baglanir.
+# -----------------------------------------------------------------------------
+MACROS:
+  sky130_sram_2kbyte_1rw1r_32x512_8:
+    gds:
+      - macros/sky130_sram_2kbyte_1rw1r_32x512_8/gds/sky130_sram_2kbyte_1rw1r_32x512_8.gds
+    lef:
+      - macros/sky130_sram_2kbyte_1rw1r_32x512_8/lef/sky130_sram_2kbyte_1rw1r_32x512_8.lef
+    lib:
+      # NOT: kose anahtarinin degeri LISTE olmali, tek dize degil:
+      #   "Refusing to automatically convert string at ...lib.* to list"
+      # "*" tum zamanlama koselerini kapsar. Makronun yalnizca TT modeli
+      # oldugu icin uc kosede de ayni dosya okunur (bkz. THIRD_PARTY.md).
+      "*":
+        - macros/sky130_sram_2kbyte_1rw1r_32x512_8/lib/sky130_sram_2kbyte_1rw1r_32x512_8_TT_1p8V_25C.lib
+    spice:
+      - macros/sky130_sram_2kbyte_1rw1r_32x512_8/spice/sky130_sram_2kbyte_1rw1r_32x512_8.spice
+    instances:
+      'u_npu.u_npu_sram.g_sram[0].u_macro':
+        location: [250.00, 250.00]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[1].u_macro':
+        location: [1133.10, 250.00]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[2].u_macro':
+        location: [2016.20, 250.00]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[3].u_macro':
+        location: [2899.30, 250.00]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[4].u_macro':
+        location: [250.00, 866.54]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[5].u_macro':
+        location: [1133.10, 866.54]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[6].u_macro':
+        location: [2016.20, 866.54]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[7].u_macro':
+        location: [2899.30, 866.54]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[8].u_macro':
+        location: [250.00, 1483.08]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[9].u_macro':
+        location: [1133.10, 1483.08]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[10].u_macro':
+        location: [2016.20, 1483.08]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[11].u_macro':
+        location: [2899.30, 1483.08]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[12].u_macro':
+        location: [250.00, 2099.62]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[13].u_macro':
+        location: [1133.10, 2099.62]
+        orientation: N
+      'u_npu.u_npu_sram.g_sram[14].u_macro':
+        location: [2016.20, 2099.62]
+        orientation: N
+      'u_instruction_ram.g_sram[0].u_macro':
+        location: [2899.30, 2099.62]
+        orientation: N
+      'u_instruction_ram.g_sram[1].u_macro':
+        location: [250.00, 2716.16]
+        orientation: N
+      'u_instruction_ram.g_sram[2].u_macro':
+        location: [1133.10, 2716.16]
+        orientation: N
+      'u_instruction_ram.g_sram[3].u_macro':
+        location: [2016.20, 2716.16]
+        orientation: N
+      'u_data_ram.g_sram[0].u_macro':
+        location: [2899.30, 2716.16]
+        orientation: N
+      'u_data_ram.g_sram[1].u_macro':
+        location: [250.00, 3332.70]
+        orientation: N
+      'u_data_ram.g_sram[2].u_macro':
+        location: [1133.10, 3332.70]
+        orientation: N
+      'u_data_ram.g_sram[3].u_macro':
+        location: [2016.20, 3332.70]
+        orientation: N
+
+# -----------------------------------------------------------------------------
+# Floorplan
+#
+# DIE_AREA makro izgarasindan HESAPLANDI (yukaridaki yerlesim planina bakin).
+# Otomatik boyutlandirma (FP_SIZING: relative) makrolarin sigacagi alani
+# garanti etmiyor; acik deger veriyoruz.
+# -----------------------------------------------------------------------------
+FP_SIZING: absolute
+DIE_AREA: [0, 0, 3832.40, 4249.24]
+
+# -----------------------------------------------------------------------------
+# MAKRO GUC BAGLANTISI
+#
+# Ilk kosumda PDN adimi 46 uyari verdi (23 makro x 2 pin):
+#     [PDN-0231] u_data_ram.g_sram[0].u_macro is not connected to any
+#                power/ground nets.
+#     [PDN-0189] Supply pin ...u_macro/vccd1 is not connected to any net.
+#
+# PDN_CONNECT_MACROS_TO_GRID varsayilan olarak true, ama tek basina
+# yetmiyor: OpenROAD makronun HANGI pininin hangi ust seviye aga
+# baglanacagini bilmiyor. Esleme acikca verilmelidir.
+#
+# Bicim:  <ornek_adi_regex> <vdd_agi> <gnd_agi> <vdd_pini> <gnd_pini>
+#
+#   ust seviye aglar : VPWR / VGND   (DEF SPECIALNETS bolumunden okundu)
+#   makro pinleri    : vccd1 / vssd1 (makro LEF'inden)
+#
+# Bu baglanti olmadan makrolarin fiziksel tasarimda GUCU YOKTUR ve LVS
+# gecmez. RTL'de guc pinlerinin bagli olmamasi dogrudur (sabite baglamak
+# elektriksel kisa devre olurdu); baglanti tam da burada yapilir.
+# -----------------------------------------------------------------------------
+PDN_CONNECT_MACROS_TO_GRID: true
+PDN_MACRO_CONNECTIONS:
+  - ".*u_macro VPWR VGND vccd1 vssd1"
+
+# -----------------------------------------------------------------------------
+# MAKRO HALO (kenar bosluk payi)
+#
+# Ilk kosumda detayli yonlendirme SU HATAYLA durdu:
+#     [ERROR DRT-1231] Pin u_data_ram.g_sram[3].u_macro/addr1[7]
+#                      does not have access point
+#
+# Zincir soyle isledi:
+#   1. Ana yonlendirme BASARILI bitti - 63 turda 55.347 -> 23 ihlal.
+#   2. Anten denetimi 282 ag + 343 pin ihlali buldu.
+#   3. Onarim 586 DIYOT ekledi.
+#   4. Diyotlar makro kenarina yerlesince o pinin erisim noktasi kapandi.
+#
+# Varsayilan halo 10 um idi. 25 um'ye cikariliyor: makro kenarinda
+# standart hucre ve diyot yerlesemeyecek bir serit birakilir, yonlendirici
+# pinlere ulasacak yeri korur.
+#
+# Alan maliyeti yok: kanallar 200 um, halo her iki yandan 25 um alsa bile
+# ortada 150 um kullanilabilir serit kaliyor. Global yonlendirme kullanimi
+# zaten %14,4 idi - yer bol.
+# -----------------------------------------------------------------------------
+FP_MACRO_HORIZONTAL_HALO: 30
+FP_MACRO_VERTICAL_HALO: 30
+PDN_HORIZONTAL_HALO: 30
+PDN_VERTICAL_HALO: 30
+
+# -----------------------------------------------------------------------------
+# Sentez
+# -----------------------------------------------------------------------------
+SYNTH_STRATEGY: "AREA 0"
+
+# -----------------------------------------------------------------------------
+# Lint
+#
+# Sartname reports/lint/ altinda Verilator lint ciktisi istiyor.
+# -----------------------------------------------------------------------------
+RUN_LINTER: true
+LINTER_RELATIVE_INCLUDES: true
+
+# -----------------------------------------------------------------------------
+# PDK
+# -----------------------------------------------------------------------------
+PDK: sky130A
+STD_CELL_LIBRARY: sky130_fd_sc_hd
+
+# >>> URETILEN BLOK - gen_sources.py ile uretilir, ELLE DUZENLEMEYIN >>>
+# Kaynak: filelist.f  (55 dosya)
+VERILOG_FILES:
+  - ../rtl/Cevre_Birimleri/files_1/uart_pkg.sv
+  - ../rtl/boot/boot_rom_pkg.sv
+  - ../rtl/npu/npu_weights_pkg.sv
+  - ../rtl/Memory/memory_map_pck.sv
+  - ../rtl/cv32e40p-master/rtl/include/cv32e40p_apu_core_pkg.sv
+  - ../rtl/cv32e40p-master/rtl/include/cv32e40p_fpu_pkg.sv
+  - ../rtl/cv32e40p-master/rtl/include/cv32e40p_pkg.sv
+  - ../rtl/Cevre_Birimleri/dma_controller.sv
+  - ../rtl/Cevre_Birimleri/files_1/sync_fifo.sv
+  - ../rtl/Cevre_Birimleri/files_1/uart_peripheral.sv
+  - ../rtl/Cevre_Birimleri/files_1/uart_rx.sv
+  - ../rtl/Cevre_Birimleri/files_1/uart_stream_peripheral.sv
+  - ../rtl/Cevre_Birimleri/files_1/uart_tx.sv
+  - ../rtl/Cevre_Birimleri/gpio_peripheral.sv
+  - ../rtl/Cevre_Birimleri/i2c_peripheral.sv
+  - ../rtl/Cevre_Birimleri/jtag_debug.sv
+  - ../rtl/Cevre_Birimleri/qspi_master.sv
+  - ../rtl/Cevre_Birimleri/timer_peripheral.sv
+  - ../rtl/Memory/axi_lite_interconnect.sv
+  - ../rtl/Memory/axil_arbiter_2to1.sv
+  - ../rtl/Memory/axil_arbiter_3to1.sv
+  - ../rtl/Memory/obi_to_axi_simple.sv
+  - ../rtl/Memory/sram_module.sv
+  - ../rtl/boot/boot_rom.sv
+  - ../rtl/cv32e40p-master/bhv/cv32e40p_sim_clock_gate.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_aligner.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_alu.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_alu_div.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_apu_disp.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_compressed_decoder.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_controller.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_core.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_cs_registers.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_fifo.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_hwloop_regs.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_id_stage.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_if_stage.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_int_controller.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_mult.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_obi_interface.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_popcnt.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_prefetch_buffer.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_prefetch_controller.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_register_file_ff.sv
+  - ../rtl/cv32e40p-master/rtl/cv32e40p_sleep_unit.sv
+  - ../rtl/npu/npu_accelerator.sv
+  - ../rtl/npu/npu_axi_controller.sv
+  - ../rtl/npu/npu_compute_engine.sv
+  - ../rtl/npu/npu_csr.sv
+  - ../rtl/npu/npu_tcm_sram.sv
+  - ../rtl/Memory/soc_top.sv
+# <<< URETILEN BLOK SONU <<<
+
+# -----------------------------------------------------------------------------
+# ANTEN ONARIMI - YALNIZCA ATLAMA TELI  (5. kosumda eklendi)
+#
+# 3. kosum su hatayla dustu:
+#     [ERROR DRT-1231] Pin u_data_ram.g_sram[3].u_macro/addr1[7]
+#                      does not have access point
+#
+# Kok neden: anten onarimi 586 diyot ekledi, biri makro kenarina dusup
+# pin erisimini kapatti. 4. kosumda halo 25 um'ye cikarildi; yetmedi.
+#
+# Bu ayar diyot yerlestirmesini tamamen devreden cikarir. Anten ihlalleri
+# metal atlama teliyle giderilir - yeni hucre yerlesmez, yerlesim
+# kalabaligi olusmaz, makro pini kapanamaz.
+#
+# Maliyet yonlendirme kaynagidir. Bizde bol: global yonlendirme kullanimi
+# %14,4, overflow 0.
+# -----------------------------------------------------------------------------
+GRT_ANTENNA_REPAIR_JUMPER_ONLY: true
+
+# -----------------------------------------------------------------------------
+# NOT: MAGIC_MACRO_STD_CELL_SOURCE: PDK DENENDI VE GERI ALINDI
+#
+# Sorun: KLayout.Render "multiple top cells" ile dusuyordu. Magic varsayilan
+# "macro" kipinde makroyu BOS kabuk olarak yaratip icerigi yazma aninda GDS
+# dosyasindan kopyaliyor; alt hucre tanimlari sahipsiz kaliyor ve 12 fazla
+# ust hucre olusuyor.
+#
+# PDK kipi bunu COZDU - render 17 saniyede gecti. Ancak Magic 23 makronun
+# tam GDS hiyerarsisini bellege aliyor:
+#     Magic RSS 10,1 GB · RAM 11 GB'in hepsi dolu · swap 14 GB kullanimda
+# Sistem takasa dustu, Magic.WriteLEF 32 dakikada bitmedi.
+#
+# Bu bir yapilandirma sorunu degil, DONANIM YETERSIZLIGI (makinede 15,2 GB).
+# Varsayilan "macro" kipinde kalindi; KLayout.Render --skip ile atlaniyor.
+#
+# Render'in urettigi goruntu Final Ciktilar Bolum 6.3'te ONERILEN listede,
+# zorunlu degil. Yasak olan (s.7) ZORUNLU adimlarin kapatilmasidir.
+# Gerekce README bolum 9.9'a yazilacak.
+# -----------------------------------------------------------------------------

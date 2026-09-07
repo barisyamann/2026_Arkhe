@@ -1,0 +1,267 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
+| Date         : Sun Aug 16 00:13:01 2026
+| Host         : baris running 64-bit major release  (build 9200)
+| Command      : report_timing -max_paths 1 -nworst 1 -delay_type max -file C:/Users/ybari/2026_Arkhe/evidence/fpga/critical_path_v3.rpt
+| Design       : nexys_top
+| Device       : 7a100t-csg324
+| Speed File   : -1  PRODUCTION 1.23 2018-06-13
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (VIOLATED) :        -5.848ns  (required time - arrival time)
+  Source:                 u_soc/u_npu/u_npu_engine/fc_q_idx_reg[1]/C
+                            (rising edge-triggered cell FDCE clocked by clk_50mhz  {rise@0.000ns fall@10.000ns period=20.000ns})
+  Destination:            u_soc/u_npu/u_npu_engine/fc_logits_reg[3][3]/D
+                            (rising edge-triggered cell FDCE clocked by clk_50mhz  {rise@0.000ns fall@10.000ns period=20.000ns})
+  Path Group:             clk_50mhz
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            20.000ns  (clk_50mhz rise@20.000ns - clk_50mhz rise@0.000ns)
+  Data Path Delay:        25.745ns  (logic 17.953ns (69.735%)  route 7.792ns (30.265%))
+  Logic Levels:           65  (CARRY4=55 DSP48E1=2 LUT2=6 LUT5=1 LUT6=1)
+  Clock Path Skew:        -0.052ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    7.687ns = ( 27.687 - 20.000 ) 
+    Source Clock Delay      (SCD):    8.305ns
+    Clock Pessimism Removal (CPR):    0.565ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_50mhz rise edge)
+                                                      0.000     0.000 r  
+    E3                                                0.000     0.000 r  CLK100MHZ (IN)
+                         net (fo=0)                   0.000     0.000    CLK100MHZ
+    E3                   IBUF (Prop_ibuf_I_O)         1.482     1.482 r  CLK100MHZ_IBUF_inst/O
+                         net (fo=1, routed)           2.025     3.506    CLK100MHZ_IBUF
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.096     3.602 r  CLK100MHZ_IBUF_BUFG_inst/O
+                         net (fo=1, routed)           1.625     5.228    CLK100MHZ_IBUF_BUFG
+    SLICE_X52Y96         FDRE (Prop_fdre_C_Q)         0.456     5.684 r  clk_50mhz_reg_reg/Q
+                         net (fo=2, routed)           0.736     6.419    clk_50mhz_reg
+    BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.096     6.515 r  bufg_clk/O
+                         net (fo=5228, routed)        1.789     8.305    u_soc/u_npu/u_npu_engine/clk_50mhz
+    SLICE_X61Y19         FDCE                                         r  u_soc/u_npu/u_npu_engine/fc_q_idx_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X61Y19         FDCE (Prop_fdce_C_Q)         0.419     8.724 r  u_soc/u_npu/u_npu_engine/fc_q_idx_reg[1]/Q
+                         net (fo=36, routed)          1.028     9.752    u_soc/u_npu/u_npu_engine/fc_q_idx[1]
+    SLICE_X53Y17         LUT6 (Prop_lut6_I4_O)        0.299    10.051 r  u_soc/u_npu/u_npu_engine/p_1_out__1_i_6/O
+                         net (fo=1, routed)           0.527    10.577    u_soc/u_npu/u_npu_engine/x[11]
+    DSP48_X1Y6           DSP48E1 (Prop_dsp48e1_A[11]_PCOUT[47])
+                                                      4.036    14.613 r  u_soc/u_npu/u_npu_engine/p_1_out__1/PCOUT[47]
+                         net (fo=1, routed)           0.002    14.615    u_soc/u_npu/u_npu_engine/p_1_out__1_n_106
+    DSP48_X1Y7           DSP48E1 (Prop_dsp48e1_PCIN[47]_P[0])
+                                                      1.518    16.133 r  u_soc/u_npu/u_npu_engine/p_1_out__2/P[0]
+                         net (fo=2, routed)           0.988    17.121    u_soc/u_npu/u_npu_engine/p_1_out__2_n_105
+    SLICE_X56Y8          LUT2 (Prop_lut2_I0_O)        0.124    17.245 r  u_soc/u_npu/u_npu_engine/i___347_i_29/O
+                         net (fo=1, routed)           0.000    17.245    u_soc/u_npu/u_npu_engine/i___347_i_29_n_0
+    SLICE_X56Y8          CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.533    17.778 r  u_soc/u_npu/u_npu_engine/i___347_i_22/CO[3]
+                         net (fo=1, routed)           0.000    17.778    u_soc/u_npu/u_npu_engine/i___347_i_22_n_0
+    SLICE_X56Y9          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117    17.895 r  u_soc/u_npu/u_npu_engine/i___347_i_17/CO[3]
+                         net (fo=1, routed)           0.000    17.895    u_soc/u_npu/u_npu_engine/i___347_i_17_n_0
+    SLICE_X56Y10         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117    18.012 r  u_soc/u_npu/u_npu_engine/i___347_i_12/CO[3]
+                         net (fo=1, routed)           0.000    18.012    u_soc/u_npu/u_npu_engine/i___347_i_12_n_0
+    SLICE_X56Y11         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117    18.129 r  u_soc/u_npu/u_npu_engine/i___347_i_7/CO[3]
+                         net (fo=1, routed)           0.000    18.129    u_soc/u_npu/u_npu_engine/i___347_i_7_n_0
+    SLICE_X56Y12         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117    18.246 r  u_soc/u_npu/u_npu_engine/i___347_i_2/CO[3]
+                         net (fo=1, routed)           0.000    18.246    u_soc/u_npu/u_npu_engine/i___347_i_2_n_0
+    SLICE_X56Y13         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117    18.363 r  u_soc/u_npu/u_npu_engine/i___351_i_1/CO[3]
+                         net (fo=1, routed)           0.000    18.363    u_soc/u_npu/u_npu_engine/i___351_i_1_n_0
+    SLICE_X56Y14         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117    18.480 r  u_soc/u_npu/u_npu_engine/i___355_i_1/CO[3]
+                         net (fo=1, routed)           0.000    18.480    u_soc/u_npu/u_npu_engine/i___355_i_1_n_0
+    SLICE_X56Y15         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117    18.597 r  u_soc/u_npu/u_npu_engine/i___359_i_1/CO[3]
+                         net (fo=1, routed)           0.000    18.597    u_soc/u_npu/u_npu_engine/i___359_i_1_n_0
+    SLICE_X56Y16         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117    18.714 r  u_soc/u_npu/u_npu_engine/i___363_i_1/CO[3]
+                         net (fo=1, routed)           0.000    18.714    u_soc/u_npu/u_npu_engine/i___363_i_1_n_0
+    SLICE_X56Y17         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117    18.831 r  u_soc/u_npu/u_npu_engine/i___367_i_1/CO[3]
+                         net (fo=1, routed)           0.000    18.831    u_soc/u_npu/u_npu_engine/i___367_i_1_n_0
+    SLICE_X56Y18         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117    18.948 r  u_soc/u_npu/u_npu_engine/i___371_i_1/CO[3]
+                         net (fo=1, routed)           0.000    18.948    u_soc/u_npu/u_npu_engine/i___371_i_1_n_0
+    SLICE_X56Y19         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.315    19.263 r  u_soc/u_npu/u_npu_engine/i___347_i_1/O[3]
+                         net (fo=6, routed)           0.916    20.179    u_soc/u_npu/u_npu_engine/p_1_out__2_7[3]
+    SLICE_X57Y4          LUT2 (Prop_lut2_I1_O)        0.307    20.486 r  u_soc/u_npu/u_npu_engine/i___379_i_2/O
+                         net (fo=1, routed)           0.000    20.486    u_soc/u_npu/u_npu_engine/i___379_i_2_n_0
+    SLICE_X57Y4          CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.532    21.018 r  u_soc/u_npu/u_npu_engine/i___379_i_1/CO[3]
+                         net (fo=1, routed)           0.000    21.018    u_soc/u_npu/u_npu_engine/i___379_i_1_n_0
+    SLICE_X57Y5          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    21.132 r  u_soc/u_npu/u_npu_engine/i___378_i_11/CO[3]
+                         net (fo=1, routed)           0.000    21.132    u_soc/u_npu/u_npu_engine/i___378_i_11_n_0
+    SLICE_X57Y6          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    21.246 r  u_soc/u_npu/u_npu_engine/i___378_i_10/CO[3]
+                         net (fo=1, routed)           0.000    21.246    u_soc/u_npu/u_npu_engine/i___378_i_10_n_0
+    SLICE_X57Y7          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    21.360 r  u_soc/u_npu/u_npu_engine/i___378_i_9/CO[3]
+                         net (fo=1, routed)           0.000    21.360    u_soc/u_npu/u_npu_engine/i___378_i_9_n_0
+    SLICE_X57Y8          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    21.474 r  u_soc/u_npu/u_npu_engine/i___378_i_8/CO[3]
+                         net (fo=1, routed)           0.000    21.474    u_soc/u_npu/u_npu_engine/i___378_i_8_n_0
+    SLICE_X57Y9          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    21.588 r  u_soc/u_npu/u_npu_engine/i___378_i_7/CO[3]
+                         net (fo=1, routed)           0.000    21.588    u_soc/u_npu/u_npu_engine/i___378_i_7_n_0
+    SLICE_X57Y10         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    21.702 r  u_soc/u_npu/u_npu_engine/i___378_i_4/CO[3]
+                         net (fo=1, routed)           0.000    21.702    u_soc/u_npu/u_npu_engine/i___378_i_4_n_0
+    SLICE_X57Y11         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    21.816 r  u_soc/u_npu/u_npu_engine/i___378_i_2/CO[3]
+                         net (fo=1, routed)           0.000    21.816    u_soc/u_npu/u_npu_engine/i___378_i_2_n_0
+    SLICE_X57Y12         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    21.930 r  u_soc/u_npu/u_npu_engine/i___380_i_1/CO[3]
+                         net (fo=1, routed)           0.000    21.930    u_soc/u_npu/u_npu_engine/i___380_i_1_n_0
+    SLICE_X57Y13         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    22.044 r  u_soc/u_npu/u_npu_engine/i___384_i_1/CO[3]
+                         net (fo=1, routed)           0.000    22.044    u_soc/u_npu/u_npu_engine/i___384_i_1_n_0
+    SLICE_X57Y14         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    22.158 r  u_soc/u_npu/u_npu_engine/i___388_i_1/CO[3]
+                         net (fo=1, routed)           0.000    22.158    u_soc/u_npu/u_npu_engine/i___388_i_1_n_0
+    SLICE_X57Y15         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    22.272 r  u_soc/u_npu/u_npu_engine/i___392_i_1/CO[3]
+                         net (fo=1, routed)           0.000    22.272    u_soc/u_npu/u_npu_engine/i___392_i_1_n_0
+    SLICE_X57Y16         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    22.386 r  u_soc/u_npu/u_npu_engine/i___396_i_1/CO[3]
+                         net (fo=1, routed)           0.000    22.386    u_soc/u_npu/u_npu_engine/i___396_i_1_n_0
+    SLICE_X57Y17         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    22.500 r  u_soc/u_npu/u_npu_engine/i___400_i_1/CO[3]
+                         net (fo=1, routed)           0.000    22.500    u_soc/u_npu/u_npu_engine/i___400_i_1_n_0
+    SLICE_X57Y18         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    22.614 r  u_soc/u_npu/u_npu_engine/i___404_i_1/CO[3]
+                         net (fo=1, routed)           0.000    22.614    u_soc/u_npu/u_npu_engine/i___404_i_1_n_0
+    SLICE_X57Y19         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.313    22.927 r  u_soc/u_npu/u_npu_engine/i___378_i_1/O[3]
+                         net (fo=4, routed)           1.045    23.972    u_soc/u_npu/u_npu_engine_n_343
+    SLICE_X55Y4          LUT2 (Prop_lut2_I1_O)        0.306    24.278 r  u_soc/u_npu/i___379/O
+                         net (fo=1, routed)           0.000    24.278    u_soc/u_npu/u_npu_engine/i___421_i_26_0[0]
+    SLICE_X55Y4          CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.532    24.810 r  u_soc/u_npu/u_npu_engine/i___421_i_31/CO[3]
+                         net (fo=1, routed)           0.000    24.810    u_soc/u_npu/u_npu_engine/i___421_i_31_n_0
+    SLICE_X55Y5          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    24.924 r  u_soc/u_npu/u_npu_engine/i___421_i_26/CO[3]
+                         net (fo=1, routed)           0.000    24.924    u_soc/u_npu/u_npu_engine/i___421_i_26_n_0
+    SLICE_X55Y6          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    25.038 r  u_soc/u_npu/u_npu_engine/i___421_i_21/CO[3]
+                         net (fo=1, routed)           0.000    25.038    u_soc/u_npu/u_npu_engine/i___421_i_21_n_0
+    SLICE_X55Y7          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    25.152 r  u_soc/u_npu/u_npu_engine/i___421_i_16/CO[3]
+                         net (fo=1, routed)           0.000    25.152    u_soc/u_npu/u_npu_engine/i___421_i_16_n_0
+    SLICE_X55Y8          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    25.266 r  u_soc/u_npu/u_npu_engine/i___421_i_11/CO[3]
+                         net (fo=1, routed)           0.000    25.266    u_soc/u_npu/u_npu_engine/i___421_i_11_n_0
+    SLICE_X55Y9          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    25.380 r  u_soc/u_npu/u_npu_engine/i___421_i_6/CO[3]
+                         net (fo=1, routed)           0.000    25.380    u_soc/u_npu/u_npu_engine/i___421_i_6_n_0
+    SLICE_X55Y10         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    25.494 r  u_soc/u_npu/u_npu_engine/i___421_i_2/CO[3]
+                         net (fo=1, routed)           0.000    25.494    u_soc/u_npu/u_npu_engine/i___421_i_2_n_0
+    SLICE_X55Y11         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    25.608 r  u_soc/u_npu/u_npu_engine/i___421_i_1/CO[3]
+                         net (fo=1, routed)           0.000    25.608    u_soc/u_npu/u_npu_engine/i___421_i_1_n_0
+    SLICE_X55Y12         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    25.722 r  u_soc/u_npu/u_npu_engine/i___417_i_1/CO[3]
+                         net (fo=1, routed)           0.000    25.722    u_soc/u_npu/u_npu_engine/i___417_i_1_n_0
+    SLICE_X55Y13         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    25.836 r  u_soc/u_npu/u_npu_engine/i___413_i_1/CO[3]
+                         net (fo=1, routed)           0.000    25.836    u_soc/u_npu/u_npu_engine/i___413_i_1_n_0
+    SLICE_X55Y14         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    25.950 r  u_soc/u_npu/u_npu_engine/i___410_i_1/CO[3]
+                         net (fo=1, routed)           0.000    25.950    u_soc/u_npu/u_npu_engine/i___410_i_1_n_0
+    SLICE_X55Y15         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    26.064 r  u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_8/CO[3]
+                         net (fo=1, routed)           0.000    26.064    u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_8_n_0
+    SLICE_X55Y16         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    26.178 r  u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_7/CO[3]
+                         net (fo=1, routed)           0.000    26.178    u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_7_n_0
+    SLICE_X55Y17         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    26.292 r  u_soc/u_npu/u_npu_engine/i___411_i_4/CO[3]
+                         net (fo=1, routed)           0.000    26.292    u_soc/u_npu/u_npu_engine/i___411_i_4_n_0
+    SLICE_X55Y18         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    26.406 r  u_soc/u_npu/u_npu_engine/i___411_i_2/CO[3]
+                         net (fo=1, routed)           0.000    26.406    u_soc/u_npu/u_npu_engine/i___411_i_2_n_0
+    SLICE_X55Y19         CARRY4 (Prop_carry4_CI_O[2])
+                                                      0.239    26.645 r  u_soc/u_npu/u_npu_engine/i___411_i_1/O[2]
+                         net (fo=23, routed)          0.813    27.458    u_soc/u_npu/p_1_in0
+    SLICE_X49Y17         LUT2 (Prop_lut2_I0_O)        0.302    27.760 r  u_soc/u_npu/i___420/O
+                         net (fo=1, routed)           0.000    27.760    u_soc/u_npu/u_npu_engine/i___410_i_3_0[1]
+    SLICE_X49Y17         CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.550    28.310 r  u_soc/u_npu/u_npu_engine/i___410_i_6/CO[3]
+                         net (fo=1, routed)           0.000    28.310    u_soc/u_npu/u_npu_engine/i___410_i_6_n_0
+    SLICE_X49Y18         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    28.424 r  u_soc/u_npu/u_npu_engine/i___410_i_3/CO[3]
+                         net (fo=1, routed)           0.000    28.424    u_soc/u_npu/u_npu_engine/i___410_i_3_n_0
+    SLICE_X49Y19         CARRY4 (Prop_carry4_CI_CO[2])
+                                                      0.228    28.652 r  u_soc/u_npu/u_npu_engine/i___410_i_2/CO[2]
+                         net (fo=1, routed)           0.588    29.240    u_soc/u_npu/u_npu_engine_n_359
+    SLICE_X55Y20         LUT2 (Prop_lut2_I1_O)        0.313    29.553 r  u_soc/u_npu/i___410/O
+                         net (fo=1, routed)           0.000    29.553    u_soc/u_npu/u_npu_engine/fc_logits_reg[0][3]_0[0]
+    SLICE_X55Y20         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.532    30.085 r  u_soc/u_npu/u_npu_engine/fc_logits_reg[3][3]_i_2/CO[3]
+                         net (fo=1, routed)           0.000    30.085    u_soc/u_npu/u_npu_engine/fc_logits_reg[3][3]_i_2_n_0
+    SLICE_X55Y21         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    30.199 r  u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_4/CO[3]
+                         net (fo=1, routed)           0.000    30.199    u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_4_n_0
+    SLICE_X55Y22         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    30.313 r  u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_58/CO[3]
+                         net (fo=1, routed)           0.000    30.313    u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_58_n_0
+    SLICE_X55Y23         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.114    30.427 r  u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_42/CO[3]
+                         net (fo=1, routed)           0.000    30.427    u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_42_n_0
+    SLICE_X55Y24         CARRY4 (Prop_carry4_CI_O[3])
+                                                      0.313    30.740 f  u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_23/O[3]
+                         net (fo=4, routed)           0.782    31.522    u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_23_n_4
+    SLICE_X54Y25         LUT2 (Prop_lut2_I0_O)        0.306    31.828 r  u_soc/u_npu/u_npu_engine/fc_logits[3][7]_i_39/O
+                         net (fo=1, routed)           0.000    31.828    u_soc/u_npu/u_npu_engine/fc_logits[3][7]_i_39_n_0
+    SLICE_X54Y25         CARRY4 (Prop_carry4_S[2]_CO[3])
+                                                      0.380    32.208 r  u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_18/CO[3]
+                         net (fo=1, routed)           0.000    32.208    u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_18_n_0
+    SLICE_X54Y26         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117    32.325 r  u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_11/CO[3]
+                         net (fo=1, routed)           0.000    32.325    u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_11_n_0
+    SLICE_X54Y27         CARRY4 (Prop_carry4_CI_CO[0])
+                                                      0.254    32.579 r  u_soc/u_npu/u_npu_engine/fc_logits_reg[3][7]_i_6/CO[0]
+                         net (fo=8, routed)           0.747    33.326    u_soc/u_npu/u_npu_engine/p_1_in2_in
+    SLICE_X55Y27         LUT5 (Prop_lut5_I0_O)        0.367    33.693 r  u_soc/u_npu/u_npu_engine/fc_logits[3][3]_i_1/O
+                         net (fo=4, routed)           0.356    34.049    u_soc/u_npu/u_npu_engine/fc_logits[3]
+    SLICE_X54Y25         FDCE                                         r  u_soc/u_npu/u_npu_engine/fc_logits_reg[3][3]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_50mhz rise edge)
+                                                     20.000    20.000 r  
+    E3                                                0.000    20.000 r  CLK100MHZ (IN)
+                         net (fo=0)                   0.000    20.000    CLK100MHZ
+    E3                   IBUF (Prop_ibuf_I_O)         1.411    21.411 r  CLK100MHZ_IBUF_inst/O
+                         net (fo=1, routed)           1.920    23.331    CLK100MHZ_IBUF
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    23.422 r  CLK100MHZ_IBUF_BUFG_inst/O
+                         net (fo=1, routed)           1.504    24.927    CLK100MHZ_IBUF_BUFG
+    SLICE_X52Y96         FDRE (Prop_fdre_C_Q)         0.367    25.294 r  clk_50mhz_reg_reg/Q
+                         net (fo=2, routed)           0.654    25.947    clk_50mhz_reg
+    BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.091    26.038 r  bufg_clk/O
+                         net (fo=5228, routed)        1.649    27.687    u_soc/u_npu/u_npu_engine/clk_50mhz
+    SLICE_X54Y25         FDCE                                         r  u_soc/u_npu/u_npu_engine/fc_logits_reg[3][3]/C
+                         clock pessimism              0.565    28.253    
+                         clock uncertainty           -0.035    28.217    
+    SLICE_X54Y25         FDCE (Setup_fdce_C_D)       -0.016    28.201    u_soc/u_npu/u_npu_engine/fc_logits_reg[3][3]
+  -------------------------------------------------------------------
+                         required time                         28.201    
+                         arrival time                         -34.049    
+  -------------------------------------------------------------------
+                         slack                                 -5.848    
+
+
+
+
