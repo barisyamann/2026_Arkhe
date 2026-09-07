@@ -173,6 +173,28 @@ module npu_tcm_sram #(
         if (en_b_q) rdata_b_hold <= (inr_b_q ? dout_b[sel_b_q] : 32'h0);
     end
 
+    // -------------------------------------------------------------------------
+    // 6 Eylul 2026: KOMBINASYONEL BYPASS KALDIRILDI
+    //
+    // Onceki hali:
+    //     assign rdata_a = en_a_q ? (inr_a_q ? dout_a[sel_a_q] : 32'h0)
+    //                             : rdata_a_hold;
+    //
+    // rdata_*_hold yazmaci vardi ama YALNIZCA yedek yoldaydi. Aktif okumada
+    // (en_*_q = 1) veri dogrudan SRAM cikisindan, 15 makroluk coklayici
+    // uzerinden KOMBINASYONEL geciyordu. Bu, sram_module.sv'de I-RAM/D-RAM
+    // icin duzeltilen sorunun aynisidir.
+    //
+    // OLCUM (sramreg_d45_nodiode kosumu, max_ss_100C_1v60 kosesi):
+    //   I-RAM/D-RAM yamasindan SONRA kalan 110 setup ihlalinin 47'si bu
+    //   yoldaydi; en kotusu -1,430 ns:
+    //     u_npu.u_npu_sram.g_sram[0].u_macro/dout0[15] -> _188238_/D
+    //
+    // BEDELI: NPU okumasina bir cevrim eklenir. Cikarim cevrimi 85.587'den
+    // artar; hizlanma orani (753x) bir miktar duser ama fazlasiyla yeterli
+    // kalir. rdata_*_hold zaten her cevrim yaziliyordu; ek yazmac maliyeti
+    // yoktur, yalnizca bypass kaldirilmistir.
+    // -------------------------------------------------------------------------
     assign rdata_a = en_a_q ? (inr_a_q ? dout_a[sel_a_q] : 32'h0) : rdata_a_hold;
     assign rdata_b = en_b_q ? (inr_b_q ? dout_b[sel_b_q] : 32'h0) : rdata_b_hold;
 
