@@ -29,17 +29,6 @@ module qspi_master #(
     output logic        qspi_sck,
     output logic        qspi_cs_n,
 
-    // -------------------------------------------------------------------------
-    // QSPI veri hatlari - AYRIK yon sinyalleri (tri-state modul icinde DEGIL)
-    //
-    // ASIC akisinda tri-state yalnizca pad halkasinda bulunabilir; sentez
-    // araclari modul icindeki 'z surumunu esleyemez. Bu yuzden arayuz
-    // cikis / cikis-etkin / giris uclusune ayrildi. Gercek ucdurumlu surucu
-    // FPGA'de nexys_top'ta, simulasyonda testbench'te kuruluyor.
-    //
-    // qspi_io_oe hat basinadir: tek hatli modda yalnizca io0 surulur, ikili
-    // modda io0-io1, dortlu modda dordu birden.
-    // -------------------------------------------------------------------------
     output logic [3:0]  qspi_io_o,
     output logic [3:0]  qspi_io_oe,
     input  logic [3:0]  qspi_io_i,
@@ -59,6 +48,8 @@ localparam CMD_QOR       = 8'h6B;
 localparam CMD_PP        = 8'h02;
 localparam CMD_QPP       = 8'h32;
 localparam CMD_SE        = 8'hD8;
+
+/* verilator lint_off UNUSEDPARAM */
 localparam CMD_READ_ID   = 8'hAB;
 localparam CMD_RDID      = 8'h9F;
 localparam CMD_RES       = 8'hAB;
@@ -70,6 +61,7 @@ localparam CMD_WRDI      = 8'h04;
 localparam CMD_WREN      = 8'h06;
 localparam CMD_CLSR      = 8'h30;
 localparam CMD_RESET     = 8'hF0;
+/* verilator lint_on UNUSEDPARAM */
 
 logic [31:0] reg_ccr;
 logic [31:0] reg_adr;
@@ -112,19 +104,7 @@ assign rx_empty = (rx_wr_ptr == rx_rd_ptr);
 logic [AXI_AW-1:0] aw_addr_lat;
 logic              aw_valid_lat;
 logic [AXI_DW-1:0] w_data_lat;
-
-    // -------------------------------------------------------------------------
-    // AXI4-Lite WSTRB destegi
-    //
-    // Yazma verisiyle birlikte bayt strobe'u da mandallanir; yazmac atamasi
-    // sirasinda etkin olmayan baytlar korunur.
-    //
-    // Eskiden wstrb tamamen goz ardi ediliyordu: sb/sh ile bir yazmaca bayt
-    // yazmak TUM kelimeyi eziyordu. Yazilim hep kelime erisimi yaptigi icin
-    // patlamiyordu ama AXI4-Lite ihlaliydi.
-    // -------------------------------------------------------------------------
-    logic [31:0] w_mask_lat;
-
+logic [31:0]       w_mask_lat;
 logic              w_valid_lat;
 logic              do_write;
 logic              ccr_written;
@@ -197,7 +177,7 @@ always_ff @(posedge clk or negedge rst_n) begin
             err_tx_full <= 1'b0;
         end else if (do_write && aw_addr_lat[4:0] == ADDR_QSPI_DR) begin
             if (!tx_full) begin
-                tx_wr_ptr <= tx_wr_ptr + 1;
+                tx_wr_ptr <= tx_wr_ptr + 1'b1;
             end else begin
                 err_tx_full <= 1'b1;
             end
@@ -242,7 +222,7 @@ always_ff @(posedge clk or negedge rst_n) begin
                 ADDR_QSPI_DR: begin
                     if (!rx_empty) begin
                         s_axi_rdata <= rx_fifo[rx_rd_ptr[$clog2(FIFO_DEPTH)-1:0]];
-                        rx_rd_ptr   <= rx_rd_ptr + 1;
+                        rx_rd_ptr   <= rx_rd_ptr + 1'b1;
                     end else begin
                         s_axi_rdata  <= 32'hDEAD_BEEF;
                         err_rx_empty <= 1'b1;
@@ -271,21 +251,6 @@ assign ccr_dummy_cycles = reg_ccr[15:11];
 assign ccr_data_size    = reg_ccr[23:16];
 assign ccr_prescaler    = reg_ccr[30:25];
 assign ccr_clr_status   = reg_ccr[31];
-// -----------------------------------------------------------------------
-// CCR[24] - 4 BAYT ADRESLEME MODU
-//
-// Sartname QSPI_CCR[24] bitini REZERVE olarak birakir. Sartnamenin anlati
-// bolumu ise "Tum flash alanini kapsamak icin 4-bayt adresleme modu
-// destegi bulunacaktir" der; QSPI_ADR yazmac tanimi ise 3-bayt anlatir.
-// Bu iki ifadeyi uzlastirmak icin rezerve bit adres genisligi secicisi
-// olarak kullanilmistir:
-//
-//   CCR[24] = 0 -> 3 bayt adres (QSPI_ADR[23:0])  <- VARSAYILAN, sartname
-//   CCR[24] = 1 -> 4 bayt adres (QSPI_ADR[31:0])
-//
-// Reset degeri 0 oldugu icin davranis sartnameyle birebir ayni kalir;
-// 4-bayt yalnizca yazilim acikca istediginde devreye girer.
-// -----------------------------------------------------------------------
 assign ccr_addr_4byte   = reg_ccr[24];
 
 assign sta_fifo_err = {2'b00, err_tx_full, err_rx_empty | err_rx_full};
@@ -312,62 +277,6 @@ logic        sck_int;
 logic        sck_edge_rise, sck_edge_fall;
 logic [5:0]  sck_half_period;
 
-// =============================================================================
-// SCK yarim periyodu - EN AZ 1 (yani 2 cevrim)
-//
-// KOK NEDEN (16 Agustos'ta prescaler 4 ile gecici olarak ortulen hata):
-//
-// io_out kayitlidir ve shift_out'u BIR CEVRIM gecikmeyle takip eder:
-//     io_out[0] <= shift_out[7];
-// shift_out ise sck_edge_fall'da guncellenir. Yani yeni bit, dusen kenardan
-// bir cevrim SONRA pine cikar.
-//
-// Prescaler 0 iken yarim periyot da tam bir cevrimdi. Bu durumda dusen
-// kenardan sonraki YUKSELEN kenar, io_out henuz guncellenmeden geliyordu ve
-// kole ayni biti IKI KEZ orneklerdi. Belirti: gonderilen 0x03 komutu
-// 0x01 olarak okunuyordu.
-//
-//     0x03 = 0,0,0,0,0,0,1,1  (b7..b0)
-//     b7 tekrarlaninca -> 0,0,0,0,0,0,0,1 = 0x01   (birebir eslesti)
-//
-// Yarim periyot >= 2 cevrim oldugunda kayitlı ciktinin bir cevrimlik
-// gecikmesi soguruluyor ve veri, orneklendigi yukselen kenarda kararli
-// oluyor. Bu yuzden prescaler 4 sorunu "cozmus" gibi gorunuyordu - asil
-// duzeltme, sifir yarim periyoda hic izin vermemek.
-//
-// Ust sinir: 50 MHz / (2 x 2) = 12,5 MHz SCK. Boot icin fazlasiyla yeterli.
-// =============================================================================
-// SARTNAME s.1127-1132: SCLK = clk / (P+1)
-//   "...degerin BIR FAZLASI kadar saat frekansi bolunerek... '0' yazilirsa
-//    SCLK sistem saat hizinda, '1' oldugu zaman yarisinda olacaktir."
-//
-// Onceki gerceklemede YARIM periyot P+1 cevrimdi, yani tam periyot 2(P+1).
-// Olcum bunu dogruladi: P=1 -> 80 ns (beklenen 40), P=4 -> 200 ns (100).
-// Sapma yorum satirinda gizliydi; artik tb_qspi_mock periyodu OLCUYOR.
-//
-// P=0 DESTEKLENMEZ: SCLK = sistem saati demek olurdu ve veri ayni saatle
-// uretildigi icin kurulum suresi kalmazdi (DDR cikis yazmaci gerekir).
-// P=0 yazilirsa P=1 gibi davranilir.
-// P = 0 -> SCLK = SISTEM SAATI  (24 Agustos 2026)
-//
-// Sartname s.1127-1132: "...'0' yazilirsa SCLK sistem saat hizinda
-// olacaktir." Yani bolme orani 1; SCK saatin KENDISIDIR.
-//
-// Her cevrim degisen bir YAZMAC en fazla clk/2 (25 MHz) uretir. 50 MHz icin
-// saatin dogrudan pine yonlendirilmesi gerekir.
-//
-// SECIM: SCK = ~clk  (ters yonlendirme)
-//
-//   SCK yukselen kenari  = clk DUSEN kenari  -> flash burada ornekler
-//   veri (shift_out)     = clk YUKSELEN kenarda degisir
-//   -> arada YARIM CEVRIM kurulum suresi olusur, ayri bir negedge cikis
-//      yazmaci gerekmez.
-//
-//   SPI Mode 0 uyumu: sck_en dusukken cikis 0'a zorlanir, yani SCK bostada
-//   '0'dir. sck_en clk YUKSELEN kenarinda degisir ve o anda ~clk = 0
-//   oldugu icin gecis glitch uretmez.
-//
-// P >= 1 icin eski sayac yolu aynen korunur.
 assign presc_sifir     = (ccr_prescaler == 6'h0);
 assign sck_tam_periyot = presc_sifir ? 6'd1 : (ccr_prescaler + 6'd1);
 assign sck_half_period = (sck_tam_periyot >> 1);
@@ -382,18 +291,11 @@ always_ff @(posedge clk or negedge rst_n) begin
         sck_edge_rise <= 1'b0;
         sck_edge_fall <= 1'b0;
         if (presc_sifir) begin
-            // SCK = ~clk: her clk cevrimi TAM BIR SCK periyodudur.
-            //   clk posedge -> veri degisir  (sck_edge_fall)
-            //   clk negedge -> flash ornekler (sck_edge_rise)
-            // Ikisi de her cevrim darbelenir; sayac kullanilmaz.
             sck_cnt       <= '0;
-            sck_int       <= 1'b0;      // pin ~clk'den surulur, bu kullanilmaz
+            sck_int       <= 1'b0;
             sck_edge_fall <= 1'b1;
             sck_edge_rise <= 1'b1;
-        end
-        // Sayac 0..(tam-1): cnt < half -> SCK dusuk, cnt >= half -> yuksek
-        // SPI Mode 0: dusen kenarda veri degisir, yukselende ornekleni r.
-        else if (sck_cnt >= sck_tam_periyot - 6'd1) begin
+        end else if (sck_cnt >= sck_tam_periyot - 6'd1) begin
             sck_cnt       <= '0;
             sck_int       <= 1'b0;
             sck_edge_fall <= 1'b1;
@@ -412,15 +314,11 @@ always_ff @(posedge clk or negedge rst_n) begin
     end
 end
 
-// P=0'da saat dogrudan yonlendirilir (bkz. yukaridaki aciklama).
-// sck_en dusukken cikis 0 - SPI Mode 0 bosta durumu.
 assign qspi_sck = sck_en ? (presc_sifir ? ~clk : sck_int) : 1'b0;
 
 logic        io_oe;
 logic [3:0]  io_out;
 logic [3:0]  io_in;
-
-// qspi_io_o suruculeri modulun SONUNDA (always_comb) - tum tanimlar orada hazir
 
 assign qspi_io_oe[0] = io_oe;
 assign qspi_io_oe[1] = io_oe && ccr_data_mode[1];
@@ -455,6 +353,16 @@ logic [2:0]  addr_byte_cnt;
 logic [31:0] tx_word;
 logic [1:0]  tx_byte_idx;
 
+// Lint temizliği için kullanılmayan sinyallerin yutulması
+logic unused_ok;
+assign unused_ok = &{1'b0,
+                     ccr_data_size,
+                     ccr_clr_status,
+                     aw_addr_lat[AXI_AW-1:5],
+                     ar_addr_lat[AXI_AW-1:5],
+                     shift_in[7],
+                     1'b0};
+
 function automatic logic cmd_needs_addr(input logic [7:0] cmd);
     case (cmd)
         CMD_READ, CMD_DOR, CMD_QOR, CMD_PP, CMD_QPP, CMD_SE: return 1'b1;
@@ -478,8 +386,8 @@ always_ff @(posedge clk or negedge rst_n) begin
         err_rx_full  <= 1'b0;
         bit_cnt      <= 3'h0;
         nibble_cnt   <= 2'h0;
-        byte_cnt     <= 8'h0;
-        total_bytes  <= 8'h0;
+        byte_cnt     <= 9'h0;
+        total_bytes  <= 9'h0;
         dummy_cnt    <= 5'h0;
         addr_byte_cnt<= 3'h0;
         shift_out    <= 8'h0;
@@ -507,13 +415,13 @@ always_ff @(posedge clk or negedge rst_n) begin
                 if (ccr_written) begin
                     sta_busy  <= 1'b1;
                     state     <= ASSERT_CS;
-                    total_bytes <= reg_ccr[23:16] + 1;
-                    byte_cnt    <= 8'h0;
+                    total_bytes <= 9'(reg_ccr[23:16]) + 9'd1;
+                    byte_cnt    <= 9'h0;
                     addr_byte_cnt <= 3'h0;
                     dummy_cnt   <= 5'h0;
                     if (!tx_empty) begin
                         tx_word     <= tx_fifo[tx_rd_ptr[$clog2(FIFO_DEPTH)-1:0]];
-                        tx_rd_ptr   <= tx_rd_ptr + 1;
+                        tx_rd_ptr   <= tx_rd_ptr + 1'b1;
                     end
                     tx_byte_idx <= 2'h0;
                 end
@@ -539,7 +447,6 @@ always_ff @(posedge clk or negedge rst_n) begin
                         if (cmd_needs_addr(ccr_instr)) begin
                             addr_byte_cnt <= 3'd0;
                             state         <= SEND_ADDR;
-                            // 4 baytta en anlamli bayt once gider.
                             shift_out     <= ccr_addr_4byte ? reg_adr[31:24]
                                                             : reg_adr[23:16];
                             bit_cnt       <= 3'd7;
@@ -548,7 +455,7 @@ always_ff @(posedge clk or negedge rst_n) begin
                             state     <= DUMMY;
                             sck_en    <= 1'b1;
                         end else if (cmd_needs_data(ccr_data_mode)) begin
-                            byte_cnt <= 8'h0;
+                            byte_cnt <= 9'h0;
                             state    <= ccr_write_read_n ? WRITE_DATA : READ_DATA;
                             if (!ccr_write_read_n) io_oe <= 1'b0;
                             bit_cnt  <= 3'd7;
@@ -562,7 +469,7 @@ always_ff @(posedge clk or negedge rst_n) begin
                         end
                     end else begin
                         shift_out <= {shift_out[6:0], 1'b0};
-                        bit_cnt   <= bit_cnt - 1;
+                        bit_cnt   <= bit_cnt - 1'b1;
                     end
                 end
             end
@@ -574,23 +481,7 @@ always_ff @(posedge clk or negedge rst_n) begin
 
                 if (sck_edge_fall) begin
                     if (bit_cnt == 3'h0) begin
-                        addr_byte_cnt <= addr_byte_cnt + 1;
-                        // KARSILASTIRMA BIR KAYMISTI (18 Agustos 2026 bulgusu)
-                        //
-                        // addr_byte_cnt bloklamayan atamayla artar; ilk adres
-                        // baytinin SONUNDA hala 0 okunur. Eski kod 1 ve 2 ile
-                        // karsilastirdigi icin hicbir dala uymuyor, dogrudan
-                        // else'e dusup veri fazina geciyordu:
-                        // master 3 adres bayti yerine YALNIZCA 1 tane
-                        // gonderiyordu.
-                        //
-                        // Flash 24 bit adres bekledigi icin iki bayt boyunca
-                        // hala adres aliyor, master ise bu sirada bos hatti
-                        // (0xFF) okuyordu. Sistem testi bunu goremezdi cunku
-                        // varsayilan akis hizli acilis kullaniyor ve QSPI
-                        // yolunu hic calistirmiyor.
-                        // 3 bayt modu: [23:16] -> [15:8] -> [7:0]
-                        // 4 bayt modu: [31:24] -> [23:16] -> [15:8] -> [7:0]
+                        addr_byte_cnt <= addr_byte_cnt + 1'b1;
                         if (addr_byte_cnt == 3'd0) begin
                             shift_out <= ccr_addr_4byte ? reg_adr[23:16]
                                                         : reg_adr[15:8];
@@ -607,10 +498,10 @@ always_ff @(posedge clk or negedge rst_n) begin
                                 dummy_cnt <= ccr_dummy_cycles;
                                 state     <= DUMMY;
                             end else if (cmd_needs_data(ccr_data_mode)) begin
-                                byte_cnt <= 8'h0;
+                                byte_cnt <= 9'h0;
                                 bit_cnt  <= 3'd7;
                                 if (ccr_write_read_n) begin
-                                    state    <= WRITE_DATA;
+                                    state       <= WRITE_DATA;
                                     shift_out   <= tx_word[7:0];
                                     tx_byte_idx <= 2'd1;
                                 end else begin
@@ -624,7 +515,7 @@ always_ff @(posedge clk or negedge rst_n) begin
                         end
                     end else begin
                         shift_out <= {shift_out[6:0], 1'b0};
-                        bit_cnt   <= bit_cnt - 1;
+                        bit_cnt   <= bit_cnt - 1'b1;
                     end
                 end
             end
@@ -635,7 +526,7 @@ always_ff @(posedge clk or negedge rst_n) begin
                     if (dummy_cnt == 5'h1) begin
                         dummy_cnt <= 5'h0;
                         if (cmd_needs_data(ccr_data_mode)) begin
-                            byte_cnt <= 8'h0;
+                            byte_cnt <= 9'h0;
                             bit_cnt  <= 3'd7;
                             if (ccr_write_read_n) begin
                                 state       <= WRITE_DATA;
@@ -650,7 +541,7 @@ always_ff @(posedge clk or negedge rst_n) begin
                             sck_en <= 1'b0;
                         end
                     end else begin
-                        dummy_cnt <= dummy_cnt - 1;
+                        dummy_cnt <= dummy_cnt - 1'b1;
                     end
                 end
             end
@@ -659,20 +550,6 @@ always_ff @(posedge clk or negedge rst_n) begin
                 io_oe  <= 1'b1;
                 sck_en <= 1'b1;
 
-                // -------------------------------------------------------------
-                // HATA 1 - CIKIS SURUCUSU KENAR KONTROLUNUN DISINDA OLMALI
-                //
-                // 22 Agustos 2026, PP testi eklenince bulundu.
-                //
-                // SEND_ADDR cikisini HER cevrim guncelliyor; WRITE_DATA ise
-                // yalnizca sck_edge_fall altinda guncelliyordu. Duruma
-                // girildigi cevrimde io0 bayat ADRES bitini tasiyor, ilk veri
-                // biti bir SCK cevrimi GEC cikiyordu. Flash bir bit kaymis
-                // veri yaziyordu: 0x78 -> 0x3C, 0x56 -> 0x2B, 0x34 -> 0x1A.
-                //
-                // Okuma testleri bunu goremezdi: hepsi adres 0 kullaniyor ve
-                // bir bit kaymis sifir yine sifirdir.
-                // -------------------------------------------------------------
                 unique case (ccr_data_mode)
                     2'b10:   io_out[1:0] <= shift_out[7:6];
                     2'b11:   io_out[3:0] <= shift_out[7:4];
@@ -683,23 +560,11 @@ always_ff @(posedge clk or negedge rst_n) begin
                     case (ccr_data_mode)
                         2'b01: begin
                             if (bit_cnt == 3'h0) begin
-                                byte_cnt <= byte_cnt + 1;
-                                if (byte_cnt + 1 >= total_bytes) begin
+                                byte_cnt <= byte_cnt + 1'b1;
+                                if (byte_cnt + 1'b1 >= total_bytes) begin
                                     state  <= DEASSERT_CS;
                                     sck_en <= 1'b0;
                                 end else begin
-                                    // ---------------------------------------------
-                                    // HATA 2 - HER KELIMENIN 4. BAYTI ATLANIYORDU
-                                    //
-                                    // Eski kod tx_byte_idx==3 oldugunda yeni
-                                    // kelimeyi cekip tx_word[7:0]'i yukluyordu;
-                                    // boylece tx_word[31:24] HIC gonderilmiyordu.
-                                    // 4 baytlik bir PP'de son bayt, ilk baytin
-                                    // TEKRARIYDI.
-                                    //
-                                    // Dogrusu: once 4. bayti yukle, SONRAKI bayt
-                                    // icin yeni kelimeyi cek.
-                                    // ---------------------------------------------
                                     case (tx_byte_idx)
                                         2'd0: shift_out <= tx_word[7:0];
                                         2'd1: shift_out <= tx_word[15:8];
@@ -710,51 +575,51 @@ always_ff @(posedge clk or negedge rst_n) begin
                                     if (tx_byte_idx == 2'd3) begin
                                         if (!tx_empty) begin
                                             tx_word   <= tx_fifo[tx_rd_ptr[$clog2(FIFO_DEPTH)-1:0]];
-                                            tx_rd_ptr <= tx_rd_ptr + 1;
+                                            tx_rd_ptr <= tx_rd_ptr + 1'b1;
                                         end
                                         tx_byte_idx <= 2'd0;
                                     end else begin
-                                        tx_byte_idx <= tx_byte_idx + 1;
+                                        tx_byte_idx <= tx_byte_idx + 1'b1;
                                     end
                                     bit_cnt <= 3'd7;
                                 end
                             end else begin
                                 shift_out <= {shift_out[6:0], 1'b0};
-                                bit_cnt   <= bit_cnt - 1;
+                                bit_cnt   <= bit_cnt - 1'b1;
                             end
                         end
                         2'b10: begin
                             io_out[1:0] <= shift_out[7:6];
                             if (nibble_cnt == 2'd3) begin
                                 nibble_cnt <= 2'd0;
-                                byte_cnt   <= byte_cnt + 1;
-                                if (byte_cnt + 1 >= total_bytes) begin
+                                byte_cnt   <= byte_cnt + 1'b1;
+                                if (byte_cnt + 1'b1 >= total_bytes) begin
                                     state  <= DEASSERT_CS;
                                     sck_en <= 1'b0;
                                 end else begin
                                     shift_out   <= tx_word[7:0];
-                                    tx_byte_idx <= tx_byte_idx + 1;
+                                    tx_byte_idx <= tx_byte_idx + 1'b1;
                                 end
                             end else begin
                                 shift_out  <= {shift_out[5:0], 2'b00};
-                                nibble_cnt <= nibble_cnt + 1;
+                                nibble_cnt <= nibble_cnt + 1'b1;
                             end
                         end
                         2'b11: begin
                             io_out[3:0] <= shift_out[7:4];
                             if (nibble_cnt[0] == 1'b1) begin
                                 nibble_cnt <= 2'd0;
-                                byte_cnt   <= byte_cnt + 1;
-                                if (byte_cnt + 1 >= total_bytes) begin
+                                byte_cnt   <= byte_cnt + 1'b1;
+                                if (byte_cnt + 1'b1 >= total_bytes) begin
                                     state  <= DEASSERT_CS;
                                     sck_en <= 1'b0;
                                 end else begin
                                     shift_out   <= tx_word[7:0];
-                                    tx_byte_idx <= tx_byte_idx + 1;
+                                    tx_byte_idx <= tx_byte_idx + 1'b1;
                                 end
                             end else begin
                                 shift_out  <= {shift_out[3:0], 4'h0};
-                                nibble_cnt <= nibble_cnt + 1;
+                                nibble_cnt <= nibble_cnt + 1'b1;
                             end
                         end
                         default:;
@@ -773,22 +638,22 @@ always_ff @(posedge clk or negedge rst_n) begin
                             if (bit_cnt == 3'h0) begin
                                 if (!rx_full) begin
                                     if (byte_cnt[1:0] == 2'd3) begin
-                                        rx_wr_ptr <= rx_wr_ptr + 1;
+                                        rx_wr_ptr <= rx_wr_ptr + 1'b1;
                                     end
                                 end else begin
                                     err_rx_full <= 1'b1;
                                 end
-                                byte_cnt <= byte_cnt + 1;
-                                if (byte_cnt + 1 >= total_bytes) begin
+                                byte_cnt <= byte_cnt + 1'b1;
+                                if (byte_cnt + 1'b1 >= total_bytes) begin
                                     if (byte_cnt[1:0] != 2'd3 && !rx_full)
-                                        rx_wr_ptr <= rx_wr_ptr + 1;
+                                        rx_wr_ptr <= rx_wr_ptr + 1'b1;
                                     state  <= DEASSERT_CS;
                                     sck_en <= 1'b0;
                                 end else begin
                                     bit_cnt <= 3'd7;
                                 end
                             end else begin
-                                bit_cnt <= bit_cnt - 1;
+                                bit_cnt <= bit_cnt - 1'b1;
                             end
                         end
                         2'b10: begin
@@ -797,18 +662,20 @@ always_ff @(posedge clk or negedge rst_n) begin
                                 nibble_cnt <= 2'd0;
                                 if (!rx_full) begin
                                     if (byte_cnt[1:0] == 2'd3) begin
-                                        rx_wr_ptr <= rx_wr_ptr + 1;
+                                        rx_wr_ptr <= rx_wr_ptr + 1'b1;
                                     end
                                 end else begin
                                     err_rx_full <= 1'b1;
                                 end
-                                byte_cnt <= byte_cnt + 1;
-                                if (byte_cnt + 1 >= total_bytes) begin
+                                byte_cnt <= byte_cnt + 1'b1;
+                                if (byte_cnt + 1'b1 >= total_bytes) begin
                                     state  <= DEASSERT_CS;
                                     sck_en <= 1'b0;
+                                end else begin
+                                    nibble_cnt <= nibble_cnt + 1'b1;
                                 end
                             end else begin
-                                nibble_cnt <= nibble_cnt + 1;
+                                nibble_cnt <= nibble_cnt + 1'b1;
                             end
                         end
                         2'b11: begin
@@ -817,18 +684,20 @@ always_ff @(posedge clk or negedge rst_n) begin
                                 nibble_cnt <= 2'd0;
                                 if (!rx_full) begin
                                     if (byte_cnt[1:0] == 2'd3) begin
-                                        rx_wr_ptr <= rx_wr_ptr + 1;
+                                        rx_wr_ptr <= rx_wr_ptr + 1'b1;
                                     end
                                 end else begin
                                     err_rx_full <= 1'b1;
                                 end
-                                byte_cnt <= byte_cnt + 1;
-                                if (byte_cnt + 1 >= total_bytes) begin
+                                byte_cnt <= byte_cnt + 1'b1;
+                                if (byte_cnt + 1'b1 >= total_bytes) begin
                                     state  <= DEASSERT_CS;
                                     sck_en <= 1'b0;
+                                end else begin
+                                    nibble_cnt <= nibble_cnt + 1'b1;
                                 end
                             end else begin
-                                nibble_cnt <= nibble_cnt + 1;
+                                nibble_cnt <= nibble_cnt + 1'b1;
                             end
                         end
                         default:;
@@ -909,21 +778,6 @@ assign irq = sta_done;
         !tx_full |-> !sta_fifo_err[1]);
 `endif
 
-
-// -----------------------------------------------------------------------------
-// VERI HATLARI KOMBINASYONEL SURULUR  (23 Agustos 2026)
-//
-// Onceden pin yazmacli io_out'tan surulyordu; io_out ise shift_out'u BIR
-// CEVRIM gecikmeyle takip ediyordu. Yani yeni bit dusen kenardan IKI cevrim
-// sonra pine ulasiyordu ve yarim periyot 2 cevrimden kisa olamiyordu -
-// prescaler semantigi bu yuzden sartnameden 2 kat sapiyordu.
-//
-// Simdi pin dogrudan shift_out'tan surulyor: bit dusen kenardan BIR cevrim
-// sonra kararli, yarim periyot 1 cevrime inebiliyor.
-//
-// Komut ve adres DAIMA tek hatlidir (SPI Mode 0); yalnizca veri fazi
-// x1/x2/x4 olabilir. Diger durumlarda yazmacli io_out kullanilir.
-// -----------------------------------------------------------------------------
 always_comb begin
     qspi_io_o = io_out;
     if (state == SEND_CMD || state == SEND_ADDR) begin
