@@ -49,10 +49,133 @@ module tb_npu_sw_bench;
 
     // npu_sw_bench.c ile ayni
     localparam int OFS_SONUC = 7000;
+
+    // Donanim cikarim cevrimi - tb_npu_audio / npu_golden ciktisindan
+    localparam int DONANIM_CEVRIM = 85587;
     localparam logic [31:0] IMZA = 32'hB051_0000 | N_OUT;
 
     logic clk = 0;
     always #10 clk = ~clk;                 // 50 MHz
+
+    // =========================================================================
+    // TCM / I-RAM ERISIMI - IKI KIPTE DE CALISIR   (5 Eylul 2026'da eklendi)
+    //
+    // Bu testbench dogrudan `uut.u_npu.u_npu_sram.ram[...]` ve
+    // `uut.u_instruction_ram.ram[...]` dizilerine erisiyordu. Bu diziler
+    // YALNIZCA cikarimsal kipte vardir; USE_SRAM_MACRO tanimliyken elaborasyon
+    //   ERROR: [VRFC 10-2991] 'ram' is not declared under prefix 'u_npu_sram'
+    // ile duser. Sonuc: hizlanma olcumu ASIC kod yolunda HIC kosulamiyordu.
+    //
+    // Makro kipinde bolunme (npu_tcm_sram.sv):
+    //     TCM   : addr[12:9] -> makro (0..14),  addr[8:0] -> makro ici
+    //     I-RAM : addr / 512 -> makro,          addr % 512 -> makro ici
+    // Her iki bellek de 512 kelimelik sky130 makrolarindan olusur.
+    // =========================================================================
+`ifdef USE_SRAM_MACRO
+    // DIKKAT: g_sram[m].u_macro yoluna DEGISKEN indisle erisilemez; xelab
+    //   "'u_macro' is not declared under prefix 'g_sram'"
+    // ile duser. Ayni kisit tb_soc_top.sv:390'da da not edilmistir.
+    // Bu yuzden makro secimi SABIT indisli case ile yapiliyor.
+    function automatic logic [31:0] tcm_oku(input int adr);
+        int mak, ofs;
+        mak = adr / 512; ofs = adr - mak * 512;
+        tcm_oku = 32'hDEAD_BEEF;
+        case (mak)
+             0: tcm_oku = uut.u_npu.u_npu_sram.g_sram[0].u_macro.mem[ofs];
+             1: tcm_oku = uut.u_npu.u_npu_sram.g_sram[1].u_macro.mem[ofs];
+             2: tcm_oku = uut.u_npu.u_npu_sram.g_sram[2].u_macro.mem[ofs];
+             3: tcm_oku = uut.u_npu.u_npu_sram.g_sram[3].u_macro.mem[ofs];
+             4: tcm_oku = uut.u_npu.u_npu_sram.g_sram[4].u_macro.mem[ofs];
+             5: tcm_oku = uut.u_npu.u_npu_sram.g_sram[5].u_macro.mem[ofs];
+             6: tcm_oku = uut.u_npu.u_npu_sram.g_sram[6].u_macro.mem[ofs];
+             7: tcm_oku = uut.u_npu.u_npu_sram.g_sram[7].u_macro.mem[ofs];
+             8: tcm_oku = uut.u_npu.u_npu_sram.g_sram[8].u_macro.mem[ofs];
+             9: tcm_oku = uut.u_npu.u_npu_sram.g_sram[9].u_macro.mem[ofs];
+            10: tcm_oku = uut.u_npu.u_npu_sram.g_sram[10].u_macro.mem[ofs];
+            11: tcm_oku = uut.u_npu.u_npu_sram.g_sram[11].u_macro.mem[ofs];
+            12: tcm_oku = uut.u_npu.u_npu_sram.g_sram[12].u_macro.mem[ofs];
+            13: tcm_oku = uut.u_npu.u_npu_sram.g_sram[13].u_macro.mem[ofs];
+            14: tcm_oku = uut.u_npu.u_npu_sram.g_sram[14].u_macro.mem[ofs];
+            default: ;
+        endcase
+    endfunction
+
+    task automatic tcm_yaz(input int adr, input logic [31:0] deger);
+        int mak, ofs;
+        mak = adr / 512; ofs = adr - mak * 512;
+        case (mak)
+             0: uut.u_npu.u_npu_sram.g_sram[0].u_macro.mem[ofs] = deger;
+             1: uut.u_npu.u_npu_sram.g_sram[1].u_macro.mem[ofs] = deger;
+             2: uut.u_npu.u_npu_sram.g_sram[2].u_macro.mem[ofs] = deger;
+             3: uut.u_npu.u_npu_sram.g_sram[3].u_macro.mem[ofs] = deger;
+             4: uut.u_npu.u_npu_sram.g_sram[4].u_macro.mem[ofs] = deger;
+             5: uut.u_npu.u_npu_sram.g_sram[5].u_macro.mem[ofs] = deger;
+             6: uut.u_npu.u_npu_sram.g_sram[6].u_macro.mem[ofs] = deger;
+             7: uut.u_npu.u_npu_sram.g_sram[7].u_macro.mem[ofs] = deger;
+             8: uut.u_npu.u_npu_sram.g_sram[8].u_macro.mem[ofs] = deger;
+             9: uut.u_npu.u_npu_sram.g_sram[9].u_macro.mem[ofs] = deger;
+            10: uut.u_npu.u_npu_sram.g_sram[10].u_macro.mem[ofs] = deger;
+            11: uut.u_npu.u_npu_sram.g_sram[11].u_macro.mem[ofs] = deger;
+            12: uut.u_npu.u_npu_sram.g_sram[12].u_macro.mem[ofs] = deger;
+            13: uut.u_npu.u_npu_sram.g_sram[13].u_macro.mem[ofs] = deger;
+            14: uut.u_npu.u_npu_sram.g_sram[14].u_macro.mem[ofs] = deger;
+            default: ;
+        endcase
+    endtask
+
+    task automatic tcm_yukle(input string dosya);
+        logic [31:0] gecici [0:7679];
+        $readmemh(dosya, gecici);
+        for (int i = 0; i < 7680; i++) tcm_yaz(i, gecici[i]);
+    endtask
+
+    function automatic logic [31:0] iram_oku(input int adr);
+        int mak, ofs;
+        mak = adr / 512; ofs = adr - mak * 512;
+        iram_oku = 32'hDEAD_BEEF;
+        case (mak)
+            0: iram_oku = uut.u_instruction_ram.g_sram[0].u_macro.mem[ofs];
+            1: iram_oku = uut.u_instruction_ram.g_sram[1].u_macro.mem[ofs];
+            2: iram_oku = uut.u_instruction_ram.g_sram[2].u_macro.mem[ofs];
+            3: iram_oku = uut.u_instruction_ram.g_sram[3].u_macro.mem[ofs];
+            default: ;
+        endcase
+    endfunction
+
+    task automatic iram_yaz(input int adr, input logic [31:0] deger);
+        int mak, ofs;
+        mak = adr / 512; ofs = adr - mak * 512;
+        case (mak)
+            0: uut.u_instruction_ram.g_sram[0].u_macro.mem[ofs] = deger;
+            1: uut.u_instruction_ram.g_sram[1].u_macro.mem[ofs] = deger;
+            2: uut.u_instruction_ram.g_sram[2].u_macro.mem[ofs] = deger;
+            3: uut.u_instruction_ram.g_sram[3].u_macro.mem[ofs] = deger;
+            default: ;
+        endcase
+    endtask
+
+    task automatic iram_yukle(input string dosya);
+        logic [31:0] gecici [0:2047];
+        $readmemh(dosya, gecici);
+        for (int i = 0; i < 2048; i++) iram_yaz(i, gecici[i]);
+    endtask
+`else
+    function automatic logic [31:0] tcm_oku(input int adr);
+        return uut.u_npu.u_npu_sram.ram[adr];
+    endfunction
+
+    task automatic tcm_yukle(input string dosya);
+        $readmemh(dosya, uut.u_npu.u_npu_sram.ram);
+    endtask
+
+    task automatic iram_yukle(input string dosya);
+        $readmemh(dosya, uut.u_instruction_ram.ram);
+    endtask
+
+    function automatic logic [31:0] iram_oku(input int adr);
+        return uut.u_instruction_ram.ram[adr];
+    endfunction
+`endif
 
     logic rst_n;
 
@@ -148,16 +271,16 @@ module tb_npu_sw_bench;
         // #1 ile zaman 0'daki tum initial bloklarinin bitmesi beklenir.
         // ---------------------------------------------------------------
         #1;
-        $readmemh("tcm_image.mem", uut.u_npu.u_npu_sram.ram);
-        $readmemh(BENCH_HEX, uut.u_instruction_ram.ram);
+        tcm_yukle("tcm_image.mem");
+        iram_yukle(BENCH_HEX);
         force uut.u_core.boot_addr_i = 32'h0100_0000;
 
         // TANI: yukleme gercekten oldu mu
         $display("  [TANI] TCM[0]=%08h TCM[704]=%08h TCM[768]=%08h TCM[4768]=%08h",
-                 uut.u_npu.u_npu_sram.ram[0],    uut.u_npu.u_npu_sram.ram[704],
-                 uut.u_npu.u_npu_sram.ram[768],  uut.u_npu.u_npu_sram.ram[4768]);
+                 tcm_oku(0),    tcm_oku(704),
+                 tcm_oku(768),  tcm_oku(4768));
         $display("  [TANI] IRAM[0]=%08h IRAM[1]=%08h",
-                 uut.u_instruction_ram.ram[0], uut.u_instruction_ram.ram[1]);
+                 iram_oku(0), iram_oku(1));
 
         $display("================================================================");
         $display(" YAZILIM GERCEKLEMESI CEVRIM OLCUMU");
@@ -170,19 +293,19 @@ module tb_npu_sw_bench;
 
         // Sonuc imzasini bekle
         bekleme = 0;
-        while (uut.u_npu.u_npu_sram.ram[OFS_SONUC] !== IMZA && bekleme < 20_000_000) begin
+        while (tcm_oku(OFS_SONUC) !== IMZA && bekleme < 20_000_000) begin
             @(posedge clk);
             bekleme++;
         end
 
         denetle("sonuc imzasi TCM'e yazildi",
-                uut.u_npu.u_npu_sram.ram[OFS_SONUC] === IMZA);
+                tcm_oku(OFS_SONUC) === IMZA);
         if (hata != 0) begin
             $display(" Imza gelmedi - CPU kiyaslamayi tamamlamadi.");
             $fatal(1, "yazilim kiyaslamasi tamamlanmadi");
         end
 
-        gecen = uut.u_npu.u_npu_sram.ram[OFS_SONUC + 1];
+        gecen = tcm_oku(OFS_SONUC + 1);
 
         // ---------------------------------------------------------------
         // DUZ PIKSEL ORANI ILE OLCEKLEME YANLIS SONUC VERIR
@@ -226,24 +349,37 @@ module tb_npu_sw_bench;
         $display("  Tam cikarim tap sayisi      : %0d", TOPLAM_TAP);
         $display("  Kaba alt sinir tahmini      : %.0f cevrim (%.2f s @50MHz)",
                  tam_cikarim, tam_cikarim / 50.0e6);
-        // 23 Agustos 2026: CONV_MAC uc asamali boru hattina cevrildi,
-// cikarim 80.583 -> 81.083 cevrim (+500, piksel basina bosaltma).
-        $display("  Donanim (tb_npu_audio)      : 81083 cevrim = 1.62 ms");
-        $display("  Kaba hizlanma               : %.0fx", tam_cikarim / 81083.0);
+        // DONANIM CEVRIM SAYISI - RTL'DEN OLCULUR, ELLE GUNCELLENIR
+        //
+        // 23 Agu 2026: CONV_MAC uc asamali boru hatti -> 80.583 -> 81.083
+        // 28 Agu 2026: requantization boru hatti (CONV_RQ_MUL / FC_RQ_MUL)
+        //              -> 81.083 -> 85.587 cevrim
+        //
+        // 5 Eylul 2026: bu uc yerde 81.083 SABIT yaziliydi ve guncel RTL ile
+        // ortusmuyordu; hizlanma orani oldugundan YUKSEK cikiyordu (874x
+        // yerine dogrusu asagidaki deger). analiz.py zaten 85.587 kullaniyor.
+        // Guncel deger su iki testin ciktisinda gorunur:
+        //     build/regression/npu_golden/sim.log     "NPU cycles  = 85587"
+        //     build/regression/npu_dogruluk/sim.log   "85587 cevrim"
+        // NPU boru hatti degisirse bu sabit de guncellenmelidir.
+        $display("  Donanim (tb_npu_audio)      : %0d cevrim = %.2f ms",
+                 DONANIM_CEVRIM, DONANIM_CEVRIM / 50.0e3);
+        $display("  Kaba hizlanma               : %.0fx",
+                 tam_cikarim / real'(DONANIM_CEVRIM));
         $display("");
         $display("  NOT: kesin sayi icin iki N olcumu gerekir ->");
         $display("       python tb/npu_sw_bench/analiz.py");
         $display("");
         $display("  fc_acc = [%0d, %0d, %0d, %0d]  (kismi - %0d piksel)",
-                 $signed(uut.u_npu.u_npu_sram.ram[OFS_SONUC + 2]),
-                 $signed(uut.u_npu.u_npu_sram.ram[OFS_SONUC + 3]),
-                 $signed(uut.u_npu.u_npu_sram.ram[OFS_SONUC + 4]),
-                 $signed(uut.u_npu.u_npu_sram.ram[OFS_SONUC + 5]), N_OUT);
+                 $signed(tcm_oku(OFS_SONUC + 2)),
+                 $signed(tcm_oku(OFS_SONUC + 3)),
+                 $signed(tcm_oku(OFS_SONUC + 4)),
+                 $signed(tcm_oku(OFS_SONUC + 5)), N_OUT);
 
         // Akil sagligi: yazilim donanimdan YAVAS olmali, aksi halde
         // hizlandirici bir ise yaramiyor demektir
         denetle("yazilim donanimdan en az 100x yavas",
-                tam_cikarim > 100.0 * 81083.0);
+                tam_cikarim > 100.0 * real'(DONANIM_CEVRIM));
 
         $display("================================================================");
         if (hata != 0) begin

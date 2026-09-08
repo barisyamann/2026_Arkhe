@@ -39,7 +39,22 @@ OLCUMLER = [
     (50, 542273),
 ]
 
-DONANIM_CEVRIM = 81083      # tb_npu_audio, cikarim basina
+# DONANIM CEVRIM SAYISI - RTL'DEN OLCULUR, ELLE GUNCELLENIR
+#
+# 81083 degeri NPU'ya requantization boru hatti EKLENMEDEN ONCE olculmustu.
+# Boru hatti (CONV_RQ_MUL / FC_RQ_MUL asamalari, commit 3d4c001) 32x32
+# carpmayi ikiye boldu; ASIC kritik yolunu kisaltti ama cikarim basina
+# 4504 cevrim ekledi.
+#
+#     eski (boru hattisiz) : 81 083 cevrim  -> hizlanma 795x
+#     guncel (boru hatli)  : 85 587 cevrim  -> hizlanma 753x
+#
+# Guncel deger su iki testin ciktisinda gorunur ve ikisi de ayni sayiyi verir:
+#     build/regression/npu_golden/sim.log     "NPU cycles  = 85587"
+#     build/regression/npu_dogruluk/sim.log   "85587 cevrim"
+#
+# RTL'in NPU boru hatti degisirse bu sabit de guncellenmelidir.
+DONANIM_CEVRIM = 85587      # tb_npu_audio, cikarim basina (boru hatli)
                             # 23 Agu 2026: CONV_MAC 3 asamali
                             # boru hatti -> 80.583 + 500
 SAAT_HZ        = 50_000_000

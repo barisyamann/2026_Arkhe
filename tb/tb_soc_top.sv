@@ -156,9 +156,26 @@ module tb_soc_top;
     // Agirliklar buradan TCM'e YUKLEYICI tarafindan kopyalanir; testbench
     // artik onlari TCM'e onyuklemez. Boylece simulasyon, uretilmis cipte
     // olacak seyin AYNISINI kosar.
+    // -------------------------------------------------------------------------
+    // 5 Eylul 2026: makro kipindeki CEKIRDEK TESTI icin ayri flash imaji.
+    //
+    // USE_SRAM_MACRO tanimliyken I-RAM'e dogrudan $readmemh yapilamaz (dort
+    // ayri makro), bu yuzden CORE_TEST gercek QSPI boot zincirine duser.
+    // Normal imajda ana uygulama oldugu icin core_test hic kosmuyor ve
+    // D-RAM imzasi bos kaliyordu. Bu imaj core_test'i flash'a gomer.
+    // Uretimi: python sw_nexys/scripts/gen_flash_image.py
+    // -------------------------------------------------------------------------
     spi_flash_model #(
         .APP_OFS    (32'h0080_0000),
+`ifdef USE_SRAM_MACRO
+  `ifdef CORE_TEST
+        .INIT_FILE  ("flash_core_test.hex"),
+  `else
         .INIT_FILE  ("flash_sim.hex"),
+  `endif
+`else
+        .INIT_FILE  ("flash_sim.hex"),
+`endif
         .WORD_COUNT (6048)
     ) u_flash (
         .sck   (qspi_sck),
@@ -473,11 +490,56 @@ module tb_soc_top;
         // Sonuclarin D-RAM'e yazildigini de dogruluyoruz - imza 0xC0DE0001.
         // =====================================================================
         log_print("[TB] CEKIRDEK TESTI: core_test.hex kosuluyor, iz aliniyor");
+        // -------------------------------------------------------------------
+        // 5 Eylul 2026: sabit 200 us bekleme MAKRO KIPINDE YETMIYOR.
+        //
+        // Cikarimsal kipte core_test.hex I-RAM'e $readmemh ile ANINDA
+        // yuklenir; 200 us program icin fazlasiyla yeterlidir. Makro kipinde
+        // ise gercek QSPI boot zinciri kosar: yukleyici 8 kB uygulamayi
+        // flash'tan bayt bayt okur. 200 us sonunda PC hala boot ROM'un
+        // kopyalama dongusundeydi (0x36-0x3a), cekirdek testi programi hic
+        // baslamamisti ve imza dogal olarak bos kaliyordu.
+        //
+        // Sabit bir sure yerine imzayi BEKLIYORUZ; boylece iki kip de ayni
+        // kodu kullanir ve boot suresi degisirse test kendiliginden uyum
+        // saglar. Ust sinir sistem testindeki 30 ms ile ayni.
+        // -------------------------------------------------------------------
+    `ifdef USE_SRAM_MACRO
+        begin
+            int bekleme;
+            bekleme = 0;
+            while (uut.u_data_ram.g_sram[2].u_macro.mem[31] !== 32'hC0DE0001 &&
+                   bekleme < 30_000) begin
+                #(1_000);                 // 1 us adimlarla
+                bekleme = bekleme + 1;
+            end
+            log_print($sformatf("[TB] imza beklendi: %0d us", bekleme));
+        end
+    `else
         #(200_000);                       // 200 us - program bitmis olur
+    `endif
 
         begin
             logic [31:0] imza;
+            // -----------------------------------------------------------------
+            // 5 Eylul 2026'da DUZELTILDI.
+            //
+            // Bu satir korumasizdi ve makro kipinde elaborasyonu dusuruyordu:
+            //   ERROR: [VRFC 10-2991] 'ram' is not declared under prefix
+            //                         'u_data_ram'
+            // USE_SRAM_MACRO tanimliyken D-RAM tek bir 'ram' dizisi degil,
+            // MACRO_WORDS (512) kelimelik dort ayri makrodur. Ayni koruma
+            // 366. satirdaki NPU erisimine konmus ama buraya unutulmus.
+            //
+            // Kelime indisi 13'h400 + 31 = 1055:
+            //     makro    = 1055 / 512 = 2
+            //     ic ofset = 1055 % 512 = 31
+            // -----------------------------------------------------------------
+        `ifdef USE_SRAM_MACRO
+            imza = uut.u_data_ram.g_sram[2].u_macro.mem[31];
+        `else
             imza = uut.u_data_ram.ram[13'h400 + 31];   // 0x20001000 + 31*4
+        `endif
             if (imza === 32'hC0DE0001) begin
                 log_print("      [OK]   core_test D-RAM imzasi dogru: 0xC0DE0001");
             end else begin

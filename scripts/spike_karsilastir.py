@@ -107,8 +107,15 @@ def donguyu_kes(iz, esik=20):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--spike", default=str(KOK / "build/spike/spike_iz.txt"))
+    # 4 Eylul 2026: varsayilan yol DUZELTILDI. Onceden
+    # "build/coretest/trace_core_00000000.log" yaziyordu; o dizin elle
+    # kosulan eski bir xsim denemesinden kalmaydi. Regresyon izi
+    # build/regression/<test adi>/ altina yazar, dolayisiyla belgedeki
+    # yeniden uretim adimlari (run_regression --test cekirdek_izi ->
+    # spike_karsilastir) "iz bulunamadi" ile kesiliyordu.
     ap.add_argument("--rtl",
-                    default=str(KOK / "build/coretest/trace_core_00000000.log"))
+                    default=str(KOK / "build/regression/cekirdek_izi"
+                                      "/trace_core_00000000.log"))
     ap.add_argument("--baslangic", default=BASLANGIC_PC)
     a = ap.parse_args()
 

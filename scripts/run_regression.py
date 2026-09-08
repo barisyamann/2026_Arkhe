@@ -261,7 +261,8 @@ TESTLER = [
                    ROOT/"rtl"/"cv32e40p-master"/"bhv"/"cv32e40p_tracer.sv"],
         tanim=["CORE_TEST", "CV32E40P_TRACE_EXECUTION"],
         mem=["core_test.hex", "app.hex", "app_sim.hex", "boot.hex",
-             "flash.hex", "flash_sim.hex", "fc_weights_packed32.mem"],
+             "flash.hex", "flash_sim.hex", "flash_core_test.hex",
+             "fc_weights_packed32.mem"],
         mem_zorunlu=False,
         ek_bayrak=["-L", "uvm",
                    "-i", str(ROOT/"rtl"/"cv32e40p-master"/"bhv"/"include"),
@@ -375,7 +376,7 @@ def filelist_rtl():
     return kaynaklar or None
 
 
-def test_kos(t, vivado_bin, kapsam=False):
+def test_kos(t, vivado_bin, kapsam=False, ek_tanim=None):
     # Kaynak listesi gec baglanan testler (tam sistem) icin
     if t.get("kaynak") is None:
         rtl = filelist_rtl()
@@ -406,13 +407,42 @@ def test_kos(t, vivado_bin, kapsam=False):
     for tn in t.get("tanim", []):
         tanim_arg += ["-d", tn]
 
+    # -------------------------------------------------------------------------
+    # 5 Eylul 2026'da EKLENDI: --ek-tanim
+    #
+    # Regresyon simdiye kadar HIC USE_SRAM_MACRO tanimlamiyordu; yani butun
+    # testler SRAM'in CIKARIMSAL yolunu (`else` dali) dogruluyordu. ASIC
+    # akisi ise `asic/config.yaml` icinde bu tanimi acar ve MAKRO yolunu
+    # kullanir. Iki yol farkli kodtur - biri dogrulanirken digeri
+    # dogrulanmamis kaliyordu.
+    #
+    # sram_module.sv'ye eklenen okuma boru hattu (macro_read_pending,
+    # kombinasyonel bypass'in kaldirilmasi) YALNIZCA makro dalindadir.
+    # Bu tanim verilmeden kosulan regresyon o degisikligi HIC test etmez.
+    # -------------------------------------------------------------------------
+    for tn in (ek_tanim or []):
+        if tn not in t.get("tanim", []):
+            tanim_arg += ["-d", tn]
+
     # ek_bayrak: teste ozel derleyici bayraklari (orn. -L uvm, -i <dizin>)
     # cekirdek izi testi cv32e40p_tracer'i kullanir; o da uvm_pkg import
     # eder ve bhv/include dizinindeki basliklara ihtiyac duyar.
     ek_bayrak = [str(x) for x in t.get("ek_bayrak", [])]
 
+    # USE_SRAM_MACRO acikken RTL, saticinin davranissal SRAM modelini
+    # ornekler; o dosya normal kaynak listesinde YOKTUR (yalnizca ASIC
+    # akisinin filelist.f'inde). Eklenmezse elaborasyon
+    # "Module <sky130_sram_2kbyte_1rw1r_32x512_8> not found" ile duser.
+    kaynaklar = [str(k) for k in t["kaynak"]]
+    if "USE_SRAM_MACRO" in (ek_tanim or []):
+        sram_model = (ROOT / "asic" / "macros" /
+                      "sky130_sram_2kbyte_1rw1r_32x512_8" / "verilog" /
+                      "sky130_sram_2kbyte_1rw1r_32x512_8.v")
+        if sram_model.is_file():
+            kaynaklar.insert(0, str(sram_model))
+
     rc, out = komut([xvlog, "-sv"] + tanim_arg + ek_bayrak +
-                    [str(k) for k in t["kaynak"]] +
+                    kaynaklar +
                     ["-log", "vlog.log"], d, d / "vlog.log")
     if rc != 0:
         return dict(ad=t["ad"], durum="DERLEME HATASI", denetim=0,
@@ -584,7 +614,35 @@ def main():
                     help="Vivado bin dizini")
     ap.add_argument("--coverage", action="store_true",
                     help="Kod kapsama (statement/branch/condition/toggle) topla")
+    # -------------------------------------------------------------------------
+    # 4 Eylul 2026'da EKLENDI: --test ve --list.
+    #
+    # Teker teker inceleme icin tek test kosmak gerekiyordu; onceden bu
+    # secenek yoktu, her seferinde 16 testin tamami (sistem testleri dahil,
+    # bazilari 400+ saniye) kosuyordu. --list test adlarini yazar; --test
+    # <ad> (birden fazla kez verilebilir) yalnizca o testleri kosar.
+    # -------------------------------------------------------------------------
+    ap.add_argument("--test", action="append", metavar="AD",
+                    help="Yalnizca bu testi kos. Birden fazla kez verilebilir. "
+                         "Adlar icin --list")
+    ap.add_argument("--list", action="store_true",
+                    help="Test adlarini listele ve cik")
+    ap.add_argument("--ek-tanim", action="append", metavar="TANIM",
+                    dest="ek_tanim",
+                    help="Butun testlere ek `define ekle (orn. USE_SRAM_MACRO). "
+                         "Birden fazla kez verilebilir.")
     a = ap.parse_args()
+
+    if a.list:
+        print("Blok testleri:")
+        for t in TESTLER:
+            if t.get("kaynak") is not None:
+                print(f"  {t['ad']}")
+        print("Sistem testleri (bellek dosyalari gerekir):")
+        for t in TESTLER:
+            if t.get("kaynak") is None:
+                print(f"  {t['ad']}")
+        return 0
 
     if a.coverage:
         shutil.rmtree(WORK / "covdb", ignore_errors=True)
@@ -599,10 +657,21 @@ def main():
     print(" ARKHE SoC - BLOK SEVIYESI REGRESYON")
     print("=" * 70)
 
+    testler = TESTLER
+    if a.test:
+        istenen = set(a.test)
+        gecerli = {t["ad"] for t in TESTLER}
+        bilinmeyen = istenen - gecerli
+        if bilinmeyen:
+            print(f"HATA: bilinmeyen test adi: {', '.join(sorted(bilinmeyen))}")
+            print("      Adlar icin: --list")
+            return 2
+        testler = [t for t in TESTLER if t["ad"] in istenen]
+
     sonuclar = []
-    for t in TESTLER:
+    for t in testler:
         print(f"  {t['ad']:<12} calisiyor...", end="", flush=True)
-        s = test_kos(t, a.vivado, a.coverage)
+        s = test_kos(t, a.vivado, a.coverage, a.ek_tanim)
         sonuclar.append(s)
         if s["durum"] == "GECTI":
             print(f"\r  {t['ad']:<12} GECTI    {s['denetim']:>3} denetim  "

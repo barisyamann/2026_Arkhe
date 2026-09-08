@@ -508,6 +508,73 @@ localparam int TEST_WORDS = 128;
         end
 
         // ---------------------------------------------------------------------
+        // TEST: FIFO HATA BAYRAKLARI (negatif senaryo)
+        //
+        // Sartname QSPI_STA[11:8] icinde FIFO hata bayraklari istiyor. RTL
+        // bunlari uretiyor ancak testbench negatif senaryoyu hic sinamiyordu:
+        //     sta_fifo_err = {2'b00, err_tx_full, err_rx_empty | err_rx_full}
+        // yani STA[9] = dolu TX FIFO'ya yazma, STA[8] = bos RX FIFO'dan okuma.
+        //
+        // FIFO derinligi 64 kelime. Once iki FIFO bosaltilir, sonra sinir
+        // asilir ve bayragin kalktigi dogrulanir. Temizleme QSPI_CCR[31]
+        // (clr_status) ile yapilir.
+        // ---------------------------------------------------------------------
+        begin : fifo_hata_testi
+            logic [31:0] sta;
+            int i;
+
+            $display("");
+            $display("--- TEST: FIFO hata bayraklari (negatif) ---");
+
+            // Temiz baslangic: iki FIFO'yu bosalt, durum bayraklarini sil
+            axi_write(32'h10, 32'h0000_0003);   // QSPI_FCR: rx+tx flush
+            axi_write(32'h00, 32'h8000_0000);   // QSPI_CCR[31] = clr_status
+            repeat (4) @(posedge clk);
+            axi_read(32'h0C, sta);
+            check("baslangic: hata bayraklari temiz", {28'b0, sta[11:8]}, 32'h0);
+
+            // --- 1) BOS RX FIFO'DAN OKUMA -> STA[8] ---
+            axi_read(32'h08, sta);              // QSPI_DR, RX bos
+            repeat (2) @(posedge clk);
+            axi_read(32'h0C, sta);
+            check("bos RX okuma -> STA[8]", {31'b0, sta[8]}, 32'h1);
+
+            // Temizle ve dogrula
+            axi_write(32'h00, 32'h8000_0000);
+            repeat (4) @(posedge clk);
+            axi_read(32'h0C, sta);
+            check("clr_status -> STA[8] temizlendi", {31'b0, sta[8]}, 32'h0);
+
+            // --- 2) DOLU TX FIFO'YA YAZMA -> STA[9] ---
+            axi_write(32'h10, 32'h0000_0003);   // iki FIFO'yu bosalt
+            repeat (4) @(posedge clk);
+
+            // 64 kelime yaz: FIFO tam dolar, henuz hata yok
+            for (i = 0; i < 64; i++) begin
+                axi_write(32'h08, 32'hA5A5_0000 + i);
+            end
+            repeat (2) @(posedge clk);
+            axi_read(32'h0C, sta);
+            check("64 kelime sonrasi TX dolu (STA[6])", {31'b0, sta[6]}, 32'h1);
+            check("64 kelime sonrasi hata yok (STA[9])", {31'b0, sta[9]}, 32'h0);
+
+            // 65. yazma -> tasma hatasi
+            axi_write(32'h08, 32'hDEAD_BEEF);
+            repeat (2) @(posedge clk);
+            axi_read(32'h0C, sta);
+            check("dolu TX'e yazma -> STA[9]", {31'b0, sta[9]}, 32'h1);
+
+            // Temizle ve dogrula
+            axi_write(32'h00, 32'h8000_0000);
+            axi_write(32'h10, 32'h0000_0003);
+            repeat (4) @(posedge clk);
+            axi_read(32'h0C, sta);
+            check("clr_status -> STA[9] temizlendi", {31'b0, sta[9]}, 32'h0);
+            check("son durum: tum hata bayraklari temiz",
+                  {28'b0, sta[11:8]}, 32'h0);
+        end
+
+        // ---------------------------------------------------------------------
         // Ozet
         // ---------------------------------------------------------------------
         $display("================================================================");

@@ -71,6 +71,27 @@ def main():
         uret(app_sim, DEST.parent / "flash_sim.hex", "flash_sim")
     else:
         print("UYARI: app_sim.hex yok, flash_sim.hex uretilmedi")
+
+    # -------------------------------------------------------------------------
+    # 5 Eylul 2026'da EKLENDI: flash_core_test.hex
+    #
+    # USE_SRAM_MACRO tanimliyken I-RAM tek bir 'ram' dizisi degil, dort ayri
+    # SRAM makrosudur; testbench $readmemh ile core_test.hex'i dogrudan
+    # yukleyemez ve GERCEK QSPI BOOT zincirine duser. O zincir flash'taki
+    # uygulamayi kopyalar - normal imajda core_test DEGIL, ana uygulama var.
+    # Sonuc: cekirdek testi makro kipinde hic kosmuyor, D-RAM imzasi hic
+    # yazilmiyor, test "imza yanlis: 0xxxxxxxxx" ile duser (5 Eylul 2026'da
+    # bu sekilde gozlendi).
+    #
+    # Bu imaj core_test'i flash'a gomer; boylece makro kipinde de gercek boot
+    # zinciriyle cekirdek testi kosulabilir ve Spike ISS karsilastirmasi ASIC
+    # kod yolunda da yapilabilir.
+    # -------------------------------------------------------------------------
+    core_test = APP_HEX.parent / "core_test.hex"
+    if core_test.is_file():
+        uret(core_test, DEST.parent / "flash_core_test.hex", "flash_core")
+    else:
+        print("UYARI: core_test.hex yok, flash_core_test.hex uretilmedi")
     return
 
     app = oku(APP_HEX)
