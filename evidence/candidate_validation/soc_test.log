@@ -1,0 +1,95 @@
+[SPI_FLASH] 24192 bayt yuklendi: flash_sim.hex
+[0] SoC Simülasyonu Başlatıldı.
+[0] GPIO Çıkışı Değişti: gpio_o = 16'h0000
+[TB] GERCEK BOOT: uygulama QSPI flash'tan yuklenecek.
+[TB] SRAM MAKRO KIPI: bellekler 23 adet sky130 makrosu.
+[171000] Reset kaldırıldı. İşlemci çalışıyor...
+[UART] 
+[UART] *** ARKHE FPGA TEST ***
+[UART] Timer test
+[UART] Timer OK
+[UART] Bus fault test
+[UART] Bus fault @ 0x00000100 ST=0x05
+[UART] I2C test
+[26417250000] *** I2C İşlemi Tamamlandı - IRQ aktif ***
+[UART] I2C CFG=0x02
+[UART] 
+[UART] Run: 1
+[UART] Clear TCM
+[UART] Stream ready
+      [OK]   CPU UART-stream ve DMA'yi kurdu
+[TB] UART-stream'den 1960 bayt gonderiliyor (0x55)
+[32223690000] [DMA] Transfer başladı: src=0x40030020, dst=0x20010000, len=490 words
+[51817530000] [DMA] Transfer tamamlandı.
+[51817550000] *** DMA Transfer Tamamlandı - IRQ aktif ***
+[TB] UART-stream gonderimi tamamlandi
+[51821290000] *** DMA kesmesi temizlendi ***
+[UART] DMA done
+[TB] UART_RDR testi: A1 B2 C3 D4 gonderiliyor
+[52748970000] NPU donanım motorunun tamamlanması bekleniyor...
+[UART] RDR: A1B2C3D4
+[UART] Start NPU
+[55095170000] [NPU_ENGINE] Starting upgraded NPU computation: in_addr=0x0000, out_addr=0x1dac
+[56806910000] [NPU_ENGINE] Upgraded NPU computation done. Selected Class=3
+            fc_acc: [0]=-985885, [1]=242268, [2]=240758, [3]=387226
+            probs:  [0]=0, [1]=1050, [2]=1050, [3]=1995
+[56806910000] NPU donanım motoru DONE sinyalini verdi!
+[UART] [IRQ] Class: 3
+[UART] -> NO
+      [OK]   NPU beklenen sinifi verdi: 3 (NO), GPIO 0xAAAA
+  -- REUSE: global reset olmadan ikinci cikarim
+[58866830000] GPIO Çıkışı Değişti: gpio_o = 16'haaaa
+[UART] Wait 2ms
+[UART] 
+[UART] Run: 2
+[UART] Clear TCM
+[UART] Stream ready
+[TB] UART-stream'den 1960 bayt gonderiliyor (0x80)
+[66321790000] [DMA] Transfer başladı: src=0x40030020, dst=0x20010000, len=490 words
+[85915630000] [DMA] Transfer tamamlandı.
+[85915650000] *** DMA Transfer Tamamlandı - IRQ aktif ***
+[TB] UART-stream gonderimi tamamlandi
+[85919390000] *** DMA kesmesi temizlendi ***
+[UART] DMA done
+[UART] RDR: A1B2C3D4
+[UART] Start NPU
+[89159350000] [NPU_ENGINE] Starting upgraded NPU computation: in_addr=0x0000, out_addr=0x1dac
+[90871090000] [NPU_ENGINE] Upgraded NPU computation done. Selected Class=0
+            fc_acc: [0]=427, [1]=-518, [2]=-94, [3]=186
+            probs:  [0]=1024, [1]=1024, [2]=1024, [3]=1024
+[UART] [IRQ] Class: 0
+[UART] -> SILENCE
+      [OK]   Uygulama reset olmadan yeni tura girdi
+      [OK]   Ikinci cikarim RESET OLMADAN dogru sonuc verdi: 0 (SILENCE)
+      [OK]   DMA UART-stream verisini TCM'e tasidi
+      [OK]   Veri yolu hatasi yakalandi, adres ve kaynak dogru
+      [OK]   I2C protokol motoru NACK ile dogru sonlandi
+      [OK]   UART_RDR bayt okuma dogru: A1B2C3D4
+      [OK]   ISR sonucu UART'tan yazdirdi
+[93373210000] GPIO Çıkışı Değişti: gpio_o = 16'h0f0f
+[93373230000] GPIO girişleri 0xA5A5 olarak ayarlandı.
+
+================================================================
+ JTAG HATA AYIKLAMA (DEBUG) PORTU DOGRULAMA TESTI BASLATILDI
+================================================================
+     [JTAG] TAP Reset yapiliyor...
+ ---> JTAG IDCODE okunuyor...
+      [OK]   JTAG IDCODE = 0x0000000041524b48
+ ---> CPU'ya HALT istegi gonderiliyor...
+      [OK]   CPU halt (debug_req_o) = 0x0000000000000001
+ ---> JTAG uzerinden TCM SRAM adresine veri yaziliyor (0x20011000 = 0xDEADBEEF)...
+ ---> JTAG uzerinden TCM SRAM adresi okunuyor (0x20011000)...
+      [OK]   JTAG bellek okuma/yazma = 0x00000000deadbeef
+ ---> CPU Resume ediliyor...
+      [OK]   CPU resume (debug_req_o) = 0x0000000000000000
+================================================================
+ JTAG PORTU DOGRULAMA TESTI TAMAMLANDI
+================================================================
+[93467130000] SoC Simülasyonu Tamamlandı.
+================================================================
+ TUM TESTLER GECTI - 0 hata
+================================================================
+- /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:803: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.044 2026-01-01
+- Verilator: $finish at 93ms; walltime 51.109 s; speed 1.829 ms/s
+- Verilator: cpu 51.108 s on 1 threads; alloced 7 MB

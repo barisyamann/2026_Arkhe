@@ -1,0 +1,6 @@
+{
+  "commit": "d800acba6e464ba7ea453b7cb11bec954e36e4db",
+  "checked_sources": 57,
+  "mismatches": [],
+  "method": "SHA256 of git show commit:path compared with frozen d45 source_hashes.json"
+}

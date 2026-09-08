@@ -1,0 +1,41 @@
+
+===========================================================================
+Violator List
+============================================================================
+[setup in-out] clk_i -> qspi_sck : -1.296215
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[14] -> _188237_/D : -0.916938
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[16] -> _188239_/D : -0.657867
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[23] -> _188246_/D : -0.655685
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[12] -> _188235_/D : -0.625199
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[9] -> _188232_/D : -0.614236
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[24] -> _188247_/D : -0.555575
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[20] -> _188243_/D : -0.487338
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[14] -> _190346_/D : -0.485892
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[5] -> _188228_/D : -0.448152
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[22] -> _188245_/D : -0.382947
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[15] -> _188238_/D : -0.373289
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout1[19] -> _188930_/D : -0.365244
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[13] -> _188236_/D : -0.336120
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[11] -> _188234_/D : -0.297774
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout1[19] -> _189025_/D : -0.295007
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[18] -> _188241_/D : -0.222339
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[12] -> _190344_/D : -0.195815
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[9] -> _190341_/D : -0.190211
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[10] -> _188233_/D : -0.185223
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[19] -> _188242_/D : -0.179805
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[8] -> _188231_/D : -0.171255
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout1[31] -> _188942_/D : -0.163753
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[24] -> _190356_/D : -0.144208
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[25] -> _188248_/D : -0.139440
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout1[31] -> _189037_/D : -0.131340
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout1[13] -> _189019_/D : -0.112314
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[28] -> _188251_/D : -0.088496
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[17] -> _188240_/D : -0.086096
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout1[12] -> _189018_/D : -0.082739
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[23] -> _190355_/D : -0.056700
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[0] -> _188223_/D : -0.050095
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[16] -> _190348_/D : -0.042439
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout1[13] -> _188924_/D : -0.031214
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout1[28] -> _189034_/D : -0.026706
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout1[28] -> _188939_/D : -0.008646
+[setup reg-reg] u_npu.u_npu_sram.g_sram[0].u_macro/dout0[5] -> _190337_/D : -0.007544

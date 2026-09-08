@@ -1,0 +1,21 @@
+
+===========================================================================
+Clock Skew (Hold)
+============================================================================
+======================= min_ss_100C_1v60 Corner ===================================
+
+Clock clk_i
+4.272280 source latency u_instruction_ram.g_sram[0].u_macro/clk1 v
+-6.378084 target latency _187831_/CLK ^
+-0.100000 clock uncertainty
+0.000000 CRPR
+--------------
+-2.205805 hold skew
+
+Clock jtag_clk
+0.983461 source latency _189829_/CLK ^
+-0.938184 target latency _188145_/CLK ^
+0.000000 CRPR
+--------------
+0.045277 hold skew
+

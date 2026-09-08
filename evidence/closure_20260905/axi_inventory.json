@@ -1,0 +1,117 @@
+[
+  {
+    "name": "cpu_data",
+    "prefix": "uut.data_axil_",
+    "read_only": false
+  },
+  {
+    "name": "dma_master",
+    "prefix": "uut.dma_m_",
+    "read_only": false
+  },
+  {
+    "name": "jtag_master",
+    "prefix": "uut.jtag_m_",
+    "read_only": false
+  },
+  {
+    "name": "arbiter_out",
+    "prefix": "uut.merged_m_",
+    "read_only": false
+  },
+  {
+    "name": "boot_data",
+    "prefix": "uut.s0_",
+    "read_only": false
+  },
+  {
+    "name": "iram_data",
+    "prefix": "uut.s1_",
+    "read_only": false
+  },
+  {
+    "name": "dram",
+    "prefix": "uut.s2_",
+    "read_only": false
+  },
+  {
+    "name": "gpio",
+    "prefix": "uut.s3_",
+    "read_only": false
+  },
+  {
+    "name": "timer",
+    "prefix": "uut.s4_",
+    "read_only": false
+  },
+  {
+    "name": "uart_general",
+    "prefix": "uut.s5_",
+    "read_only": false
+  },
+  {
+    "name": "uart_stream",
+    "prefix": "uut.s6_",
+    "read_only": false
+  },
+  {
+    "name": "i2c",
+    "prefix": "uut.s7_",
+    "read_only": false
+  },
+  {
+    "name": "qspi",
+    "prefix": "uut.s8_",
+    "read_only": false
+  },
+  {
+    "name": "npu_csr",
+    "prefix": "uut.s9_",
+    "read_only": false
+  },
+  {
+    "name": "npu_memory",
+    "prefix": "uut.s10_",
+    "read_only": false
+  },
+  {
+    "name": "dma_csr",
+    "prefix": "uut.s11_",
+    "read_only": false
+  },
+  {
+    "name": "jtag_csr",
+    "prefix": "uut.s12_",
+    "read_only": false
+  },
+  {
+    "name": "rom_slave",
+    "prefix": "uut.rom_s_",
+    "read_only": false
+  },
+  {
+    "name": "iram_slave",
+    "prefix": "uut.iram_s_",
+    "read_only": false
+  },
+  {
+    "name": "npu_engine",
+    "prefix": "uut.u_npu.eng_",
+    "read_only": false
+  },
+  {
+    "name": "cpu_instruction",
+    "prefix": "uut.instr_axil_",
+    "read_only": true
+  },
+  {
+    "name": "rom_instruction",
+    "prefix": "uut.rom_m0_",
+    "read_only": true
+  },
+  {
+    "name": "iram_instruction",
+    "prefix": "uut.iram_m0_",
+    "read_only": true
+  }
+]

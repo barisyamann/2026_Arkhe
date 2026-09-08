@@ -1,0 +1,7 @@
+{
+  "exit_code": 0,
+  "checked_files": 1372,
+  "stdout": "python3 scripts/verify_delivery.py\n{\n  \"missing\": [],\n  \"empty\": [],\n  \"source_errors\": [],\n  \"hash_errors\": [],\n  \"signoff_clean\": false,\n  \"note\": \"File completeness is separate from timing/DRC closure; read asic/README.md.\"\n}\n",
+  "stderr": "",
+  "time_utc": "2026-09-08T18:24:27Z"
+}

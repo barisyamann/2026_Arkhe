@@ -1,0 +1,2 @@
+PASS SRAM registered read: 76 checked reads, 78 accepted, 76 responses, 2 reset-aborted
+/home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_sram_registered.sv:101: $finish called at 18260000 (1ps)

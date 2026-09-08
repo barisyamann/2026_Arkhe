@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "cpu_cycles": 68474022,
+  "npu_cycles": 85587,
+  "speedup": 800.0516667250868,
+  "reference_clock_hz": 50000000,
+  "cpu_seconds_at_50mhz": 1.36948044,
+  "npu_seconds_at_50mhz": 0.00171174,
+  "output_q12": [
+    0,
+    225,
+    326,
+    3543
+  ],
+  "input": "benchmark_golden",
+  "cpu_scope": "Full 4000 convolution outputs, FC bias/MAC/requantization and softmax; custom C, -Os rv32imc_zicsr; CPU RTL with SRAM models",
+  "npu_scope": "Compute engine with synchronous TCM model; no boot/UART/DMA input transfer",
+  "limitations": [
+    "Single benchmark input",
+    "Custom integer C baseline, not official TFLite Micro executable",
+    "Comparison clock is not ASIC post-route timing closure"
+  ]
+}

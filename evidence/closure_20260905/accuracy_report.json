@@ -1,0 +1,192 @@
+{
+  "rtl_simulation_passed": true,
+  "evaluation_count": 100,
+  "benchmark_count": 1,
+  "subsets": {
+    "speech": {
+      "count": 75,
+      "tflite_accuracy": 0.8133333333333334,
+      "rtl_accuracy": 0.8133333333333334,
+      "difference_percentage_points": 0.0,
+      "relative_accuracy_difference": 0.0,
+      "tflite_confusion": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          16,
+          2,
+          5
+        ],
+        [
+          0,
+          1,
+          24,
+          0
+        ],
+        [
+          1,
+          1,
+          2,
+          21
+        ]
+      ],
+      "rtl_confusion": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          16,
+          2,
+          5
+        ],
+        [
+          0,
+          1,
+          24,
+          0
+        ],
+        [
+          1,
+          1,
+          2,
+          21
+        ]
+      ]
+    },
+    "synthetic_silence": {
+      "count": 25,
+      "tflite_accuracy": 0.8,
+      "rtl_accuracy": 0.8,
+      "difference_percentage_points": 0.0,
+      "relative_accuracy_difference": 0.0,
+      "tflite_confusion": [
+        [
+          20,
+          0,
+          4,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "rtl_confusion": [
+        [
+          20,
+          0,
+          4,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "combined": {
+      "count": 100,
+      "tflite_accuracy": 0.81,
+      "rtl_accuracy": 0.81,
+      "difference_percentage_points": 0.0,
+      "relative_accuracy_difference": 0.0,
+      "tflite_confusion": [
+        [
+          20,
+          0,
+          4,
+          1
+        ],
+        [
+          2,
+          16,
+          2,
+          5
+        ],
+        [
+          0,
+          1,
+          24,
+          0
+        ],
+        [
+          1,
+          1,
+          2,
+          21
+        ]
+      ],
+      "rtl_confusion": [
+        [
+          20,
+          0,
+          4,
+          1
+        ],
+        [
+          2,
+          16,
+          2,
+          5
+        ],
+        [
+          0,
+          1,
+          24,
+          0
+        ],
+        [
+          1,
+          1,
+          2,
+          21
+        ]
+      ]
+    }
+  },
+  "limitations": [
+    "Small stratified evaluation, not entire official test set; training overlap unknown",
+    "Floating-point host frontend, not bit-exact official microfrontend; identical tensors used on both classifiers",
+    "Synthetic silence evaluated separately; no model-output-based selection"
+  ],
+  "source": "https://www.tensorflow.org/tutorials/audio/simple_audio",
+  "class_disagreements_including_benchmark": 0,
+  "rtl_vs_integer_reference_probability_mismatches": 0
+}

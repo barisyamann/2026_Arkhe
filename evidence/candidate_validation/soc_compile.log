@@ -1,0 +1,815 @@
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:173:36: Ignoring unsupported: coverage clocking event
+  173 |     covergroup cg_soc_verification @(posedge clk);
+      |                                    ^
+                   ... For warning description see https://verilator.org/warn/COVERIGN?v=5.044
+                   ... Use "/* verilator lint_off COVERIGN */" and lint_on around source to disable this message.
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:178:27: Ignoring unsupported: cover bin specification
+  178 |             bins idle     = {16'h0000};
+      |                           ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:179:27: Ignoring unsupported: cover bin specification
+  179 |             bins cls_yes  = {16'h5555};
+      |                           ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:180:27: Ignoring unsupported: cover bin specification
+  180 |             bins cls_no   = {16'hAAAA};
+      |                           ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:181:27: Ignoring unsupported: cover bin specification
+  181 |             bins cls_sil  = {16'h0F0F};
+      |                           ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:182:27: Ignoring unsupported: cover bin specification
+  182 |             bins cls_unk  = {16'hFFFF};
+      |                           ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:177:19: Ignoring unsupported: coverpoint
+  177 |         cov_gpio: coverpoint gpio_o {
+      |                   ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:188:23: Ignoring unsupported: cover bin specification
+  188 |             bins low  = {1'b0};
+      |                       ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:189:23: Ignoring unsupported: cover bin specification
+  189 |             bins high = {1'b1};
+      |                       ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:187:23: Ignoring unsupported: coverpoint
+  187 |         cov_jtag_tms: coverpoint jtag_tms {
+      |                       ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:194:22: Ignoring unsupported: cover bin specification
+  194 |             bins hit = {1'b1};
+      |                      ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:193:21: Ignoring unsupported: coverpoint
+  193 |         cov_axi_aw: coverpoint (uut.u_npu.u_npu_axi_ctrl.mem_awvalid && uut.u_npu.u_npu_axi_ctrl.mem_awready) {
+      |                     ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:197:22: Ignoring unsupported: cover bin specification
+  197 |             bins hit = {1'b1};
+      |                      ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:196:20: Ignoring unsupported: coverpoint
+  196 |         cov_axi_w: coverpoint (uut.u_npu.u_npu_axi_ctrl.mem_wvalid && uut.u_npu.u_npu_axi_ctrl.mem_wready) {
+      |                    ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:200:22: Ignoring unsupported: cover bin specification
+  200 |             bins hit = {1'b1};
+      |                      ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:199:21: Ignoring unsupported: coverpoint
+  199 |         cov_axi_ar: coverpoint (uut.u_npu.u_npu_axi_ctrl.mem_arvalid && uut.u_npu.u_npu_axi_ctrl.mem_arready) {
+      |                     ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:203:22: Ignoring unsupported: cover bin specification
+  203 |             bins hit = {1'b1};
+      |                      ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:202:20: Ignoring unsupported: coverpoint
+  202 |         cov_axi_r: coverpoint (uut.u_npu.u_npu_axi_ctrl.mem_rvalid && uut.u_npu.u_npu_axi_ctrl.mem_rready) {
+      |                    ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:221:67: Ignoring unsupported: cover bin specification
+  221 |         cov_irq_npu:   coverpoint uut.npu_irq        { bins fired = {1'b1}; }
+      |                                                                   ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:221:24: Ignoring unsupported: coverpoint
+  221 |         cov_irq_npu:   coverpoint uut.npu_irq        { bins fired = {1'b1}; }
+      |                        ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:222:67: Ignoring unsupported: cover bin specification
+  222 |         cov_irq_timer: coverpoint uut.timer_irq      { bins fired = {1'b1}; }
+      |                                                                   ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:222:24: Ignoring unsupported: coverpoint
+  222 |         cov_irq_timer: coverpoint uut.timer_irq      { bins fired = {1'b1}; }
+      |                        ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:223:67: Ignoring unsupported: cover bin specification
+  223 |         cov_irq_dma:   coverpoint uut.dma_irq        { bins fired = {1'b1}; }
+      |                                                                   ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:223:24: Ignoring unsupported: coverpoint
+  223 |         cov_irq_dma:   coverpoint uut.dma_irq        { bins fired = {1'b1}; }
+      |                        ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:224:67: Ignoring unsupported: cover bin specification
+  224 |         cov_irq_fault: coverpoint uut.bus_fault_irq  { bins fired = {1'b1}; }
+      |                                                                   ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:224:24: Ignoring unsupported: coverpoint
+  224 |         cov_irq_fault: coverpoint uut.bus_fault_irq  { bins fired = {1'b1}; }
+      |                        ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:228:29: Ignoring unsupported: cover bin specification
+  228 |             bins idle       = {3'd0};
+      |                             ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:229:29: Ignoring unsupported: cover bin specification
+  229 |             bins read_req   = {3'd1};
+      |                             ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:230:29: Ignoring unsupported: cover bin specification
+  230 |             bins read_wait  = {3'd2};
+      |                             ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:231:29: Ignoring unsupported: cover bin specification
+  231 |             bins write_req  = {3'd3};
+      |                             ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:232:29: Ignoring unsupported: cover bin specification
+  232 |             bins write_wait = {3'd4};
+      |                             ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:233:29: Ignoring unsupported: cover bin specification
+  233 |             bins done       = {3'd5};
+      |                             ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:227:24: Ignoring unsupported: coverpoint
+  227 |         cov_dma_state: coverpoint uut.u_dma.dma_state {
+      |                        ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:239:26: Ignoring unsupported: cover bin specification
+  239 |             bins bos     = {0};
+      |                          ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:240:26: Ignoring unsupported: cover bin specification
+  240 |             bins az      = {[1:63]};
+      |                          ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:241:26: Ignoring unsupported: cover bin specification
+  241 |             bins orta    = {[64:191]};
+      |                          ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:242:26: Ignoring unsupported: cover bin specification
+  242 |             bins cok     = {[192:255]};
+      |                          ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:243:26: Ignoring unsupported: cover bin specification
+  243 |             bins dolu    = {256};
+      |                          ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:238:25: Ignoring unsupported: coverpoint
+  238 |         cov_uart2_fifo: coverpoint uut.u_uart2.fifo_level {
+      |                         ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:248:26: Ignoring unsupported: cover bin specification
+  248 |             bins silence = {2'd0};
+      |                          ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:249:26: Ignoring unsupported: cover bin specification
+  249 |             bins unknown = {2'd1};
+      |                          ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:250:26: Ignoring unsupported: cover bin specification
+  250 |             bins yes     = {2'd2};
+      |                          ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:251:26: Ignoring unsupported: cover bin specification
+  251 |             bins no      = {2'd3};
+      |                          ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:247:24: Ignoring unsupported: coverpoint
+  247 |         cov_npu_class: coverpoint uut.u_npu.class_sig {
+      |                        ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:256:29: Ignoring unsupported: cover bin specification
+  256 |             bins yok        = {2'b00};
+      |                             ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:257:29: Ignoring unsupported: cover bin specification
+  257 |             bins veri_kopru = {2'b01};
+      |                             ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:258:31: Ignoring unsupported: cover bin specification
+  258 |             bins buyruk_kopru = {2'b10};
+      |                               ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:255:24: Ignoring unsupported: coverpoint
+  255 |         cov_fault_src: coverpoint {uut.instr_bus_err, uut.data_bus_err} {
+      |                        ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:263:13: Ignoring unsupported: cover 'iff'
+  263 |             iff (uut.u_data_bridge.axil_bvalid_i) {
+      |             ^~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:264:25: Ignoring unsupported: cover bin specification
+  264 |             bins okay   = {2'b00};
+      |                         ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:265:25: Ignoring unsupported: cover bin specification
+  265 |             bins slverr = {2'b10};
+      |                         ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:266:25: Ignoring unsupported: cover bin specification
+  266 |             bins decerr = {2'b11};
+      |                         ^
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:262:23: Ignoring unsupported: coverpoint
+  262 |         cov_axi_resp: coverpoint uut.u_data_bridge.axil_bresp_i
+      |                       ^~~~~~~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:270:9: Ignoring unsupported: cover cross
+  270 |         cross cov_irq_npu, cov_npu_class;
+      |         ^~~~~
+%Warning-COVERIGN: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:173:5: Ignoring unsupported: covergroup
+  173 |     covergroup cg_soc_verification @(posedge clk);
+      |     ^~~~~~~~~~
+%Warning-TIMESCALEMOD: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Cevre_Birimleri/files_1/uart_pkg.sv:7:9: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+    7 | package uart_pkg;
+      |         ^~~~~~~~
+                       /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/memory_map_pck.sv:23:9: ... Location of module with timescale
+   23 | package memory_map_pck;
+      |         ^~~~~~~~~~~~~~
+                       ... For warning description see https://verilator.org/warn/TIMESCALEMOD?v=5.044
+                       ... Use "/* verilator lint_off TIMESCALEMOD */" and lint_on around source to disable this message.
+%Warning-TIMESCALEMOD: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/boot/boot_rom_pkg.sv:18:9: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+   18 | package boot_rom_pkg;
+      |         ^~~~~~~~~~~~
+                       /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/memory_map_pck.sv:23:9: ... Location of module with timescale
+   23 | package memory_map_pck;
+      |         ^~~~~~~~~~~~~~
+%Warning-TIMESCALEMOD: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_weights_pkg.sv:18:9: Timescale missing on this module as other modules have it (IEEE 1800-2023 3.14.2.3)
+   18 | package npu_weights_pkg;
+      |         ^~~~~~~~~~~~~~~
+                       /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/memory_map_pck.sv:23:9: ... Location of module with timescale
+   23 | package memory_map_pck;
+      |         ^~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_fifo.sv:128:49: Operator COND expects 2 bits on the Conditional True, but Conditional True's CONST '1'h1' generates 1 bits.
+                                                                                                                            : ... note: In instance 'tb_soc_top.uut.u_core.if_stage_i.prefetch_buffer_i.fifo_i'
+  128 |           status_cnt_q    <= (status_cnt_q > 0) ? 1'b1 : '0;
+      |                                                 ^
+                      ... For warning description see https://verilator.org/warn/WIDTHEXPAND?v=5.044
+                      ... Use "/* verilator lint_off WIDTHEXPAND */" and lint_on around source to disable this message.
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_prefetch_controller.sv:114:26: Operator NEQ expects 3 bits on the LHS, but LHS's VARREF 'cnt_q' generates 2 bits.
+                                                                                                                                           : ... note: In instance 'tb_soc_top.uut.u_core.if_stage_i.prefetch_buffer_i.prefetch_controller_i'
+  114 |   assign busy_o = (cnt_q != 3'b000) || trans_valid_o;
+      |                          ^~
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ff_one.sv:48:27: Operator ASSIGNW expects 5 bits on the Assign RHS, but Assign RHS's UNSIGNED generates 32 bits.
+                                                                                                                            : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.alu_i.ff_one_i'
+   48 |       assign index_lut[j] = $unsigned(j);
+      |                           ^
+                     ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.044
+                     ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:422:35: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's CONST '1'h1' generates 1 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+  422 |             data_sign_extension_o = 1'b1;
+      |                                   ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:893:79: Operator COND expects 32 bits on the Conditional False, but Conditional False's CONST '2'h3' generates 2 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+  893 |                     cv32e40p_fpu_pkg::FP16    : apu_lat_o = (C_LAT_FP16<2)    ? C_LAT_FP16+1    : 2'h3;
+      |                                                                               ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:893:59: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                                                                              : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+  893 |                     cv32e40p_fpu_pkg::FP16    : apu_lat_o = (C_LAT_FP16<2)    ? C_LAT_FP16+1    : 2'h3;
+      |                                                           ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:894:79: Operator COND expects 32 bits on the Conditional False, but Conditional False's CONST '2'h3' generates 2 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+  894 |                     cv32e40p_fpu_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<2) ? C_LAT_FP16ALT+1 : 2'h3;
+      |                                                                               ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:894:59: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                                                                              : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+  894 |                     cv32e40p_fpu_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<2) ? C_LAT_FP16ALT+1 : 2'h3;
+      |                                                           ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:895:79: Operator COND expects 32 bits on the Conditional False, but Conditional False's CONST '2'h3' generates 2 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+  895 |                     cv32e40p_fpu_pkg::FP8     : apu_lat_o = (C_LAT_FP8<2)     ? C_LAT_FP8+1     : 2'h3;
+      |                                                                               ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:895:59: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                                                                              : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+  895 |                     cv32e40p_fpu_pkg::FP8     : apu_lat_o = (C_LAT_FP8<2)     ? C_LAT_FP8+1     : 2'h3;
+      |                                                           ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1135:15: Logical operator IF expects 1 bit on the If, but If's SEL generates 2 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1135 |               if (instr_rdata_i[24:23]) illegal_insn_o = 1'b1;
+      |               ^~
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1239:15: Logical operator IF expects 1 bit on the If, but If's SEL generates 4 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1239 |               if (instr_rdata_i[24:21]) illegal_insn_o = 1'b1;    
+      |               ^~
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1249:15: Logical operator IF expects 1 bit on the If, but If's SEL generates 4 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1249 |               if (instr_rdata_i[24:21]) illegal_insn_o = 1'b1;    
+      |               ^~
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1281:15: Logical operator IF expects 1 bit on the If, but If's SEL generates 5 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1281 |               if (instr_rdata_i[24:20]) illegal_insn_o = 1'b1;
+      |               ^~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1349:75: Operator COND expects 32 bits on the Conditional False, but Conditional False's CONST '2'h3' generates 2 bits.
+                                                                                                                                : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1349 |                 cv32e40p_fpu_pkg::FP64    : apu_lat_o = (C_LAT_FP64<2)    ? C_LAT_FP64+1    : 2'h3;
+      |                                                                           ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1349:55: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1349 |                 cv32e40p_fpu_pkg::FP64    : apu_lat_o = (C_LAT_FP64<2)    ? C_LAT_FP64+1    : 2'h3;
+      |                                                       ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1350:75: Operator COND expects 32 bits on the Conditional False, but Conditional False's CONST '2'h3' generates 2 bits.
+                                                                                                                                : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1350 |                 cv32e40p_fpu_pkg::FP16    : apu_lat_o = (C_LAT_FP16<2)    ? C_LAT_FP16+1    : 2'h3;
+      |                                                                           ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1350:55: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1350 |                 cv32e40p_fpu_pkg::FP16    : apu_lat_o = (C_LAT_FP16<2)    ? C_LAT_FP16+1    : 2'h3;
+      |                                                       ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1351:75: Operator COND expects 32 bits on the Conditional False, but Conditional False's CONST '2'h3' generates 2 bits.
+                                                                                                                                : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1351 |                 cv32e40p_fpu_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<2) ? C_LAT_FP16ALT+1 : 2'h3;
+      |                                                                           ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1351:55: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1351 |                 cv32e40p_fpu_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<2) ? C_LAT_FP16ALT+1 : 2'h3;
+      |                                                       ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1352:75: Operator COND expects 32 bits on the Conditional False, but Conditional False's CONST '2'h3' generates 2 bits.
+                                                                                                                                : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1352 |                 cv32e40p_fpu_pkg::FP8     : apu_lat_o = (C_LAT_FP8<2)     ? C_LAT_FP8+1     : 2'h3;
+      |                                                                           ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1352:55: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1352 |                 cv32e40p_fpu_pkg::FP8     : apu_lat_o = (C_LAT_FP8<2)     ? C_LAT_FP8+1     : 2'h3;
+      |                                                       ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1479:71: Operator COND expects 32 bits on the Conditional False, but Conditional False's CONST '2'h3' generates 2 bits.
+                                                                                                                                : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1479 |             cv32e40p_fpu_pkg::FP64    : apu_lat_o = (C_LAT_FP64<2)    ? C_LAT_FP64+1    : 2'h3;
+      |                                                                       ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1479:51: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1479 |             cv32e40p_fpu_pkg::FP64    : apu_lat_o = (C_LAT_FP64<2)    ? C_LAT_FP64+1    : 2'h3;
+      |                                                   ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1480:71: Operator COND expects 32 bits on the Conditional False, but Conditional False's CONST '2'h3' generates 2 bits.
+                                                                                                                                : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1480 |             cv32e40p_fpu_pkg::FP16    : apu_lat_o = (C_LAT_FP16<2)    ? C_LAT_FP16+1    : 2'h3;
+      |                                                                       ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1480:51: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1480 |             cv32e40p_fpu_pkg::FP16    : apu_lat_o = (C_LAT_FP16<2)    ? C_LAT_FP16+1    : 2'h3;
+      |                                                   ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1481:71: Operator COND expects 32 bits on the Conditional False, but Conditional False's CONST '2'h3' generates 2 bits.
+                                                                                                                                : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1481 |             cv32e40p_fpu_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<2) ? C_LAT_FP16ALT+1 : 2'h3;
+      |                                                                       ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1481:51: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1481 |             cv32e40p_fpu_pkg::FP16ALT : apu_lat_o = (C_LAT_FP16ALT<2) ? C_LAT_FP16ALT+1 : 2'h3;
+      |                                                   ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1482:71: Operator COND expects 32 bits on the Conditional False, but Conditional False's CONST '2'h3' generates 2 bits.
+                                                                                                                                : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1482 |             cv32e40p_fpu_pkg::FP8     : apu_lat_o = (C_LAT_FP8<2)     ? C_LAT_FP8+1     : 2'h3;
+      |                                                                       ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:1482:51: Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.decoder_i'
+ 1482 |             cv32e40p_fpu_pkg::FP8     : apu_lat_o = (C_LAT_FP8<2)     ? C_LAT_FP8+1     : 2'h3;
+      |                                                   ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:108:37: Operator COND expects 33 bits on the Conditional False, but Conditional False's SIGNED generates 32 bits.
+                                                                                                                            : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.mult_i'
+  108 |   assign short_op_c = mulh_active_o ? $signed({mulh_carry_q, op_c_i}) : $signed(op_c_i);
+      |                                     ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:111:63: Operator ADD expects 34 bits on the RHS, but RHS's SIGNED generates 32 bits.
+                                                                                                                            : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.mult_i'
+  111 |   assign short_mac = $signed(short_op_c) + $signed(short_mul) + $signed(short_round);
+      |                                                               ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:273:5: Operator ADD expects 32 bits on the LHS, but LHS's SIGNED generates 18 bits.
+                                                                                                                           : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.mult_i'
+  273 |   ) + $signed(
+      |     ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:273:5: Operator ADD expects 32 bits on the RHS, but RHS's SIGNED generates 18 bits.
+                                                                                                                           : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.mult_i'
+  273 |   ) + $signed(
+      |     ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:275:5: Operator ADD expects 32 bits on the RHS, but RHS's SIGNED generates 18 bits.
+                                                                                                                           : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.mult_i'
+  275 |   ) + $signed(
+      |     ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:277:5: Operator ADD expects 32 bits on the RHS, but RHS's SIGNED generates 18 bits.
+                                                                                                                           : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.mult_i'
+  277 |   ) + $signed(
+      |     ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:302:29: Operator ASSIGNW expects 32 bits on the Assign RHS, but Assign RHS's SIGNED generates 17 bits.
+                                                                                                                            : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.mult_i'
+  302 |   assign dot_short_op_b_ext = $signed(dot_short_op_b[1]);
+      |                             ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:312:28: Operator ASSIGNW expects 16 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 17 bits.
+                                                                                                                           : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.mult_i'
+  312 |   assign clpx_shift_result = $signed(dot_short_result[31:15]) >>> clpx_shift_i;
+      |                            ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_int_controller.sv:122:58: Operator ASSIGN expects 5 bits on the Assign RHS, but Assign RHS's VARREF 'CSR_MEIX_BIT' generates 32 bits.
+                                                                                                                                     : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.int_controller_i'
+  122 |     else if (irq_local_qual[CSR_MEIX_BIT]) irq_id_ctrl_o = CSR_MEIX_BIT;   
+      |                                                          ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_int_controller.sv:123:58: Operator ASSIGN expects 5 bits on the Assign RHS, but Assign RHS's VARREF 'CSR_MSIX_BIT' generates 32 bits.
+                                                                                                                                     : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.int_controller_i'
+  123 |     else if (irq_local_qual[CSR_MSIX_BIT]) irq_id_ctrl_o = CSR_MSIX_BIT;   
+      |                                                          ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_int_controller.sv:124:58: Operator ASSIGN expects 5 bits on the Assign RHS, but Assign RHS's VARREF 'CSR_MTIX_BIT' generates 32 bits.
+                                                                                                                                     : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.int_controller_i'
+  124 |     else if (irq_local_qual[CSR_MTIX_BIT]) irq_id_ctrl_o = CSR_MTIX_BIT;   
+      |                                                          ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_int_controller.sv:147:24: Operator ASSIGN expects 5 bits on the Assign RHS, but Assign RHS's VARREF 'CSR_MTIX_BIT' generates 32 bits.
+                                                                                                                                     : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i.int_controller_i'
+  147 |     else irq_id_ctrl_o = CSR_MTIX_BIT;   
+      |                        ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:213:32: Operator COND expects 32 bits on the Conditional True, but Conditional True's VARREF 'div_shift' generates 6 bits.
+                                                                                                                           : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.alu_i'
+  213 |   assign shift_amt = div_valid ? div_shift : operand_b_i;
+      |                                ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:261:24: Operator ASSIGNW expects 16 bits on the Assign RHS, but Assign RHS's UNSIGNED generates 2 bits.
+                                                                                                                           : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.alu_i'
+  261 |   assign clpx_shift_ex = $unsigned(clpx_shift_i);
+      |                        ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:275:35: Operator ASSIGN expects 16 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 17 bits.
+                                                                                                                          : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.alu_i'
+  275 |         shift_right_result[31:16] = $signed(
+      |                                   ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:278:34: Operator ASSIGN expects 16 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 17 bits.
+                                                                                                                          : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.alu_i'
+  278 |         shift_right_result[15:0] = $signed(
+      |                                  ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:284:35: Operator ASSIGN expects 8 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 9 bits.
+                                                                                                                          : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.alu_i'
+  284 |         shift_right_result[31:24] = $signed(
+      |                                   ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:287:35: Operator ASSIGN expects 8 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 9 bits.
+                                                                                                                          : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.alu_i'
+  287 |         shift_right_result[23:16] = $signed(
+      |                                   ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:290:34: Operator ASSIGN expects 8 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 9 bits.
+                                                                                                                          : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.alu_i'
+  290 |         shift_right_result[15:8] = $signed(
+      |                                  ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:293:33: Operator ASSIGN expects 8 bits on the Assign RHS, but Assign RHS's SHIFTRS generates 9 bits.
+                                                                                                                          : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.alu_i'
+  293 |         shift_right_result[7:0] = $signed(
+      |                                 ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:300:28: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's SHIFTR generates 64 bits.
+                                                                                                                          : ... note: In instance 'tb_soc_top.uut.u_core.ex_stage_i.alu_i'
+  300 |         shift_right_result = shift_op_a_32 >> shift_amt_int[4:0];
+      |                            ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_id_stage.sv:661:35: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's UNSIGNED generates 5 bits.
+                                                                                                                                : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i'
+  661 |       OP_B_BMASK:       operand_b = $unsigned(operand_b_fw_id[4:0]);
+      |                                   ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_id_stage.sv:1484:30: Operator ASSIGNDLY expects 6 bits on the Assign RHS, but Assign RHS's CONST '5'h0' generates 5 bits.
+                                                                                                                                 : ... note: In instance 'tb_soc_top.uut.u_core.id_stage_i'
+ 1484 |       atop_ex_o              <= 5'b0;
+      |                              ^~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:302:61: Operator ADD expects 32 or 13 bits on the RHS, but RHS's SEL generates 6 bits.
+                                                                                                                 : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+  302 |     assign flat_idx_in = in_bounds ? (t_in_signed[5:0] * 40 + f_in_signed[5:0]) : 13'b0;
+      |                                                             ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:497:25: Operator GTE expects 16 bits on the LHS, but LHS's VARREF 'div_num' generates 13 bits.
+                                                                                                                 : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+  497 |             if (div_num >= div_den) begin
+      |                         ^~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:536:19: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's SIGNED generates 8 bits.
+                                                                                                                 : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+  536 |         max_score = $signed(fc_logits[0]);
+      |                   ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:539:23: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's SIGNED generates 8 bits.
+                                                                                                                 : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+  539 |             max_score = $signed(fc_logits[1]);
+      |                       ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:538:35: Operator GTS expects 32 bits on the LHS, but LHS's SIGNED generates 8 bits.
+                                                                                                                 : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+  538 |         if ($signed(fc_logits[1]) > max_score)
+      |                                   ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:542:23: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's SIGNED generates 8 bits.
+                                                                                                                 : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+  542 |             max_score = $signed(fc_logits[2]);
+      |                       ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:541:35: Operator GTS expects 32 bits on the LHS, but LHS's SIGNED generates 8 bits.
+                                                                                                                 : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+  541 |         if ($signed(fc_logits[2]) > max_score)
+      |                                   ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:545:23: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's SIGNED generates 8 bits.
+                                                                                                                 : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+  545 |             max_score = $signed(fc_logits[3]);
+      |                       ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:544:35: Operator GTS expects 32 bits on the LHS, but LHS's SIGNED generates 8 bits.
+                                                                                                                 : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+  544 |         if ($signed(fc_logits[3]) > max_score)
+      |                                   ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:1010:53: Operator SUB expects 32 bits on the RHS, but RHS's SIGNED generates 8 bits.
+                                                                                                                  : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+ 1010 |                     exp_val[0] <= get_exp(max_score - $signed(fc_logits[0]));
+      |                                                     ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:1011:53: Operator SUB expects 32 bits on the RHS, but RHS's SIGNED generates 8 bits.
+                                                                                                                  : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+ 1011 |                     exp_val[1] <= get_exp(max_score - $signed(fc_logits[1]));
+      |                                                     ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:1012:53: Operator SUB expects 32 bits on the RHS, but RHS's SIGNED generates 8 bits.
+                                                                                                                  : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+ 1012 |                     exp_val[2] <= get_exp(max_score - $signed(fc_logits[2]));
+      |                                                     ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:1013:53: Operator SUB expects 32 bits on the RHS, but RHS's SIGNED generates 8 bits.
+                                                                                                                  : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+ 1013 |                     exp_val[3] <= get_exp(max_score - $signed(fc_logits[3]));
+      |                                                     ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:1037:44: Operator ADD expects 16 bits on the LHS, but LHS's ARRAYSEL generates 13 bits.
+                                                                                                                  : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+ 1037 |                     sum_exp   = exp_val[0] + exp_val[1] + exp_val[2] + exp_val[3];
+      |                                            ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:1037:44: Operator ADD expects 16 bits on the RHS, but RHS's ARRAYSEL generates 13 bits.
+                                                                                                                  : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+ 1037 |                     sum_exp   = exp_val[0] + exp_val[1] + exp_val[2] + exp_val[3];
+      |                                            ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:1037:57: Operator ADD expects 16 bits on the RHS, but RHS's ARRAYSEL generates 13 bits.
+                                                                                                                  : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+ 1037 |                     sum_exp   = exp_val[0] + exp_val[1] + exp_val[2] + exp_val[3];
+      |                                                         ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_compute_engine.sv:1037:70: Operator ADD expects 16 bits on the RHS, but RHS's ARRAYSEL generates 13 bits.
+                                                                                                                  : ... note: In instance 'tb_soc_top.uut.u_npu.u_npu_engine'
+ 1037 |                     sum_exp   = exp_val[0] + exp_val[1] + exp_val[2] + exp_val[3];
+      |                                                                      ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_tcm_axi_slave.sv:84:43: Operator LT expects 32 bits on the LHS, but LHS's SEL generates 30 bits.
+                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_npu.u_eng_axi_slave'
+   84 |     wire ar_gecerli = (s_axi_araddr[31:2] < TCM_WORDS);
+      |                                           ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/npu/npu_tcm_axi_slave.sv:85:43: Operator LT expects 32 bits on the LHS, but LHS's SEL generates 30 bits.
+                                                                                                               : ... note: In instance 'tb_soc_top.uut.u_npu.u_eng_axi_slave'
+   85 |     wire aw_gecerli = (s_axi_awaddr[31:2] < TCM_WORDS);
+      |                                           ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_cs_registers.sv:521:34: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's VARREF 'tinfo_types' generates 16 bits.
+                                                                                                                                    : ... note: In instance 'tb_soc_top.uut.u_core.cs_registers_i'
+  521 |         CSR_TINFO: csr_rdata_int = tinfo_types;
+      |                                  ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Cevre_Birimleri/i2c_peripheral.sv:207:35: Operator EQ expects 32 bits on the LHS, but LHS's VARREF 'tick_cnt' generates 5 bits.
+                                                                                                                         : ... note: In instance 'tb_soc_top.uut.u_i2c'
+  207 |                         (tick_cnt == (QUARTER - 1));
+      |                                   ^~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Cevre_Birimleri/i2c_peripheral.sv:220:26: Operator EQ expects 32 bits on the LHS, but LHS's VARREF 'tick_cnt' generates 5 bits.
+                                                                                                                         : ... note: In instance 'tb_soc_top.uut.u_i2c'
+  220 |             if (tick_cnt == (QUARTER - 1)) begin
+      |                          ^~
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axi_lite_interconnect.sv:373:29: Operator ASSIGN expects 4 bits on the Assign RHS, but Assign RHS's FUNCREF 'get_slave_id' generates 32 bits.
+                                                                                                                      : ... note: In instance 'tb_soc_top.uut.u_interconnect'
+  373 |                 write_sel_d = get_slave_id(m_awaddr);
+      |                             ^
+%Warning-WIDTHTRUNC: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axi_lite_interconnect.sv:515:28: Operator ASSIGN expects 4 bits on the Assign RHS, but Assign RHS's FUNCREF 'get_slave_id' generates 32 bits.
+                                                                                                                      : ... note: In instance 'tb_soc_top.uut.u_interconnect'
+  515 |                 read_sel_d = get_slave_id(m_araddr);
+      |                            ^
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Cevre_Birimleri/qspi_master.sv:481:22: Operator ASSIGNDLY expects 9 bits on the Assign RHS, but Assign RHS's CONST '8'h0' generates 8 bits.
+                                                                                                                      : ... note: In instance 'tb_soc_top.uut.u_qspi'
+  481 |         byte_cnt     <= 8'h0;
+      |                      ^~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Cevre_Birimleri/qspi_master.sv:482:22: Operator ASSIGNDLY expects 9 bits on the Assign RHS, but Assign RHS's CONST '8'h0' generates 8 bits.
+                                                                                                                      : ... note: In instance 'tb_soc_top.uut.u_qspi'
+  482 |         total_bytes  <= 8'h0;
+      |                      ^~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Cevre_Birimleri/qspi_master.sv:511:33: Operator ASSIGNDLY expects 9 bits on the Assign RHS, but Assign RHS's CONST '8'h0' generates 8 bits.
+                                                                                                                      : ... note: In instance 'tb_soc_top.uut.u_qspi'
+  511 |                     byte_cnt    <= 8'h0;
+      |                                 ^~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Cevre_Birimleri/qspi_master.sv:551:38: Operator ASSIGNDLY expects 9 bits on the Assign RHS, but Assign RHS's CONST '8'h0' generates 8 bits.
+                                                                                                                      : ... note: In instance 'tb_soc_top.uut.u_qspi'
+  551 |                             byte_cnt <= 8'h0;
+      |                                      ^~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Cevre_Birimleri/qspi_master.sv:610:42: Operator ASSIGNDLY expects 9 bits on the Assign RHS, but Assign RHS's CONST '8'h0' generates 8 bits.
+                                                                                                                      : ... note: In instance 'tb_soc_top.uut.u_qspi'
+  610 |                                 byte_cnt <= 8'h0;
+      |                                          ^~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Cevre_Birimleri/qspi_master.sv:638:38: Operator ASSIGNDLY expects 9 bits on the Assign RHS, but Assign RHS's CONST '8'h0' generates 8 bits.
+                                                                                                                      : ... note: In instance 'tb_soc_top.uut.u_qspi'
+  638 |                             byte_cnt <= 8'h0;
+      |                                      ^~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Cevre_Birimleri/files_1/uart_stream_peripheral.sv:190:42: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'fifo_level' generates 9 bits.
+                                                                                                                                         : ... note: In instance 'tb_soc_top.uut.u_uart2'
+  190 |                              (fifo_level >= (FIFO_DEPTH / 2));
+      |                                          ^~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:1145:9: Operator TASKREF 'check' expects 64 bits on the Function Argument, but Function Argument's SEL generates 32 bits.
+                                                                                                    : ... note: In instance 'tb_soc_top'
+ 1145 |         check("JTAG IDCODE", jtag_rdata[31:0], 32'h41524B48);
+      |         ^~~~~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:1145:9: Operator TASKREF 'check' expects 64 bits on the Function Argument, but Function Argument's CONST '32'h41524b48' generates 32 bits.
+                                                                                                    : ... note: In instance 'tb_soc_top'
+ 1145 |         check("JTAG IDCODE", jtag_rdata[31:0], 32'h41524B48);
+      |         ^~~~~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:1152:9: Operator TASKREF 'check' expects 64 bits on the Function Argument, but Function Argument's VARXREF 'debug_req_o' generates 1 bits.
+                                                                                                    : ... note: In instance 'tb_soc_top'
+ 1152 |         check("CPU halt (debug_req_o)", uut.u_jtag.debug_req_o, 1'b1);
+      |         ^~~~~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:1152:9: Operator TASKREF 'check' expects 64 bits on the Function Argument, but Function Argument's CONST '1'h1' generates 1 bits.
+                                                                                                    : ... note: In instance 'tb_soc_top'
+ 1152 |         check("CPU halt (debug_req_o)", uut.u_jtag.debug_req_o, 1'b1);
+      |         ^~~~~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:1166:9: Operator TASKREF 'check' expects 64 bits on the Function Argument, but Function Argument's SEL generates 32 bits.
+                                                                                                    : ... note: In instance 'tb_soc_top'
+ 1166 |         check("JTAG bellek okuma/yazma", jtag_rdata[63:32], 32'hDEADBEEF);
+      |         ^~~~~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:1166:9: Operator TASKREF 'check' expects 64 bits on the Function Argument, but Function Argument's CONST '32'hdeadbeef' generates 32 bits.
+                                                                                                    : ... note: In instance 'tb_soc_top'
+ 1166 |         check("JTAG bellek okuma/yazma", jtag_rdata[63:32], 32'hDEADBEEF);
+      |         ^~~~~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:1173:9: Operator TASKREF 'check' expects 64 bits on the Function Argument, but Function Argument's VARXREF 'debug_req_o' generates 1 bits.
+                                                                                                    : ... note: In instance 'tb_soc_top'
+ 1173 |         check("CPU resume (debug_req_o)", uut.u_jtag.debug_req_o, 1'b0);
+      |         ^~~~~
+%Warning-WIDTHEXPAND: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/tb/tb_soc_top.sv:1173:9: Operator TASKREF 'check' expects 64 bits on the Function Argument, but Function Argument's CONST '1'h0' generates 1 bits.
+                                                                                                    : ... note: In instance 'tb_soc_top'
+ 1173 |         check("CPU resume (debug_req_o)", uut.u_jtag.debug_req_o, 1'b0);
+      |         ^~~~~
+%Warning-UNSIGNED: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/sram_module.sv:262:33: Comparison is constant due to unsigned arithmetic
+                                                                                                          : ... note: In instance 'tb_soc_top.uut.u_data_ram'
+  262 |         rvalid_addr_q <= (raddr < RAM_DEPTH[$clog2(RAM_DEPTH)-1:0]) ||
+      |                                 ^
+                   ... For warning description see https://verilator.org/warn/UNSIGNED?v=5.044
+                   ... Use "/* verilator lint_off UNSIGNED */" and lint_on around source to disable this message.
+%Warning-UNSIGNED: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axi_lite_interconnect.sv:307:18: Comparison is constant due to unsigned arithmetic
+                                                                                                                    : ... note: In instance 'tb_soc_top.uut.u_interconnect'
+  307 |         if (addr >= 32'h0000_0000 && addr <= 32'h0000_03FF) return 0;   
+      |                  ^~
+%Warning-CASEINCOMPLETE: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_aligner.sv:102:5: Case values incompletely covered (example pattern 0x4)
+                                                                                                                                 : ... note: In instance 'tb_soc_top'
+  102 |     case (state)
+      |     ^~~~
+                         ... For warning description see https://verilator.org/warn/CASEINCOMPLETE?v=5.044
+                         ... Use "/* verilator lint_off CASEINCOMPLETE */" and lint_on around source to disable this message.
+%Warning-CASEINCOMPLETE: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:139:7: Case values incompletely covered (example pattern 0x0)
+                                                                                                                             : ... note: In instance 'tb_soc_top'
+  139 |       case (vector_mode_i)
+      |       ^~~~
+%Warning-CASEINCOMPLETE: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:153:7: Case values incompletely covered (example pattern 0x0)
+                                                                                                                             : ... note: In instance 'tb_soc_top'
+  153 |       case (vector_mode_i)
+      |       ^~~~
+%Warning-CASEINCOMPLETE: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:752:5: Case values incompletely covered (example pattern 0x0)
+                                                                                                                             : ... note: In instance 'tb_soc_top'
+  752 |     case (operator_i)
+      |     ^~~~
+%Warning-CASEINCOMPLETE: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_mult.sv:140:5: Case values incompletely covered (example pattern 0x5)
+                                                                                                                              : ... note: In instance 'tb_soc_top'
+  140 |     case (mulh_CS)
+      |     ^~~~
+%Warning-CASEINCOMPLETE: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:332:7: Case values incompletely covered (example pattern 0x2)
+                                                                                                                                         : ... note: In instance 'tb_soc_top'
+  332 |       case (data_type_ex_i)
+      |       ^~~~
+%Warning-CASEINCOMPLETE: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_cs_registers.sv:920:7: Case values incompletely covered (example pattern 0x0)
+                                                                                                                                      : ... note: In instance 'tb_soc_top'
+  920 |       case (csr_addr_i)
+      |       ^~~~
+%Warning-COMBDLY: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/bhv/cv32e40p_sim_clock_gate.sv:29:31: Non-blocking assignment '<=' in combinational logic process
+                                                                                                                                 : ... note: In instance 'tb_soc_top'
+                                                                                                                                 : ... This will be executed as a blocking assignment '='!
+   29 |     if (clk_i == 1'b0) clk_en <= en_i | scan_cg_en_i;
+      |                               ^~
+                  ... For warning description see https://verilator.org/warn/COMBDLY?v=5.044
+                  ... Use "/* verilator lint_off COMBDLY */" and lint_on around source to disable this message.
+                  *** See https://verilator.org/warn/COMBDLY?v=5.044 before disabling this,
+                  else you may end up with different sim results.
+%Warning-UNOPTFLAT: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_id_stage.sv:293:16: Signal unoptimizable: Circular combinational logic: 'tb_soc_top.uut.u_core.id_stage_i.ctrl_transfer_insn_in_id'
+                                                                                                                              : ... note: In instance 'tb_soc_top'
+  293 |   logic [ 1:0] ctrl_transfer_insn_in_id;
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~
+                    ... For warning description see https://verilator.org/warn/UNOPTFLAT?v=5.044
+                    ... Use "/* verilator lint_off UNOPTFLAT */" and lint_on around source to disable this message.
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_id_stage.sv:293:16:      Example path: tb_soc_top.uut.u_core.id_stage_i.ctrl_transfer_insn_in_id
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_controller.sv:256:3:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:151:16:      Example path: tb_soc_top.uut.u_core.is_decoding
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_controller.sv:48:23:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_controller.sv:48:23:      Example path: tb_soc_top.uut.u_core.id_stage_i.controller_i.deassert_we_o
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:3006:38:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_id_stage.sv:293:16:      Example path: tb_soc_top.uut.u_core.id_stage_i.ctrl_transfer_insn_in_id
+%Warning-UNOPTFLAT: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:275:23: Signal unoptimizable: Circular combinational logic: 'tb_soc_top.uut.u_core.id_ready'
+                                                                                                                          : ... note: In instance 'tb_soc_top'
+  275 |   logic               id_ready;
+      |                       ^~~~~~~~
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:275:23:      Example path: tb_soc_top.uut.u_core.id_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_controller.sv:256:3:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:151:16:      Example path: tb_soc_top.uut.u_core.is_decoding
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_controller.sv:48:23:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_controller.sv:48:23:      Example path: tb_soc_top.uut.u_core.id_stage_i.controller_i.deassert_we_o
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_decoder.sv:3006:38:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_id_stage.sv:293:16:      Example path: tb_soc_top.uut.u_core.id_stage_i.ctrl_transfer_insn_in_id
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_controller.sv:256:3:      Example path: ALWAYS
+%Warning-UNOPTFLAT: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:276:23: Signal unoptimizable: Circular combinational logic: 'tb_soc_top.uut.u_core.ex_ready'
+                                                                                                                          : ... note: In instance 'tb_soc_top'
+  276 |   logic               ex_ready;
+      |                       ^~~~~~~~
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:276:23:      Example path: tb_soc_top.uut.u_core.ex_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu_div.sv:123:3:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:882:16:      Example path: tb_soc_top.uut.u_core.ex_stage_i.alu_i.div_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: tb_soc_top.uut.u_core.ex_stage_i.__VdfgRegularize_h92205aba_0_0
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:21:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:276:23:      Example path: tb_soc_top.uut.u_core.ex_ready
+%Warning-UNOPTFLAT: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:386:53: Signal unoptimizable: Circular combinational logic: 'tb_soc_top.uut.s7_awready'
+                                                                                                       : ... note: In instance 'tb_soc_top'
+  386 |     logic [31:0] s7_awaddr; logic s7_awvalid; logic s7_awready;
+      |                                                     ^~~~~~~~~~
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:386:53:      Example path: tb_soc_top.uut.s7_awready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:293:67:      Example path: tb_soc_top.uut.merged_m_awready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axil_arbiter_3to1.sv:76:20:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:224:18:      Example path: tb_soc_top.uut.data_axil_awready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/obi_to_axi_simple.sv:147:36:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/obi_to_axi_simple.sv:147:36:      Example path: tb_soc_top.__VdfgRegularize_h6e95ff9d_0_19
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/obi_to_axi_simple.sv:155:75:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/obi_to_axi_simple.sv:155:75:      Example path: tb_soc_top.__VdfgRegularize_h6e95ff9d_0_21
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:415:19:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:94:17:      Example path: tb_soc_top.uut.u_core.load_store_unit_i.count_up
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:397:25:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:282:23:      Example path: tb_soc_top.uut.u_core.lsu_ready_ex
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: tb_soc_top.uut.u_core.ex_stage_i.__VdfgRegularize_h92205aba_0_0
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:21:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:276:23:      Example path: tb_soc_top.uut.u_core.ex_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu_div.sv:123:3:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:882:16:      Example path: tb_soc_top.uut.u_core.ex_stage_i.alu_i.div_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: ASSIGNW
+%Warning-UNOPTFLAT: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:365:53: Signal unoptimizable: Circular combinational logic: 'tb_soc_top.uut.s4_awready'
+                                                                                                       : ... note: In instance 'tb_soc_top'
+  365 |     logic [31:0] s4_awaddr; logic s4_awvalid; logic s4_awready;
+      |                                                     ^~~~~~~~~~
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:365:53:      Example path: tb_soc_top.uut.s4_awready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:293:67:      Example path: tb_soc_top.uut.merged_m_awready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axil_arbiter_3to1.sv:76:20:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:224:18:      Example path: tb_soc_top.uut.data_axil_awready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/obi_to_axi_simple.sv:147:36:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/obi_to_axi_simple.sv:147:36:      Example path: tb_soc_top.__VdfgRegularize_h6e95ff9d_0_19
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/obi_to_axi_simple.sv:155:75:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/obi_to_axi_simple.sv:155:75:      Example path: tb_soc_top.__VdfgRegularize_h6e95ff9d_0_21
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:415:19:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:94:17:      Example path: tb_soc_top.uut.u_core.load_store_unit_i.count_up
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:397:25:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:282:23:      Example path: tb_soc_top.uut.u_core.lsu_ready_ex
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: tb_soc_top.uut.u_core.ex_stage_i.__VdfgRegularize_h92205aba_0_0
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:21:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:276:23:      Example path: tb_soc_top.uut.u_core.ex_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu_div.sv:123:3:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:882:16:      Example path: tb_soc_top.uut.u_core.ex_stage_i.alu_i.div_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: ASSIGNW
+%Warning-UNOPTFLAT: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:358:53: Signal unoptimizable: Circular combinational logic: 'tb_soc_top.uut.s3_awready'
+                                                                                                       : ... note: In instance 'tb_soc_top'
+  358 |     logic [31:0] s3_awaddr; logic s3_awvalid; logic s3_awready;
+      |                                                     ^~~~~~~~~~
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:358:53:      Example path: tb_soc_top.uut.s3_awready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axi_lite_interconnect.sv:347:5:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:293:67:      Example path: tb_soc_top.uut.merged_m_awready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axil_arbiter_3to1.sv:76:20:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:224:18:      Example path: tb_soc_top.uut.data_axil_awready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/obi_to_axi_simple.sv:147:36:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/obi_to_axi_simple.sv:147:36:      Example path: tb_soc_top.__VdfgRegularize_h6e95ff9d_0_19
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/obi_to_axi_simple.sv:155:75:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/obi_to_axi_simple.sv:155:75:      Example path: tb_soc_top.__VdfgRegularize_h6e95ff9d_0_21
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:415:19:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:94:17:      Example path: tb_soc_top.uut.u_core.load_store_unit_i.count_up
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:397:25:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:282:23:      Example path: tb_soc_top.uut.u_core.lsu_ready_ex
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: tb_soc_top.uut.u_core.ex_stage_i.__VdfgRegularize_h92205aba_0_0
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:21:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:276:23:      Example path: tb_soc_top.uut.u_core.ex_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu_div.sv:123:3:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:882:16:      Example path: tb_soc_top.uut.u_core.ex_stage_i.alu_i.div_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: ASSIGNW
+%Warning-UNOPTFLAT: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:389:53: Signal unoptimizable: Circular combinational logic: 'tb_soc_top.uut.s7_arready'
+                                                                                                       : ... note: In instance 'tb_soc_top'
+  389 |     logic [31:0] s7_araddr; logic s7_arvalid; logic s7_arready;
+      |                                                     ^~~~~~~~~~
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:389:53:      Example path: tb_soc_top.uut.s7_arready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axi_lite_interconnect.sv:490:5:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:296:67:      Example path: tb_soc_top.uut.merged_m_arready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axil_arbiter_3to1.sv:139:5:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:234:18:      Example path: tb_soc_top.uut.data_axil_arready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:415:19:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:94:17:      Example path: tb_soc_top.uut.u_core.load_store_unit_i.count_up
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:397:25:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:282:23:      Example path: tb_soc_top.uut.u_core.lsu_ready_ex
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: tb_soc_top.uut.u_core.ex_stage_i.__VdfgRegularize_h92205aba_0_0
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:21:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:276:23:      Example path: tb_soc_top.uut.u_core.ex_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu_div.sv:123:3:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:882:16:      Example path: tb_soc_top.uut.u_core.ex_stage_i.alu_i.div_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: ASSIGNW
+%Warning-UNOPTFLAT: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:347:53: Signal unoptimizable: Circular combinational logic: 'tb_soc_top.uut.s1_arready'
+                                                                                                       : ... note: In instance 'tb_soc_top'
+  347 |     logic [31:0] s1_araddr; logic s1_arvalid; logic s1_arready;
+      |                                                     ^~~~~~~~~~
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:347:53:      Example path: tb_soc_top.uut.s1_arready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axi_lite_interconnect.sv:490:5:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:296:67:      Example path: tb_soc_top.uut.merged_m_arready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axil_arbiter_3to1.sv:139:5:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:234:18:      Example path: tb_soc_top.uut.data_axil_arready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:415:19:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:94:17:      Example path: tb_soc_top.uut.u_core.load_store_unit_i.count_up
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:397:25:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:282:23:      Example path: tb_soc_top.uut.u_core.lsu_ready_ex
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: tb_soc_top.uut.u_core.ex_stage_i.__VdfgRegularize_h92205aba_0_0
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:21:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:276:23:      Example path: tb_soc_top.uut.u_core.ex_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu_div.sv:123:3:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:882:16:      Example path: tb_soc_top.uut.u_core.ex_stage_i.alu_i.div_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: ASSIGNW
+%Warning-UNOPTFLAT: /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:340:53: Signal unoptimizable: Circular combinational logic: 'tb_soc_top.uut.s0_arready'
+                                                                                                       : ... note: In instance 'tb_soc_top'
+  340 |     logic [31:0] s0_araddr; logic s0_arvalid; logic s0_arready;
+      |                                                     ^~~~~~~~~~
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:340:53:      Example path: tb_soc_top.uut.s0_arready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axi_lite_interconnect.sv:490:5:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:296:67:      Example path: tb_soc_top.uut.merged_m_arready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/axil_arbiter_3to1.sv:139:5:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/Memory/soc_top.sv:234:18:      Example path: tb_soc_top.uut.data_axil_arready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:415:19:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:94:17:      Example path: tb_soc_top.uut.u_core.load_store_unit_i.count_up
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:397:25:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:282:23:      Example path: tb_soc_top.uut.u_core.lsu_ready_ex
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: tb_soc_top.uut.u_core.ex_stage_i.__VdfgRegularize_h92205aba_0_0
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:21:      Example path: ASSIGNW
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_core.sv:276:23:      Example path: tb_soc_top.uut.u_core.ex_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu_div.sv:123:3:      Example path: ALWAYS
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_alu.sv:882:16:      Example path: tb_soc_top.uut.u_core.ex_stage_i.alu_i.div_ready
+                    /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/rtl/cv32e40p-master/rtl/cv32e40p_ex_stage.sv:474:60:      Example path: ASSIGNW
+make: Entering directory '/home/tatua7806/arkhe_exp/experiments/sramreg_20260905/validation/obj_soc'
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -c -o verilated.o /nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/verilated.cpp
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -c -o verilated_timing.o /nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/verilated_timing.cpp
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -c -o verilated_threads.o /nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/verilated_threads.cpp
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -x c++-header Vtb_soc_top__pch.h -o Vtb_soc_top__pch.h.fast.gch
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -x c++-header Vtb_soc_top__pch.h -o Vtb_soc_top__pch.h.slow.gch
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.fast -c -o Vtb_soc_top.o Vtb_soc_top.cpp
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.fast -c -o Vtb_soc_top___024root__0.o Vtb_soc_top___024root__0.cpp
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.fast -c -o Vtb_soc_top_tb_soc_top__0.o Vtb_soc_top_tb_soc_top__0.cpp
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.fast -c -o Vtb_soc_top_tb_soc_top__1.o Vtb_soc_top_tb_soc_top__1.cpp
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.fast -c -o Vtb_soc_top_tb_soc_top__2.o Vtb_soc_top_tb_soc_top__2.cpp
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.fast -c -o Vtb_soc_top_std__0.o Vtb_soc_top_std__0.cpp
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.fast -c -o Vtb_soc_top_tb_soc_top__03a__03acg_soc_verification__Vclpkg__0.o Vtb_soc_top_tb_soc_top__03a__03acg_soc_verification__Vclpkg__0.cpp
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.fast -c -o Vtb_soc_top_std__03a__03asemaphore__Vclpkg__0.o Vtb_soc_top_std__03a__03asemaphore__Vclpkg__0.cpp
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.fast -c -o Vtb_soc_top_std__03a__03aprocess__Vclpkg__0.o Vtb_soc_top_std__03a__03aprocess__Vclpkg__0.cpp
+g++ -Os  -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.fast -c -o Vtb_soc_top__main.o Vtb_soc_top__main.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top__ConstPool__0__Slow.o Vtb_soc_top__ConstPool__0__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top___024root__Slow.o Vtb_soc_top___024root__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top___024root__0__Slow.o Vtb_soc_top___024root__0__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top_tb_soc_top__Slow.o Vtb_soc_top_tb_soc_top__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top_tb_soc_top__0__Slow.o Vtb_soc_top_tb_soc_top__0__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top_tb_soc_top__1__Slow.o Vtb_soc_top_tb_soc_top__1__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top___024unit__Slow.o Vtb_soc_top___024unit__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top___024unit__0__Slow.o Vtb_soc_top___024unit__0__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top_std__Slow.o Vtb_soc_top_std__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top_std__0__Slow.o Vtb_soc_top_std__0__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top_tb_soc_top__03a__03acg_soc_verification__Vclpkg__Slow.o Vtb_soc_top_tb_soc_top__03a__03acg_soc_verification__Vclpkg__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top_tb_soc_top__03a__03acg_soc_verification__Vclpkg__0__Slow.o Vtb_soc_top_tb_soc_top__03a__03acg_soc_verification__Vclpkg__0__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top_std__03a__03asemaphore__Vclpkg__Slow.o Vtb_soc_top_std__03a__03asemaphore__Vclpkg__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top_std__03a__03asemaphore__Vclpkg__0__Slow.o Vtb_soc_top_std__03a__03asemaphore__Vclpkg__0__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top_std__03a__03aprocess__Vclpkg__Slow.o Vtb_soc_top_std__03a__03aprocess__Vclpkg__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top_std__03a__03aprocess__Vclpkg__0__Slow.o Vtb_soc_top_std__03a__03aprocess__Vclpkg__0__Slow.cpp
+g++   -I.  -MMD -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include -I/nix/store/wl8c1s56dn566asz404bqwcl0gdrw933-verilator-5.044/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -DVL_TIME_CONTEXT   -fcoroutines -include Vtb_soc_top__pch.h.slow -c -o Vtb_soc_top__Syms__Slow.o Vtb_soc_top__Syms__Slow.cpp
+g++    verilated.o verilated_timing.o verilated_threads.o Vtb_soc_top__ALL.a    -pthread -lpthread -latomic   -o Vtb_soc_top
+rm Vtb_soc_top__ALL.verilator_deplist.tmp
+make: Leaving directory '/home/tatua7806/arkhe_exp/experiments/sramreg_20260905/validation/obj_soc'
+- V e r i l a t i o n   R e p o r t: Verilator 5.044 2026-01-01 rev v5.040
+- Verilator: Built from 34.220 MB sources in 68 modules, into 3.220 MB in 27 C++ files needing 0.004 MB
+- Verilator: Walltime 9.765 s (elab=0.114, cvt=0.635, bld=8.843); cpu 0.974 s on 4 threads; alloced 564.668 MB

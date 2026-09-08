@@ -1,0 +1,1275 @@
+17:31:01.188  DMA done
+17:31:01.188  Start NPU
+17:31:01.188  [IRQ] Class: 3
+17:31:01.188  -> NO
+17:31:01.188  Run: 124
+17:31:01.188  Clear TCM
+17:31:01.188  Stream ready
+17:31:01.261  DMA done
+17:31:01.261  Start NPU
+17:31:01.261  [IRQ] Class: 3
+17:31:01.261  -> NO
+17:31:01.261  Run: 125
+17:31:01.277  Clear TCM
+17:31:01.277  Stream ready
+17:31:01.347  DMA done
+17:31:01.347  Start NPU
+17:31:01.347  [IRQ] Class: 3
+17:31:01.347  -> NO
+17:31:01.364  Run: 126
+17:31:01.364  Clear TCM
+17:31:01.364  Stream ready
+17:31:01.424  DMA done
+17:31:01.424  Start NPU
+17:31:01.424  [IRQ] Class: 3
+17:31:01.424  -> NO
+17:31:01.424  Run: 127
+17:31:01.442  Clear TCM
+17:31:01.442  Stream ready
+17:31:01.508  DMA done
+17:31:01.508  Start NPU
+17:31:01.508  [IRQ] Class: 2
+17:31:01.508  -> YES
+17:31:01.508  Run: 128
+17:31:01.524  Clear TCM
+17:31:01.524  Stream ready
+17:31:01.590  DMA done
+17:31:01.590  Start NPU
+17:31:01.590  [IRQ] Class: 3
+17:31:01.590  -> NO
+17:31:01.604  Run: 129
+17:31:01.604  Clear TCM
+17:31:01.604  Stream ready
+17:31:01.668  DMA done
+17:31:01.668  Start NPU
+17:31:01.684  [IRQ] Class: 2
+17:31:01.684  -> YES
+17:31:01.684  Run: 130
+17:31:01.684  Clear TCM
+17:31:01.684  Stream ready
+17:31:01.764  DMA done
+17:31:01.764  Start NPU
+17:31:01.764  [IRQ] Class: 2
+17:31:01.764  -> YES
+17:31:01.764  Run: 131
+17:31:01.780  Clear TCM
+17:31:01.780  Stream ready
+17:31:01.844  DMA done
+17:31:01.844  Start NPU
+17:31:01.844  [IRQ] Class: 3
+17:31:01.844  -> NO
+17:31:01.844  Run: 132
+17:31:01.854  Clear TCM
+17:31:01.854  Stream ready
+17:31:01.923  DMA done
+17:31:01.923  Start NPU
+17:31:01.923  [IRQ] Class: 3
+17:31:01.923  -> NO
+17:31:01.923  Run: 133
+17:31:01.940  Clear TCM
+17:31:01.940  Stream ready
+17:31:02.003  DMA done
+17:31:02.003  Start NPU
+17:31:02.003  [IRQ] Class: 2
+17:31:02.003  -> YES
+17:31:02.003  Run: 134
+17:31:02.020  Clear TCM
+17:31:02.020  Stream ready
+17:31:02.083  DMA done
+17:31:02.083  Start NPU
+17:31:02.083  [IRQ] Class: 0
+17:31:02.083  -> SILENCE
+17:31:02.099  Run: 135
+17:31:02.100  Clear TCM
+17:31:02.100  Stream ready
+17:31:02.161  DMA done
+17:31:02.161  Start NPU
+17:31:02.161  [IRQ] Class: 2
+17:31:02.161  -> YES
+17:31:02.161  Run: 136
+17:31:02.180  Clear TCM
+17:31:02.180  Stream ready
+17:31:02.244  DMA done
+17:31:02.244  Start NPU
+17:31:02.244  [IRQ] Class: 2
+17:31:02.244  -> YES
+17:31:02.244  Run: 137
+17:31:02.260  Clear TCM
+17:31:02.260  Stream ready
+17:31:02.320  DMA done
+17:31:02.320  Start NPU
+17:31:02.320  [IRQ] Class: 3
+17:31:02.320  -> NO
+17:31:02.320  Run: 138
+17:31:02.340  Clear TCM
+17:31:02.340  Stream ready
+17:31:02.403  DMA done
+17:31:02.403  Start NPU
+17:31:02.403  [IRQ] Class: 2
+17:31:02.403  -> YES
+17:31:02.403  Run: 139
+17:31:02.420  Clear TCM
+17:31:02.420  Stream ready
+17:31:02.484  DMA done
+17:31:02.484  Start NPU
+17:31:02.484  [IRQ] Class: 3
+17:31:02.484  -> NO
+17:31:02.500  Run: 140
+17:31:02.500  Clear TCM
+17:31:02.500  Stream ready
+17:31:02.563  DMA done
+17:31:02.563  Start NPU
+17:31:02.563  [IRQ] Class: 2
+17:31:02.563  -> YES
+17:31:02.579  Run: 141
+17:31:02.579  Clear TCM
+17:31:02.579  Stream ready
+17:31:02.643  DMA done
+17:31:02.643  Start NPU
+17:31:02.643  [IRQ] Class: 2
+17:31:02.643  -> YES
+17:31:02.643  Run: 142
+17:31:02.659  Clear TCM
+17:31:02.659  Stream ready
+17:31:02.721  DMA done
+17:31:02.721  Start NPU
+17:31:02.721  [IRQ] Class: 3
+17:31:02.721  -> NO
+17:31:02.721  Run: 143
+17:31:02.731  Clear TCM
+17:31:02.731  Stream ready
+17:31:02.804  DMA done
+17:31:02.804  Start NPU
+17:31:02.804  [IRQ] Class: 3
+17:31:02.804  -> NO
+17:31:02.818  Run: 144
+17:31:02.818  Clear TCM
+17:31:02.818  Stream ready
+17:31:02.884  DMA done
+17:31:02.884  Start NPU
+17:31:02.884  [IRQ] Class: 2
+17:31:02.884  -> YES
+17:31:02.900  Run: 145
+17:31:02.900  Clear TCM
+17:31:02.900  Stream ready
+17:31:02.966  DMA done
+17:31:02.966  Start NPU
+17:31:02.966  [IRQ] Class: 3
+17:31:02.966  -> NO
+17:31:02.980  Run: 146
+17:31:02.980  Clear TCM
+17:31:02.980  Stream ready
+17:31:03.046  DMA done
+17:31:03.046  Start NPU
+17:31:03.060  [IRQ] Class: 3
+17:31:03.060  -> NO
+17:31:03.060  Run: 147
+17:31:03.060  Clear TCM
+17:31:03.060  Stream ready
+17:31:03.137  DMA done
+17:31:03.137  Start NPU
+17:31:03.137  [IRQ] Class: 3
+17:31:03.137  -> NO
+17:31:03.137  Run: 148
+17:31:03.155  Clear TCM
+17:31:03.156  Stream ready
+17:31:03.220  DMA done
+17:31:03.220  Start NPU
+17:31:03.220  [IRQ] Class: 3
+17:31:03.220  -> NO
+17:31:03.220  Run: 149
+17:31:03.236  Clear TCM
+17:31:03.236  Stream ready
+17:31:03.300  DMA done
+17:31:03.300  Start NPU
+17:31:03.300  [IRQ] Class: 3
+17:31:03.300  -> NO
+17:31:03.316  Run: 150
+17:31:03.316  Clear TCM
+17:31:03.316  Stream ready
+17:31:03.379  DMA done
+17:31:03.379  Start NPU
+17:31:03.379  [IRQ] Class: 2
+17:31:03.379  -> YES
+17:31:03.379  Run: 151
+17:31:03.395  Clear TCM
+17:31:03.395  Stream ready
+17:31:03.462  DMA done
+17:31:03.462  Start NPU
+17:31:03.462  [IRQ] Class: 3
+17:31:03.462  -> NO
+17:31:03.462  Run: 152
+17:31:03.475  Clear TCM
+17:31:03.475  Stream ready
+17:31:03.539  DMA done
+17:31:03.539  Start NPU
+17:31:03.539  [IRQ] Class: 1
+17:31:03.556  Run: 153
+17:31:03.556  Clear TCM
+17:31:03.556  Stream ready
+17:31:03.619  DMA done
+17:31:03.619  Start NPU
+17:31:03.619  [IRQ] Class: 3
+17:31:03.619  -> NO
+17:31:03.619  Run: 154
+17:31:03.636  Clear TCM
+17:31:03.636  Stream ready
+17:31:03.700  DMA done
+17:31:03.700  Start NPU
+17:31:03.700  [IRQ] Class: 2
+17:31:03.700  -> YES
+17:31:03.700  Run: 155
+17:31:03.716  Clear TCM
+17:31:03.716  Stream ready
+17:31:03.777  DMA done
+17:31:03.777  Start NPU
+17:31:03.777  [IRQ] Class: 3
+17:31:03.777  -> NO
+17:31:03.777  Run: 156
+17:31:03.795  Clear TCM
+17:31:03.795  Stream ready
+17:31:03.859  DMA done
+17:31:03.859  Start NPU
+17:31:03.859  [IRQ] Class: 2
+17:31:03.859  -> YES
+17:31:03.859  Run: 157
+17:31:03.876  Clear TCM
+17:31:03.876  Stream ready
+17:31:03.941  DMA done
+17:31:03.941  Start NPU
+17:31:03.941  [IRQ] Class: 1
+17:31:03.941  Run: 158
+17:31:03.955  Clear TCM
+17:31:03.955  Stream ready
+17:31:04.022  DMA done
+17:31:04.022  Start NPU
+17:31:04.022  [IRQ] Class: 3
+17:31:04.035  -> NO
+17:31:04.035  Run: 159
+17:31:04.035  Clear TCM
+17:31:04.035  Stream ready
+17:31:04.101  DMA done
+17:31:04.101  Start NPU
+17:31:04.116  [IRQ] Class: 3
+17:31:04.116  -> NO
+17:31:04.116  Run: 160
+17:31:04.116  Clear TCM
+17:31:04.116  Stream ready
+17:31:04.194  DMA done
+17:31:04.194  Start NPU
+17:31:04.194  [IRQ] Class: 3
+17:31:04.194  -> NO
+17:31:04.194  Run: 161
+17:31:04.210  Clear TCM
+17:31:04.210  Stream ready
+17:31:04.276  DMA done
+17:31:04.276  Start NPU
+17:31:04.276  [IRQ] Class: 3
+17:31:04.276  -> NO
+17:31:04.276  Run: 162
+17:31:04.284  Clear TCM
+17:31:04.284  Stream ready
+17:31:04.355  DMA done
+17:31:04.355  Start NPU
+17:31:04.355  [IRQ] Class: 3
+17:31:04.355  -> NO
+17:31:04.355  Run: 163
+17:31:04.371  Clear TCM
+17:31:04.371  Stream ready
+17:31:04.424  DMA done
+17:31:04.424  Start NPU
+17:31:04.424  [IRQ] Class: 3
+17:31:04.424  -> NO
+17:31:04.442  Run: 164
+17:31:04.442  Clear TCM
+17:31:04.442  Stream ready
+17:31:04.516  DMA done
+17:31:04.516  Start NPU
+17:31:04.516  [IRQ] Class: 1
+17:31:04.516  Run: 165
+17:31:04.532  Clear TCM
+17:31:04.532  Stream ready
+17:31:04.595  DMA done
+17:31:04.595  Start NPU
+17:31:04.595  [IRQ] Class: 3
+17:31:04.595  -> NO
+17:31:04.595  Run: 166
+17:31:04.609  Clear TCM
+17:31:04.609  Stream ready
+17:31:04.675  DMA done
+17:31:04.675  Start NPU
+17:31:04.675  [IRQ] Class: 3
+17:31:04.675  -> NO
+17:31:04.675  Run: 167
+17:31:04.691  Clear TCM
+17:31:04.691  Stream ready
+17:31:04.756  DMA done
+17:31:04.756  Start NPU
+17:31:04.756  [IRQ] Class: 3
+17:31:04.756  -> NO
+17:31:04.756  Run: 168
+17:31:04.771  Clear TCM
+17:31:04.771  Stream ready
+17:31:04.835  DMA done
+17:31:04.835  Start NPU
+17:31:04.835  [IRQ] Class: 3
+17:31:04.835  -> NO
+17:31:04.852  Run: 169
+17:31:04.852  Clear TCM
+17:31:04.852  Stream ready
+17:31:04.915  DMA done
+17:31:04.915  Start NPU
+17:31:04.915  [IRQ] Class: 2
+17:31:04.915  -> YES
+17:31:04.915  Run: 170
+17:31:04.932  Clear TCM
+17:31:04.932  Stream ready
+17:31:04.996  DMA done
+17:31:04.996  Start NPU
+17:31:04.996  [IRQ] Class: 2
+17:31:04.996  -> YES
+17:31:05.012  Run: 171
+17:31:05.012  Clear TCM
+17:31:05.012  Stream ready
+17:31:05.068  DMA done
+17:31:05.068  Start NPU
+17:31:05.068  [IRQ] Class: 2
+17:31:05.068  -> YES
+17:31:05.090  Run: 172
+17:31:05.090  Clear TCM
+17:31:05.090  Stream ready
+17:31:05.145  DMA done
+17:31:05.145  Start NPU
+17:31:05.145  [IRQ] Class: 2
+17:31:05.145  -> YES
+17:31:05.159  Run: 173
+17:31:05.159  Clear TCM
+17:31:05.159  Stream ready
+17:31:05.226  DMA done
+17:31:05.226  Start NPU
+17:31:05.226  [IRQ] Class: 3
+17:31:05.226  -> NO
+17:31:05.226  Run: 174
+17:31:05.242  Clear TCM
+17:31:05.242  Stream ready
+17:31:05.316  DMA done
+17:31:05.316  Start NPU
+17:31:05.316  [IRQ] Class: 3
+17:31:05.316  -> NO
+17:31:05.332  Run: 175
+17:31:05.332  Clear TCM
+17:31:05.332  Stream ready
+17:31:05.396  DMA done
+17:31:05.396  Start NPU
+17:31:05.396  [IRQ] Class: 3
+17:31:05.396  -> NO
+17:31:05.396  Run: 176
+17:31:05.412  Clear TCM
+17:31:05.412  Stream ready
+17:31:05.476  DMA done
+17:31:05.476  Start NPU
+17:31:05.476  [IRQ] Class: 3
+17:31:05.476  -> NO
+17:31:05.492  Run: 177
+17:31:05.492  Clear TCM
+17:31:05.492  Stream ready
+17:31:05.555  DMA done
+17:31:05.555  Start NPU
+17:31:05.555  [IRQ] Class: 3
+17:31:05.568  -> NO
+17:31:05.568  Run: 178
+17:31:05.568  Clear TCM
+17:31:05.568  Stream ready
+17:31:05.633  DMA done
+17:31:05.633  Start NPU
+17:31:05.633  [IRQ] Class: 3
+17:31:05.633  -> NO
+17:31:05.648  Run: 179
+17:31:05.648  Clear TCM
+17:31:05.648  Stream ready
+17:31:05.709  DMA done
+17:31:05.709  Start NPU
+17:31:05.709  [IRQ] Class: 2
+17:31:05.709  -> YES
+17:31:05.709  Run: 180
+17:31:05.723  Clear TCM
+17:31:05.723  Stream ready
+17:31:05.785  DMA done
+17:31:05.785  Start NPU
+17:31:05.785  [IRQ] Class: 3
+17:31:05.785  -> NO
+17:31:05.785  Run: 181
+17:31:05.811  Clear TCM
+17:31:05.811  Stream ready
+17:31:05.877  DMA done
+17:31:05.877  Start NPU
+17:31:05.877  [IRQ] Class: 3
+17:31:05.877  -> NO
+17:31:05.877  Run: 182
+17:31:05.891  Clear TCM
+17:31:05.891  Stream ready
+17:31:05.957  DMA done
+17:31:05.957  Start NPU
+17:31:05.957  [IRQ] Class: 3
+17:31:05.957  -> NO
+17:31:05.970  Run: 183
+17:31:05.970  Clear TCM
+17:31:05.970  Stream ready
+17:31:06.035  DMA done
+17:31:06.035  Start NPU
+17:31:06.035  [IRQ] Class: 1
+17:31:06.035  Run: 184
+17:31:06.049  Clear TCM
+17:31:06.049  Stream ready
+17:31:06.114  DMA done
+17:31:06.114  Start NPU
+17:31:06.114  [IRQ] Class: 3
+17:31:06.114  -> NO
+17:31:06.114  Run: 185
+17:31:06.129  Clear TCM
+17:31:06.129  Stream ready
+17:31:06.194  DMA done
+17:31:06.194  Start NPU
+17:31:06.194  [IRQ] Class: 1
+17:31:06.194  Run: 186
+17:31:06.209  Clear TCM
+17:31:06.209  Stream ready
+17:31:06.276  DMA done
+17:31:06.276  Start NPU
+17:31:06.276  [IRQ] Class: 0
+17:31:06.276  -> SILENCE
+17:31:06.291  Run: 187
+17:31:06.291  Clear TCM
+17:31:06.291  Stream ready
+17:31:06.356  DMA done
+17:31:06.356  Start NPU
+17:31:06.356  [IRQ] Class: 3
+17:31:06.356  -> NO
+17:31:06.356  Run: 188
+17:31:06.372  Clear TCM
+17:31:06.372  Stream ready
+17:31:06.434  DMA done
+17:31:06.434  Start NPU
+17:31:06.434  [IRQ] Class: 3
+17:31:06.434  -> NO
+17:31:06.434  Run: 189
+17:31:06.443  Clear TCM
+17:31:06.443  Stream ready
+17:31:06.511  DMA done
+17:31:06.511  Start NPU
+17:31:06.511  [IRQ] Class: 2
+17:31:06.530  -> YES
+17:31:06.530  Run: 190
+17:31:06.530  Clear TCM
+17:31:06.530  Stream ready
+17:31:06.585  DMA done
+17:31:06.585  Start NPU
+17:31:06.585  [IRQ] Class: 1
+17:31:06.597  Run: 191
+17:31:06.597  Clear TCM
+17:31:06.597  Stream ready
+17:31:06.676  DMA done
+17:31:06.676  Start NPU
+17:31:06.676  [IRQ] Class: 1
+17:31:06.676  Run: 192
+17:31:06.691  Clear TCM
+17:31:06.691  Stream ready
+17:31:06.756  DMA done
+17:31:06.756  Start NPU
+17:31:06.756  [IRQ] Class: 3
+17:31:06.756  -> NO
+17:31:06.756  Run: 193
+17:31:06.772  Clear TCM
+17:31:06.772  Stream ready
+17:31:06.833  DMA done
+17:31:06.833  Start NPU
+17:31:06.833  [IRQ] Class: 2
+17:31:06.833  -> YES
+17:31:06.833  Run: 194
+17:31:06.851  Clear TCM
+17:31:06.851  Stream ready
+17:31:06.916  DMA done
+17:31:06.917  Start NPU
+17:31:06.917  [IRQ] Class: 3
+17:31:06.917  -> NO
+17:31:06.917  Run: 195
+17:31:06.932  Clear TCM
+17:31:06.932  Stream ready
+17:31:06.994  DMA done
+17:31:06.994  Start NPU
+17:31:06.994  [IRQ] Class: 3
+17:31:06.994  -> NO
+17:31:06.994  Run: 196
+17:31:07.010  Clear TCM
+17:31:07.010  Stream ready
+17:31:07.076  DMA done
+17:31:07.076  Start NPU
+17:31:07.076  [IRQ] Class: 3
+17:31:07.076  -> NO
+17:31:07.076  Run: 197
+17:31:07.090  Clear TCM
+17:31:07.090  Stream ready
+17:31:07.154  DMA done
+17:31:07.154  Start NPU
+17:31:07.154  [IRQ] Class: 3
+17:31:07.154  -> NO
+17:31:07.154  Run: 198
+17:31:07.154  Clear TCM
+17:31:07.172  Stream ready
+17:31:07.236  DMA done
+17:31:07.236  Start NPU
+17:31:07.236  [IRQ] Class: 3
+17:31:07.236  -> NO
+17:31:07.236  Run: 199
+17:31:07.252  Clear TCM
+17:31:07.252  Stream ready
+17:31:07.315  DMA done
+17:31:07.315  Start NPU
+17:31:07.315  [IRQ] Class: 2
+17:31:07.315  -> YES
+17:31:07.315  Run: 200
+17:31:07.329  Clear TCM
+17:31:07.329  Stream ready
+17:31:07.397  DMA done
+17:31:07.397  Start NPU
+17:31:07.397  [IRQ] Class: 1
+17:31:07.397  Run: 201
+17:31:07.397  Clear TCM
+17:31:07.412  Stream ready
+17:31:07.475  DMA done
+17:31:07.475  Start NPU
+17:31:07.475  [IRQ] Class: 3
+17:31:07.475  -> NO
+17:31:07.475  Run: 202
+17:31:07.487  Clear TCM
+17:31:07.487  Stream ready
+17:31:07.556  DMA done
+17:31:07.556  Start NPU
+17:31:07.556  [IRQ] Class: 3
+17:31:07.556  -> NO
+17:31:07.556  Run: 203
+17:31:07.572  Clear TCM
+17:31:07.572  Stream ready
+17:31:07.635  DMA done
+17:31:07.635  Start NPU
+17:31:07.635  [IRQ] Class: 3
+17:31:07.635  -> NO
+17:31:07.635  Run: 204
+17:31:07.651  Clear TCM
+17:31:07.651  Stream ready
+17:31:07.718  DMA done
+17:31:07.718  Start NPU
+17:31:07.718  [IRQ] Class: 2
+17:31:07.718  -> YES
+17:31:07.718  Run: 205
+17:31:07.731  Clear TCM
+17:31:07.731  Stream ready
+17:31:07.794  DMA done
+17:31:07.794  Start NPU
+17:31:07.794  [IRQ] Class: 3
+17:31:07.809  -> NO
+17:31:07.809  Run: 206
+17:31:07.809  Clear TCM
+17:31:07.809  Stream ready
+17:31:07.875  DMA done
+17:31:07.875  Start NPU
+17:31:07.875  [IRQ] Class: 3
+17:31:07.875  -> NO
+17:31:07.875  Run: 207
+17:31:07.892  Clear TCM
+17:31:07.892  Stream ready
+17:31:07.956  DMA done
+17:31:07.956  Start NPU
+17:31:07.956  [IRQ] Class: 2
+17:31:07.956  -> YES
+17:31:07.972  Run: 208
+17:31:07.972  Clear TCM
+17:31:07.972  Stream ready
+17:31:08.032  DMA done
+17:31:08.032  Start NPU
+17:31:08.032  [IRQ] Class: 3
+17:31:08.032  -> NO
+17:31:08.032  Run: 209
+17:31:08.051  Clear TCM
+17:31:08.051  Stream ready
+17:31:08.116  DMA done
+17:31:08.116  Start NPU
+17:31:08.116  [IRQ] Class: 3
+17:31:08.116  -> NO
+17:31:08.116  Run: 210
+17:31:08.132  Clear TCM
+17:31:08.132  Stream ready
+17:31:08.196  DMA done
+17:31:08.196  Start NPU
+17:31:08.196  [IRQ] Class: 2
+17:31:08.196  -> YES
+17:31:08.212  Run: 211
+17:31:08.212  Clear TCM
+17:31:08.212  Stream ready
+17:31:08.276  DMA done
+17:31:08.276  Start NPU
+17:31:08.276  [IRQ] Class: 2
+17:31:08.276  -> YES
+17:31:08.291  Run: 212
+17:31:08.291  Clear TCM
+17:31:08.291  Stream ready
+17:31:08.355  DMA done
+17:31:08.355  Start NPU
+17:31:08.355  [IRQ] Class: 2
+17:31:08.355  -> YES
+17:31:08.355  Run: 213
+17:31:08.372  Clear TCM
+17:31:08.372  Stream ready
+17:31:08.436  DMA done
+17:31:08.436  Start NPU
+17:31:08.436  [IRQ] Class: 2
+17:31:08.436  -> YES
+17:31:08.436  Run: 214
+17:31:08.452  Clear TCM
+17:31:08.452  Stream ready
+17:31:08.516  DMA done
+17:31:08.516  Start NPU
+17:31:08.516  [IRQ] Class: 2
+17:31:08.516  -> YES
+17:31:08.516  Run: 215
+17:31:08.532  Clear TCM
+17:31:08.532  Stream ready
+17:31:08.593  DMA done
+17:31:08.593  Start NPU
+17:31:08.593  [IRQ] Class: 2
+17:31:08.593  -> YES
+17:31:08.605  Run: 216
+17:31:08.605  Clear TCM
+17:31:08.605  Stream ready
+17:31:08.671  DMA done
+17:31:08.671  Start NPU
+17:31:08.671  [IRQ] Class: 3
+17:31:08.671  -> NO
+17:31:08.692  Run: 217
+17:31:08.692  Clear TCM
+17:31:08.692  Stream ready
+17:31:08.756  DMA done
+17:31:08.756  Start NPU
+17:31:08.756  [IRQ] Class: 2
+17:31:08.756  -> YES
+17:31:08.756  Run: 218
+17:31:08.771  Clear TCM
+17:31:08.771  Stream ready
+17:31:08.836  DMA done
+17:31:08.836  Start NPU
+17:31:08.836  [IRQ] Class: 1
+17:31:08.836  Run: 219
+17:31:08.836  Clear TCM
+17:31:08.850  Stream ready
+17:31:08.915  DMA done
+17:31:08.915  Start NPU
+17:31:08.915  [IRQ] Class: 3
+17:31:08.915  -> NO
+17:31:08.915  Run: 220
+17:31:08.928  Clear TCM
+17:31:08.928  Stream ready
+17:31:08.989  DMA done
+17:31:08.989  Start NPU
+17:31:08.989  [IRQ] Class: 3
+17:31:08.989  -> NO
+17:31:08.989  Run: 221
+17:31:09.000  Clear TCM
+17:31:09.000  Stream ready
+17:31:09.073  DMA done
+17:31:09.073  Start NPU
+17:31:09.073  [IRQ] Class: 1
+17:31:09.090  Run: 222
+17:31:09.090  Clear TCM
+17:31:09.090  Stream ready
+17:31:09.156  DMA done
+17:31:09.156  Start NPU
+17:31:09.156  [IRQ] Class: 3
+17:31:09.156  -> NO
+17:31:09.172  Run: 223
+17:31:09.172  Clear TCM
+17:31:09.172  Stream ready
+17:31:09.229  DMA done
+17:31:09.229  Start NPU
+17:31:09.229  [IRQ] Class: 0
+17:31:09.229  -> SILENCE
+17:31:09.229  Run: 224
+17:31:09.245  Clear TCM
+17:31:09.245  Stream ready
+17:31:09.316  DMA done
+17:31:09.316  Start NPU
+17:31:09.316  [IRQ] Class: 2
+17:31:09.316  -> YES
+17:31:09.331  Run: 225
+17:31:09.331  Clear TCM
+17:31:09.331  Stream ready
+17:31:09.397  DMA done
+17:31:09.397  Start NPU
+17:31:09.397  [IRQ] Class: 2
+17:31:09.397  -> YES
+17:31:09.412  Run: 226
+17:31:09.412  Clear TCM
+17:31:09.412  Stream ready
+17:31:09.473  DMA done
+17:31:09.473  Start NPU
+17:31:09.473  [IRQ] Class: 2
+17:31:09.473  -> YES
+17:31:09.492  Run: 227
+17:31:09.492  Clear TCM
+17:31:09.492  Stream ready
+17:31:09.555  DMA done
+17:31:09.555  Start NPU
+17:31:09.555  [IRQ] Class: 3
+17:31:09.555  -> NO
+17:31:09.555  Run: 228
+17:31:09.571  Clear TCM
+17:31:09.571  Stream ready
+17:31:09.635  DMA done
+17:31:09.635  Start NPU
+17:31:09.635  [IRQ] Class: 1
+17:31:09.635  Run: 229
+17:31:09.635  Clear TCM
+17:31:09.650  Stream ready
+17:31:09.714  DMA done
+17:31:09.714  Start NPU
+17:31:09.714  [IRQ] Class: 2
+17:31:09.714  -> YES
+17:31:09.714  Run: 230
+17:31:09.732  Clear TCM
+17:31:09.732  Stream ready
+17:31:09.795  DMA done
+17:31:09.795  Start NPU
+17:31:09.795  [IRQ] Class: 3
+17:31:09.795  -> NO
+17:31:09.795  Run: 231
+17:31:09.811  Clear TCM
+17:31:09.811  Stream ready
+17:31:09.875  DMA done
+17:31:09.875  Start NPU
+17:31:09.875  [IRQ] Class: 3
+17:31:09.875  -> NO
+17:31:09.875  Run: 232
+17:31:09.890  Clear TCM
+17:31:09.890  Stream ready
+17:31:09.955  DMA done
+17:31:09.955  Start NPU
+17:31:09.955  [IRQ] Class: 2
+17:31:09.955  -> YES
+17:31:09.955  Run: 233
+17:31:09.971  Clear TCM
+17:31:09.971  Stream ready
+17:31:10.037  DMA done
+17:31:10.037  Start NPU
+17:31:10.037  [IRQ] Class: 2
+17:31:10.037  -> YES
+17:31:10.037  Run: 234
+17:31:10.052  Clear TCM
+17:31:10.052  Stream ready
+17:31:10.116  DMA done
+17:31:10.116  Start NPU
+17:31:10.116  [IRQ] Class: 3
+17:31:10.116  -> NO
+17:31:10.129  Run: 235
+17:31:10.129  Clear TCM
+17:31:10.129  Stream ready
+17:31:10.190  DMA done
+17:31:10.190  Start NPU
+17:31:10.190  [IRQ] Class: 1
+17:31:10.190  Run: 236
+17:31:10.200  Clear TCM
+17:31:10.200  Stream ready
+17:31:10.276  DMA done
+17:31:10.276  Start NPU
+17:31:10.276  [IRQ] Class: 3
+17:31:10.276  -> NO
+17:31:10.287  Run: 237
+17:31:10.287  Clear TCM
+17:31:10.287  Stream ready
+17:31:10.356  DMA done
+17:31:10.356  Start NPU
+17:31:10.356  [IRQ] Class: 2
+17:31:10.356  -> YES
+17:31:10.372  Run: 238
+17:31:10.372  Clear TCM
+17:31:10.372  Stream ready
+17:31:10.434  DMA done
+17:31:10.434  Start NPU
+17:31:10.434  [IRQ] Class: 2
+17:31:10.434  -> YES
+17:31:10.434  Run: 239
+17:31:10.446  Clear TCM
+17:31:10.446  Stream ready
+17:31:10.514  DMA done
+17:31:10.514  Start NPU
+17:31:10.514  [IRQ] Class: 3
+17:31:10.514  -> NO
+17:31:10.514  Run: 240
+17:31:10.531  Clear TCM
+17:31:10.531  Stream ready
+17:31:10.595  DMA done
+17:31:10.595  Start NPU
+17:31:10.595  [IRQ] Class: 3
+17:31:10.595  -> NO
+17:31:10.595  Run: 241
+17:31:10.608  Clear TCM
+17:31:10.608  Stream ready
+17:31:10.674  DMA done
+17:31:10.674  Start NPU
+17:31:10.674  [IRQ] Class: 3
+17:31:10.674  -> NO
+17:31:10.674  Run: 242
+17:31:10.691  Clear TCM
+17:31:10.691  Stream ready
+17:31:10.751  DMA done
+17:31:10.751  Start NPU
+17:31:10.751  [IRQ] Class: 3
+17:31:10.751  -> NO
+17:31:10.751  Run: 243
+17:31:10.771  Clear TCM
+17:31:10.771  Stream ready
+17:31:10.836  DMA done
+17:31:10.836  Start NPU
+17:31:10.836  [IRQ] Class: 2
+17:31:10.836  -> YES
+17:31:10.847  Run: 244
+17:31:10.847  Clear TCM
+17:31:10.847  Stream ready
+17:31:10.906  DMA done
+17:31:10.906  Start NPU
+17:31:10.906  [IRQ] Class: 2
+17:31:10.906  -> YES
+17:31:10.930  Run: 245
+17:31:10.930  Clear TCM
+17:31:10.930  Stream ready
+17:31:10.997  DMA done
+17:31:10.997  Start NPU
+17:31:10.997  [IRQ] Class: 2
+17:31:10.997  -> YES
+17:31:10.997  Run: 246
+17:31:11.010  Clear TCM
+17:31:11.010  Stream ready
+17:31:11.076  DMA done
+17:31:11.076  Start NPU
+17:31:11.076  [IRQ] Class: 3
+17:31:11.076  -> NO
+17:31:11.090  Run: 247
+17:31:11.090  Clear TCM
+17:31:11.090  Stream ready
+17:31:11.154  DMA done
+17:31:11.154  Start NPU
+17:31:11.154  [IRQ] Class: 3
+17:31:11.154  -> NO
+17:31:11.172  Run: 248
+17:31:11.172  Clear TCM
+17:31:11.172  Stream ready
+17:31:11.236  DMA done
+17:31:11.236  Start NPU
+17:31:11.236  [IRQ] Class: 2
+17:31:11.236  -> YES
+17:31:11.252  Run: 249
+17:31:11.252  Clear TCM
+17:31:11.252  Stream ready
+17:31:11.316  DMA done
+17:31:11.316  Start NPU
+17:31:11.316  [IRQ] Class: 2
+17:31:11.316  -> YES
+17:31:11.316  Run: 250
+17:31:11.328  Clear TCM
+17:31:11.328  Stream ready
+17:31:11.395  DMA done
+17:31:11.395  Start NPU
+17:31:11.395  [IRQ] Class: 0
+17:31:11.395  -> SILENCE
+17:31:11.410  Run: 251
+17:31:11.410  Clear TCM
+17:31:11.410  Stream ready
+17:31:11.474  DMA done
+17:31:11.474  Start NPU
+17:31:11.474  [IRQ] Class: 3
+17:31:11.474  -> NO
+17:31:11.474  Run: 252
+17:31:11.492  Clear TCM
+17:31:11.492  Stream ready
+17:31:11.551  DMA done
+17:31:11.551  Start NPU
+17:31:11.551  [IRQ] Class: 1
+17:31:11.551  Run: 253
+17:31:11.569  Clear TCM
+17:31:11.569  Stream ready
+17:31:11.636  DMA done
+17:31:11.636  Start NPU
+17:31:11.636  [IRQ] Class: 3
+17:31:11.636  -> NO
+17:31:11.652  Run: 254
+17:31:11.652  Clear TCM
+17:31:11.652  Stream ready
+17:31:11.715  DMA done
+17:31:11.715  Start NPU
+17:31:11.715  [IRQ] Class: 3
+17:31:11.715  -> NO
+17:31:11.715  Run: 255
+17:31:11.729  Clear TCM
+17:31:11.729  Stream ready
+17:31:11.796  DMA done
+17:31:11.796  Start NPU
+17:31:11.796  [IRQ] Class: 3
+17:31:11.796  -> NO
+17:31:11.796  Run: 256
+17:31:11.808  Clear TCM
+17:31:11.808  Stream ready
+17:31:11.876  DMA done
+17:31:11.876  Start NPU
+17:31:11.876  [IRQ] Class: 2
+17:31:11.876  -> YES
+17:31:11.889  Run: 257
+17:31:11.889  Clear TCM
+17:31:11.889  Stream ready
+17:31:11.955  DMA done
+17:31:11.955  Start NPU
+17:31:11.955  [IRQ] Class: 3
+17:31:11.955  -> NO
+17:31:11.955  Run: 258
+17:31:11.972  Clear TCM
+17:31:11.972  Stream ready
+17:31:12.036  DMA done
+17:31:12.036  Start NPU
+17:31:12.036  [IRQ] Class: 3
+17:31:12.036  -> NO
+17:31:12.036  Run: 259
+17:31:12.052  Clear TCM
+17:31:12.052  Stream ready
+17:31:12.111  DMA done
+17:31:12.111  Start NPU
+17:31:12.111  [IRQ] Class: 3
+17:31:12.111  -> NO
+17:31:12.111  Run: 260
+17:31:12.132  Clear TCM
+17:31:12.132  Stream ready
+17:31:12.196  DMA done
+17:31:12.196  Start NPU
+17:31:12.196  [IRQ] Class: 1
+17:31:12.196  Run: 261
+17:31:12.211  Clear TCM
+17:31:12.211  Stream ready
+17:31:12.275  DMA done
+17:31:12.275  Start NPU
+17:31:12.275  [IRQ] Class: 0
+17:31:12.275  -> SILENCE
+17:31:12.275  Run: 262
+17:31:12.292  Clear TCM
+17:31:12.292  Stream ready
+17:31:12.355  DMA done
+17:31:12.355  Start NPU
+17:31:12.355  [IRQ] Class: 2
+17:31:12.355  -> YES
+17:31:12.355  Run: 263
+17:31:12.372  Clear TCM
+17:31:12.372  Stream ready
+17:31:12.436  DMA done
+17:31:12.436  Start NPU
+17:31:12.436  [IRQ] Class: 0
+17:31:12.436  -> SILENCE
+17:31:12.436  Run: 264
+17:31:12.452  Clear TCM
+17:31:12.452  Stream ready
+17:31:12.516  DMA done
+17:31:12.516  Start NPU
+17:31:12.516  [IRQ] Class: 3
+17:31:12.516  -> NO
+17:31:12.516  Run: 265
+17:31:12.531  Clear TCM
+17:31:12.531  Stream ready
+17:31:12.595  DMA done
+17:31:12.595  Start NPU
+17:31:12.595  [IRQ] Class: 3
+17:31:12.595  -> NO
+17:31:12.595  Run: 266
+17:31:12.612  Clear TCM
+17:31:12.612  Stream ready
+17:31:12.676  DMA done
+17:31:12.676  Start NPU
+17:31:12.676  [IRQ] Class: 3
+17:31:12.676  -> NO
+17:31:12.688  Run: 267
+17:31:12.688  Clear TCM
+17:31:12.688  Stream ready
+17:31:12.756  DMA done
+17:31:12.756  Start NPU
+17:31:12.756  [IRQ] Class: 3
+17:31:12.756  -> NO
+17:31:12.772  Run: 268
+17:31:12.772  Clear TCM
+17:31:12.772  Stream ready
+17:31:12.838  DMA done
+17:31:12.838  Start NPU
+17:31:12.838  [IRQ] Class: 2
+17:31:12.838  -> YES
+17:31:12.838  Run: 269
+17:31:12.852  Clear TCM
+17:31:12.852  Stream ready
+17:31:12.915  DMA done
+17:31:12.915  Start NPU
+17:31:12.915  [IRQ] Class: 3
+17:31:12.931  -> NO
+17:31:12.931  Run: 270
+17:31:12.931  Clear TCM
+17:31:12.931  Stream ready
+17:31:12.995  DMA done
+17:31:12.995  Start NPU
+17:31:12.995  [IRQ] Class: 2
+17:31:12.995  -> YES
+17:31:12.995  Run: 271
+17:31:13.010  Clear TCM
+17:31:13.010  Stream ready
+17:31:13.076  DMA done
+17:31:13.076  Start NPU
+17:31:13.076  [IRQ] Class: 1
+17:31:13.076  Run: 272
+17:31:13.076  Clear TCM
+17:31:13.092  Stream ready
+17:31:13.152  DMA done
+17:31:13.152  Start NPU
+17:31:13.152  [IRQ] Class: 3
+17:31:13.152  -> NO
+17:31:13.152  Run: 273
+17:31:13.172  Clear TCM
+17:31:13.172  Stream ready
+17:31:13.236  DMA done
+17:31:13.236  Start NPU
+17:31:13.236  [IRQ] Class: 3
+17:31:13.236  -> NO
+17:31:13.252  Run: 274
+17:31:13.252  Clear TCM
+17:31:13.252  Stream ready
+17:31:13.317  DMA done
+17:31:13.317  Start NPU
+17:31:13.317  [IRQ] Class: 3
+17:31:13.317  -> NO
+17:31:13.317  Run: 275
+17:31:13.331  Clear TCM
+17:31:13.331  Stream ready
+17:31:13.397  DMA done
+17:31:13.397  Start NPU
+17:31:13.397  [IRQ] Class: 2
+17:31:13.397  -> YES
+17:31:13.412  Run: 276
+17:31:13.412  Clear TCM
+17:31:13.412  Stream ready
+17:31:13.477  DMA done
+17:31:13.477  Start NPU
+17:31:13.477  [IRQ] Class: 1
+17:31:13.491  Run: 277
+17:31:13.491  Clear TCM
+17:31:13.491  Stream ready
+17:31:13.558  DMA done
+17:31:13.558  Start NPU
+17:31:13.558  [IRQ] Class: 2
+17:31:13.558  -> YES
+17:31:13.571  Run: 278
+17:31:13.571  Clear TCM
+17:31:13.571  Stream ready
+17:31:13.634  DMA done
+17:31:13.634  Start NPU
+17:31:13.634  [IRQ] Class: 3
+17:31:13.652  -> NO
+17:31:13.652  Run: 279
+17:31:13.652  Clear TCM
+17:31:13.652  Stream ready
+17:31:13.716  DMA done
+17:31:13.716  Start NPU
+17:31:13.716  [IRQ] Class: 2
+17:31:13.716  -> YES
+17:31:13.732  Run: 280
+17:31:13.732  Clear TCM
+17:31:13.732  Stream ready
+17:31:13.792  DMA done
+17:31:13.792  Start NPU
+17:31:13.792  [IRQ] Class: 3
+17:31:13.811  -> NO
+17:31:13.811  Run: 281
+17:31:13.811  Clear TCM
+17:31:13.811  Stream ready
+17:31:13.875  DMA done
+17:31:13.875  Start NPU
+17:31:13.875  [IRQ] Class: 3
+17:31:13.875  -> NO
+17:31:13.892  Run: 282
+17:31:13.892  Clear TCM
+17:31:13.892  Stream ready
+17:31:13.957  DMA done
+17:31:13.957  Start NPU
+17:31:13.972  [IRQ] Class: 3
+17:31:13.972  -> NO
+17:31:13.972  Run: 283
+17:31:13.972  Clear TCM
+17:31:13.972  Stream ready
+17:31:14.050  DMA done
+17:31:14.050  Start NPU
+17:31:14.050  [IRQ] Class: 3
+17:31:14.064  -> NO
+17:31:14.064  Run: 284
+17:31:14.064  Clear TCM
+17:31:14.064  Stream ready
+17:31:14.131  DMA done
+17:31:14.131  Start NPU
+17:31:14.131  [IRQ] Class: 1
+17:31:14.131  Run: 285
+17:31:14.144  Clear TCM
+17:31:14.144  Stream ready
+17:31:14.212  DMA done
+17:31:14.212  Start NPU
+17:31:14.212  [IRQ] Class: 3
+17:31:14.212  -> NO
+17:31:14.212  Run: 286
+17:31:14.227  Clear TCM
+17:31:14.227  Stream ready
+17:31:14.291  DMA done
+17:31:14.291  Start NPU
+17:31:14.291  [IRQ] Class: 0
+17:31:14.291  -> SILENCE
+17:31:14.307  Run: 287
+17:31:14.307  Clear TCM
+17:31:14.307  Stream ready
+17:31:14.372  DMA done
+17:31:14.372  Start NPU
+17:31:14.372  [IRQ] Class: 3
+17:31:14.372  -> NO
+17:31:14.372  Run: 288
+17:31:14.386  Clear TCM
+17:31:14.386  Stream ready
+17:31:14.451  DMA done
+17:31:14.451  Start NPU
+17:31:14.451  [IRQ] Class: 0
+17:31:14.467  -> SILENCE
+17:31:14.467  Run: 289
+17:31:14.467  Clear TCM
+17:31:14.467  Stream ready
+17:31:14.531  DMA done
+17:31:14.531  Start NPU
+17:31:14.531  [IRQ] Class: 3
+17:31:14.531  -> NO
+17:31:14.531  Run: 290
+17:31:14.546  Clear TCM
+17:31:14.546  Stream ready
+17:31:14.601  DMA done
+17:31:14.601  Start NPU
+17:31:14.601  [IRQ] Class: 3
+17:31:14.627  -> NO
+17:31:14.627  Run: 291
+17:31:14.627  Clear TCM
+17:31:14.627  Stream ready
+17:31:19.642  DMA done
+17:31:19.642  Start NPU
+17:31:19.642  [IRQ] Class: 2
+17:31:19.642  -> YES
+17:31:19.642  Run: 292
+17:31:19.657  Clear TCM
+17:31:19.657  Stream ready
+17:31:19.684  DMA done
+17:31:19.684  Start NPU
+17:31:19.684  [IRQ] Class: 1
+17:31:19.684  Run: 293
+17:31:19.700  Clear TCM
+17:31:19.700  Stream ready
+17:31:19.716  DMA done
+17:31:19.716  Start NPU
+17:31:19.716  [IRQ] Class: 1
+17:31:19.716  Run: 294
+17:31:19.716  Clear TCM
+17:31:19.732  Stream ready
+17:31:20.052  DMA done
+17:31:20.052  Start NPU
+17:31:20.052  [IRQ] Class: 3
+17:31:20.052  -> NO
+17:31:20.052  Run: 295
+17:31:20.052  Clear TCM
+17:31:20.052  Stream ready
+17:31:20.122  DMA done
+17:31:20.122  Start NPU
+17:31:20.122  [IRQ] Class: 1
+17:31:20.122  Run: 296
+17:31:20.122  Clear TCM
+17:31:20.122  Stream ready
+17:31:20.468  DMA done
+17:31:20.468  Start NPU
+17:31:20.468  [IRQ] Class: 2
+17:31:20.468  -> YES
+17:31:20.468  Run: 297
+17:31:20.468  Clear TCM
+17:31:20.468  Stream ready
+17:31:20.547  DMA done
+17:31:20.547  Start NPU
+17:31:20.547  [IRQ] Class: 3
+17:31:20.547  -> NO
+17:31:20.547  Run: 298
+17:31:20.564  Clear TCM
+17:31:20.564  Stream ready
+17:31:20.628  DMA done
+17:31:20.628  Start NPU
+17:31:20.628  [IRQ] Class: 3
+17:31:20.628  -> NO
+17:31:20.628  Run: 299
+17:31:20.643  Clear TCM
+17:31:20.643  Stream ready
+17:31:20.708  DMA done
+17:31:20.708  Start NPU
+17:31:20.708  [IRQ] Class: 3
+17:31:20.708  -> NO
+17:31:20.708  Run: 300
+17:31:20.723  Clear TCM
+17:31:20.723  Stream ready
+17:31:20.779  DMA done
+17:31:20.779  Start NPU
+17:31:20.779  [IRQ] Class: 3
+17:31:20.779  -> NO
+17:31:20.779  Run: 301
+17:31:20.804  Clear TCM
+17:31:20.804  Stream ready
+17:31:20.859  DMA done
+17:31:20.859  Start NPU
+17:31:20.859  [IRQ] Class: 3
+17:31:20.859  -> NO
+17:31:20.859  Run: 302
+17:31:20.874  Clear TCM
+17:31:20.874  Stream ready
+17:31:20.948  DMA done
+17:31:20.948  Start NPU
+17:31:20.948  [IRQ] Class: 3
+17:31:20.948  -> NO
+17:31:20.948  Run: 303
+17:31:20.964  Clear TCM
+17:31:20.964  Stream ready
+17:31:21.029  DMA done
+17:31:21.029  Start NPU
+17:31:21.029  [IRQ] Class: 3
+17:31:21.029  -> NO
+17:31:21.029  Run: 304
+17:31:21.044  Clear TCM
+17:31:21.044  Stream ready
+17:31:21.107  DMA done
+17:31:21.107  Start NPU
+17:31:21.107  [IRQ] Class: 3
+17:31:21.107  -> NO
+17:31:21.124  Run: 305
+17:31:21.124  Clear TCM
+17:31:21.124  Stream ready
+17:31:21.184  DMA done
+17:31:21.184  Start NPU
+17:31:21.184  [IRQ] Class: 3
+17:31:21.184  -> NO
+17:31:21.201  Run: 306
+17:31:21.201  Clear TCM
+17:31:21.201  Stream ready
+17:31:21.268  DMA done
+17:31:21.268  Start NPU
+17:31:21.268  [IRQ] Class: 3
+17:31:21.268  -> NO
+17:31:21.268  Run: 307
+17:31:21.283  Clear TCM
+17:31:21.283  Stream ready
+17:31:24.356  DMA done
+17:31:24.356  Start NPU
+17:31:24.357  [IRQ] Class: 3
+17:31:24.357  -> NO
+17:31:24.357  Run: 308
+17:31:24.357  Clear TCM
+17:31:24.357  Stream ready

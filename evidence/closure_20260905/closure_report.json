@@ -1,0 +1,631 @@
+{
+  "created": "2026-09-05T19:35:19.465873",
+  "accuracy": {
+    "rtl_simulation_passed": true,
+    "evaluation_count": 100,
+    "benchmark_count": 1,
+    "subsets": {
+      "speech": {
+        "count": 75,
+        "tflite_accuracy": 0.8133333333333334,
+        "rtl_accuracy": 0.8133333333333334,
+        "difference_percentage_points": 0.0,
+        "relative_accuracy_difference": 0.0,
+        "tflite_confusion": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            16,
+            2,
+            5
+          ],
+          [
+            0,
+            1,
+            24,
+            0
+          ],
+          [
+            1,
+            1,
+            2,
+            21
+          ]
+        ],
+        "rtl_confusion": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            16,
+            2,
+            5
+          ],
+          [
+            0,
+            1,
+            24,
+            0
+          ],
+          [
+            1,
+            1,
+            2,
+            21
+          ]
+        ]
+      },
+      "synthetic_silence": {
+        "count": 25,
+        "tflite_accuracy": 0.8,
+        "rtl_accuracy": 0.8,
+        "difference_percentage_points": 0.0,
+        "relative_accuracy_difference": 0.0,
+        "tflite_confusion": [
+          [
+            20,
+            0,
+            4,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "rtl_confusion": [
+          [
+            20,
+            0,
+            4,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "combined": {
+        "count": 100,
+        "tflite_accuracy": 0.81,
+        "rtl_accuracy": 0.81,
+        "difference_percentage_points": 0.0,
+        "relative_accuracy_difference": 0.0,
+        "tflite_confusion": [
+          [
+            20,
+            0,
+            4,
+            1
+          ],
+          [
+            2,
+            16,
+            2,
+            5
+          ],
+          [
+            0,
+            1,
+            24,
+            0
+          ],
+          [
+            1,
+            1,
+            2,
+            21
+          ]
+        ],
+        "rtl_confusion": [
+          [
+            20,
+            0,
+            4,
+            1
+          ],
+          [
+            2,
+            16,
+            2,
+            5
+          ],
+          [
+            0,
+            1,
+            24,
+            0
+          ],
+          [
+            1,
+            1,
+            2,
+            21
+          ]
+        ]
+      }
+    },
+    "limitations": [
+      "Small stratified evaluation, not entire official test set; training overlap unknown",
+      "Floating-point host frontend, not bit-exact official microfrontend; identical tensors used on both classifiers",
+      "Synthetic silence evaluated separately; no model-output-based selection"
+    ],
+    "source": "https://www.tensorflow.org/tutorials/audio/simple_audio",
+    "class_disagreements_including_benchmark": 0,
+    "rtl_vs_integer_reference_probability_mismatches": 0
+  },
+  "speed": {
+    "passed": true,
+    "cpu_cycles": 68474022,
+    "npu_cycles": 85587,
+    "speedup": 800.0516667250868,
+    "reference_clock_hz": 50000000,
+    "cpu_seconds_at_50mhz": 1.36948044,
+    "npu_seconds_at_50mhz": 0.00171174,
+    "output_q12": [
+      0,
+      225,
+      326,
+      3543
+    ],
+    "input": "benchmark_golden",
+    "cpu_scope": "Full 4000 convolution outputs, FC bias/MAC/requantization and softmax; custom C, -Os rv32imc_zicsr; CPU RTL with SRAM models",
+    "npu_scope": "Compute engine with synchronous TCM model; no boot/UART/DMA input transfer",
+    "limitations": [
+      "Single benchmark input",
+      "Custom integer C baseline, not official TFLite Micro executable",
+      "Comparison clock is not ASIC post-route timing closure"
+    ]
+  },
+  "axi": {
+    "passed": true,
+    "status": {
+      "ad": "all_axi",
+      "durum": "GECTI",
+      "denetim": 17,
+      "hata": 0,
+      "sure": 539.7277145385742,
+      "not_": ""
+    },
+    "interfaces": [
+      {
+        "index": 0,
+        "name": "cpu_data",
+        "AR": 136116,
+        "R": 136116,
+        "AW": 15437,
+        "W": 15437,
+        "B": 15437,
+        "ERR": 0,
+        "RESPERR": 1,
+        "STALL": 321249,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 1,
+        "name": "dma_master",
+        "AR": 980,
+        "R": 980,
+        "AW": 980,
+        "W": 980,
+        "B": 980,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 1955462,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 2,
+        "name": "jtag_master",
+        "AR": 8,
+        "R": 8,
+        "AW": 1,
+        "W": 1,
+        "B": 1,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 25,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 3,
+        "name": "arbiter_out",
+        "AR": 137104,
+        "R": 137104,
+        "AW": 16418,
+        "W": 16418,
+        "B": 16418,
+        "ERR": 0,
+        "RESPERR": 1,
+        "STALL": 2347242,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 4,
+        "name": "boot_data",
+        "AR": 1,
+        "R": 1,
+        "AW": 1,
+        "W": 1,
+        "B": 1,
+        "ERR": 0,
+        "RESPERR": 1,
+        "STALL": 0,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 5,
+        "name": "iram_data",
+        "AR": 593,
+        "R": 593,
+        "AW": 558,
+        "W": 558,
+        "B": 558,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 1117,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 6,
+        "name": "dram",
+        "AR": 564,
+        "R": 564,
+        "AW": 2496,
+        "W": 2496,
+        "B": 2496,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 2496,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 7,
+        "name": "gpio",
+        "AR": 2,
+        "R": 2,
+        "AW": 4,
+        "W": 4,
+        "B": 4,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 4,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 8,
+        "name": "timer",
+        "AR": 2,
+        "R": 2,
+        "AW": 18,
+        "W": 18,
+        "B": 18,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 4,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 9,
+        "name": "uart_general",
+        "AR": 89193,
+        "R": 89193,
+        "AW": 977,
+        "W": 977,
+        "B": 977,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 179363,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 10,
+        "name": "uart_stream",
+        "AR": 1096,
+        "R": 1096,
+        "AW": 6,
+        "W": 6,
+        "B": 6,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 1952776,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 11,
+        "name": "i2c",
+        "AR": 40,
+        "R": 40,
+        "AW": 5,
+        "W": 5,
+        "B": 5,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 0,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 12,
+        "name": "qspi",
+        "AR": 45606,
+        "R": 45606,
+        "AW": 178,
+        "W": 178,
+        "B": 178,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 45784,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 13,
+        "name": "npu_csr",
+        "AR": 2,
+        "R": 2,
+        "AW": 11,
+        "W": 11,
+        "B": 11,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 13,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 14,
+        "name": "npu_memory",
+        "AR": 1,
+        "R": 1,
+        "AW": 12149,
+        "W": 12149,
+        "B": 12149,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 12149,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 15,
+        "name": "dma_csr",
+        "AR": 2,
+        "R": 2,
+        "AW": 14,
+        "W": 14,
+        "B": 14,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 16,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 16,
+        "name": "jtag_csr",
+        "AR": 2,
+        "R": 2,
+        "AW": 1,
+        "W": 1,
+        "B": 1,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 3,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 17,
+        "name": "rom_slave",
+        "AR": 187230,
+        "R": 187229,
+        "AW": 1,
+        "W": 1,
+        "B": 1,
+        "ERR": 0,
+        "RESPERR": 1,
+        "STALL": 0,
+        "PEND_R": 1,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 18,
+        "name": "iram_slave",
+        "AR": 406816,
+        "R": 406816,
+        "AW": 558,
+        "W": 558,
+        "B": 558,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 558,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 19,
+        "name": "npu_engine",
+        "AR": 81024,
+        "R": 81024,
+        "AW": 8,
+        "W": 8,
+        "B": 8,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 0,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 20,
+        "name": "cpu_instruction",
+        "AR": 593452,
+        "R": 593451,
+        "AW": 0,
+        "W": 0,
+        "B": 0,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 1223,
+        "PEND_R": 1,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 21,
+        "name": "rom_instruction",
+        "AR": 187229,
+        "R": 187228,
+        "AW": 0,
+        "W": 0,
+        "B": 0,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 3,
+        "PEND_R": 1,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      },
+      {
+        "index": 22,
+        "name": "iram_instruction",
+        "AR": 406223,
+        "R": 406223,
+        "AW": 0,
+        "W": 0,
+        "B": 0,
+        "ERR": 0,
+        "RESPERR": 0,
+        "STALL": 1220,
+        "PEND_R": 0,
+        "PEND_AW": 0,
+        "PEND_W": 0
+      }
+    ],
+    "inventory_count": 23,
+    "scope": "23 unique AXI-Lite links, passive UVM agents, transaction queues and channel stability checks",
+    "notes": [
+      "Defined SRAM precondition: crt0_deterministic.S zeroes all 8KB data SRAM using CPU stores before C startup; app.ld includes .sbss/.sdata",
+      "The original firmware produced X-containing DRAM reads; baseline_uninitialized_dram.log is preserved, no X checks disabled",
+      "SLVERR/DECERR are legal responses; directed ROM-write fault is expected",
+      "Continuous instruction fetch may have an outstanding transaction at simulation end; 5ms test liveness bound",
+      "Aggregate counts across cascaded links double-count the same logical transaction; use per-interface counts",
+      "Protocol smoke coverage is not exhaustive randomized AXI verification"
+    ]
+  },
+  "monitor_selftest": {
+    "ad": "monitor_test",
+    "durum": "GECTI",
+    "denetim": 1,
+    "hata": 0,
+    "sure": 4.42315411567688,
+    "not_": ""
+  },
+  "sha256": {
+    "build_defined_app.py": "477561397bdf2718932c1bcb1f8a7367097b469e5e2614764c366736e9674571",
+    "build_full_cpu.py": "1534a133e2ef1fb9d28262f5638420d6ff552cf6f082d05cce9e0abdb3064e84",
+    "prepare_accuracy.py": "b323e0b5d9823d59c6a3652b306f993c4d8c31586bf79c7225643a547ecfe9a3",
+    "run_accuracy.py": "9a04a4d363f1de5b98a8e5d646b4c81ece66e9a6881230dbf9b8a326df13de31",
+    "run_all_axi.py": "d5cfe877b6f4e9d29f30fa618e07bdca212ef36beefa0a62ecab9391aa4dde97",
+    "run_full_cpu.py": "a9209abb2ecde4bcfe4f465b3f3be6e10a6bb94a6f80b1dc395f42b4e9e4cc25",
+    "run_monitor_test.py": "8072e7d2a6ae851ed8ec85d966beebe71908a6f512c094f9417b4bdacb678b78",
+    "summarize.py": "b51b50b83aae62852060f01bf5b0272bf33e2fb79f056127730dec3a3c109647",
+    "all_axil_pkg.sv": "4337206f43428c5cccd54ac4fff4c14d05a2e201dbfa370ecd46689ab758ac82",
+    "tb_accuracy.sv": "51aa6d36485396131341619bc689b521ad6241c9ccf9a925c3a2b7f307429cb1",
+    "tb_all_axi.sv": "ecf456ebc5acd395fff80b2ccfb7ba8e3f1c3e0dea8c676021d34544ab022d56",
+    "tb_full_bench.sv": "fa36d748b3972be7e15125ba5dce0b5979418352f6776cb067b853ee88c241f9",
+    "tb_monitor_test.sv": "420ccdde808c57f11e1059fe86c32e6f742ec4dbc8ab97b24e4a923816ed77ea",
+    "bench_full.c": "e481868c4cffa3f12d2c3b8329116d1f3d72c4ae84802c9714939d31620d756d",
+    "accuracy_expected.mem": "b013f2a44b5da20872cd646475f267d0240808f27676c198607572d07067cf5e",
+    "accuracy_inputs.mem": "4c9bac8ea89b3a9d4177aa01bd11d1e6b9332bd809369f852a95fefa687a0967",
+    "sim\\accuracy\\sim.log": "f9dcdd81144529a16dcaecf46004c6a100cfaca5c40c3cb406fbbba42958c81e",
+    "sim\\full_cpu\\sim.log": "563eaae1697dcdcf6853a50dc33c92b6c24e6d3658beb67ae04fa251f005156c",
+    "accuracy_dataset.json": "4a573d5a7f752ae9dab0440922a0d28862c8bad158649d0c53f672506f58bafa",
+    "selection.json": "bada67d2b18d713ae71cf252d15520f7354abc178d1556c1a3667903480f17e8",
+    "bench_full.hex": "cb005663edc12f7d682996ead41394743981b39a33e1e5ee8e9cbb3675ca6d39",
+    "sim\\all_axi\\sim.log": "bcac183292d1ca5151beceb5318b4aec986e8351d1a64c0e8e5e19f617a69da2",
+    "sim\\monitor_test\\sim.log": "b230d2e3ca50e5fd94181f630237fa5e98a5ca8a59d6a42444c597a2bbb156f1",
+    "baseline_uninitialized_dram.log": "b389cad6766e9f421d1be5470f6addb011c4e5f9e0898507d0bbe8be37a4e11c",
+    "crt0_deterministic.S": "38d99931953bfdc7e6d70a0b0fe9ce5e74fbefbb531416ce8f525ef86efe72e3",
+    "firmware\\bench_full\\bench_full.elf": "23bc045978dc2746df8ff7d8c3fbbcf974a8025f2356f60146e8d01220433492",
+    "firmware\\app_defined\\app_defined.elf": "40928d0536b41ba7dff9ea642b4458f9166cbaeb77834e0c9aa50bcd574bfa30"
+  },
+  "candidate_rtl_hash_mismatches": [],
+  "external_input_sha256": {
+    "model\\micro_speech_quantized.tflite": "09e5e2a9dfb2d8ed78802bf18ce297bff54281a66ca18e0c23d69ca14f822a83",
+    "weights\\fc_weights_packed32.mem": "a71d30a06fac3eee9bf1d5e7e0fb5d07f2aa3c86c9a81c941878e2977d9b8b5a",
+    "tb\\npu_sw_bench\\tcm_image.mem": "cb823926a28b1f213bf3ece132a8f10420ecc5afd3d8c43074b87194d2243bf0",
+    "jury_demo\\app.ld": "a678a1181dd65fc8c723a70cbc82e3d20a5382bc5ca3fba11a225dbaf4d28a8a",
+    "sw_nexys\\src\\main.c": "b1d14cff1895ae69fe1781b55a6a9d0846b727792980e684d27b07d6a2e66c16"
+  }
+}

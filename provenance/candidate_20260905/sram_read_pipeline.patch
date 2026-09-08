@@ -1,0 +1,81 @@
+--- baseline/rtl/Memory/sram_module.sv
++++ candidate/rtl/Memory/sram_module.sv
+@@ -88,6 +88,28 @@
+     end
+ 
+ 
++    // ASIC: accept one read, capture the falling-edge SRAM output at
++    // the next rising edge, then advertise RVALID with registered data.
++    // Keep the response stable until RREADY. FPGA behavior is unchanged.
++`ifdef USE_SRAM_MACRO
++    logic macro_read_pending;
++    assign s_axil_arready = rst_n && !macro_read_pending && !s_axil_rvalid;
++    always_ff @(posedge clk or negedge rst_n) begin
++        if (!rst_n) begin
++            macro_read_pending <= 1'b0;
++            s_axil_rvalid <= 1'b0;
++            s_axil_rresp <= RESP_OKAY;
++        end else begin
++            macro_read_pending <= s_axil_arvalid && s_axil_arready;
++            if (macro_read_pending) begin
++                s_axil_rvalid <= 1'b1;
++                s_axil_rresp <= RESP_OKAY;
++            end else if (s_axil_rvalid && s_axil_rready) begin
++                s_axil_rvalid <= 1'b0;
++            end
++        end
++    end
++`else
+     // --- AXI Okuma Kontrol Yazmaçları (Async reset içerir) ---
+     always_ff @(posedge clk or negedge rst_n) begin
+         if (!rst_n) begin
+@@ -110,6 +132,8 @@
+         end
+     end
+ 
++`endif
++
+     // =========================================================================
+     // Bellek gerceklemesi - ortak sinyaller
+     // =========================================================================
+@@ -122,7 +146,11 @@
+     assign raddr = s_axil_araddr[$clog2(RAM_DEPTH)+1 : 2];
+     assign waddr = aw_addr_reg  [$clog2(RAM_DEPTH)+1 : 2];
+     assign wr_en = aw_active && w_active && !s_axil_bvalid;
++`ifdef USE_SRAM_MACRO
++    assign rd_en = s_axil_arvalid && s_axil_arready;
++`else
+     assign rd_en = s_axil_arvalid && !s_axil_rvalid;
++`endif
+ 
+     assign s_axil_rdata = ram_rdata;
+ 
+@@ -227,12 +255,10 @@
+     // cikisi alinir. Ayni tuzaga UART_RDR'de dusulmustu.
+     // -------------------------------------------------------------------------
+     logic [SEL_W-1:0] rsel_q;
+-    logic             rd_en_q;
+     logic             rvalid_addr_q;
+ 
+     always_ff @(posedge clk) begin
+         rsel_q        <= rsel;
+-        rd_en_q       <= rd_en;
+         rvalid_addr_q <= (raddr < RAM_DEPTH[$clog2(RAM_DEPTH)-1:0]) ||
+                          (RAM_DEPTH == (1 << $clog2(RAM_DEPTH)));
+     end
+@@ -252,10 +278,11 @@
+     logic [31:0] rdata_hold;
+ 
+     always_ff @(posedge clk) begin
+-        if (rd_en_q) rdata_hold <= dout_r[rsel_q];
+-    end
+-
+-    assign ram_rdata = rd_en_q ? dout_r[rsel_q] : rdata_hold;
++        if (macro_read_pending) rdata_hold <= dout_r[rsel_q];
++    end
++
++    // No combinational SRAM-to-CPU bypass.
++    assign ram_rdata = rdata_hold;
+ 
+ `else
+     // =========================================================================

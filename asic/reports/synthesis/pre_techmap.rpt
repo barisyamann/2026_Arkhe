@@ -1,0 +1,51 @@
+194. Printing statistics.
+
+=== soc_top ===
+
+        +----------Local Count, excluding submodules.
+        | 
+    70884 wires
+    88594 wire bits
+     1004 public wires
+    18108 public wire bits
+       25 ports
+       79 port bits
+    83657 cells
+    19705   $_ANDNOT_
+     4010   $_AND_
+       75   $_DFFE_PN0N_
+     5254   $_DFFE_PN0P_
+       71   $_DFFE_PN1P_
+     6216   $_DFFE_PP_
+      546   $_DFF_PN0_
+       31   $_DFF_PN1_
+       80   $_DFF_P_
+    16189   $_MUX_
+     2097   $_NAND_
+     3850   $_NOR_
+     2233   $_NOT_
+     2503   $_ORNOT_
+    10507   $_OR_
+     3094   $_XNOR_
+     7173   $_XOR_
+       23   sky130_sram_2kbyte_1rw1r_32x512_8
+
+   Area for cell type $_ANDNOT_ is unknown!
+   Area for cell type $_AND_ is unknown!
+   Area for cell type $_DFFE_PN0N_ is unknown!
+   Area for cell type $_DFFE_PN0P_ is unknown!
+   Area for cell type $_DFFE_PN1P_ is unknown!
+   Area for cell type $_DFFE_PP_ is unknown!
+   Area for cell type $_DFF_PN0_ is unknown!
+   Area for cell type $_DFF_PN1_ is unknown!
+   Area for cell type $_DFF_P_ is unknown!
+   Area for cell type $_MUX_ is unknown!
+   Area for cell type $_NAND_ is unknown!
+   Area for cell type $_NOR_ is unknown!
+   Area for cell type $_NOT_ is unknown!
+   Area for cell type $_ORNOT_ is unknown!
+   Area for cell type $_OR_ is unknown!
+   Area for cell type $_XNOR_ is unknown!
+   Area for cell type $_XOR_ is unknown!
+   Area for cell type \sky130_sram_2kbyte_1rw1r_32x512_8 is unknown!
+

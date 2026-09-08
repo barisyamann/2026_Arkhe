@@ -1,0 +1,51 @@
+[
+  {
+    "name": "deterministik_golden",
+    "file": "deterministik_golden.bin",
+    "expected_class": 3,
+    "expected_label": "NO",
+    "sha256": "6193d3fda4e86b158d0f79918fcd81d05cef559e6b94566025204f48b64d1dd4"
+  },
+  {
+    "name": "rastgele_sinif0_silence",
+    "file": "rastgele_sinif0_silence.bin",
+    "expected_class": 0,
+    "expected_label": "SILENCE",
+    "sha256": "bc4be34afaa53013c7cc1cd3b744ef82a4426c47c5be5c88392f803e8c5ee8bb"
+  },
+  {
+    "name": "rastgele_sinif1_unknown",
+    "file": "rastgele_sinif1_unknown.bin",
+    "expected_class": 1,
+    "expected_label": "UNKNOWN",
+    "sha256": "6caaec93660c8f04220c7e06fe65b79b12ada4031b8c8a3ff3799849e720927a"
+  },
+  {
+    "name": "rastgele_sinif2_yes",
+    "file": "rastgele_sinif2_yes.bin",
+    "expected_class": 2,
+    "expected_label": "YES",
+    "sha256": "43844183395779c967f6e7602cbe2d2b56ec659b6c93521cd1ad366434253bed"
+  },
+  {
+    "name": "rastgele_sinif3_no",
+    "file": "rastgele_sinif3_no.bin",
+    "expected_class": 3,
+    "expected_label": "NO",
+    "sha256": "cd18ebd5d144884faee190cd46d641c685deba8dc3096157c6c3e0d3cfa79dfb"
+  },
+  {
+    "name": "ses_yes",
+    "file": "ses_yes.bin",
+    "expected_class": 2,
+    "expected_label": "YES",
+    "sha256": "cca6ca140ac0f7660d36f0790b7f23db4f14ed302c33810b409dca311c89436c"
+  },
+  {
+    "name": "ses_no",
+    "file": "ses_no.bin",
+    "expected_class": 3,
+    "expected_label": "NO",
+    "sha256": "c6590c5837bbd17a57727b90ad63d6997153223fc8133888c18d50280cef715d"
+  }
+]

@@ -1,0 +1,72 @@
+
+****** xsim v2025.2 (64-bit)
+  **** SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+  **** IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+  **** SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+  **** Start of session at: Tue Sep  8 20:42:44 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/snap/xsim_script.tcl
+# xsim {snap} -autoloadwcfg -tclbatch {run.tcl}
+Time resolution is 1 ps
+source run.tcl
+## run all
+[SPI_FLASH] 512 bayt yuklendi: qspi_test_pattern.hex
+[SPI_FLASH] 512 bayt yuklendi: qspi_test_pattern.hex
+================================================================
+ QSPI MASTER BLOK TESTI - OKUMA (CMD 0x03) YOLU
+================================================================
+      [OK]   QSPI_STA done biti = 0x00000001
+      [OK]   Flash kelime 0 = 0xa5a50000
+      [OK]   Flash kelime 1 = 0xa5a50001
+      [OK]   4-bayt: QSPI_STA done biti = 0x00000001
+      [OK]   4-bayt: flash kelime 2 = 0xa5a50002
+      [OK]   4-bayt: flash kelime 3 = 0xa5a50003
+      [OK]   RDID = 01 02 19 = 0x00190201
+      [OK]   WREN sonrasi RDSR1.WEL = 0x00000001
+      [OK]   WRDI sonrasi RDSR1.WEL = 0x00000000
+      [OK]   QOR (x4) kelime 0 = 0xa5a50000
+      [OK]   QOR (x4) kelime 1 = 0xa5a50001
+[SPI_FLASH] SE: 0x000000..0x000fff silindi
+      [OK]   SE sonrasi silinmis kelime = 0xffffffff
+      [OK]   model SE sayaci = 0x00000001
+      [OK]   model PP bayt sayaci = 0x00000004
+      [OK]   PP sonrasi geri okuma = 0x12345678
+  -- 256 baytlik tam sayfa programlama
+[SPI_FLASH] SE: 0x000000..0x000fff silindi
+      [OK]   256 bayt tam sayfa yazildi = 0x00000100
+      [OK]   256 baytin TAMAMI dogru geri okundu = 0x00000000
+[SPI_FLASH] UYARI: WEL yokken PP - yazma yok sayildi
+      [OK]   WEL yokken PP yazmadi = 0xffffffff
+  -- Prescaler SCK periyodu (sartname: clk/(P+1))
+[SPI_FLASH] Desteklenmeyen komut: 0x01
+      prescaler=0  olculen=20 ns  beklenen=20 ns
+      [OK]   prescaler 0 -> 20 ns (sistem saati) = 0x00000014
+[SPI_FLASH] Desteklenmeyen komut: 0x01
+      prescaler=1  olculen=40 ns  beklenen=40 ns
+      [OK]   prescaler 1 -> 40 ns = 0x00000028
+[SPI_FLASH] Desteklenmeyen komut: 0x01
+      prescaler=2  olculen=60 ns  beklenen=60 ns
+      [OK]   prescaler 2 -> 60 ns = 0x0000003c
+      prescaler=4  olculen=100 ns  beklenen=100 ns
+      [OK]   prescaler 4 -> 100 ns = 0x00000064
+
+--- TEST: FIFO hata bayraklari (negatif) ---
+      [OK]   baslangic: hata bayraklari temiz = 0x00000000
+[SPI_FLASH] Desteklenmeyen komut: 0x00
+      [OK]   bos RX okuma -> STA[8] = 0x00000001
+      [OK]   clr_status -> STA[8] temizlendi = 0x00000000
+[SPI_FLASH] Desteklenmeyen komut: 0x00
+      [OK]   64 kelime sonrasi TX dolu (STA[6]) = 0x00000001
+      [OK]   64 kelime sonrasi hata yok (STA[9]) = 0x00000000
+      [OK]   dolu TX'e yazma -> STA[9] = 0x00000001
+[SPI_FLASH] Desteklenmeyen komut: 0x00
+      [OK]   clr_status -> STA[9] temizlendi = 0x00000000
+      [OK]   son durum: tum hata bayraklari temiz = 0x00000000
+================================================================
+ QSPI TESTI GECTI - 30 denetim, 0 hata
+================================================================
+$finish called at time : 524550 ns : File "C:/Users/ybari/2026_Arkhe/rtl/Cevre_Birimleri/tb_qspi_mock.sv" Line 590
+## quit
+INFO: [Common 17-206] Exiting xsim at Tue Sep  8 20:42:46 2026...

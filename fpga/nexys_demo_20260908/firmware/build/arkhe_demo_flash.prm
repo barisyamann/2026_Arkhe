@@ -1,0 +1,12 @@
+===================================
+Configuration Memory information
+===================================
+File Format        MCS
+Interface          SPIX4
+Size               16M
+Start Address      0x00000000
+End Address        0x00FFFFFF
+
+Addr1         Addr2         Date                    File(s)
+0x00000000    0x003A607B    Sep  8 16:18:24 2026    C:/Users/ybari/2026_Arkhe/vivado/vivado_nexys_project/Arkhe_SoC_Nexys.runs/impl_1/nexys_top.bit
+0x00800000    0x00805E7F    Sep  8 17:20:41 2026    C:/Users/ybari/2026_Arkhe/sw_nexys/build/flash_demo.bin

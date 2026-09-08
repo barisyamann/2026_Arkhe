@@ -1,83 +1,38 @@
-# Vivado/ISE/EDK/SDx/Petalinux/HLS generated paths
-# Standard Vivado gitignore template
-
-# Vivado project work directories
-*.runs/
-*.cache/
-*.hw/
-*.ip_user_files/
-*.sim/
-
-# Vivado log/jou files
-*.log
-*.jou
-*.pb
-*.rpt
-*.dcp
-*.str
-
-# Vivado simulation/compilation folders
-.Xil/
-xsim.dir/
-work/
-msim/
-covhtmlreport/
-
-# SDK/Vitis workspace directories
-.metadata/
-.sdk/
-webtalk/
-
-# OS files
-.DS_Store
-Thumbs.db
-*.xpr
-!tb/FPGA_Reports/*.rpt
-!asic/reports/**/*.rpt
-!asic/reports/**/*.log
-
-# Kanit paketi: log ve rapor dosyalari surum kontrolunde tutulur
-!evidence/
-!evidence/**
-
-# LibreLane kosum ciktilari (yuzlerce MB ara dosya)
-asic/*/runs/
-
-# Regresyon calisma dizini (her kosumda yeniden uretilir)
-build/regression/
-
-# ASIC akisi gecici calisma alani (yeniden uretilir)
-asic/run/
+/.delivery_downloads/
 __pycache__/
-*.pyc
-
-# Tum gecici derleme/simulasyon calisma dizinleri
-build/
-
-# ISTISNA - sw_nexys/build altindaki hex dosyalari TESLIM ICERIGIDIR.
-#
-# 4 Eylul 2026'da eklendi. Yukaridaki "build/" kurali sw_nexys/build'i de
-# yakaliyordu; app.hex ve boot.hex bir sekilde "git add -f" ile girmis ama
-# app_sim.hex, core_test.hex, flash.hex ve flash_sim.hex disarda kalmisti.
-# Sonuc: depoyu klonlayan biri dort sistem testini (sistem,
-# sistem_gercek_boot, uvm_axi_agent, cekirdek_izi) kosamiyordu; testler
-# mem_zorunlu=False oldugu icin ATLANMIYOR, bellek dosyasiz kosup sessizce
-# anlamsiz sonuc veriyordu.
-#
-# Bir dizin disarida birakildiginde icindeki dosya tek basina geri
-# alinamaz; once dizini geri almak gerekir - alttaki uc satirin sirasi
-# bu yuzden onemli.
-!sw_nexys/build/
-sw_nexys/build/*
-!sw_nexys/build/*.hex
-
-# Kapsama raporlari - her kosumda TUMUYLE yeniden uretilen HTML dokumu.
-# Sayilari evidence/KAPSAMA_RAPORU.md icinde ozetlenir; yeniden uretmek
-# icin: python scripts/run_regression.py --coverage
-#
-# 6 Eylul 2026: evidence/coverage/ de listeye eklendi. Onceden yalnizca
-# coverage_sistem/ yok sayiliyordu; blok raporunun 170+ HTML dosyasi her
-# kapsama kosumundan sonra "degismis" gorunuyor ve gercek degisiklikleri
-# git status icinde bogüyordu. Ikisi de uretilen ciktidir, kaynak degil.
-evidence/coverage_sistem/
-evidence/coverage/
+/asic/macros/sky130_sram_2kbyte_1rw1r_32x512_8/gds/sky130_sram_2kbyte_1rw1r_32x512_8.gds
+/asic/reports/power/net-VGND.csv
+/asic/reports/power/net-VPWR.csv
+/asic/reports/timing/max_ff_n40C_1v95/max.rpt
+/asic/reports/timing/max_ss_100C_1v60/max.rpt
+/asic/reports/timing/max_tt_025C_1v80/max.rpt
+/asic/reports/timing/min_ff_n40C_1v95/max.rpt
+/asic/reports/timing/min_ss_100C_1v60/max.rpt
+/asic/reports/timing/min_tt_025C_1v80/max.rpt
+/asic/reports/timing/nom_ff_n40C_1v95/max.rpt
+/asic/reports/timing/nom_ss_100C_1v60/max.rpt
+/asic/reports/timing/nom_tt_025C_1v80/max.rpt
+/asic/results/def/soc_top.def
+/asic/results/gds/soc_top.gds
+/asic/results/gds/soc_top.klayout.gds
+/asic/results/gds/soc_top.magic.gds
+/asic/results/netlist/soc_top_pnr.v
+/asic/results/netlist/soc_top_powered.v
+/asic/results/netlist/soc_top_synth.v
+/asic/results/odb/soc_top.odb
+/asic/results/sdf/max_ff_n40C_1v95/soc_top__max_ff_n40C_1v95.sdf
+/asic/results/sdf/max_ss_100C_1v60/soc_top__max_ss_100C_1v60.sdf
+/asic/results/sdf/max_tt_025C_1v80/soc_top__max_tt_025C_1v80.sdf
+/asic/results/sdf/min_ff_n40C_1v95/soc_top__min_ff_n40C_1v95.sdf
+/asic/results/sdf/min_ss_100C_1v60/soc_top__min_ss_100C_1v60.sdf
+/asic/results/sdf/min_tt_025C_1v80/soc_top__min_tt_025C_1v80.sdf
+/asic/results/sdf/nom_ff_n40C_1v95/soc_top__nom_ff_n40C_1v95.sdf
+/asic/results/sdf/nom_ss_100C_1v60/soc_top__nom_ss_100C_1v60.sdf
+/asic/results/sdf/nom_tt_025C_1v80/soc_top__nom_tt_025C_1v80.sdf
+/asic/results/spef/max/soc_top.max.spef
+/asic/results/spef/min/soc_top.min.spef
+/asic/results/spef/nom/soc_top.nom.spef
+/asic/results/spice/soc_top_gds.spice
+/asic/results/spice/soc_top_lef_def.spice
+/fpga/JURI_FPGA_TESTI/arkhe_jury.mcs
+/fpga/nexys_demo_20260908/firmware/build/arkhe_demo_flash.mcs

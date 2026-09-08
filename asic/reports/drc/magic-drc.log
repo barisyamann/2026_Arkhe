@@ -58,22 +58,22 @@ LEF read: Processed 582 lines.
 Reading LEF data from file macros/sky130_sram_2kbyte_1rw1r_32x512_8/lef/sky130_sram_2kbyte_1rw1r_32x512_8.lef.
 This action cannot be undone.
 LEF read: Processed 1117 lines.
-> def read /home/tatua7806/arkhe/asic/run/arkhe/85-odb-cellfrequencytables/soc_top.def -noblockage
-Reading DEF data from file /home/tatua7806/arkhe/asic/run/arkhe/85-odb-cellfrequencytables/soc_top.def.
+> def read /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/asic/runs/d45_anten2/55-odb-cellfrequencytables/soc_top.def -noblockage
+Reading DEF data from file /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/asic/runs/d45_anten2/55-odb-cellfrequencytables/soc_top.def.
 This action cannot be undone.
   Processed 5 vias total.
   Processed 3 non-default rules total.
-  Processed 2080015 subcell instances total.
+  Processed 2073891 subcell instances total.
   Processed 81 pins total.
   Processed 2 special nets total.
-  Processed 88351 nets total.
-DEF read: Processed 3743145 lines.
+  Processed 128815 nets total.
+DEF read: Processed 4108698 lines.
 [INFO] Loading soc_top
 
 DRC style is now "drc(full)"
 Loading DRC CIF style.
-[INFO] COUNT: 7659
+[INFO] COUNT: 7658
 [INFO] Should be divided by 3 or 4
-[INFO] DRC Checking DONE (/home/tatua7806/arkhe/asic/run/arkhe/100-magic-drc/reports/drc.magic.rpt)
-[INFO] Saving mag view with DRC errors (/home/tatua7806/arkhe/asic/run/arkhe/100-magic-drc/views/soc_top.drc.mag)
+[INFO] DRC Checking DONE (/home/tatua7806/arkhe_exp/experiments/sramreg_20260905/asic/runs/d45_anten2/66-magic-drc/reports/drc.magic.rpt)
+[INFO] Saving mag view with DRC errors (/home/tatua7806/arkhe_exp/experiments/sramreg_20260905/asic/runs/d45_anten2/66-magic-drc/views/soc_top.drc.mag)
 [INFO] Saved

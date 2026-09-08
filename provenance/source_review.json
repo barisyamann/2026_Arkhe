@@ -1,0 +1,12 @@
+{
+  "run": "d45_anten2",
+  "source_root": "/home/tatua7806/arkhe_exp/experiments/sramreg_20260905",
+  "run_root": "/home/tatua7806/arkhe_exp/experiments/sramreg_20260905/asic/runs/d45_anten2",
+  "packaged_at_utc": "2026-09-08T12:31:04Z",
+  "changes_vs_sept5_manifest": [
+    "rtl/npu/npu_tcm_sram.sv"
+  ],
+  "rtl_mtime_after_synthesis_config": [],
+  "historical_hash_limitation": "Hashes computed at packaging; no pre-run d45_anten2 source hash manifest found. mtime is supporting evidence, not cryptographic historical proof.",
+  "base_git_commit": "b57edf6b7c9da3bf41838874b73e0b59a72d5b46"
+}

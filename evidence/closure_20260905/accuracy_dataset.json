@@ -1,0 +1,3652 @@
+{
+  "source": "https://www.tensorflow.org/tutorials/audio/simple_audio",
+  "archive_sha256": "49650f2341b26d886b46b3f4fb8fed59e30300b17550f1ee4a768b3106cf93a0",
+  "model_sha256": "09e5e2a9dfb2d8ed78802bf18ce297bff54281a66ca18e0c23d69ca14f822a83",
+  "seed": 20260905,
+  "speech_count": 75,
+  "synthetic_silence_count": 25,
+  "benchmark_count": 1,
+  "limitations": [
+    "Small stratified evaluation, not entire official test set; training overlap unknown",
+    "Floating-point host frontend, not bit-exact official microfrontend; identical tensors used on both classifiers",
+    "Synthetic silence evaluated separately; no model-output-based selection"
+  ],
+  "records": [
+    {
+      "index": 0,
+      "name": "mini_speech_commands/yes/9db2bfe9_nohash_3.wav",
+      "label": 2,
+      "source_sha256": "874ccb6df4b4f535337cfc8d79a80cdae205a89dd3f3f48bc8333dd1191ce0a5",
+      "input_sha256": "ddf59b39e09831e01a21b707f6c88efef5cfa89698c4ada4e6f2ccc7f1870bff",
+      "official_class": 2,
+      "official_output_int8": [
+        -120,
+        -89,
+        57,
+        -103
+      ],
+      "reference": {
+        "fc_acc": [
+          -35788,
+          1915,
+          41154,
+          -8262
+        ],
+        "logits": [
+          -2,
+          15,
+          32,
+          10
+        ],
+        "probs": [
+          130,
+          620,
+          2952,
+          392
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 1,
+      "name": "mini_speech_commands/yes/48bfde8e_nohash_0.wav",
+      "label": 2,
+      "source_sha256": "57fcdc27ce86d24ffd1b97c132a8874dd418d16c00c56f9a1a6dcc66328bd2eb",
+      "input_sha256": "ce2b9d475a77ef9938ed6eb1bbfdfef112f207ccd061a8fd57e26ffd0908cf47",
+      "official_class": 2,
+      "official_output_int8": [
+        -115,
+        -59,
+        3,
+        -85
+      ],
+      "reference": {
+        "fc_acc": [
+          -32251,
+          9215,
+          25122,
+          -1157
+        ],
+        "logits": [
+          0,
+          18,
+          25,
+          13
+        ],
+        "probs": [
+          210,
+          1099,
+          2090,
+          695
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 2,
+      "name": "mini_speech_commands/yes/1a673010_nohash_0.wav",
+      "label": 2,
+      "source_sha256": "1ffbde330896cc3b0b346d3a73e5e74532c4740a31800bf7f88b457fbea0737d",
+      "input_sha256": "6d41739f97c677500e7e82b1186aa1e8711eca86db9abff4c07f8008bd280a65",
+      "official_class": 2,
+      "official_output_int8": [
+        -125,
+        -56,
+        22,
+        -97
+      ],
+      "reference": {
+        "fc_acc": [
+          -55263,
+          23097,
+          41104,
+          2164
+        ],
+        "logits": [
+          -10,
+          24,
+          32,
+          15
+        ],
+        "probs": [
+          50,
+          1148,
+          2393,
+          503
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 3,
+      "name": "mini_speech_commands/yes/c08585c1_nohash_0.wav",
+      "label": 2,
+      "source_sha256": "2881e0676acc866f87dbe85a84c3a0b41195f086f7c86df67201d082ce476ad4",
+      "input_sha256": "a2627e1f0c9cf1be17f0a30ee5420976503be593f7e0a872bb49535d1fafd4c1",
+      "official_class": 2,
+      "official_output_int8": [
+        -98,
+        -98,
+        31,
+        -91
+      ],
+      "reference": {
+        "fc_acc": [
+          -11752,
+          -12515,
+          28620,
+          -6537
+        ],
+        "logits": [
+          9,
+          9,
+          27,
+          11
+        ],
+        "probs": [
+          486,
+          486,
+          2537,
+          584
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 4,
+      "name": "mini_speech_commands/yes/9b402bc2_nohash_1.wav",
+      "label": 2,
+      "source_sha256": "f447c30d0d94ed943ec979155dec0ee56c62729001f2637c957028722d0f6188",
+      "input_sha256": "74420f236f860f297145b62d36d330ae6c93cb515e7a96aa31f6127bf2d01da8",
+      "official_class": 2,
+      "official_output_int8": [
+        -118,
+        -56,
+        -25,
+        -56
+      ],
+      "reference": {
+        "fc_acc": [
+          -40286,
+          8966,
+          17628,
+          9809
+        ],
+        "logits": [
+          -4,
+          18,
+          22,
+          18
+        ],
+        "probs": [
+          152,
+          1145,
+          1653,
+          1145
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 5,
+      "name": "mini_speech_commands/yes/8c7f81df_nohash_0.wav",
+      "label": 2,
+      "source_sha256": "493385b56227644c0ce54cd3f408464f32f496d222ba5a24df68877dd5bf21c8",
+      "input_sha256": "1042d89b3d3e001dc6f4e727a024c16f3abdc4b5a3184ec3c1a20efdf8d04194",
+      "official_class": 2,
+      "official_output_int8": [
+        -109,
+        -84,
+        31,
+        -95
+      ],
+      "reference": {
+        "fc_acc": [
+          -19497,
+          1050,
+          31388,
+          -5745
+        ],
+        "logits": [
+          5,
+          14,
+          28,
+          11
+        ],
+        "probs": [
+          309,
+          705,
+          2546,
+          535
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 6,
+      "name": "mini_speech_commands/yes/5677ec77_nohash_0.wav",
+      "label": 2,
+      "source_sha256": "b45ce50ca460b1766c28a6432d72f604887cc0a4bdeeff542c3ba05217ed3bcc",
+      "input_sha256": "dac68da739579f4ab886e5be8ef3ce5d2ae08c5383156c6af46885ea63011929",
+      "official_class": 2,
+      "official_output_int8": [
+        -119,
+        -85,
+        41,
+        -92
+      ],
+      "reference": {
+        "fc_acc": [
+          -33772,
+          4644,
+          37818,
+          419
+        ],
+        "logits": [
+          -1,
+          16,
+          31,
+          14
+        ],
+        "probs": [
+          143,
+          682,
+          2701,
+          567
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 7,
+      "name": "mini_speech_commands/yes/eb3f7d82_nohash_2.wav",
+      "label": 2,
+      "source_sha256": "7310018b8031086cb1351abfecef87bc99c82e6422bc9acd7ca047300e8fb2d0",
+      "input_sha256": "494ab105491b6c8622668de7d29c42af4e86fce1a261ddce2e3a16108717aeda",
+      "official_class": 2,
+      "official_output_int8": [
+        -105,
+        -80,
+        31,
+        -103
+      ],
+      "reference": {
+        "fc_acc": [
+          -16597,
+          2606,
+          31884,
+          -12644
+        ],
+        "logits": [
+          7,
+          15,
+          28,
+          8
+        ],
+        "probs": [
+          371,
+          772,
+          2545,
+          406
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 8,
+      "name": "mini_speech_commands/yes/8134f43f_nohash_1.wav",
+      "label": 2,
+      "source_sha256": "cc014c7ec30b9295f18dc3b9b8bb41a745b55cee7ab7d532eaebdfa073b282db",
+      "input_sha256": "b4af56817b32c3c47bdcea738197179c7d6ba9f0dad3294585346bd73bad2808",
+      "official_class": 2,
+      "official_output_int8": [
+        -125,
+        -21,
+        -11,
+        -98
+      ],
+      "reference": {
+        "fc_acc": [
+          -58230,
+          30185,
+          31074,
+          -1931
+        ],
+        "logits": [
+          -12,
+          27,
+          28,
+          13
+        ],
+        "probs": [
+          47,
+          1706,
+          1869,
+          472
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 9,
+      "name": "mini_speech_commands/yes/1eddce1d_nohash_0.wav",
+      "label": 2,
+      "source_sha256": "198e57d3ab6d4e4ea05850c522684633ef3a4437d554ac43798357150f43acc4",
+      "input_sha256": "a62af7203a1efbf7bd5c5e68e65aa5f5a5b19ea60f25c1c41b06c038ed78841c",
+      "official_class": 2,
+      "official_output_int8": [
+        -120,
+        -100,
+        66,
+        -102
+      ],
+      "reference": {
+        "fc_acc": [
+          -37113,
+          -5066,
+          43281,
+          -7454
+        ],
+        "logits": [
+          -2,
+          12,
+          33,
+          11
+        ],
+        "probs": [
+          125,
+          452,
+          3105,
+          412
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 10,
+      "name": "mini_speech_commands/yes/cc6ee39b_nohash_3.wav",
+      "label": 2,
+      "source_sha256": "8323eda19f0a9cbbd263535858b787262c640a99798301151f11ac8c727fa8e9",
+      "input_sha256": "8f496c09f0d0ba5478955cfdb5c4e255c5fd8515d2c8cc4f45105097dc0a6a51",
+      "official_class": 2,
+      "official_output_int8": [
+        -112,
+        -107,
+        63,
+        -100
+      ],
+      "reference": {
+        "fc_acc": [
+          -22566,
+          -15362,
+          39434,
+          -8684
+        ],
+        "logits": [
+          4,
+          7,
+          31,
+          10
+        ],
+        "probs": [
+          256,
+          337,
+          3055,
+          445
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 11,
+      "name": "mini_speech_commands/yes/c1d39ce8_nohash_2.wav",
+      "label": 2,
+      "source_sha256": "2279fdcf941d6ad82266807f5258122ec9853bc1971b21cdc57ba17f0c3d0304",
+      "input_sha256": "a2d143e42618e2a9dfff26cb17d004daf5ccb081af7f2e694c957f1c70310e18",
+      "official_class": 2,
+      "official_output_int8": [
+        -113,
+        -88,
+        62,
+        -116
+      ],
+      "reference": {
+        "fc_acc": [
+          -24817,
+          228,
+          38926,
+          -30587
+        ],
+        "logits": [
+          3,
+          14,
+          31,
+          1
+        ],
+        "probs": [
+          232,
+          637,
+          3032,
+          193
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 12,
+      "name": "mini_speech_commands/yes/b2e2773a_nohash_0.wav",
+      "label": 2,
+      "source_sha256": "7401097cc620809a72d0e7deb8c5c1913e0aac58b828ed7d711d3d1c84f42ef1",
+      "input_sha256": "d9e7470ca616452570538e5c7082ee5f771c1f1a26d95d810743963bbc8cfaee",
+      "official_class": 2,
+      "official_output_int8": [
+        -102,
+        -79,
+        8,
+        -83
+      ],
+      "reference": {
+        "fc_acc": [
+          -18395,
+          -1276,
+          23205,
+          -5098
+        ],
+        "logits": [
+          6,
+          13,
+          24,
+          12
+        ],
+        "probs": [
+          416,
+          790,
+          2168,
+          721
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 13,
+      "name": "mini_speech_commands/yes/3f2b358d_nohash_3.wav",
+      "label": 2,
+      "source_sha256": "b50f623057bb5f2a1c683de14e4b4aed0312f1d8e7cbb0726272b1f0092d80cc",
+      "input_sha256": "7290c3fb0e1e9f36d73970842481a84d22d7a246c35579e633d82b7ae48f3cbb",
+      "official_class": 1,
+      "official_output_int8": [
+        -121,
+        51,
+        -99,
+        -87
+      ],
+      "reference": {
+        "fc_acc": [
+          -37723,
+          43393,
+          -1252,
+          7308
+        ],
+        "logits": [
+          -3,
+          33,
+          13,
+          17
+        ],
+        "probs": [
+          105,
+          2870,
+          458,
+          661
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 14,
+      "name": "mini_speech_commands/yes/0ff728b5_nohash_1.wav",
+      "label": 2,
+      "source_sha256": "0efc271e9049596b1a8cbf329e1d4a31a4236c1cc38bd7d0e2b783a7b3a42fab",
+      "input_sha256": "aa48d54c9170632b9364c41718fe91ebd434f273a966fed8b1033d69867712c5",
+      "official_class": 2,
+      "official_output_int8": [
+        -118,
+        -103,
+        79,
+        -114
+      ],
+      "reference": {
+        "fc_acc": [
+          -24458,
+          -1153,
+          49984,
+          -16092
+        ],
+        "logits": [
+          3,
+          13,
+          36,
+          7
+        ],
+        "probs": [
+          159,
+          400,
+          3304,
+          230
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 15,
+      "name": "mini_speech_commands/yes/512dc91a_nohash_0.wav",
+      "label": 2,
+      "source_sha256": "5d5567cc7e5a3e20b7459805d15652b0a95bfccfd06d5e587434b589bfb44134",
+      "input_sha256": "72b7ec9280823af086960efb7b8f8e99b8488b3506221e66c031776caa609505",
+      "official_class": 2,
+      "official_output_int8": [
+        -93,
+        -90,
+        23,
+        -96
+      ],
+      "reference": {
+        "fc_acc": [
+          -12946,
+          -11914,
+          23668,
+          -15226
+        ],
+        "logits": [
+          8,
+          9,
+          24,
+          7
+        ],
+        "probs": [
+          557,
+          611,
+          2418,
+          508
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 16,
+      "name": "mini_speech_commands/yes/f804cbb3_nohash_0.wav",
+      "label": 2,
+      "source_sha256": "a9e14299aa8f26851755ac6b33341d79e2424bb53a19706793232fc0cd39b828",
+      "input_sha256": "2d9b6b9332dad4cfd79b032b22dedb43eec2279ee0789f3b880b7be32f286db9",
+      "official_class": 2,
+      "official_output_int8": [
+        -119,
+        -95,
+        61,
+        -103
+      ],
+      "reference": {
+        "fc_acc": [
+          -34484,
+          -1895,
+          41905,
+          -9254
+        ],
+        "logits": [
+          -1,
+          13,
+          32,
+          10
+        ],
+        "probs": [
+          145,
+          528,
+          3020,
+          401
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 17,
+      "name": "mini_speech_commands/yes/f264e0df_nohash_0.wav",
+      "label": 2,
+      "source_sha256": "b852d01e088ea6ccc106e8b634024dd039806d9e3ab48d05b225b38180ec5c69",
+      "input_sha256": "c26132712509a60f7743ab7d5de1b6aca7268fc7c069c1497ac25cd7ee6200b4",
+      "official_class": 2,
+      "official_output_int8": [
+        -114,
+        -82,
+        37,
+        -96
+      ],
+      "reference": {
+        "fc_acc": [
+          -30025,
+          790,
+          31716,
+          -9849
+        ],
+        "logits": [
+          1,
+          14,
+          28,
+          10
+        ],
+        "probs": [
+          221,
+          730,
+          2637,
+          506
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 18,
+      "name": "mini_speech_commands/yes/3ab9ba07_nohash_1.wav",
+      "label": 2,
+      "source_sha256": "4dbaf29013b75f9aa35f035e96aa0d20cd3bcc203f5cf0a300bde33984f602dd",
+      "input_sha256": "9e018c75fc37f4e0a1f4991bf0197bd5316f385198a86c70fc376e8ea932dff9",
+      "official_class": 2,
+      "official_output_int8": [
+        -105,
+        -88,
+        29,
+        -92
+      ],
+      "reference": {
+        "fc_acc": [
+          -20037,
+          -6671,
+          26865,
+          -8235
+        ],
+        "logits": [
+          5,
+          11,
+          26,
+          10
+        ],
+        "probs": [
+          366,
+          635,
+          2514,
+          579
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 19,
+      "name": "mini_speech_commands/yes/24c9f572_nohash_1.wav",
+      "label": 2,
+      "source_sha256": "b3736b100648c8bc1aebdae4d4bb9e9c7c7ebb97f4e53e9f6f409884235daa02",
+      "input_sha256": "bbcdecd8d6550ce268d037901b05bbd7179a1b393289c30f27083e684e1f1848",
+      "official_class": 2,
+      "official_output_int8": [
+        -105,
+        -95,
+        31,
+        -88
+      ],
+      "reference": {
+        "fc_acc": [
+          -17536,
+          -9536,
+          28943,
+          -3634
+        ],
+        "logits": [
+          6,
+          10,
+          27,
+          12
+        ],
+        "probs": [
+          371,
+          535,
+          2546,
+          643
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 20,
+      "name": "mini_speech_commands/yes/122c5aa7_nohash_0.wav",
+      "label": 2,
+      "source_sha256": "8563ed51b5c2fb2f80c9202fa29458b3d6a5f91087cc03444854d57dd96278d9",
+      "input_sha256": "afc7804234b84df2bd809230ef2fb0bdd282faf9cb29617ffdc92ad68a8c64b0",
+      "official_class": 2,
+      "official_output_int8": [
+        -110,
+        -90,
+        52,
+        -108
+      ],
+      "reference": {
+        "fc_acc": [
+          -19677,
+          -2987,
+          36830,
+          -17763
+        ],
+        "logits": [
+          5,
+          13,
+          30,
+          6
+        ],
+        "probs": [
+          290,
+          605,
+          2881,
+          318
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 21,
+      "name": "mini_speech_commands/yes/97ae8b25_nohash_0.wav",
+      "label": 2,
+      "source_sha256": "76653fae1f6549a2817b789d639a6341ab0c76d4d8f012458e3f40cd2d5c1428",
+      "input_sha256": "e6d493f903e4a4e6fa6ffb0e0d9f6e17659911d25cfd06a9359aace10b36b1fe",
+      "official_class": 2,
+      "official_output_int8": [
+        -99,
+        -86,
+        -3,
+        -68
+      ],
+      "reference": {
+        "fc_acc": [
+          -16930,
+          -6674,
+          21455,
+          2699
+        ],
+        "logits": [
+          7,
+          11,
+          23,
+          15
+        ],
+        "probs": [
+          462,
+          666,
+          2004,
+          962
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 22,
+      "name": "mini_speech_commands/yes/3e31dffe_nohash_3.wav",
+      "label": 2,
+      "source_sha256": "6f24cc3f490326972d31e5cbf472f29c3d71a62d80def8dd8842d62ee8ea15ea",
+      "input_sha256": "e752ee703a2754937915df03e6da4d367370191553fbbb95875e24c46cb56f8e",
+      "official_class": 2,
+      "official_output_int8": [
+        -107,
+        -98,
+        59,
+        -109
+      ],
+      "reference": {
+        "fc_acc": [
+          -17947,
+          -9959,
+          37229,
+          -19669
+        ],
+        "logits": [
+          6,
+          10,
+          30,
+          5
+        ],
+        "probs": [
+          330,
+          476,
+          2987,
+          301
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 23,
+      "name": "mini_speech_commands/yes/0f3f64d5_nohash_1.wav",
+      "label": 2,
+      "source_sha256": "d47339c79b4e4a8b476e9f981e71d2d9dfe5fa0a3f34c9f8fd48d3594c17b7dd",
+      "input_sha256": "6e67132cbe4971536ada03d7cebbf184bfb335734787e5376cbc3b850a636755",
+      "official_class": 2,
+      "official_output_int8": [
+        -108,
+        -93,
+        54,
+        -110
+      ],
+      "reference": {
+        "fc_acc": [
+          -18159,
+          -4265,
+          35475,
+          -21139
+        ],
+        "logits": [
+          6,
+          12,
+          30,
+          5
+        ],
+        "probs": [
+          322,
+          560,
+          2918,
+          294
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 24,
+      "name": "mini_speech_commands/yes/b83c1acf_nohash_0.wav",
+      "label": 2,
+      "source_sha256": "4534da1d3ad813cf5e5624c3fe31ac7645677f6ecd8d2bb6c925f150c6d90744",
+      "input_sha256": "c4b54a115f2befb2c86364f10625bae4fa4bbc3e61dd61afa7352558a8745af5",
+      "official_class": 2,
+      "official_output_int8": [
+        -108,
+        -83,
+        8,
+        -74
+      ],
+      "reference": {
+        "fc_acc": [
+          -21509,
+          717,
+          27735,
+          3794
+        ],
+        "logits": [
+          5,
+          14,
+          26,
+          16
+        ],
+        "probs": [
+          317,
+          725,
+          2181,
+          871
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 25,
+      "name": "mini_speech_commands/no/01bcfc0c_nohash_0.wav",
+      "label": 3,
+      "source_sha256": "ec9e4335b45dbcfc07ac6638cd90aa9af2d42dc3354ae4a9b6cab4a2ccca69d7",
+      "input_sha256": "6ed21a353d3ed17c44c6185a99d32a9b38cd44a0b4321de213ed845ad1bab6f5",
+      "official_class": 3,
+      "official_output_int8": [
+        -100,
+        -52,
+        -75,
+        -28
+      ],
+      "reference": {
+        "fc_acc": [
+          -19109,
+          6922,
+          -1610,
+          12964
+        ],
+        "logits": [
+          6,
+          17,
+          13,
+          20
+        ],
+        "probs": [
+          442,
+          1214,
+          840,
+          1598
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 26,
+      "name": "mini_speech_commands/no/e96a5020_nohash_1.wav",
+      "label": 3,
+      "source_sha256": "461bc3581e0f0c431714aaf3c3e311ef4bebb425e6418ad312d758e600fcccd1",
+      "input_sha256": "53453fe7d498e0075fb320af22bd4732c77cacbc01d9f9032a366f61d08736e4",
+      "official_class": 0,
+      "official_output_int8": [
+        -58,
+        -64,
+        -64,
+        -70
+      ],
+      "reference": {
+        "fc_acc": [
+          2792,
+          -735,
+          -970,
+          -2098
+        ],
+        "logits": [
+          15,
+          14,
+          14,
+          13
+        ],
+        "probs": [
+          1120,
+          1021,
+          1021,
+          932
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 27,
+      "name": "mini_speech_commands/no/eb67fcbc_nohash_2.wav",
+      "label": 3,
+      "source_sha256": "2b3c18c0241719913b9bc166cd675bd089437ea5cabd6e852cd53c35c23e69ad",
+      "input_sha256": "b61c6a08293d44f1b5c35ea07e90e636a6c4c602774015137a53207766836026",
+      "official_class": 3,
+      "official_output_int8": [
+        -104,
+        -56,
+        -82,
+        -14
+      ],
+      "reference": {
+        "fc_acc": [
+          -15690,
+          10362,
+          -811,
+          21964
+        ],
+        "logits": [
+          7,
+          19,
+          14,
+          24
+        ],
+        "probs": [
+          384,
+          1154,
+          730,
+          1826
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 28,
+      "name": "mini_speech_commands/no/e14a99a5_nohash_0.wav",
+      "label": 3,
+      "source_sha256": "e445e8b0710b0c500d15231d218e77077e17be8bf65725094b9444408c88f958",
+      "input_sha256": "00b27577ba77f07b33c1aadc4c84217aca81637b1f47c770c2b4ca41d8e0ce4c",
+      "official_class": 3,
+      "official_output_int8": [
+        -122,
+        -54,
+        -81,
+        1
+      ],
+      "reference": {
+        "fc_acc": [
+          -47232,
+          15363,
+          5337,
+          29868
+        ],
+        "logits": [
+          -7,
+          21,
+          16,
+          27
+        ],
+        "probs": [
+          91,
+          1189,
+          752,
+          2063
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 29,
+      "name": "mini_speech_commands/no/3a70ab7f_nohash_2.wav",
+      "label": 3,
+      "source_sha256": "04920390f544ce9dea2b2c81fe7336736ac4705364587895ec43a62a6c1d3e10",
+      "input_sha256": "316564692e46c4487118497b52388a122f95e47b8841fc52e8733a762170c353",
+      "official_class": 3,
+      "official_output_int8": [
+        -115,
+        -82,
+        -111,
+        53
+      ],
+      "reference": {
+        "fc_acc": [
+          -20726,
+          11906,
+          -12820,
+          46119
+        ],
+        "logits": [
+          5,
+          19,
+          8,
+          34
+        ],
+        "probs": [
+          202,
+          731,
+          266,
+          2895
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 30,
+      "name": "mini_speech_commands/no/989a2213_nohash_0.wav",
+      "label": 3,
+      "source_sha256": "5ab1945ad5086f8a0feba0f238bfb2142bab43e8e6ebbc78ecb21084a083b8be",
+      "input_sha256": "08bce7886f5743615138f4c5c3ced459d61f4f3edcbce592ef9a33a44d2a1328",
+      "official_class": 2,
+      "official_output_int8": [
+        -109,
+        -61,
+        -31,
+        -54
+      ],
+      "reference": {
+        "fc_acc": [
+          -25602,
+          6414,
+          16668,
+          9568
+        ],
+        "logits": [
+          3,
+          17,
+          21,
+          18
+        ],
+        "probs": [
+          297,
+          1073,
+          1548,
+          1176
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 31,
+      "name": "mini_speech_commands/no/b4aa9fef_nohash_2.wav",
+      "label": 3,
+      "source_sha256": "36524df675cd4e843889a940f41d1448bccedcfef1a716e805ea11744d1e9bf6",
+      "input_sha256": "26a4bf4caef76281707dcac6c28f33e16732b7bb1f7dd0e924bf04f042539c9b",
+      "official_class": 3,
+      "official_output_int8": [
+        -96,
+        -82,
+        -101,
+        24
+      ],
+      "reference": {
+        "fc_acc": [
+          -4548,
+          5019,
+          -8977,
+          33919
+        ],
+        "logits": [
+          12,
+          16,
+          10,
+          29
+        ],
+        "probs": [
+          509,
+          736,
+          424,
+          2425
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 32,
+      "name": "mini_speech_commands/no/9785931e_nohash_1.wav",
+      "label": 3,
+      "source_sha256": "be8374e85700a03c77c7ae00db3e80a785f42229cf666a9f1329027045fd89ec",
+      "input_sha256": "257290804b3c7ec1658f2735fa281d004cdc5f85e0f206c9b3e6b6f735a9fc51",
+      "official_class": 3,
+      "official_output_int8": [
+        -114,
+        -57,
+        -50,
+        -34
+      ],
+      "reference": {
+        "fc_acc": [
+          -30962,
+          9508,
+          10564,
+          16870
+        ],
+        "logits": [
+          0,
+          18,
+          19,
+          21
+        ],
+        "probs": [
+          218,
+          1136,
+          1245,
+          1496
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 33,
+      "name": "mini_speech_commands/no/2da58b32_nohash_2.wav",
+      "label": 3,
+      "source_sha256": "a40be52e3314df54e69c036b6b7f14c1dbf6ee52af2da349e5fe1fe71485476a",
+      "input_sha256": "bd59672dc7a705f1ac06e044aa67a9878c23aafc65352d59ea1b5acc0a4c985c",
+      "official_class": 1,
+      "official_output_int8": [
+        -111,
+        -32,
+        -82,
+        -32
+      ],
+      "reference": {
+        "fc_acc": [
+          -26669,
+          16180,
+          -1465,
+          15801
+        ],
+        "logits": [
+          2,
+          21,
+          13,
+          21
+        ],
+        "probs": [
+          270,
+          1542,
+          740,
+          1542
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 34,
+      "name": "mini_speech_commands/no/cc6ee39b_nohash_3.wav",
+      "label": 3,
+      "source_sha256": "92ac5b87fb8e54f4aac074c62f6d4a9348584d76a70b44601790cd045963341c",
+      "input_sha256": "d99cbef21060338254098c9d955f3cf555c812b1032ae518e3f71dc43619c31e",
+      "official_class": 3,
+      "official_output_int8": [
+        -91,
+        -69,
+        -69,
+        -26
+      ],
+      "reference": {
+        "fc_acc": [
+          -7422,
+          4857,
+          5398,
+          17301
+        ],
+        "logits": [
+          11,
+          16,
+          16,
+          22
+        ],
+        "probs": [
+          592,
+          938,
+          938,
+          1626
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 35,
+      "name": "mini_speech_commands/no/39a12648_nohash_2.wav",
+      "label": 3,
+      "source_sha256": "d3c8d3ee1ae8089b9c6fb41ce3e3cdd8259ebd1bb0b85f99c850fb22544a640b",
+      "input_sha256": "7c5868615b19c4ec51c6741341bb1660124a5283f5be4e03e101d2423484fe29",
+      "official_class": 3,
+      "official_output_int8": [
+        -126,
+        -78,
+        -104,
+        52
+      ],
+      "reference": {
+        "fc_acc": [
+          -62816,
+          11730,
+          -6213,
+          42311
+        ],
+        "logits": [
+          -14,
+          19,
+          11,
+          33
+        ],
+        "probs": [
+          38,
+          796,
+          382,
+          2878
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 36,
+      "name": "mini_speech_commands/no/aa233654_nohash_0.wav",
+      "label": 3,
+      "source_sha256": "cd70e6295c3e9feacaa5aef8011ca7ff669e0bfd9f96c0eefc38920b7799a194",
+      "input_sha256": "c8d09948a44e91f2311450cf6418aa6c82307f14720eef6998915011ae99b147",
+      "official_class": 3,
+      "official_output_int8": [
+        -119,
+        -47,
+        -60,
+        -30
+      ],
+      "reference": {
+        "fc_acc": [
+          -41701,
+          13658,
+          8861,
+          17472
+        ],
+        "logits": [
+          -4,
+          20,
+          18,
+          22
+        ],
+        "probs": [
+          144,
+          1302,
+          1084,
+          1565
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 37,
+      "name": "mini_speech_commands/no/573cdb8a_nohash_0.wav",
+      "label": 3,
+      "source_sha256": "4b766a2912e1c37b96c58205cdeb832ffcf2b6c0f6d090e68a8e7837e27fbed0",
+      "input_sha256": "6b1db3367347577cb031903ea83132e10b750014d45411fc515bb71ea9ae1506",
+      "official_class": 3,
+      "official_output_int8": [
+        -122,
+        -46,
+        -89,
+        1
+      ],
+      "reference": {
+        "fc_acc": [
+          -46470,
+          17959,
+          -589,
+          29893
+        ],
+        "logits": [
+          -6,
+          22,
+          14,
+          27
+        ],
+        "probs": [
+          99,
+          1305,
+          626,
+          2064
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 38,
+      "name": "mini_speech_commands/no/dca2797e_nohash_2.wav",
+      "label": 3,
+      "source_sha256": "193a0519de0f0b95249e819d0b7144e7e5ba9783adb496000f00152358b27843",
+      "input_sha256": "2c406236f4037b8017378540c82db54845d88f7b6e43a9ffbe111a16783fc198",
+      "official_class": 3,
+      "official_output_int8": [
+        -120,
+        -81,
+        -114,
+        59
+      ],
+      "reference": {
+        "fc_acc": [
+          -37991,
+          7822,
+          -22297,
+          41173
+        ],
+        "logits": [
+          -3,
+          17,
+          4,
+          32
+        ],
+        "probs": [
+          120,
+          755,
+          229,
+          2990
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 39,
+      "name": "mini_speech_commands/no/af130f12_nohash_0.wav",
+      "label": 3,
+      "source_sha256": "a7d6d797b4c8a616809b653a7567aa898b98b0b12e5f18b90e8fc5076d210821",
+      "input_sha256": "5f5c75b9582cb43fa098c17e8ff1d723fb827233e64f0ee22e30964c0aea476e",
+      "official_class": 3,
+      "official_output_int8": [
+        -125,
+        -56,
+        -111,
+        36
+      ],
+      "reference": {
+        "fc_acc": [
+          -58347,
+          21320,
+          -16247,
+          41677
+        ],
+        "logits": [
+          -12,
+          23,
+          7,
+          32
+        ],
+        "probs": [
+          46,
+          1152,
+          265,
+          2631
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 40,
+      "name": "mini_speech_commands/no/f4504600_nohash_2.wav",
+      "label": 3,
+      "source_sha256": "03a6313f1b26baca0b8ccdabab5f34bfa9a1bfb2e1ac16aa4faa7edf60116191",
+      "input_sha256": "cc7ad63e62562a3036d0c0c7e4fe7e8dfbead4a1220b72b6089480a3c8611524",
+      "official_class": 3,
+      "official_output_int8": [
+        -119,
+        -26,
+        -94,
+        -16
+      ],
+      "reference": {
+        "fc_acc": [
+          -40794,
+          19406,
+          -7591,
+          22048
+        ],
+        "logits": [
+          -4,
+          23,
+          11,
+          24
+        ],
+        "probs": [
+          136,
+          1630,
+          542,
+          1786
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 41,
+      "name": "mini_speech_commands/no/cd7f8c1b_nohash_0.wav",
+      "label": 3,
+      "source_sha256": "7adaf950b6960739a175cf060b259af6e0c178b813325a81248e90c74c670ed1",
+      "input_sha256": "fa56e4ad4ea292046634cd7b047d48200bd570a0830aace4dcd9aa9d46944ae3",
+      "official_class": 3,
+      "official_output_int8": [
+        -116,
+        -31,
+        -109,
+        0
+      ],
+      "reference": {
+        "fc_acc": [
+          -29606,
+          22598,
+          -19210,
+          28728
+        ],
+        "logits": [
+          1,
+          24,
+          6,
+          27
+        ],
+        "probs": [
+          188,
+          1557,
+          298,
+          2050
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 42,
+      "name": "mini_speech_commands/no/96cd0255_nohash_0.wav",
+      "label": 3,
+      "source_sha256": "34670e25d3bd03fb8f4a057236e0b61fd4dd352bc7e57f7ff21231dd08c818a7",
+      "input_sha256": "1b4ae48b59e5fd2f2b6ee3dbcd58948c1d6c71294b97accd684ecec3c9bd241b",
+      "official_class": 3,
+      "official_output_int8": [
+        -100,
+        -71,
+        -88,
+        3
+      ],
+      "reference": {
+        "fc_acc": [
+          -17300,
+          22,
+          -9497,
+          21399
+        ],
+        "logits": [
+          6,
+          14,
+          10,
+          23
+        ],
+        "probs": [
+          441,
+          919,
+          636,
+          2098
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 43,
+      "name": "mini_speech_commands/no/135c6841_nohash_1.wav",
+      "label": 3,
+      "source_sha256": "7cb3053a01cf84e6d9a2acc74ab17d642e2d0c6d87ee5670c4c6f3a614a817c2",
+      "input_sha256": "33d9a0843340378ce17d4049ad092a801a2698ee419bd6ebaf7fef72a1161e1f",
+      "official_class": 3,
+      "official_output_int8": [
+        -117,
+        -60,
+        -105,
+        27
+      ],
+      "reference": {
+        "fc_acc": [
+          -37078,
+          10115,
+          -18305,
+          29550
+        ],
+        "logits": [
+          -2,
+          18,
+          6,
+          27
+        ],
+        "probs": [
+          172,
+          1084,
+          361,
+          2477
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 44,
+      "name": "mini_speech_commands/no/1cc80e39_nohash_0.wav",
+      "label": 3,
+      "source_sha256": "28e51b3abae743d56bb5a71399790559689e22410969a28b8df213c65d047dc2",
+      "input_sha256": "60eb07359af310302dc7e7853b7d016b16677f84f730009fef7fe04b984e5d3f",
+      "official_class": 3,
+      "official_output_int8": [
+        -105,
+        -70,
+        -111,
+        30
+      ],
+      "reference": {
+        "fc_acc": [
+          -10479,
+          11056,
+          -18320,
+          37551
+        ],
+        "logits": [
+          9,
+          19,
+          6,
+          30
+        ],
+        "probs": [
+          368,
+          921,
+          279,
+          2527
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 45,
+      "name": "mini_speech_commands/no/c33682f0_nohash_0.wav",
+      "label": 3,
+      "source_sha256": "58e47c5839e0165da94ce802ff345870b4162c0aa376cf6231c572f848ae53eb",
+      "input_sha256": "1b16ff9b57d757994de8f30bf9a5bf1b1032e8307ba2653e083fc394d6711250",
+      "official_class": 3,
+      "official_output_int8": [
+        -116,
+        -68,
+        -108,
+        37
+      ],
+      "reference": {
+        "fc_acc": [
+          -25836,
+          16408,
+          -10369,
+          41907
+        ],
+        "logits": [
+          3,
+          21,
+          9,
+          32
+        ],
+        "probs": [
+          183,
+          959,
+          319,
+          2632
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 46,
+      "name": "mini_speech_commands/no/695c2127_nohash_0.wav",
+      "label": 3,
+      "source_sha256": "437f23caecf85f019c350e8c02a305737a7a3641c2576d4d63881f45bd7cf094",
+      "input_sha256": "ddeba694aa82fb18864f1e60f1beb056b1a4817d85891a9c6ec40b1ef05c7e8b",
+      "official_class": 3,
+      "official_output_int8": [
+        -118,
+        -40,
+        -96,
+        -1
+      ],
+      "reference": {
+        "fc_acc": [
+          -33575,
+          19525,
+          -5014,
+          30749
+        ],
+        "logits": [
+          -1,
+          23,
+          12,
+          28
+        ],
+        "probs": [
+          148,
+          1339,
+          488,
+          2119
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 47,
+      "name": "mini_speech_commands/no/d7559b2d_nohash_1.wav",
+      "label": 3,
+      "source_sha256": "f5ad54561a4c24b85316e0fc74916b72f763e6699b8e836326ca380634e8db04",
+      "input_sha256": "85f869f3a44ec3fef70d09234fa64857153b37015bb821b9886451354ab5f681",
+      "official_class": 3,
+      "official_output_int8": [
+        -124,
+        -48,
+        -82,
+        -2
+      ],
+      "reference": {
+        "fc_acc": [
+          -63823,
+          14043,
+          -40,
+          24658
+        ],
+        "logits": [
+          -14,
+          20,
+          14,
+          25
+        ],
+        "probs": [
+          56,
+          1278,
+          737,
+          2023
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 48,
+      "name": "mini_speech_commands/no/a2b16113_nohash_0.wav",
+      "label": 3,
+      "source_sha256": "ec8af92da59313faa35ababb2c5d5cc68037dbb74910c74df28e1d83c99ad0f9",
+      "input_sha256": "80f551548485acdf7228eec50534ccaaa2278de2de8b1453339f8bee587c9f75",
+      "official_class": 2,
+      "official_output_int8": [
+        -103,
+        -60,
+        -46,
+        -46
+      ],
+      "reference": {
+        "fc_acc": [
+          -18894,
+          6534,
+          10601,
+          11367
+        ],
+        "logits": [
+          6,
+          17,
+          19,
+          19
+        ],
+        "probs": [
+          396,
+          1087,
+          1306,
+          1306
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 49,
+      "name": "mini_speech_commands/no/146d97db_nohash_0.wav",
+      "label": 3,
+      "source_sha256": "d066ce835351164a9b5c766eb44a8fb35f1113dd27966dc1651f65d5a23f12e1",
+      "input_sha256": "0d7adfe0535ea840d28cee1b13fea2fa06990689e8d0f09891ce22439111a3e9",
+      "official_class": 3,
+      "official_output_int8": [
+        -123,
+        -46,
+        -115,
+        28
+      ],
+      "reference": {
+        "fc_acc": [
+          -47118,
+          22415,
+          -23484,
+          39823
+        ],
+        "logits": [
+          -7,
+          24,
+          4,
+          31
+        ],
+        "probs": [
+          76,
+          1313,
+          209,
+          2496
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 50,
+      "name": "mini_speech_commands/up/f550b7dc_nohash_0.wav",
+      "label": 1,
+      "source_sha256": "aa7e997a0e575af6edd2cc16aac6d078b2c633646250bfeb14fa2057ef2a5d50",
+      "input_sha256": "72eeb0b3f7ee071bb25b2cdf4b80bb048ced745ec55bbb95ba7bf57ec4f628b4",
+      "official_class": 0,
+      "official_output_int8": [
+        -55,
+        -78,
+        -55,
+        -68
+      ],
+      "reference": {
+        "fc_acc": [
+          5078,
+          -4908,
+          4060,
+          860
+        ],
+        "logits": [
+          16,
+          12,
+          16,
+          14
+        ],
+        "probs": [
+          1161,
+          805,
+          1161,
+          967
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 51,
+      "name": "mini_speech_commands/up/74551073_nohash_0.wav",
+      "label": 1,
+      "source_sha256": "d5d6095ec65568be8ce91f8c4b6dab9ab925769bc8dc61540ca32da108a4e2c6",
+      "input_sha256": "e431190b78e0a1840177ae14cf69384dae5c4f647efd74237cca04f278bc2d8d",
+      "official_class": 2,
+      "official_output_int8": [
+        -106,
+        -67,
+        -22,
+        -61
+      ],
+      "reference": {
+        "fc_acc": [
+          -20013,
+          5124,
+          18462,
+          6210
+        ],
+        "logits": [
+          5,
+          16,
+          22,
+          17
+        ],
+        "probs": [
+          355,
+          976,
+          1693,
+          1070
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 52,
+      "name": "mini_speech_commands/left/708b8d51_nohash_1.wav",
+      "label": 1,
+      "source_sha256": "eba50da280dc2f6a5047992ec2cd681cb78f9aac6343b27d74a62ae649b1ae01",
+      "input_sha256": "86c023f84fb91497e6d5eb907e6aff808e636b94271dafadd249d7126a362e90",
+      "official_class": 3,
+      "official_output_int8": [
+        -84,
+        -70,
+        -58,
+        -44
+      ],
+      "reference": {
+        "fc_acc": [
+          -8559,
+          -1269,
+          2756,
+          6735
+        ],
+        "logits": [
+          10,
+          13,
+          15,
+          17
+        ],
+        "probs": [
+          706,
+          930,
+          1117,
+          1342
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 53,
+      "name": "mini_speech_commands/go/023a61ad_nohash_1.wav",
+      "label": 1,
+      "source_sha256": "2f20610afc51f5ec43000411fa55d1dbb7ee8f78eef885339d51409c95701453",
+      "input_sha256": "2183f4ada9c18346f57e70b5dabca7246181c4593d7744ad9286800c11013f88",
+      "official_class": 3,
+      "official_output_int8": [
+        -109,
+        -28,
+        -100,
+        -19
+      ],
+      "reference": {
+        "fc_acc": [
+          -21660,
+          17717,
+          -13914,
+          19449
+        ],
+        "logits": [
+          4,
+          22,
+          8,
+          23
+        ],
+        "probs": [
+          306,
+          1596,
+          442,
+          1750
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 54,
+      "name": "mini_speech_commands/right/7c75a504_nohash_0.wav",
+      "label": 1,
+      "source_sha256": "b1f5d2de726a617ec5abf5bdc62c48710657888eaa636d0b00030905f1bb4f02",
+      "input_sha256": "1822201d54f1fdb9b216315a418792db24dbca1e38ddec719f36313260fa75ba",
+      "official_class": 1,
+      "official_output_int8": [
+        -112,
+        45,
+        -95,
+        -95
+      ],
+      "reference": {
+        "fc_acc": [
+          -29857,
+          29212,
+          -10705,
+          -10772
+        ],
+        "logits": [
+          1,
+          27,
+          9,
+          9
+        ],
+        "probs": [
+          255,
+          2775,
+          532,
+          532
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 55,
+      "name": "mini_speech_commands/stop/d1d3e64d_nohash_0.wav",
+      "label": 1,
+      "source_sha256": "8d5e1b8e92efed58eb31b214214fbdd492377786f911af14a71ed2fe6d8e1be4",
+      "input_sha256": "cc33e8d072fe5213191b28f6e9b5640389c8d46c8ad708dfbedb1df7418fd58c",
+      "official_class": 3,
+      "official_output_int8": [
+        -68,
+        -56,
+        -90,
+        -42
+      ],
+      "reference": {
+        "fc_acc": [
+          2086,
+          6112,
+          -9935,
+          11183
+        ],
+        "logits": [
+          15,
+          17,
+          10,
+          19
+        ],
+        "probs": [
+          957,
+          1150,
+          605,
+          1382
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 56,
+      "name": "mini_speech_commands/down/439c84f4_nohash_1.wav",
+      "label": 1,
+      "source_sha256": "4f806c9713e5a729aa75ccb1d977a396d5483c0dab677a18cda3adfcff75795f",
+      "input_sha256": "d2b73b2255df6e8bb2e4adc803a621823e54f386c04b67c09a8345fa467d2e29",
+      "official_class": 1,
+      "official_output_int8": [
+        -95,
+        -28,
+        -88,
+        -45
+      ],
+      "reference": {
+        "fc_acc": [
+          -15988,
+          12018,
+          -11647,
+          7099
+        ],
+        "logits": [
+          7,
+          19,
+          9,
+          17
+        ],
+        "probs": [
+          531,
+          1597,
+          638,
+          1329
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 57,
+      "name": "mini_speech_commands/stop/a8cb6dda_nohash_0.wav",
+      "label": 1,
+      "source_sha256": "4aef2ce07e31453dd0f51a7e51a8485900795fc0db704c767c160d8404c9883a",
+      "input_sha256": "a8b7cd11b5b60167e09a0f01623ff3f6aeb664a50cb8919532bea06103d54d81",
+      "official_class": 1,
+      "official_output_int8": [
+        -46,
+        -30,
+        -76,
+        -103
+      ],
+      "reference": {
+        "fc_acc": [
+          9725,
+          13374,
+          -3249,
+          -20654
+        ],
+        "logits": [
+          18,
+          20,
+          13,
+          5
+        ],
+        "probs": [
+          1305,
+          1568,
+          825,
+          396
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 58,
+      "name": "mini_speech_commands/down/53eb0a88_nohash_0.wav",
+      "label": 1,
+      "source_sha256": "26be262fd747953614f4c06d9776187b42d8acf97e52d43cbfbcd864637387cf",
+      "input_sha256": "eaad6c09966199a53c6f2b3174ba813418ae1f7f3a9450d2230617846d5e749e",
+      "official_class": 1,
+      "official_output_int8": [
+        -109,
+        -29,
+        -59,
+        -59
+      ],
+      "reference": {
+        "fc_acc": [
+          -24123,
+          15584,
+          5773,
+          7834
+        ],
+        "logits": [
+          3,
+          21,
+          17,
+          17
+        ],
+        "probs": [
+          304,
+          1589,
+          1101,
+          1101
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 59,
+      "name": "mini_speech_commands/down/6f2f57c1_nohash_1.wav",
+      "label": 1,
+      "source_sha256": "204f322e4b1e79a3dd3f33fed9557b8dfc8c668dd165aa75180f00522b451ca9",
+      "input_sha256": "2e4f312132be458765ab67e8201f62668cb09722f5670ab3464d8bf148b5e982",
+      "official_class": 1,
+      "official_output_int8": [
+        -120,
+        12,
+        -101,
+        -47
+      ],
+      "reference": {
+        "fc_acc": [
+          -34126,
+          36032,
+          -5340,
+          22697
+        ],
+        "logits": [
+          -1,
+          30,
+          12,
+          24
+        ],
+        "probs": [
+          130,
+          2242,
+          430,
+          1293
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 60,
+      "name": "mini_speech_commands/stop/605ed0ff_nohash_0.wav",
+      "label": 1,
+      "source_sha256": "3e277b5452c001593866875f44a63d9c5fa0452c2c8b4a5acde92796dd2dac13",
+      "input_sha256": "13cd962b0d213335987a966f383950f92845149ca4af369a4d0db1f8544797c0",
+      "official_class": 1,
+      "official_output_int8": [
+        -108,
+        8,
+        -63,
+        -94
+      ],
+      "reference": {
+        "fc_acc": [
+          -22955,
+          24026,
+          7961,
+          -9237
+        ],
+        "logits": [
+          4,
+          25,
+          17,
+          10
+        ],
+        "probs": [
+          317,
+          2180,
+          1046,
+          550
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 61,
+      "name": "mini_speech_commands/right/34ba417a_nohash_1.wav",
+      "label": 1,
+      "source_sha256": "c2a4e864ae2b1fa8b6c6efa53c343a9efe8685db3847e73764c651f18e528a62",
+      "input_sha256": "ac13e50be078c7ede7e134f2cfe2519c4d3d6eef74ca726ad3d092330f92807b",
+      "official_class": 1,
+      "official_output_int8": [
+        -101,
+        57,
+        -111,
+        -101
+      ],
+      "reference": {
+        "fc_acc": [
+          -14714,
+          34309,
+          -26043,
+          -14548
+        ],
+        "logits": [
+          8,
+          29,
+          3,
+          8
+        ],
+        "probs": [
+          431,
+          2960,
+          272,
+          431
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 62,
+      "name": "mini_speech_commands/down/da584bc0_nohash_0.wav",
+      "label": 1,
+      "source_sha256": "5505ed535c00f3045410d3a4232ffa0a034f0430a65aeb69619b9b6208d13a2c",
+      "input_sha256": "9e2e72db57fb97cbd9e50bfbf9b4abee35101ee6f5d91626345d9c1dcd9c18d1",
+      "official_class": 1,
+      "official_output_int8": [
+        -67,
+        0,
+        -104,
+        -86
+      ],
+      "reference": {
+        "fc_acc": [
+          3482,
+          23824,
+          -17736,
+          -3843
+        ],
+        "logits": [
+          16,
+          24,
+          6,
+          12
+        ],
+        "probs": [
+          980,
+          2043,
+          392,
+          679
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 63,
+      "name": "mini_speech_commands/up/eb3f7d82_nohash_2.wav",
+      "label": 1,
+      "source_sha256": "cf7319f72de3ce5ef333b5e00ecf76d92a2cd78fe20a66decc727ce34ed874ad",
+      "input_sha256": "c8919ed437bdce6fc4f2aba9b82f6b5c2a47fdcced0138e0558211cdf938e20f",
+      "official_class": 1,
+      "official_output_int8": [
+        -44,
+        -36,
+        -100,
+        -75
+      ],
+      "reference": {
+        "fc_acc": [
+          8968,
+          11661,
+          -19253,
+          -2243
+        ],
+        "logits": [
+          18,
+          19,
+          6,
+          13
+        ],
+        "probs": [
+          1338,
+          1466,
+          445,
+          845
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 64,
+      "name": "mini_speech_commands/down/78622c2b_nohash_1.wav",
+      "label": 1,
+      "source_sha256": "13bba4f343836dd82e862ad85d84500a2a7c3ae42c05544600a0c6c10ece33a6",
+      "input_sha256": "fd3270b464be465abcb467384603549f3ba739cb320f06feaadd9bccee0967eb",
+      "official_class": 1,
+      "official_output_int8": [
+        -104,
+        22,
+        -78,
+        -96
+      ],
+      "reference": {
+        "fc_acc": [
+          -17926,
+          27343,
+          729,
+          -11472
+        ],
+        "logits": [
+          6,
+          26,
+          14,
+          9
+        ],
+        "probs": [
+          384,
+          2406,
+          800,
+          505
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 65,
+      "name": "mini_speech_commands/go/8056e897_nohash_1.wav",
+      "label": 1,
+      "source_sha256": "ca75e80981549909b2181e0b794ccb4c711e331938c64e5d0ca6950a7a54c52e",
+      "input_sha256": "72e07592c63ed28ca78997d524005a70834f072bee29d5818b26a656413b38d0",
+      "official_class": 3,
+      "official_output_int8": [
+        -111,
+        -72,
+        -85,
+        12
+      ],
+      "reference": {
+        "fc_acc": [
+          -23703,
+          5949,
+          511,
+          29887
+        ],
+        "logits": [
+          4,
+          17,
+          14,
+          27
+        ],
+        "probs": [
+          272,
+          897,
+          681,
+          2245
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 66,
+      "name": "mini_speech_commands/stop/365531e2_nohash_1.wav",
+      "label": 1,
+      "source_sha256": "d5e4e7c9fa7ea87e070dccf197514d5a95e92d60e69f4bde83f64ff7475bd8c2",
+      "input_sha256": "0084f9f4b213a884925bd546c5a5c681226773deafc9c7bda42a43588b81d2e1",
+      "official_class": 1,
+      "official_output_int8": [
+        -77,
+        -31,
+        -47,
+        -101
+      ],
+      "reference": {
+        "fc_acc": [
+          -4955,
+          12530,
+          6188,
+          -20599
+        ],
+        "logits": [
+          12,
+          20,
+          17,
+          5
+        ],
+        "probs": [
+          788,
+          1643,
+          1248,
+          415
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 67,
+      "name": "mini_speech_commands/go/afd53389_nohash_1.wav",
+      "label": 1,
+      "source_sha256": "4e52c47dcd36c76da0e838df6b19f6fd747ab3b27176f7007b3bd0a6039ed49c",
+      "input_sha256": "7b6a92b03b2989be2a0a6f698b4f871cb3f3c402f7c46c21b715e39ab298feb4",
+      "official_class": 3,
+      "official_output_int8": [
+        -109,
+        -28,
+        -100,
+        -19
+      ],
+      "reference": {
+        "fc_acc": [
+          -22883,
+          19274,
+          -12552,
+          19830
+        ],
+        "logits": [
+          4,
+          22,
+          8,
+          23
+        ],
+        "probs": [
+          306,
+          1596,
+          442,
+          1750
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 68,
+      "name": "mini_speech_commands/stop/d933bf5e_nohash_2.wav",
+      "label": 1,
+      "source_sha256": "ba8652946c56d6fdfed9b77e9b4a5c0c3c8e6e94919572d86a6341a9feb98d26",
+      "input_sha256": "8336ed4d90a594f5b616ef4d4e02a7a5bf6b278c1e0af813bf484298e2e9f827",
+      "official_class": 1,
+      "official_output_int8": [
+        -75,
+        -27,
+        -84,
+        -70
+      ],
+      "reference": {
+        "fc_acc": [
+          -5260,
+          11760,
+          -10154,
+          -2269
+        ],
+        "logits": [
+          12,
+          19,
+          10,
+          13
+        ],
+        "probs": [
+          848,
+          1612,
+          706,
+          929
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 69,
+      "name": "mini_speech_commands/stop/94de6a6a_nohash_1.wav",
+      "label": 1,
+      "source_sha256": "fb07b689195e5ef926feb09561d9d877bcd61b2f12919d5bc6932fdbc2fcb589",
+      "input_sha256": "3615a43a842a8fd133e826757a36225681a40042ee8dad704d96393ad9152839",
+      "official_class": 1,
+      "official_output_int8": [
+        -112,
+        3,
+        -88,
+        -59
+      ],
+      "reference": {
+        "fc_acc": [
+          -31288,
+          19909,
+          -9121,
+          4535
+        ],
+        "logits": [
+          0,
+          23,
+          10,
+          16
+        ],
+        "probs": [
+          254,
+          2099,
+          637,
+          1104
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 70,
+      "name": "mini_speech_commands/down/c7124b73_nohash_1.wav",
+      "label": 1,
+      "source_sha256": "7bc5d8ebff9afe2cf4397d5d4c1e1d24cc9bae9eb528347d0c24d73b808a073f",
+      "input_sha256": "d845e3196cb6a0829dd6a778fb3f80eb9a1da1dbff892093c6e181b869b45783",
+      "official_class": 1,
+      "official_output_int8": [
+        -111,
+        -9,
+        -84,
+        -52
+      ],
+      "reference": {
+        "fc_acc": [
+          -25041,
+          22341,
+          -3382,
+          10717
+        ],
+        "logits": [
+          3,
+          24,
+          13,
+          19
+        ],
+        "probs": [
+          278,
+          1911,
+          696,
+          1208
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 71,
+      "name": "mini_speech_commands/left/3f6ba067_nohash_0.wav",
+      "label": 1,
+      "source_sha256": "d9e2b82bf55489114db3ad75b3f220920d5009731968edad76dd0f0779053a73",
+      "input_sha256": "51b2fb6c4d0973f111e5b98f45e8b42e972fc9aaf41c0d70136a417b0fd606ba",
+      "official_class": 1,
+      "official_output_int8": [
+        -116,
+        -37,
+        -45,
+        -59
+      ],
+      "reference": {
+        "fc_acc": [
+          -39152,
+          11999,
+          9306,
+          4187
+        ],
+        "logits": [
+          -3,
+          19,
+          18,
+          16
+        ],
+        "probs": [
+          193,
+          1460,
+          1332,
+          1109
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 72,
+      "name": "mini_speech_commands/right/824e8ce5_nohash_0.wav",
+      "label": 1,
+      "source_sha256": "c275b7886aa7246104b8c6af5cd930769d7b72f015264b28ed14265299345a9a",
+      "input_sha256": "3944966bf0f2dfe31738178492b727360a03824779e237d1a0ce239403935042",
+      "official_class": 2,
+      "official_output_int8": [
+        -110,
+        -34,
+        -25,
+        -87
+      ],
+      "reference": {
+        "fc_acc": [
+          -27493,
+          12827,
+          16272,
+          -7454
+        ],
+        "logits": [
+          2,
+          20,
+          21,
+          11
+        ],
+        "probs": [
+          288,
+          1502,
+          1646,
+          658
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 73,
+      "name": "mini_speech_commands/stop/8e05039f_nohash_4.wav",
+      "label": 1,
+      "source_sha256": "c7d625f1a754a414c68d2a5ae75c4fa564d1f71c2bb741dc11751fd8bc9fb062",
+      "input_sha256": "9d498a2fc991e0d8d53cfcd4cacffb9147fc923692a5fc3fcaab85ded01faa8e",
+      "official_class": 0,
+      "official_output_int8": [
+        -1,
+        -47,
+        -115,
+        -93
+      ],
+      "reference": {
+        "fc_acc": [
+          26828,
+          17023,
+          -30332,
+          -5073
+        ],
+        "logits": [
+          26,
+          21,
+          1,
+          12
+        ],
+        "probs": [
+          2038,
+          1288,
+          205,
+          564
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 74,
+      "name": "mini_speech_commands/go/b16f2d0d_nohash_0.wav",
+      "label": 1,
+      "source_sha256": "7208e6fbf7bf8b5e9f9b25b894ab8385a0def92e6dbb2aa50ba4c9eb001c781f",
+      "input_sha256": "0041a3a62809a62d7710484eed3741ab5321c07afecce37aa94e5c205af200ad",
+      "official_class": 1,
+      "official_output_int8": [
+        -105,
+        -19,
+        -103,
+        -29
+      ],
+      "reference": {
+        "fc_acc": [
+          -19087,
+          20959,
+          -16370,
+          18950
+        ],
+        "logits": [
+          6,
+          23,
+          7,
+          22
+        ],
+        "probs": [
+          365,
+          1740,
+          401,
+          1588
+        ],
+        "sinif": 1,
+        "sinif_adi": "UNKNOWN"
+      }
+    },
+    {
+      "index": 75,
+      "name": "synthetic_silence_0",
+      "label": 0,
+      "source_sha256": "0c92bddb4e96f3ea9ec9f0f64a668255a6c15527ac09f6f119cafde60c7c4a39",
+      "input_sha256": "179c9fe5f27bb407d04c57995aa367677cf714f972ad3a8f66294ba8fa34b08e",
+      "official_class": 0,
+      "official_output_int8": [
+        -64,
+        -64,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          427,
+          -518,
+          -94,
+          186
+        ],
+        "logits": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1024,
+          1024,
+          1024,
+          1024
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 76,
+      "name": "synthetic_silence_1",
+      "label": 0,
+      "source_sha256": "b18b4a232b68f3206d9128b263effbd57661591778b363fd1e9ad5c9ab85fd76",
+      "input_sha256": "f190d3df704a302448753e6eaea8f51e27a1336e5d8a6705f3d9f5dad426ae38",
+      "official_class": 2,
+      "official_output_int8": [
+        -64,
+        -64,
+        -58,
+        -70
+      ],
+      "reference": {
+        "fc_acc": [
+          663,
+          -617,
+          1277,
+          -1184
+        ],
+        "logits": [
+          14,
+          14,
+          15,
+          13
+        ],
+        "probs": [
+          1021,
+          1021,
+          1120,
+          932
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 77,
+      "name": "synthetic_silence_2",
+      "label": 0,
+      "source_sha256": "043b04cc2668cf1721ee85d07dac819b97e8736fc828b3f5c6725c36879a3f27",
+      "input_sha256": "5418240753f3b1ed4f1edb00dd64e13911262c679adfd1fe33f3a93387799534",
+      "official_class": 0,
+      "official_output_int8": [
+        -64,
+        -64,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          1008,
+          -1028,
+          -656,
+          -242
+        ],
+        "logits": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1024,
+          1024,
+          1024,
+          1024
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 78,
+      "name": "synthetic_silence_3",
+      "label": 0,
+      "source_sha256": "38df52f8a3709f5960ac2d3e05dfcc900f26e8715122b662d794cf8759c33ad7",
+      "input_sha256": "0fbd8b1faf4f7ad6f1eb1d0a52fd6bfac4cd7c29663b657d959a1e457f93020f",
+      "official_class": 0,
+      "official_output_int8": [
+        -64,
+        -64,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          1001,
+          -1091,
+          354,
+          -933
+        ],
+        "logits": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1024,
+          1024,
+          1024,
+          1024
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 79,
+      "name": "synthetic_silence_4",
+      "label": 0,
+      "source_sha256": "1f83e80539b858d426949e7e89f1c8540ece61c73c0780fa12b726c1fddc7fba",
+      "input_sha256": "4a00cb38e8f3f5b26546658b22d03ca6cd4aabfdcf351a2f9e2eb85c9e7d4987",
+      "official_class": 0,
+      "official_output_int8": [
+        -63,
+        -68,
+        -63,
+        -63
+      ],
+      "reference": {
+        "fc_acc": [
+          1074,
+          -1185,
+          896,
+          -377
+        ],
+        "logits": [
+          14,
+          13,
+          14,
+          14
+        ],
+        "probs": [
+          1046,
+          955,
+          1046,
+          1046
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 80,
+      "name": "synthetic_silence_5",
+      "label": 0,
+      "source_sha256": "0d9283c24555a68fd5478eea11e4d29b1cb53841e2e51fefb99f40acd10212eb",
+      "input_sha256": "fee63d7504a406e37c168b985234b67d3cab7a2b28092ea2015a12a39d83dd6c",
+      "official_class": 0,
+      "official_output_int8": [
+        -59,
+        -66,
+        -66,
+        -66
+      ],
+      "reference": {
+        "fc_acc": [
+          1160,
+          -177,
+          -513,
+          -410
+        ],
+        "logits": [
+          15,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1096,
+          999,
+          999,
+          999
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 81,
+      "name": "synthetic_silence_6",
+      "label": 0,
+      "source_sha256": "aa03b001f089839b6054a846726a333f886d964bd941a6bb17aed946d4975a35",
+      "input_sha256": "57f374ddcd548994f5d8a46512b447689b2f55abe5184b4a2e029e6b957d1726",
+      "official_class": 3,
+      "official_output_int8": [
+        -66,
+        -66,
+        -66,
+        -59
+      ],
+      "reference": {
+        "fc_acc": [
+          198,
+          -1034,
+          -159,
+          1380
+        ],
+        "logits": [
+          14,
+          14,
+          14,
+          15
+        ],
+        "probs": [
+          999,
+          999,
+          999,
+          1096
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    },
+    {
+      "index": 82,
+      "name": "synthetic_silence_7",
+      "label": 0,
+      "source_sha256": "b8207c3f0bf2dea6807d2a3d8ee555b58b27c50bd607527a56b423361144442f",
+      "input_sha256": "65fd50efaeca16796fba5984b268ff0853f62616419de0ee8ffef8673caa1803",
+      "official_class": 0,
+      "official_output_int8": [
+        -64,
+        -64,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          331,
+          -192,
+          446,
+          -482
+        ],
+        "logits": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1024,
+          1024,
+          1024,
+          1024
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 83,
+      "name": "synthetic_silence_8",
+      "label": 0,
+      "source_sha256": "e4d64dea09f1de36f900f0d70af1d1ab776950665568719623e8310ee56897ba",
+      "input_sha256": "ab72bc02b1b673b0c7721c773f3c60dbe6a491281c0f1d170ee38af40c363040",
+      "official_class": 0,
+      "official_output_int8": [
+        -64,
+        -64,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          301,
+          206,
+          202,
+          -1064
+        ],
+        "logits": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1024,
+          1024,
+          1024,
+          1024
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 84,
+      "name": "synthetic_silence_9",
+      "label": 0,
+      "source_sha256": "9f70fbdd54ea2159ebf77bdce6a22ee8896f65872da6d256a7f83c556bfc2c71",
+      "input_sha256": "799e646ca299a8edf9809ee0c2f356f272eb0484d8b7bb255a3be9f0dd4010eb",
+      "official_class": 0,
+      "official_output_int8": [
+        -64,
+        -64,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          882,
+          -1013,
+          -565,
+          345
+        ],
+        "logits": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1024,
+          1024,
+          1024,
+          1024
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 85,
+      "name": "synthetic_silence_10",
+      "label": 0,
+      "source_sha256": "90ba90244596ad03511afbadc450efafebb1b864e3f15ef3a7e2667d43a578ea",
+      "input_sha256": "693e59ff106d90ab8ace2af49fae4edf441e01bc4ae77d459706a68e4ea5961c",
+      "official_class": 0,
+      "official_output_int8": [
+        -58,
+        -70,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          2332,
+          -1552,
+          -838,
+          448
+        ],
+        "logits": [
+          15,
+          13,
+          14,
+          14
+        ],
+        "probs": [
+          1120,
+          932,
+          1021,
+          1021
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 86,
+      "name": "synthetic_silence_11",
+      "label": 0,
+      "source_sha256": "988d29f91f9fd768495f9031c8006610fa666d171e5e878e7a9f3eeb5e5038b0",
+      "input_sha256": "fded9a9d346160f50f06038acd457d1f732ed394e7ac965c40950d6c3ab01404",
+      "official_class": 2,
+      "official_output_int8": [
+        -66,
+        -66,
+        -59,
+        -66
+      ],
+      "reference": {
+        "fc_acc": [
+          142,
+          -1056,
+          1312,
+          83
+        ],
+        "logits": [
+          14,
+          14,
+          15,
+          14
+        ],
+        "probs": [
+          999,
+          999,
+          1096,
+          999
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 87,
+      "name": "synthetic_silence_12",
+      "label": 0,
+      "source_sha256": "52441296045f38a18591a066fa990ec2316c6187129bd5803e6f72cc702e27d0",
+      "input_sha256": "161f81ed328cec29d2c8dd4de354242c91b5fe73167e92759a91c85a0e1f409c",
+      "official_class": 0,
+      "official_output_int8": [
+        -64,
+        -64,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          677,
+          29,
+          38,
+          454
+        ],
+        "logits": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1024,
+          1024,
+          1024,
+          1024
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 88,
+      "name": "synthetic_silence_13",
+      "label": 0,
+      "source_sha256": "84da96d03c510ff401f62923fbc339fdfcd00a25d0b8be477e4a5cdf35c18ecd",
+      "input_sha256": "795c2ed875847758a0a9dddd4ef1e35d38a684cea44ef8a06164ddc350c8ed50",
+      "official_class": 0,
+      "official_output_int8": [
+        -58,
+        -64,
+        -64,
+        -70
+      ],
+      "reference": {
+        "fc_acc": [
+          1354,
+          -1050,
+          196,
+          -1432
+        ],
+        "logits": [
+          15,
+          14,
+          14,
+          13
+        ],
+        "probs": [
+          1120,
+          1021,
+          1021,
+          932
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 89,
+      "name": "synthetic_silence_14",
+      "label": 0,
+      "source_sha256": "e706cf55c240bd7ebd9ec8f5ae11e20e015d41a8989b8cafea64695dc80b75d2",
+      "input_sha256": "a525293f4509b71867bc58dc95351bdef32b9ebd6942a465316c1d5bcb12f7d2",
+      "official_class": 0,
+      "official_output_int8": [
+        -64,
+        -64,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          738,
+          -139,
+          437,
+          -304
+        ],
+        "logits": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1024,
+          1024,
+          1024,
+          1024
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 90,
+      "name": "synthetic_silence_15",
+      "label": 0,
+      "source_sha256": "fdddc9ea2425d5cfefde30a6902bad155a8009c62043b12415c6ab1807eaad8b",
+      "input_sha256": "9ba4e6b512f194800eb0ce6e23991a69f50c6462d010490d6aaf66c01ad7d024",
+      "official_class": 0,
+      "official_output_int8": [
+        -63,
+        -68,
+        -63,
+        -63
+      ],
+      "reference": {
+        "fc_acc": [
+          158,
+          -1410,
+          443,
+          5
+        ],
+        "logits": [
+          14,
+          13,
+          14,
+          14
+        ],
+        "probs": [
+          1046,
+          955,
+          1046,
+          1046
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 91,
+      "name": "synthetic_silence_16",
+      "label": 0,
+      "source_sha256": "e54e40e7a2217b2b4d56321f27e60c38c6ef2bc44d07cfaa9416d7c90b9eb8fb",
+      "input_sha256": "51a37ce32f2153f6aa0f70cb7d71b4973e3abcb45f26552eed665e6dc03422f2",
+      "official_class": 2,
+      "official_output_int8": [
+        -64,
+        -70,
+        -58,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          977,
+          -1450,
+          1338,
+          -840
+        ],
+        "logits": [
+          14,
+          13,
+          15,
+          14
+        ],
+        "probs": [
+          1021,
+          932,
+          1120,
+          1021
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 92,
+      "name": "synthetic_silence_17",
+      "label": 0,
+      "source_sha256": "a5d23f215a07339ea7bd98f34b1d75bf5d79796a9eded2c28b421e070c4824db",
+      "input_sha256": "9c94ade413c7783ae98c250729922b75eefeab3acaa8d579b54a72590e4460d5",
+      "official_class": 0,
+      "official_output_int8": [
+        -64,
+        -64,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          -30,
+          -472,
+          1093,
+          -514
+        ],
+        "logits": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1024,
+          1024,
+          1024,
+          1024
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 93,
+      "name": "synthetic_silence_18",
+      "label": 0,
+      "source_sha256": "1c9f4d5c9b80596a5284e7f7d82356dc46a92103337238db520682a621b3a0a2",
+      "input_sha256": "5fcfa79dffd87fb1eaa065a683ef1bcfeb22874bc1e06fe0d3b43060e7ba3428",
+      "official_class": 0,
+      "official_output_int8": [
+        -64,
+        -64,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          -200,
+          -110,
+          226,
+          846
+        ],
+        "logits": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1024,
+          1024,
+          1024,
+          1024
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 94,
+      "name": "synthetic_silence_19",
+      "label": 0,
+      "source_sha256": "6e56efc3a4025acb770e1ccc305e407f66cc9a397bc11801aee49ca51ffca4ab",
+      "input_sha256": "283b984329a9545c6a3a70ae0bbe66aba8b1049da6429e2381b4d5e28af5988c",
+      "official_class": 0,
+      "official_output_int8": [
+        -63,
+        -68,
+        -63,
+        -63
+      ],
+      "reference": {
+        "fc_acc": [
+          333,
+          -1263,
+          600,
+          -524
+        ],
+        "logits": [
+          14,
+          13,
+          14,
+          14
+        ],
+        "probs": [
+          1046,
+          955,
+          1046,
+          1046
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 95,
+      "name": "synthetic_silence_20",
+      "label": 0,
+      "source_sha256": "a4d877c81e9e5a8bd1e36c00d1946b31f373149c39c066bb3b82523b1b29d6f3",
+      "input_sha256": "7cf5e740cf2785a1ee66411ad4e773b20efd358302dc5419b80d8f7aa70210bf",
+      "official_class": 0,
+      "official_output_int8": [
+        -59,
+        -66,
+        -66,
+        -66
+      ],
+      "reference": {
+        "fc_acc": [
+          1142,
+          -1029,
+          -515,
+          474
+        ],
+        "logits": [
+          15,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1096,
+          999,
+          999,
+          999
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 96,
+      "name": "synthetic_silence_21",
+      "label": 0,
+      "source_sha256": "a646acd57af8c4da7d3af17fcb96fd82b064ffac267b5115aafba86066384cc4",
+      "input_sha256": "0d84e68d1ea9af8081079273fda13c1775d757b422751215593c8cf370e2a06b",
+      "official_class": 2,
+      "official_output_int8": [
+        -66,
+        -66,
+        -59,
+        -66
+      ],
+      "reference": {
+        "fc_acc": [
+          247,
+          -981,
+          1519,
+          -344
+        ],
+        "logits": [
+          14,
+          14,
+          15,
+          14
+        ],
+        "probs": [
+          999,
+          999,
+          1096,
+          999
+        ],
+        "sinif": 2,
+        "sinif_adi": "YES"
+      }
+    },
+    {
+      "index": 97,
+      "name": "synthetic_silence_22",
+      "label": 0,
+      "source_sha256": "5a16412b8cd1c1fa2af2ad22136f2e299b2f104f5020fa14d7f3e561d5f896ee",
+      "input_sha256": "a0e47ed46f7fc2f15c96dc457512064fe950b90e162a9812d1d15d5acf6805d0",
+      "official_class": 0,
+      "official_output_int8": [
+        -64,
+        -64,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          -24,
+          -1047,
+          -722,
+          918
+        ],
+        "logits": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1024,
+          1024,
+          1024,
+          1024
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 98,
+      "name": "synthetic_silence_23",
+      "label": 0,
+      "source_sha256": "e876b1b4a660d5584205b78df8c3857ee46bea1b8ba5033065f75dbc5e515181",
+      "input_sha256": "8b608f801b52ed39ff15d91423145f53ad25e5f8487961303b7503d5fe5ae259",
+      "official_class": 0,
+      "official_output_int8": [
+        -58,
+        -70,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          1344,
+          -1681,
+          1007,
+          225
+        ],
+        "logits": [
+          15,
+          13,
+          14,
+          14
+        ],
+        "probs": [
+          1120,
+          932,
+          1021,
+          1021
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 99,
+      "name": "synthetic_silence_24",
+      "label": 0,
+      "source_sha256": "701b9ea6b6412511bf71f58c396400f2a36fb15f0013277b2c319debf5e32571",
+      "input_sha256": "336d39388d763147f22e0ee4888339a4bcce934e88d2d293286c14c488a94fee",
+      "official_class": 0,
+      "official_output_int8": [
+        -64,
+        -64,
+        -64,
+        -64
+      ],
+      "reference": {
+        "fc_acc": [
+          187,
+          -1028,
+          165,
+          119
+        ],
+        "logits": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "probs": [
+          1024,
+          1024,
+          1024,
+          1024
+        ],
+        "sinif": 0,
+        "sinif_adi": "SILENCE"
+      }
+    },
+    {
+      "index": 100,
+      "name": "benchmark_golden",
+      "label": null,
+      "source_sha256": null,
+      "input_sha256": "6193d3fda4e86b158d0f79918fcd81d05cef559e6b94566025204f48b64d1dd4",
+      "official_class": 3,
+      "official_output_int8": [
+        -128,
+        -114,
+        -108,
+        93
+      ],
+      "reference": {
+        "fc_acc": [
+          -566992,
+          149030,
+          156762,
+          216460
+        ],
+        "logits": [
+          -128,
+          79,
+          83,
+          109
+        ],
+        "probs": [
+          0,
+          225,
+          326,
+          3543
+        ],
+        "sinif": 3,
+        "sinif_adi": "NO"
+      }
+    }
+  ]
+}

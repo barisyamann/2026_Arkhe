@@ -1,0 +1,465 @@
+{
+  "created": "2026-09-06T00:14:15.958570",
+  "count": 1400,
+  "consecutive_inferences_without_reset": true,
+  "subsets": {
+    "speech": {
+      "count": 1200,
+      "class_agreement_count": 1200,
+      "official_correct": 1000,
+      "rtl_correct": 1000,
+      "official_accuracy": 0.8333333333333334,
+      "rtl_accuracy": 0.8333333333333334,
+      "difference_percentage_points": 0.0,
+      "relative_accuracy_loss": 0.0,
+      "official_confusion": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          25,
+          281,
+          23,
+          71
+        ],
+        [
+          2,
+          18,
+          372,
+          8
+        ],
+        [
+          1,
+          50,
+          2,
+          347
+        ]
+      ],
+      "rtl_confusion": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          25,
+          281,
+          23,
+          71
+        ],
+        [
+          2,
+          18,
+          372,
+          8
+        ],
+        [
+          1,
+          50,
+          2,
+          347
+        ]
+      ]
+    },
+    "synthetic_silence": {
+      "count": 100,
+      "class_agreement_count": 100,
+      "official_correct": 94,
+      "rtl_correct": 94,
+      "official_accuracy": 0.94,
+      "rtl_accuracy": 0.94,
+      "difference_percentage_points": 0.0,
+      "relative_accuracy_loss": 0.0,
+      "official_confusion": [
+        [
+          94,
+          0,
+          5,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "rtl_confusion": [
+        [
+          94,
+          0,
+          5,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "labelled_combined": {
+      "count": 1300,
+      "class_agreement_count": 1300,
+      "official_correct": 1094,
+      "rtl_correct": 1094,
+      "official_accuracy": 0.8415384615384616,
+      "rtl_accuracy": 0.8415384615384616,
+      "difference_percentage_points": 0.0,
+      "relative_accuracy_loss": 0.0,
+      "official_confusion": [
+        [
+          94,
+          0,
+          5,
+          1
+        ],
+        [
+          25,
+          281,
+          23,
+          71
+        ],
+        [
+          2,
+          18,
+          372,
+          8
+        ],
+        [
+          1,
+          50,
+          2,
+          347
+        ]
+      ],
+      "rtl_confusion": [
+        [
+          94,
+          0,
+          5,
+          1
+        ],
+        [
+          25,
+          281,
+          23,
+          71
+        ],
+        [
+          2,
+          18,
+          372,
+          8
+        ],
+        [
+          1,
+          50,
+          2,
+          347
+        ]
+      ]
+    },
+    "stress": {
+      "count": 100,
+      "class_agreement_count": 100
+    },
+    "SILENCE": {
+      "count": 100,
+      "class_agreement_count": 100,
+      "official_correct": 94,
+      "rtl_correct": 94,
+      "official_accuracy": 0.94,
+      "rtl_accuracy": 0.94,
+      "difference_percentage_points": 0.0,
+      "relative_accuracy_loss": 0.0,
+      "official_confusion": [
+        [
+          94,
+          0,
+          5,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "rtl_confusion": [
+        [
+          94,
+          0,
+          5,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "UNKNOWN": {
+      "count": 400,
+      "class_agreement_count": 400,
+      "official_correct": 281,
+      "rtl_correct": 281,
+      "official_accuracy": 0.7025,
+      "rtl_accuracy": 0.7025,
+      "difference_percentage_points": 0.0,
+      "relative_accuracy_loss": 0.0,
+      "official_confusion": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          25,
+          281,
+          23,
+          71
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "rtl_confusion": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          25,
+          281,
+          23,
+          71
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "YES": {
+      "count": 400,
+      "class_agreement_count": 400,
+      "official_correct": 372,
+      "rtl_correct": 372,
+      "official_accuracy": 0.93,
+      "rtl_accuracy": 0.93,
+      "difference_percentage_points": 0.0,
+      "relative_accuracy_loss": 0.0,
+      "official_confusion": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          18,
+          372,
+          8
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "rtl_confusion": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          18,
+          372,
+          8
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "NO": {
+      "count": 400,
+      "class_agreement_count": 400,
+      "official_correct": 347,
+      "rtl_correct": 347,
+      "official_accuracy": 0.8675,
+      "rtl_accuracy": 0.8675,
+      "difference_percentage_points": 0.0,
+      "relative_accuracy_loss": 0.0,
+      "official_confusion": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          50,
+          2,
+          347
+        ]
+      ],
+      "rtl_confusion": [
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          50,
+          2,
+          347
+        ]
+      ]
+    }
+  },
+  "official_class_disagreements": [],
+  "integer_reference_mismatch_indices": [],
+  "limitations": [
+    "Stratified evaluation excluding the earlier 75 speech files, not entire official test set; training overlap unknown",
+    "Floating-point host frontend, not bit-exact official microfrontend; identical tensors used on both classifiers",
+    "Synthetic silence evaluated separately; no model-output-based selection"
+  ],
+  "rtl_hash_mismatches": [],
+  "sha256": {
+    "make_readme.py": "443d8840d6055c991592d2aac2ec537042628e709137ba2a2c979ba615eb707e",
+    "prepare_accuracy.py": "139944fe504d062d090f7525951ad29a66644ea641074adc9e6269b9187c4a58",
+    "run_accuracy.py": "b13e44db755a6a62e7f333301590658a144fb4e0e807677031db10f55eb4f498",
+    "summarize.py": "d3b12189d51c3e44b068915e7ceb0be127e167fc3dd226ec7e7e0b4413352a6d",
+    "tb_accuracy.sv": "2f8ca8152de2915e206ee1f52fbbd2cf42588842e6b3db5f0787155cc0575f39",
+    "accuracy_expected.mem": "832cb62d778dfae711cd125682dde7f097fdce517fcca016a6dcb9f6693273ff",
+    "accuracy_inputs.mem": "0723bd11d37a7e1c458a8bfed6f056fdf0854faa1e9cfdaf8e813841f71fa65e",
+    "accuracy_dataset.json": "86a30b3e040c5d6ed2954758a53b91955fa17ab22dc22c5fc303a946eca80cef",
+    "selection.json": "0ca3f5fc0b6684521d6df84280c2839fa24c0cbf0fe9ec2843570b794f3d9c86",
+    "sim\\accuracy\\sim.log": "d28244ed58c2040d4b671284c82978f5f11550386a813107d4c05dd74c2103e3"
+  }
+}
