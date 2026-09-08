@@ -1067,10 +1067,6 @@
   "bytes": 33835,
   "sha256": "f52b25c53ef1ef086f38d711b2cb0684e0515aac74b2e097f2c9a8eff7ac5f85"
  },
- "dtr_demo/Ekran ÃƒÂ§Ã„Â±ktÃ„Â±sÃ„Â±_demo_sonucu.png": {
-  "bytes": 139792,
-  "sha256": "2ce0a1d54b8e088f139cc0efcdc76b271a481f523c9b65cb5de96ffbc3d54d93"
- },
  "dtr_demo/scripts/create_vivado_proj.tcl": {
   "bytes": 385,
   "sha256": "f993a278bd14e0d4d50f9eea847739a16d9754f85640b2e694da25d63ce11ce3"
@@ -5494,5 +5490,9 @@
  "evidence/spike_20260908/karsilastirma_sonucu.txt": {
   "bytes": 762,
   "sha256": "840181b56b829ff531a7f6b8a026c869a455c28869faec234c4b32c2786c8657"
+ },
+ "dtr_demo/Ekran çıktısı_demo_sonucu.png": {
+  "bytes": 139792,
+  "sha256": "2ce0a1d54b8e088f139cc0efcdc76b271a481f523c9b65cb5de96ffbc3d54d93"
  }
 }
