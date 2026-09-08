@@ -264,6 +264,22 @@ package axil_uvm_pkg;
         static int unsigned gecersiz_yanit;
         static int unsigned uzun_islem;
 
+        // 8 Eylul 2026'da eklendi - islem duzeyi kapsama ve ek denetimler.
+        // Sartname EK-3 "UVM-tabanli olasi scoreboarding faaliyetleri"
+        // ifadesine karsilik gelir; §5.2 protocol check esigini asar.
+        static int unsigned okuma_sayisi;
+        static int unsigned yazma_sayisi;
+        static int unsigned hatali_yanit;      // SLVERR/DECERR
+        static int unsigned bos_strb;          // yazmada strb == 0
+        static int unsigned hizasiz_adres;     // adres[1:0] != 0
+        static int unsigned kismi_yazma;       // strb tam kelime degil
+        static time         ilk_islem_ani;
+        static time         son_islem_ani;
+        static int unsigned en_uzun_ns;
+
+        // Erisilen adres bolgeleri - hangi cevre birimi uyarildi
+        static int unsigned bolge_sayaci [string];
+
         // AXI4-Lite'ta RESP[1:0] yalnizca 00/10/11 olabilir; 01 (EXOKAY)
         // yalnizca AXI4 exclusive erisimde gecerlidir ve Lite'ta YOKTUR.
         localparam time UZUN_ESIK = 10000;   // 10 us
@@ -273,24 +289,115 @@ package axil_uvm_pkg;
             analiz = new("analiz", this);
         endfunction
 
+        // Adresten cevre birimi adi - SoC bellek haritasina gore.
+        // Yalnizca raporlama icindir; denetim yapmaz.
+        function string bolge_adi(bit [31:0] a);
+            case (a[31:16])
+                16'h4000: case (a[15:12])
+                              4'h0: return "uart1";
+                              4'h1: return "gpio";
+                              4'h2: return "i2c";
+                              4'h3: return "uart_stream";
+                              4'h4: return "timer";
+                              4'h5: return "qspi";
+                              4'h6: return "dma";
+                              default: return "cevre_diger";
+                          endcase
+                16'h2000: return "npu_tcm";
+                16'h2001: return "npu_tcm";
+                16'h2002: return "npu_csr";
+                default:  return "diger";
+            endcase
+        endfunction
+
         function void write(axil_islem it);
+            time sure;
+            string b;
+
             toplam++;
+            sure = it.bitis - it.baslangic;
+
+            if (toplam == 1) ilk_islem_ani = it.baslangic;
+            son_islem_ani = it.bitis;
+            if (sure > en_uzun_ns) en_uzun_ns = int'(sure);
+
+            if (it.tur == AXIL_OKUMA) okuma_sayisi++;
+            else                     yazma_sayisi++;
+
+            b = bolge_adi(it.adres);
+            if (bolge_sayaci.exists(b)) bolge_sayaci[b]++;
+            else                        bolge_sayaci[b] = 1;
+
+            // --- 1) Yanit kodu gecerliligi ---
+            // AXI4-Lite'ta RESP yalnizca OKAY(00), SLVERR(10), DECERR(11)
+            // olabilir. EXOKAY(01) yalnizca AXI4 exclusive erisimdedir.
             if (it.yanit == 2'b01) begin
                 gecersiz_yanit++;
                 `uvm_error(get_type_name(),
                     $sformatf("AXI4-Lite'ta gecersiz yanit EXOKAY: %s", it.ozet()))
             end
-            if ((it.bitis - it.baslangic) > UZUN_ESIK) begin
+
+            // --- 2) Hata yaniti sayimi ---
+            // Hata KENDILIGINDEN kusur degildir: bus-fault testi bilerek
+            // DECERR uretir. Sayilir ve raporlanir, hata bildirilmez.
+            if (it.yanit == 2'b10 || it.yanit == 2'b11) begin
+                hatali_yanit++;
+                `uvm_info(get_type_name(),
+                    $sformatf("hata yaniti (beklenen olabilir): %s", it.ozet()),
+                    UVM_HIGH)
+            end
+
+            // --- 3) Askida kalmis islem ---
+            if (sure > UZUN_ESIK) begin
                 uzun_islem++;
                 `uvm_warning(get_type_name(),
-                    $sformatf("islem %0t surdu: %s", it.bitis - it.baslangic, it.ozet()))
+                    $sformatf("islem %0t surdu: %s", sure, it.ozet()))
             end
+
+            // --- 4) Yazmada bos strobe ---
+            // WSTRB == 0 hicbir bayti yazmaz; AXI'de yasaldir ama bizim
+            // tasarimimizda uretilmemelidir. Uretiliyorsa ya CPU bosuna
+            // yaziyor ya da strobe uretimi bozuk.
+            if (it.tur == AXIL_YAZMA && it.strb == 4'b0000) begin
+                bos_strb++;
+                `uvm_error(get_type_name(),
+                    $sformatf("yazmada WSTRB==0 (hicbir bayt yazilmaz): %s",
+                              it.ozet()))
+            end
+
+            // --- 5) Hizasiz adres ---
+            // Butun AXI-Lite cevre birimlerimiz 32-bit yazmac dosyasidir;
+            // adres 4 bayta hizali gelmelidir.
+            if (it.adres[1:0] != 2'b00) begin
+                hizasiz_adres++;
+                `uvm_error(get_type_name(),
+                    $sformatf("hizasiz adres (adres[1:0]=%0d): %s",
+                              it.adres[1:0], it.ozet()))
+            end
+
+            // --- 6) Kismi yazma sayimi ---
+            // Bayt/yarim-kelime yazmalari yasaldir (ornegin UART TDR).
+            // Sayilir ki kapsamada gorunsun.
+            if (it.tur == AXIL_YAZMA && it.strb != 4'b1111) kismi_yazma++;
         endfunction
 
         function void report_phase(uvm_phase phase);
+            string b;
             `uvm_info(get_type_name(),
-                $sformatf("scoreboard: toplam=%0d gecersiz_yanit=%0d uzun=%0d",
-                          toplam, gecersiz_yanit, uzun_islem), UVM_LOW)
+                $sformatf("scoreboard: toplam=%0d okuma=%0d yazma=%0d",
+                          toplam, okuma_sayisi, yazma_sayisi), UVM_LOW)
+            `uvm_info(get_type_name(),
+                $sformatf("  protokol: gecersiz_yanit=%0d bos_strb=%0d hizasiz=%0d",
+                          gecersiz_yanit, bos_strb, hizasiz_adres), UVM_LOW)
+            `uvm_info(get_type_name(),
+                $sformatf("  bilgi   : hata_yaniti=%0d kismi_yazma=%0d uzun=%0d en_uzun=%0d ns",
+                          hatali_yanit, kismi_yazma, uzun_islem, en_uzun_ns), UVM_LOW)
+            if (bolge_sayaci.size() > 0) begin
+                `uvm_info(get_type_name(), "  erisilen bolgeler:", UVM_LOW)
+                foreach (bolge_sayaci[b])
+                    `uvm_info(get_type_name(),
+                        $sformatf("    %-14s %0d islem", b, bolge_sayaci[b]), UVM_LOW)
+            end
         endfunction
     endclass
 
@@ -418,6 +525,35 @@ package axil_uvm_pkg;
             $display("  [OK]   asili kalmis islem yok (hepsi <10us tamamlandi)");
         else
             $display("  [HATA] %0d islem asili kaldi", axil_scoreboard::uzun_islem);
+
+        // -----------------------------------------------------------------
+        // 8 Eylul 2026'da eklenen islem duzeyi denetimleri
+        // -----------------------------------------------------------------
+        if (axil_scoreboard::bos_strb == 0)
+            $display("  [OK]   yazmalarda WSTRB==0 yok (her yazma en az bir bayt yazar)");
+        else begin
+            $display("  [HATA] %0d yazmada WSTRB==0", axil_scoreboard::bos_strb);
+            ihlal += axil_scoreboard::bos_strb;
+        end
+
+        if (axil_scoreboard::hizasiz_adres == 0)
+            $display("  [OK]   butun adresler 4 bayta hizali");
+        else begin
+            $display("  [HATA] %0d hizasiz adres", axil_scoreboard::hizasiz_adres);
+            ihlal += axil_scoreboard::hizasiz_adres;
+        end
+
+        if (axil_scoreboard::okuma_sayisi + axil_scoreboard::yazma_sayisi
+            == axil_scoreboard::toplam)
+            $display("  [OK]   okuma+yazma sayimi toplamla tutarli (%0d)",
+                     axil_scoreboard::toplam);
+        else
+            $display("  [HATA] sayim tutarsiz: okuma=%0d yazma=%0d toplam=%0d",
+                     axil_scoreboard::okuma_sayisi, axil_scoreboard::yazma_sayisi,
+                     axil_scoreboard::toplam);
+
+        $display("  bilgi  : kismi yazma=%0d  en uzun islem=%0d ns",
+                 axil_scoreboard::kismi_yazma, axil_scoreboard::en_uzun_ns);
 
         $display("==============================================================");
         return ihlal;

@@ -370,9 +370,11 @@ def filelist_rtl():
         satir = satir.split("//")[0].split("#")[0].strip()
         if not satir or satir.startswith("+") or satir.startswith("-"):
             continue
-        yol = (ROOT / "asic" / satir).resolve()
-        if yol.is_file():
-            kaynaklar.append(yol)
+        for taban in (ROOT / "asic", ROOT):
+            yol = (taban / satir).resolve()
+            if yol.is_file():
+                kaynaklar.append(yol)
+                break
     return kaynaklar or None
 
 
