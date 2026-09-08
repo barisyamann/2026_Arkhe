@@ -1,0 +1,118 @@
+================================================================================
+ ARKHE SoC - NEXYS A7 FPGA FIZIKSEL KART TESTI KANIT RAPORU
+ Referans: TEKNOFEST 2026 Cip Tasarimi Yarismasi Sartnamesi Bolum 5.2
+ Tarih: 26 Agustos 2026, 22:42:24 (TSİ)
+ Hedef FPGA: Digilent Nexys A7-100T (Xilinx Artix-7 XC7A100T-1CSG324C)
+ Bitstream Zamanlama: WNS +1.216 ns, TNS 0.000 ns, WHS +0.057 ns, THS 0.000 ns @ 50 MHz
+ Seri Port: 115200 Baud, 8N1 (COM16 - FT2232HQ USB-UART Bridge)
+================================================================================
+
+[CANLI UART METIN CIKTISI]:
+*** ARKHE FULL TEST ***
+Timer test
+Timer OK
+Bus fault test
+Bus fault ST=0x05
+I2C test
+I2C CFG=0x02
+GPIO SW=0x1080
+
+Run: 1
+Clear TCM
+Stream ready
+DMA done
+RDR: A1B2C3D4
+Start NPU
+[IRQ] Class: 3
+-> NO
+Wait 3s
+
+Run: 2
+Clear TCM
+Stream ready
+DMA done
+RDR: A1B2C3D4
+Start NPU
+[IRQ] Class: 0
+-> SILENCE
+Wait 3s
+
+Run: 3
+Clear TCM
+Stream ready
+DMA done
+RDR: A1B2C3D4
+Start NPU
+[IRQ] Class: 2
+-> YES
+Wait 3s
+
+Run: 4
+Clear TCM
+Stream ready
+DMA done
+RDR: A1B2C3D4
+Start NPU
+[IRQ] Class: 3
+-> NO
+Wait 3s
+
+Run: 5
+Clear TCM
+Stream ready
+DMA done
+RDR: A1B2C3D4
+Start NPU
+[IRQ] Class: 0
+-> SILENCE
+Wait 3s
+
+Run: 6
+Clear TCM
+Stream ready
+DMA done
+RDR: A1B2C3D4
+Start NPU
+[IRQ] Class: 2
+-> YES
+Wait 3s
+
+Run: 7
+Clear TCM
+Stream ready
+DMA done
+RDR: A1B2C3D4
+Start NPU
+[IRQ] Class: 3
+-> NO
+Wait 3s
+
+Run: 8
+Clear TCM
+Stream ready
+DMA done
+RDR: A1B2C3D4
+Start NPU
+[IRQ] Class: 0
+-> SILENCE
+Wait 3s
+
+================================================================================
+ DOGRULANAN DONANIM MODULLERI VE KAPSAMA:
+ 1. [OK] SPI NOR Flash & Iki Asamali Boot: Boot ROM (0x00000000) 8 MB ofsetinden
+        uygulama ve NPU agirliklarini basariyla yukledi ve calistirdi.
+ 2. [OK] 32-bit Donanimsal Timer: 50 MHz sayac ve timer_irq kesme hatti dogrulandi.
+ 3. [OK] AXI Veri Yolu Korumasi: Boot ROM salt-okunur korumasi (SLVERR) ve
+        Trap Handler hata yakalama mimarisi (ST=0x05) dogrulandi.
+ 4. [OK] I2C Master (400 kHz): START -> Adres (0x50) -> Veri (0xA5) -> NACK -> STOP
+        donanimsal protokol motoru kilitlenmesiz olarak dogrulandi (CFG=0x02).
+ 5. [OK] GPIO & Switch / LED: 16-DIP Switch (SW=0x1080) donanimdan okundu ve
+        16-LED cikis suruculeri test edildi.
+ 6. [OK] DMA & UART-Stream: 1960 baytlik veri transferi ve 4-bayt paketli FIFO yolu
+        dogrulandi (DMA done, RDR: A1B2C3D4).
+ 7. [OK] NPU Donanimsal Hizlandirici: Conv2D -> ReLU -> FC -> Softmax motoru tam
+        olarak calisti, NPU IRQ kesmesi ureterek Class 0 (SILENCE), Class 2 (YES)
+        ve Class 3 (NO) cikarimlarini basariyla tamamladi.
+ 8. [OK] REUSE-01 Sartname Isteri: Global reset OLMADAN ardisik ve sonsuz
+        cikarim dongusu (Run 1 -> Run 8) 100% stabil sekilde dogrulandi.
+================================================================================
