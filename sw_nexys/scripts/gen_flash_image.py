@@ -73,6 +73,20 @@ def main():
         print("UYARI: app_sim.hex yok, flash_sim.hex uretilmedi")
 
     # -------------------------------------------------------------------------
+    # 8 Eylul 2026'da EKLENDI: flash_demo.hex
+    #
+    # TEKNOFEST final demo araci (demo_harness.py) vektorleri arka arkaya
+    # gonderir. Kart imajindaki 3 saniyelik bekleme aracin zaman asimina
+    # dusmesine yol acar; DEMO_MODE ile derlenen app_demo.hex beklemesizdir.
+    # Demo gunu karta BU imaj yuklenir.
+    # -------------------------------------------------------------------------
+    app_demo = APP_HEX.parent / "app_demo.hex"
+    if app_demo.is_file():
+        uret(app_demo, DEST.parent / "flash_demo.hex", "flash_demo")
+    else:
+        print("UYARI: app_demo.hex yok, flash_demo.hex uretilmedi")
+
+    # -------------------------------------------------------------------------
     # 5 Eylul 2026'da EKLENDI: flash_core_test.hex
     #
     # USE_SRAM_MACRO tanimliyken I-RAM tek bir 'ram' dizisi degil, dort ayri

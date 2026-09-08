@@ -27,6 +27,24 @@ set_property -dict { PACKAGE_PIN D4    IOSTANDARD LVCMOS33 } [get_ports { UART_R
 set_property -dict { PACKAGE_PIN C17   IOSTANDARD LVCMOS33  PULLUP TRUE } [get_ports { I2C_SCL }];
 set_property -dict { PACKAGE_PIN D18   IOSTANDARD LVCMOS33  PULLUP TRUE } [get_ports { I2C_SDA }];
 
+# --- UART-stream (UART 2) - Pmod JB ---
+#
+# 8 Eylul 2026'da eklendi. TEKNOFEST demo araci IKI AYRI seri port istiyor:
+# cikarim vektoru (1960 bayt) UART-stream'den girer, sonuc core UART'tan
+# cikar. Kart uzerinde tek USB-UART koprusu var (UART 1 -> C4/D4), bu yuzden
+# UART 2 harici bir 3,3 V UART-TTL modulu ile Pmod JB uzerinden veriliyor.
+#
+# Kablolama (Pmod JB ust sira):
+#   JB1 (D14) <- modulun TX'i   (FPGA girisi)
+#   JB2 (F16) -> modulun RX'i   (FPGA cikisi)
+#   JB5/JB6   <- GND
+# DIKKAT: modul 3,3 V kipinde olmalidir; 5 V seviye FPGA bankasini bozar.
+#
+# PULLUP, hat bosta iken '1' (UART idle) okunmasi icindir; modul takili
+# degilken alici sahte start biti gormez.
+set_property -dict { PACKAGE_PIN D14   IOSTANDARD LVCMOS33  PULLUP TRUE } [get_ports { JB_UART_RX }];
+set_property -dict { PACKAGE_PIN F16   IOSTANDARD LVCMOS33 } [get_ports { JB_UART_TX }];
+
 # --- 16 Anahtar (Switches - Girişler) ---
 set_property -dict { PACKAGE_PIN J15   IOSTANDARD LVCMOS33 } [get_ports { SW[0] }];
 set_property -dict { PACKAGE_PIN L16   IOSTANDARD LVCMOS33 } [get_ports { SW[1] }];

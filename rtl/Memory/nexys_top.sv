@@ -17,6 +17,20 @@ module nexys_top (
     output logic        UART_RXD_OUT,   // Pin D4 (TX on FPGA side)
 
     // -------------------------------------------------------------------------
+    // UART-stream (UART 2) - Pmod JB  (8 Eylul 2026'da eklendi)
+    //
+    // TEKNOFEST demo araci IKI AYRI seri port istiyor: cikarim vektoru
+    // UART-stream'den girer, sonuc core UART'tan cikar. Kart uzerinde tek
+    // USB-UART koprusu var (UART 1), bu yuzden UART 2 harici bir 3,3 V
+    // UART-TTL modulu ile Pmod JB uzerinden disari veriliyor.
+    //
+    // Onceden uart2_rxd 1'b1'e cekili, uart2_txd bostaydi; RTL'de UART 2
+    // mevcuttu ama karta HIC cikmiyordu, dolayisiyla demo kosulamazdi.
+    // -------------------------------------------------------------------------
+    input  logic        JB_UART_RX,     // Pmod JB1 (D14) - moduldeki TX buraya
+    output logic        JB_UART_TX,     // Pmod JB2 (F16) - moduldeki RX buraya
+
+    // -------------------------------------------------------------------------
     // I2C Master - Pmod JA (22 Agustos 2026'da eklendi)
     //
     // ONCEKI DURUM: I2C hatlari yalnizca modul ICINDE kablolanmisti, karta
@@ -155,9 +169,9 @@ module nexys_top (
         .uart1_rxd      (UART_TXD_IN),
         .uart1_txd      (UART_RXD_OUT),
 
-        // UART 2 (Kullanılmıyor, High-Z kalması için 1'e çekildi)
-        .uart2_rxd      (1'b1),
-        .uart2_txd      (),
+        // UART 2 = UART-stream -> Pmod JB (harici 3,3 V UART-TTL modulu)
+        .uart2_rxd      (JB_UART_RX),
+        .uart2_txd      (JB_UART_TX),
 
         // I2C Master -> Pmod JA
         .i2c_sda_o      (i2c_sda_o_w),

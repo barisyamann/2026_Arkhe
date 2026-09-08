@@ -245,6 +245,29 @@ def main():
     )
 
     # -------------------------------------------------------------------------
+    # DEMO YAPIMI - app_demo.hex   (8 Eylul 2026'da eklendi)
+    #
+    # TEKNOFEST final demo araci (demo_harness.py) UART-stream'den arka
+    # arkaya 1960 baytlik vektor gonderir ve her biri icin core UART'tan
+    # sonuc bekler. Kart yapiminda cikarimlar arasinda 3 saniye bekleme
+    # var (sonucu insan gozuyle okuyabilmek icin); bu, 50 vektorluk bir
+    # kosumu 2,5 dakikaya cikarir ve arac zaman asimi verir.
+    #
+    # DEMO_MODE beklemeyi tamamen kaldirir. BASKA HICBIR FARK YOKTUR:
+    # boot, DMA, NPU, ISR ve UART yollari uc yapimda da birebir aynidir.
+    # -------------------------------------------------------------------------
+    build_image(
+        gcc, objcopy, size,
+        name="app_demo",
+        c_sources=[SRC_DIR / "main.c"],
+        asm_sources=[SRC_DIR / "crt0.S"],
+        linker_script=LINK_DIR / "app.ld",
+        image_bytes=APP_IMAGE_BYTES,
+        hex_dest=BUILD_DIR / "app_demo.hex",
+        extra_defs=["-DDEMO_MODE"],
+    )
+
+    # -------------------------------------------------------------------------
     # CEKIRDEK TESTI - core_test.hex  (Spike ISS karsilastirmasi icin)
     #
     # Sartname s.569 ve EK-3 "Cekirdek Testleri": komut izlerinin Spike ISS

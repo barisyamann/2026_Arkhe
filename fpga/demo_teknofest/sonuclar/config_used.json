@@ -1,0 +1,293 @@
+{
+  "_OKUBENI": [
+    "TEKNOFEST Cip Tasarim Yarismasi - Mikrodenetleyici kategorisi",
+    "ARAYUZ TANIM DOKUMANI (ICD). Bu dosyayi takiminiz doldurur ve demo gunu teslim eder.",
+    "",
+    "Alt cizgi ile baslayan ('_bilgi', '_alanlar', '_ornekler') anahtarlar",
+    "aciklama amaclidir, program tarafindan yok sayilir. Silmeniz gerekmez.",
+    "",
+    "Doldurduktan sonra kontrol edin:  python demo_harness.py validate -c bu_dosya.json",
+    "Bos birakilan alan varsayilan degerini alir; varsayilanlar asagida yazilidir."
+  ],
+  "team": {
+    "_alanlar": {
+      "name": "Takim adi. Metin. Rapor basligi ve cikti klasoru adi olur. Ornek: 'Bogazici RISC-V'",
+      "id": "Basvuru/KYS takim numarasi. Metin. Ornek: '2026-MCU-041'",
+      "notes": "Juriye iletmek istediginiz serbest not. Ornek: 'Kart: Nexys A7, sistem saati 50 MHz'"
+    },
+    "name": "ARKHE",
+    "id": "",
+    "notes": "CV32E40P RV32IMC + TinyConv NPU. UART-stream (UART2) harici 3,3 V UART-TTL modulu ile Pmod JB uzerinden verilir; core UART kart ustu USB-UART koprusudur. Cihaz her cikarim oncesi core UART'a 'Stream ready' yazar. Yazilim referansi 1418 ms: npu_hizlanma testinde 50 piksel icin olculen 547.221 cevrimden 4000 piksele olceklenmis tahmindir (70.902.259 cevrim / 50 MHz)."
+  },
+  "stream": {
+    "_bilgi": "UART-stream: cikarim verisinin YZ hizlandiriciya suruldugu arayuz.",
+    "port": {
+      "_alanlar": {
+        "port": "Isletim sistemindeki port adi. Windows: 'COM3'. Linux: '/dev/ttyUSB0'. macOS: '/dev/tty.usbserial-A1'. Juri demo gunu bunu kendi makinesine gore degistirir; siz kendi kullandiginizi yazin.",
+        "baudrate": "Bit hizi (bps). Tamsayi. Yaygin: 115200, 230400, 460800, 921600, 1000000, 3000000. Sartname UART'in 1 Mbps'i desteklemesini ister; stream tarafinda 1000000 onerilir.",
+        "bytesize": "Veri biti sayisi. 5 | 6 | 7 | 8. Neredeyse her zaman 8.",
+        "parity": "Eslik biti. 'N' (yok) | 'E' (cift) | 'O' (tek) | 'M' (mark) | 'S' (space). Varsayilan 'N'.",
+        "stopbits": "Stop biti. 1 | 1.5 | 2. Varsayilan 1.",
+        "rtscts": "Donanimsal RTS/CTS akis kontrolu. true | false. Tasariminizda CTS yoksa false.",
+        "dsrdtr": "DSR/DTR akis kontrolu. true | false. Genelde false.",
+        "xonxoff": "Yazilimsal XON/XOFF akis kontrolu. true | false. Ikili veri gonderildigi icin false olmali.",
+        "write_timeout_s": "Yazma zaman asimi (saniye). Ondalik. Ornek: 5.0",
+        "read_timeout_s": "Okuma zaman asimi (saniye). Ondalik. Stream tarafinda kullanilmaz. Ornek: 0.05",
+        "dtr": "Port acilirken DTR hattinin degeri. true | false | null. Karti resetliyorsa false yazin, aksi halde null birakin.",
+        "rts": "Port acilirken RTS hattinin degeri. true | false | null. Ayni sekilde.",
+        "open_settle_ms": "Port acildiktan sonra beklenecek sure (ms). Tamsayi. USB-UART kopru cipleri icin 200 iyi bir baslangictir; kartiniz aciliste resetleniyorsa 1500-2000 yazin.",
+        "flush_input_on_open": "Port acilirken bekleyen giris tamponu bosaltilsin mi. true | false. VARSAYILAN true: eski cop veriyi atar. Kartiniz boot banner'ini harness baglanmadan ONCE yazdiriyorsa false yapin, yoksa banner bosaltilir ve yakalanamaz."
+      },
+      "port": "COM12",
+      "baudrate": 1000000,
+      "bytesize": 8,
+      "parity": "N",
+      "stopbits": 1,
+      "rtscts": false,
+      "dsrdtr": false,
+      "xonxoff": false,
+      "write_timeout_s": 5.0,
+      "read_timeout_s": 0.05,
+      "dtr": null,
+      "rts": null,
+      "open_settle_ms": 200,
+      "flush_input_on_open": true
+    },
+    "framing": {
+      "_bilgi": [
+        "Bir cerceve su sirayla olusturulur:",
+        "  [preamble] [index] [length] [payload] [checksum] [trailer]",
+        "Kullanmadiginiz alani bos birakin (hex icin \"\", boyut icin 0).",
+        "Hicbir cerceveleme kullanmiyorsaniz (ham 1960 bayt): preamble_hex=\"\",",
+        "index_field_size=0, length_field_size=0, checksum=\"none\", trailer_hex=\"\"."
+      ],
+      "_alanlar": {
+        "preamble_hex": "Cerceve basi senkron deseni, hex metin. Bosluk/0x kullanmayin. Yok ise \"\". Ornek: \"AA55\" | \"5A\" | \"DEADBEEF\"",
+        "index_field_size": "Cerceve sira numarasi alaninin bayt sayisi. 0 (yok) | 1 | 2 | 4. Harness her cerceveyi 0'dan baslayarak numaralandirir.",
+        "length_field_size": "Uzunluk alaninin bayt sayisi. 0 (yok) | 1 | 2 | 4. 1960 bayt icin en az 2 gerekir.",
+        "length_counts": "Uzunluk alani neyi sayar. 'payload' (yalniz veri) | 'payload_plus_checksum' (veri + checksum).",
+        "endian": "index/length/checksum alanlarinin bayt sirasi. 'little' | 'big'.",
+        "checksum": "Saglama turu. 'none' | 'sum8' (bayt toplaminin dusuk 8 biti) | 'xor8' | 'crc16_ccitt' (poly 0x1021, init 0xFFFF) | 'crc32' (zlib/IEEE).",
+        "checksum_covers": "Saglamanin kapsadigi alan. 'payload' | 'header_payload' (preamble+index+length dahil).",
+        "trailer_hex": "Cerceve sonu deseni, hex metin. Yok ise \"\". Ornek: \"0D0A\" | \"55AA\"",
+        "chunk_size": "Cerceveyi kac baytlik parcalar halinde yazalim. Tamsayi. 0 = tek seferde. Akis kontrolu yoksa ve RX FIFO'nuz kucukse 64 veya 32 yazin. Ornek: 256",
+        "inter_chunk_delay_ms": "Parcalar arasi bekleme (ms). Ondalik. Varsayilan 0. FIFO tasiyorsa 1-5 arasi deneyin.",
+        "inter_frame_delay_ms": "Iki cerceve arasi bekleme (ms). Ondalik. Cihaziniz sonuc yazdiktan sonra toparlanma suresi istiyorsa artirin. Ornek: 20",
+        "drain_after_write": "Yazimdan sonra cikis tamponunun bosalmasini bekle. true | false. Gecikme olcumunun dogru olmasi icin true birakin."
+      },
+      "preamble_hex": "",
+      "index_field_size": 0,
+      "length_field_size": 0,
+      "length_counts": "payload",
+      "endian": "little",
+      "checksum": "none",
+      "checksum_covers": "payload",
+      "trailer_hex": "",
+      "chunk_size": 256,
+      "inter_chunk_delay_ms": 0,
+      "inter_frame_delay_ms": 50,
+      "drain_after_write": true
+    },
+    "payload": {
+      "_alanlar": {
+        "length": "Bir cikarim vektorunun eleman sayisi. Tamsayi. Bu demo paketi icin 1960. Girdi arayuzunuz bu uzunlukla uyumlu olmalidir.",
+        "encoding": "Her elemanin tel uzerindeki bicimi. 'int8' (ikiye tumleyen, -128..127 -> 0x80..0x7F) | 'uint8_offset128' (deger+128, yani 0..255) | 'uint8_raw' (0..255 dogrudan). TFLite int8 nicemleme kullanir; cogu takim icin 'int8' dogrudur.",
+        "pad_value": "Vektor kisa gelirse doldurma degeri. Tamsayi -128..127. Ornek: 0"
+      },
+      "length": 1960,
+      "encoding": "int8",
+      "pad_value": 0
+    }
+  },
+  "core": {
+    "_bilgi": "Genel amacli UART: cekirdegin kesme rutininde yazdirdigi cikarim sonucu buradan okunur.",
+    "port": {
+      "_alanlar": {
+        "port": "Port adi. Ornek: 'COM4' | '/dev/ttyUSB1'. Stream ile AYNI fiziksel port OLAMAZ.",
+        "baudrate": "Bit hizi. Ornek: 115200 | 921600",
+        "read_timeout_s": "Okuma tamponu yoklama araligi (saniye). 0.05 iyi bir deger.",
+        "_diger": "bytesize, parity, stopbits, rtscts, dsrdtr, xonxoff, dtr, rts, open_settle_ms alanlari stream ile ayni anlama gelir."
+      },
+      "port": "COM16",
+      "baudrate": 115200,
+      "bytesize": 8,
+      "parity": "N",
+      "stopbits": 1,
+      "rtscts": false,
+      "dsrdtr": false,
+      "xonxoff": false,
+      "read_timeout_s": 0.05,
+      "write_timeout_s": 5.0,
+      "dtr": null,
+      "rts": null,
+      "open_settle_ms": 200,
+      "flush_input_on_open": false
+    },
+    "result": {
+      "_bilgi": [
+        "Cikarim sonucunun nasil okunacagi. Dort mod var; SADECE kullandiginiz",
+        "modun alanlarini doldurun, digerleri yok sayilir.",
+        "  'regex_line'   -> ASCII satir, duzenli ifade ile ayristirilir  (EN YAYGIN)",
+        "  'json_line'    -> her sonuc bir satirlik JSON nesnesi",
+        "  'csv_line'     -> virgulle ayrilmis satir",
+        "  'binary_fixed' -> sabit uzunlukta ikili kayit"
+      ],
+      "_alanlar": {
+        "mode": "'regex_line' | 'json_line' | 'csv_line' | 'binary_fixed'",
+        "line_terminator": "Satir sonu karakteri. '\\n' | '\\r\\n' | '\\r'. Metin modlari icin.",
+        "encoding": "Metin kodlamasi. 'ascii' | 'utf-8'. Varsayilan 'ascii'.",
+        "regex": "[regex_line] Sonuc satirini yakalayan duzenli ifade. ZORUNLU olarak (?P<label>...) grubunu icermeli; varsa (?P<scores>...) grubu skorlari verir. Ornek cikti 'RESULT: yes scores=-12,3,120,-8' icin varsayilan ifade calisir.",
+        "json_label_key": "[json_line] Etiketin bulundugu anahtar. Ornek: 'label' | 'class' | 'pred'",
+        "json_scores_key": "[json_line] Skor dizisinin anahtari. Ornek: 'scores' | 'logits'",
+        "csv_label_index": "[csv_line] Etiketin kacinci sutunda oldugu (0'dan baslar). Ornek: 0",
+        "csv_scores_start": "[csv_line] Skorlarin basladigi sutun indeksi. Ornek: 1",
+        "binary_preamble_hex": "[binary_fixed] Kayit basi deseni, hex. Ornek: '5A5A'. Yoksa \"\" (o zaman kayitlar birbirini takip eder).",
+        "binary_label_size": "[binary_fixed] Etiket alaninin bayt sayisi. 1 | 2 | 4",
+        "binary_score_count": "[binary_fixed] Kac skor var. 0 (skor yok) | 4",
+        "binary_score_size": "[binary_fixed] Her skorun bayt sayisi. 1 | 2 | 4",
+        "binary_score_signed": "[binary_fixed] Skorlar isaretli mi. true | false",
+        "binary_endian": "[binary_fixed] 'little' | 'big'",
+        "label_map": "Cihazin yazdigi etiketi sinif adina cevirir. Cihaz sayi yaziyorsa: {\"0\":\"silence\",\"1\":\"unknown\",\"2\":\"yes\",\"3\":\"no\"}. Cihaz zaten 'yes'/'no' yaziyorsa bos birakin: {}. Kisaltma kullaniyorsaniz: {\"Y\":\"yes\",\"N\":\"no\",\"S\":\"silence\",\"U\":\"unknown\"}",
+        "classes": "Sinif adlari, model cikis sirasiyla. Sartname EK-1'e gore: [\"silence\",\"unknown\",\"yes\",\"no\"]. Sirayi degistirdiyseniz burada da degistirin; sayisal etiketler bu siraya gore cozulur.",
+        "timeout_ms": "Bir cerceve gonderildikten sonra sonuc icin beklenecek sure (ms). Tamsayi. Ornek: 5000. Cikarimini + UART yazimini rahatca kapsayacak sekilde secin.",
+        "ignore_regex": "Sonuc olmayan satirlari elemek icin duzenli ifade. Bos birakilabilir. Ornek: '^(BOOT|INFO|DBG|>)' -> bu on eklerle baslayan satirlar sonuc sayilmaz."
+      },
+      "mode": "regex_line",
+      "line_terminator": "\n",
+      "encoding": "ascii",
+      "regex": "\\[IRQ\\]\\s*Class:\\s*(?P<label>[0-3])",
+      "json_label_key": "label",
+      "json_scores_key": "scores",
+      "csv_label_index": 0,
+      "csv_scores_start": 1,
+      "binary_preamble_hex": "",
+      "binary_label_size": 1,
+      "binary_score_count": 0,
+      "binary_score_size": 1,
+      "binary_score_signed": true,
+      "binary_endian": "little",
+      "label_map": {
+        "0": "silence",
+        "1": "unknown",
+        "2": "yes",
+        "3": "no"
+      },
+      "classes": [
+        "silence",
+        "unknown",
+        "yes",
+        "no"
+      ],
+      "timeout_ms": 5000,
+      "ignore_regex": "^(\\*\\*\\*|Timer|Bus|Clear|Stream|Start|Wait|DMA|->|\\[BOOT\\]|INFO|DBG)"
+    },
+    "boot_banner_regex": "Stream ready"
+  },
+  "hooks": {
+    "_bilgi": [
+      "Tasarim degisikligi GEREKTIRMEYEN kancalar. Hepsi istege baglidir;",
+      "kullanmadiginizi \"\" birakin. Hex alanlarina gonderilecek ham baytlari",
+      "hex metin olarak yazin (ornek: 'AT+RUN\\r\\n' yerine '41542B52554E0D0A')."
+    ],
+    "_alanlar": {
+      "boot_banner_regex": "Kart aciliste/boot sonrasi bir mesaj yazdiriyorsa onu yakalayan ifade. Harness kosuma baslamadan once bunu bekler. Ornek: 'BOOT OK' | '^MCU ready' . Banner yoksa \"\" birakin. DIKKAT: banner harness baglanmadan once yazildiysa yakalanamaz; ya kartinizi harness baslatildiktan sonra resetleyin, ya 'boot_trigger_core_hex' tanimlayin, ya da port ayarlarinda 'flush_input_on_open' degerini false yapin.",
+      "boot_trigger_core_hex": "Banner beklemeden hemen once core UART'a gonderilecek baytlar; kart bir komutla kimlik/banner yazdiriyorsa buraya yazin. Ornek: '' | '76' ('v' = version). Yoksa \"\".",
+      "boot_timeout_ms": "Banner icin beklenecek azami sure (ms). Ornek: 10000",
+      "core_init_hex": "Kosumun basinda core UART'a bir kez gonderilecek baytlar. Ornek: cihaz 's' komutuyla akis moduna geciyorsa '73'. Yoksa \"\".",
+      "stream_init_hex": "Kosumun basinda stream UART'a bir kez gonderilecek baytlar. Yoksa \"\".",
+      "pre_frame_core_hex": "HER cerceveden once core UART'a gonderilecek baytlar (ornek: 'bir sonraki cikarima hazirlan' komutu). Yoksa \"\".",
+      "interleave_core_hex": "OPSIYONEL saglamlik testi. Iki cikarim arasinda bir cevre birimini calistiran komut. Kullanmak isterseniz ham baytlari hex olarak yazin. Bos birakilirsa peripheral_interleave senaryosu ATLANDI olarak raporlanir ve saglamlik basari oranina dahil edilmez. Ornek: cihaz 'g' ile GPIO testi kosuyorsa '67'.",
+      "interleave_expect_regex": "Yukaridaki komuta beklenen yanit. Ornek: 'GPIO OK'. Yanit yoksa \"\" birakin (o zaman sadece cikarimin devam etmesi kontrol edilir).",
+      "reset_hex": "Yazilimsal reset komutu. Harness normal akista KULLANMAZ, yalnizca kayit amaclidir. Yoksa \"\"."
+    },
+    "boot_banner_regex": "",
+    "boot_timeout_ms": 10000,
+    "boot_trigger_core_hex": "",
+    "core_init_hex": "",
+    "stream_init_hex": "",
+    "pre_frame_core_hex": "",
+    "interleave_core_hex": "",
+    "interleave_expect_regex": "",
+    "reset_hex": ""
+  },
+  "run": {
+    "_alanlar": {
+      "warmup_frames": "Olcume dahil edilmeyen isinma cercevesi sayisi. Tamsayi. Ornek: 1",
+      "retries_per_sample": "Zaman asiminda ayni ornegin kac kez daha denenecegi. Tamsayi. 0 = tekrar yok. Ornek: 1",
+      "inter_sample_delay_ms": "Ornekler arasi ek bekleme (ms). Ondalik. Varsayilan 0.",
+      "stop_on_consecutive_timeouts": "Bu kadar ardisik zaman asiminda kosum durur. Tamsayi. Ornek: 10",
+      "software_reference_ms": "Ayni kartta, hizlandirici KULLANILMADAN, yalnizca CV32E40P uzerinde yazilimla yapilan tek cikarimin olculen suresi (ms). Ondalik veya null. Girilirse rapor hizlanma orani hesaplar. Ornek: 85.0"
+    },
+    "warmup_frames": 1,
+    "retries_per_sample": 1,
+    "inter_sample_delay_ms": 0,
+    "stop_on_consecutive_timeouts": 10,
+    "software_reference_ms": 1418.0,
+    "speedup_threshold": 10.0
+  },
+  "_ornekler": {
+    "_bilgi": "Cikti formatiniza en yakin ornegi 'core.result' bolumune kopyalayin.",
+    "A_ascii_satir": {
+      "cihaz_ciktisi": "RESULT: yes scores=-12,3,120,-8",
+      "mode": "regex_line",
+      "regex": "RESULT\\s*[:=]\\s*(?P<label>[A-Za-z_0-9]+)(?:.*?scores\\s*[:=]\\s*(?P<scores>[-+0-9.,;\\s]+))?",
+      "label_map": {}
+    },
+    "B_sayisal_etiket": {
+      "cihaz_ciktisi": "INF 2 120",
+      "mode": "regex_line",
+      "regex": "INF\\s+(?P<label>\\d+)\\s+(?P<scores>[-0-9\\s]+)",
+      "label_map": {
+        "0": "silence",
+        "1": "unknown",
+        "2": "yes",
+        "3": "no"
+      }
+    },
+    "C_json": {
+      "cihaz_ciktisi": "{\"label\":\"no\",\"scores\":[-5,0,10,118]}",
+      "mode": "json_line",
+      "json_label_key": "label",
+      "json_scores_key": "scores"
+    },
+    "D_csv": {
+      "cihaz_ciktisi": "2,-12,3,120,-8",
+      "mode": "csv_line",
+      "csv_label_index": 0,
+      "csv_scores_start": 1,
+      "label_map": {
+        "0": "silence",
+        "1": "unknown",
+        "2": "yes",
+        "3": "no"
+      }
+    },
+    "E_ikili": {
+      "cihaz_ciktisi": "5A 5A 02 F4 03 78 F8  (preamble + etiket + 4 adet int8 skor)",
+      "mode": "binary_fixed",
+      "binary_preamble_hex": "5A5A",
+      "binary_label_size": 1,
+      "binary_score_count": 4,
+      "binary_score_size": 1,
+      "binary_score_signed": true
+    },
+    "F_cerceveleme_ornekleri": {
+      "ham_1960_bayt": {
+        "preamble_hex": "",
+        "length_field_size": 0,
+        "checksum": "none"
+      },
+      "basit_baslik": {
+        "preamble_hex": "AA55",
+        "length_field_size": 2,
+        "checksum": "none"
+      },
+      "crc_korumali": {
+        "preamble_hex": "AA55",
+        "length_field_size": 2,
+        "checksum": "crc16_ccitt",
+        "checksum_covers": "payload"
+      }
+    }
+  }
+}

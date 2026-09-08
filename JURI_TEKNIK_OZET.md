@@ -48,7 +48,30 @@ Tarihsel aday logları ve test kaynakları pakette korunmuştur. 5–6 Eylül NP
 
 8 Eylül QSPI testinde yeni FIFO negatif senaryolarıyla 30 kontrol geçmiştir. Kaynak/test kayıtlarının tarih ve kapsamları `evidence/` altında tutulur. Son UVM veya kod kapsamı için tamamlanmamış loglar başarı kabul edilmez.
 
-8 Eylül 16:18 FPGA bitstream'inin yönlendirme sonrası WNS +1,218 ns, hold +0,055 ns; tüm tanımlı zamanlama kısıtları sağlanmıştır. 17:31 kart/demo testinde 9 PASS, 1 FAIL, 1 SKIP vardır: aralıksız beş çerçevenin dördüne yanıt gelmiştir. Bu sürüm sonradan eklenen UART FIFO toplayıcısı sıfırlama düzeltmesini içermez. 5 Eylül tek USB jüri provası ayrı bir firmware/wrapper sürümüdür.
+8 Eylül 16:18 FPGA bitstream'inin yönlendirme sonrası WNS +1,218 ns, hold +0,055 ns; tüm tanımlı zamanlama kısıtları sağlanmıştır.
+
+8 Eylül 17:31'de yarışma paketiyle gelen `demo_harness.py` aracı, public dataset'in tamamıyla kart üzerinde koşulmuştur. Ham çıktılar `fpga/demo_teknofest/sonuclar/` altındadır.
+
+| Metrik | Değer |
+|---|---:|
+| Gönderilen örnek | 156 |
+| Golden referansı olan | 156 |
+| **Golden ile uyum** | **%100,00 (156/156)** |
+| Uyuşmazlık | 0 |
+| Zaman aşımı | 0 |
+| Gecikme (medyan / p95 / maks) | 7,74 / 8,78 / 21,58 ms |
+| Ölçülen hızlanma | 183,3× |
+| Sağlamlık senaryoları | 9/10 (+1 opsiyonel atlandı) |
+
+Uyum matrisi tamamen köşegendir (silence 6, unknown 16, yes 50, no 84); köşegen dışı hücre yoktur. Donanım doğruluğu ve golden model doğruluğu %72,44 ile aynıdır, fark 0,00 puandır; bu oran veri setinin zorluğudur ve puanlamada kullanılmaz.
+
+Başarısız tek senaryo `back_to_back`'tir: tam sırada koşulduğunda aralıksız beş çerçevenin dördüne yanıt gelmiştir. Tek başına koşulduğunda üç bağımsız tekrarda 5/5 geçmiştir; fark, kendinden önceki senaryodan devreden geçiş etkisidir. Kök nedeni `uart_stream_peripheral.sv` içindeki toplayıcı sayacının (`pack_cnt_r`) `UARTS_FIFO_CLR` ile sıfırlanmamasıdır. Düzeltmesi hazırdır ancak bu teslim yamasız RTL'e SHA-256 ile bağlı olduğu için **dahil edilmemiştir**; ayrı bir fiziksel koşumla girecektir. `peripheral_interleave` senaryosu şartname gereği opsiyoneldir ve `hooks.interleave_core_hex` tanımlanmadığı için ATLANDI olarak raporlanır.
+
+Demo imajı DEMO_MODE ile derlenir. Normal kart imajından iki farkı vardır: çıkarımlar arası 3 saniyelik bekleme yoktur ve `UART_RDR` bayt yolu doğrulama bloğu atlanır. O blok çerçeve başına 1960 değil 1964 bayt tüketir; araç tam 1960 bayt gönderdiği için fazladan istenen 4 bayt bir sonraki çerçevenin başından karşılanır ve o çerçeve kaymış işlenirdi. Normal ve simülasyon imajları bloğu hâlâ koşar, kapsama kaybı yoktur. Ayrıntı: `fpga/demo_teknofest/OKUBENI.md`.
+
+5 Eylül tek USB jüri provası ayrı bir firmware/wrapper sürümüdür.
+
+Fonksiyonel doğrulama Vivado xsim 2025.2 (`xvlog`/`xelab`/`xsim`) ile yapılmıştır; DSim kullanılmamıştır.
 
 ## Teslimin kullanımı
 
