@@ -39,6 +39,13 @@
  *    RV32M  : mul mulh mulhsu mulhu div divu rem remu
  *    RV32C  : derleyici -Os ile sikistirilmis bicimleri uretir
  *
+ *    KENAR DURUMLARI (8 Eylul 2026'da eklendi)
+ *      - bolme: x/0 = -1, x%0 = x, INT_MIN/-1 = INT_MIN, INT_MIN%-1 = 0
+ *        (RISC-V spec Bolum 7.2; istisna URETILMEZ)
+ *      - kaydirma miktari maskeleme: shamt yalnizca alt 5 bit
+ *      - mulhsu: isaretli x isaretsiz ust yari
+ *      - gercek jal/jalr ve ic ice cagri ile yigin trafigi
+ *
  *    Sonuclar D-RAM'e yazilir; hem Spike hem RTL ayni adreslere ayni
  *    degerleri yazmalidir.
  *
@@ -50,6 +57,37 @@
 
 /* Sonuclarin yazilacagi D-RAM bolgesi. Spike'ta da RTL'de de ayni adres. */
 #define SONUC_TABAN  ((volatile unsigned int *)0x20001000)
+
+/* -----------------------------------------------------------------------------
+ * Yardimci fonksiyonlar - 8 Eylul 2026'da eklendi
+ *
+ * Onceki surumde "fonksiyon cagrisi: jal / jalr / yigin" yorumu vardi ama
+ * altindaki satir yalnizca bir toplama yapiyordu; derleyici hicbir cagri
+ * buyrugu uretmiyordu. Bu fonksiyonlar noinline ile gercek jal/jalr ve
+ * yigin cerceve trafigi uretir.
+ * -------------------------------------------------------------------------- */
+__attribute__((noinline))
+static unsigned int cekirdek_topla(unsigned int p, unsigned int q)
+{
+    return p + q;
+}
+
+/* Ic ice cagri - yigin derinligi ve ra kaydinin saklanmasi denetlenir. */
+__attribute__((noinline))
+static unsigned int cekirdek_ic_ice(unsigned int n)
+{
+    if (n == 0u) return 1u;
+    return n + cekirdek_ic_ice(n - 1u);
+}
+
+/* Fonksiyon isaretcisi uzerinden cagri - jalr uretir (jal degil). */
+typedef unsigned int (*ikili_fn)(unsigned int, unsigned int);
+
+__attribute__((noinline))
+static unsigned int cekirdek_xor(unsigned int p, unsigned int q)
+{
+    return p ^ q;
+}
 
 int main(void)
 {
@@ -134,6 +172,73 @@ int main(void)
 
     /* --- Fonksiyon cagrisi: jal / jalr / yigin --- */
     s[26] = (unsigned int)((int)a + (int)b);
+
+    /* =====================================================================
+     * 8 Eylul 2026'da eklenen genisletilmis denetimler
+     *
+     * Onceki surum temel RV32IMC buyruklarini uyariyordu ama KENAR
+     * DURUMLARI dislarida birakiyordu. ISS karsilastirmasinin degeri tam
+     * da burada: bir cekirdek normal degerlerde dogru, kenar durumlarda
+     * yanlis olabilir ve bu ancak referans modelle yakalanir.
+     * ===================================================================== */
+
+    /* --- mulhsu: isaretli x isaretsiz ust yari ---
+     * Dokumantasyonda listelenmisti ama kodda YOKTU. C'de dogrudan
+     * karsiligi olmadigi icin acikca kuruyoruz. */
+    {
+        long long ms = (long long)x * (long long)(unsigned long long)b;
+        s[27] = (unsigned int)((unsigned long long)ms >> 32);
+    }
+
+    /* --- Bolme kenar durumlari - RISC-V spesifikasyonu Bolum 7.2 ---
+     *
+     * RISC-V'de bolme ISTISNA URETMEZ; tanimli degerler dondurur:
+     *   x / 0        = -1 (tum bitler 1)
+     *   x % 0        = x
+     *   INT_MIN / -1 = INT_MIN   (tasma, sarmalanir)
+     *   INT_MIN % -1 = 0
+     *
+     * Bir cekirdek bunlari yanlis uygularsa normal testler yakalamaz.
+     * Bolen volatile'dan gelir; derleyici sabit katlayamaz. */
+    {
+        volatile int sifir = 0;
+        volatile int eksi_bir = -1;
+        volatile int enkucuk = (-2147483647 - 1);   /* INT_MIN */
+        unsigned int kenar = 0u;
+
+        kenar ^= (unsigned int)(y / sifir);          /* div  by 0  -> -1 */
+        kenar ^= (unsigned int)(y % sifir);          /* rem  by 0  -> y  */
+        kenar ^= (unsigned int)(enkucuk / eksi_bir); /* tasma -> INT_MIN */
+        kenar ^= (unsigned int)(enkucuk % eksi_bir); /* -> 0 */
+        s[28] = kenar;
+    }
+
+    /* --- Kaydirma miktarinin maskelenmesi ---
+     * RV32'de shamt YALNIZCA alt 5 bittir; a << 33 ile a << 1 ayni
+     * sonucu vermelidir. Maskelemeyi atlayan bir uygulama burada ayrisir. */
+    {
+        volatile unsigned int otuzuc = 33u;
+        volatile unsigned int otuziki = 32u;
+        unsigned int kaydir = 0u;
+        kaydir ^= a << (otuzuc & 31u);
+        kaydir ^= a >> (otuzuc & 31u);
+        kaydir ^= (unsigned int)(((int)a) >> (otuzuc & 31u));
+        kaydir ^= a << (otuziki & 31u);   /* 32 & 31 = 0, degismemeli */
+        s[29] = kaydir;
+    }
+
+    /* --- Gercek fonksiyon cagrilari: jal, jalr, yigin ---
+     * cekirdek_topla    -> jal
+     * cekirdek_ic_ice   -> ic ice jal + ra saklama (yigin derinligi 6)
+     * fn isaretcisi     -> jalr */
+    {
+        volatile ikili_fn fn = cekirdek_xor;
+        unsigned int cagri = 0u;
+        cagri += cekirdek_topla(a, b);
+        cagri += cekirdek_ic_ice(6u);
+        cagri += fn(a, b);
+        s[30] = cagri;
+    }
 
     /* --- Imza: tamamlandigini gosterir --- */
     s[31] = 0xC0DE0001u;

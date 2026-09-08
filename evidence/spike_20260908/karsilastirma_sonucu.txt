@@ -1,21 +1,21 @@
-Spike ham buyruk : 414
-RTL   ham buyruk : 1457
+Spike ham buyruk : 489
+RTL   ham buyruk : 1480
 hizalama PC      : 0x01000000
-Spike (hizali)   : 409
-RTL   (hizali)   : 409
+Spike (hizali)   : 484
+RTL   (hizali)   : 484
 
 ==================================================================
 KARSILASTIRMA
 ==================================================================
-  karsilastirilan buyruk : 409
+  karsilastirilan buyruk : 484
   PC uyusmazligi         : 0
   makine kodu uyusmazligi: 0
-  sikistirilmis (beklenen): 156
+  sikistirilmis (beklenen): 170
 
-SONUC: 409 buyrukta PC dizisi BIREBIR ESLESTI.
+SONUC: 484 buyrukta PC dizisi BIREBIR ESLESTI.
        Spike ISS ile RTL izleri TUR ve SIRA bakimindan ayni.
 
-       156 buyrukta makine kodu gosterimi farkli: Spike ham
+       170 buyrukta makine kodu gosterimi farkli: Spike ham
        16-bit sikistirilmis kodu, CV32E40P tracer'i ise
        ACILMIS 32-bit karsiligini raporlar. Ayni buyruk,
        farkli gosterim - PC esitligi dogru cozuldugunu kanitlar.

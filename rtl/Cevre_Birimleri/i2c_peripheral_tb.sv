@@ -216,6 +216,39 @@ module i2c_peripheral_tb;
         $display("--- I2C TEST BAŞLIYOR ---");
 
         // ---------------------------------------------------------------------
+        // TEST -1: RESET SONRASI YAZMAC DEGERLERI  (8 Eylul 2026'da eklendi)
+        //
+        // Hicbir yazmacin reset degeri denetlenmiyordu. Bir yazmac reset'te
+        // bilinmeyen (X) veya yanlis degerde kalirsa, sonraki testler ona
+        // ONCE YAZDIGI icin hatayi maskeler. Reset degeri, cipin guc
+        // verildiginde bilinen bir durumda oldugunun tek kanitidir.
+        // ---------------------------------------------------------------------
+        axil_read(8'h00, rdata);
+        check("RESET: I2C_NBY = 1 (en kucuk gecerli deger)", rdata, 32'd1);
+
+        axil_read(8'h04, rdata);
+        check("RESET: I2C_ADR = 0", rdata, 32'd0);
+
+        axil_read(8'h0C, rdata);
+        check("RESET: I2C_TDR = 0", rdata, 32'd0);
+
+        axil_read(8'h08, rdata);
+        check("RESET: I2C_RDR = 0", rdata, 32'd0);
+
+        axil_read(8'h10, rdata);
+        check("RESET: I2C_CFG = 0 (bayraklar temiz, mesgul degil)", rdata, 32'd0);
+
+        // Reset degerlerinde X/Z olmamali - $isunknown ile acikca denetlenir.
+        axil_read(8'h10, rdata);
+        if ($isunknown(rdata)) begin
+            $display("[FAIL] RESET: I2C_CFG icinde X/Z bit var: %h", rdata);
+            fail_count++;
+        end else begin
+            $display("[PASS] RESET: I2C_CFG bilinmeyen bit icermiyor");
+            pass_count++;
+        end
+
+        // ---------------------------------------------------------------------
         // TEST 0: YAZMAC DAVRANISLARI  (22 Agustos 2026'da eklendi)
         //
         // Sartname EK-2 su davranislari acikca tanimliyor ama hicbiri test
@@ -326,6 +359,58 @@ module i2c_peripheral_tb;
         check("RX Data (RDR) Dogru", rdata[15:0], 16'h3412); // LSB first, 0x12 alt bayta
         
         axil_write(8'h10, 32'h00); // Interrupt temizle
+
+        // ---------------------------------------------------------------------
+        // TEST 3: BAYRAK TEMIZLEME VE SINIR DEGERLER  (8 Eylul 2026'da eklendi)
+        //
+        // Yukarida TX_DONE ve RX_DONE bayraklarinin donanim tarafindan
+        // KURULDUGU denetleniyordu ama yazilim tarafindan TEMIZLENEBILDIGI
+        // hic denetlenmiyordu. Temizlenemeyen bir bayrak, bir sonraki
+        // islemde sahte "tamamlandi" verir ve surucu erken doner.
+        // ---------------------------------------------------------------------
+        axil_read(8'h10, rdata);
+        check("CFG: yazilim bayraklari temizleyebiliyor", rdata[3:1], 3'b000);
+
+        // --- I2C_NBY tam sinir degerleri ---
+        // Sartname 1..4 arasini tanimliyor. Yukarida 0, 1, 3, 25 denendi;
+        // 2 ve 4 (ust sinir) ile 5 (sinirin hemen ustu) denenmemisti.
+        axil_write(8'h00, 32'd2);
+        axil_read(8'h00, rdata);
+        check("I2C_NBY: 2 yazildi -> 2", rdata, 32'd2);
+
+        axil_write(8'h00, 32'd4);
+        axil_read(8'h00, rdata);
+        check("I2C_NBY: 4 yazildi -> 4 (ust sinir)", rdata, 32'd4);
+
+        axil_write(8'h00, 32'd5);
+        axil_read(8'h00, rdata);
+        check("I2C_NBY: 5 yazildi -> 4 (sinira kirpilir)", rdata, 32'd4);
+
+        axil_write(8'h00, 32'hFFFF_FFFF);
+        axil_read(8'h00, rdata);
+        check("I2C_NBY: 0xFFFFFFFF -> 4 (tasma kirpilir)", rdata, 32'd4);
+
+        // --- I2C_ADR ust bitlerin atilmasi ---
+        // Yukarida 0x7F ile [6:0] tutuldugu denetlendi; ust bitlerin
+        // gercekten ATILDIGI (sizmadigi) denetlenmemisti.
+        axil_write(8'h04, 32'hFFFF_FF80);
+        axil_read(8'h04, rdata);
+        check("I2C_ADR: ust bitler atiliyor (0xFFFFFF80 -> 0)", rdata, 32'd0);
+
+        axil_write(8'h04, 32'h0000_00AA);
+        axil_read(8'h04, rdata);
+        check("I2C_ADR: 0xAA -> 0x2A (yalnizca 7 bit)", rdata, 32'h0000_002A);
+
+        // --- I2C_TDR tam genislik ---
+        // Yukarida 0x12345678 yazildi; tum bitlerin 1 oldugu durum
+        // denenmemisti (bit sizmasi/kirpma bu desende gorunur).
+        axil_write(8'h0C, 32'hFFFF_FFFF);
+        axil_read(8'h0C, rdata);
+        check("I2C_TDR: 0xFFFFFFFF tam genislik korunuyor", rdata, 32'hFFFF_FFFF);
+
+        axil_write(8'h0C, 32'hA5A5_5A5A);
+        axil_read(8'h0C, rdata);
+        check("I2C_TDR: 0xA5A55A5A desen korunuyor", rdata, 32'hA5A5_5A5A);
 
         // =====================================================================
         // Sartname s.615: testler manuel inceleme gerektirmeden kendi kendini

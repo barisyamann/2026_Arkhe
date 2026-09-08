@@ -107,6 +107,27 @@ package axil_uvm_pkg;
         static int unsigned yazma_sayisi;
         static int unsigned hatali_yanit;
 
+        // -------------------------------------------------------------------
+        // SINYAL DUZEYI KARARLILIK SAYACLARI (8 Eylul 2026'da eklendi)
+        //
+        // Islem duzeyi denetimi yalnizca TAMAMLANMIS islemlere bakar; bir
+        // islem tamamlanirken protokolu ihlal etse bile orada gorunmez.
+        // AXI4-Lite spesifikasyonu (ARM IHI0022, A3.2.1) sunu sart kosar:
+        //
+        //   "Once VALID yukseldiginde, READY gelene kadar dusurulemez ve
+        //    bilgi sinyalleri (ADDR/DATA/STRB) degistirilemez."
+        //
+        // Bu sayaclar el sikisma oncesi geri cekilme ve adres/veri kaymasi
+        // hatalarini yakalar. Ikisi de islem SAYISINI bozmadan VERIYI bozan
+        // hatalardir, dolayisiyla mevcut denetimlerin koru noktasidir.
+        // -------------------------------------------------------------------
+        static int unsigned ar_kararsiz;
+        static int unsigned aw_kararsiz;
+        static int unsigned w_kararsiz;
+        static int unsigned r_kararsiz;
+        static int unsigned b_kararsiz;
+        static int unsigned x_bilinmeyen;
+
         function new(string name, uvm_component parent);
             super.new(name, parent);
             ap = new("ap", this);
@@ -122,7 +143,139 @@ package axil_uvm_pkg;
             fork
                 okuma_izle();
                 yazma_izle();
+                kararlilik_izle();
             join
+        endtask
+
+        // -------------------------------------------------------------------
+        // AXI4-Lite el sikisma kararliligi (ARM IHI0022 A3.2.1)
+        //
+        // Her kanal icin kural: VALID yuksek ve READY dusukken, BIR SONRAKI
+        // cevrimde VALID hala yuksek olmali ve bilgi sinyalleri AYNI
+        // kalmalidir. Ayrica el sikisan cevrimde hicbir bilgi sinyali X/Z
+        // olmamalidir - sentez sonrasi netlistte veya eksik reset'te
+        // bilinmeyen deger tasinabilir ve islem duzeyi bunu gormez.
+        // -------------------------------------------------------------------
+        task kararlilik_izle();
+            bit        ar_bekle, aw_bekle, w_bekle, r_bekle, b_bekle;
+            bit [31:0] ar_adr, aw_adr, w_veri, r_veri;
+            bit [3:0]  w_strb;
+            bit [1:0]  r_yanit, b_yanit;
+
+            ar_bekle = 1'b0; aw_bekle = 1'b0; w_bekle = 1'b0;
+            r_bekle  = 1'b0; b_bekle  = 1'b0;
+
+            forever begin
+                @(posedge vif.clk);
+                if (!vif.rst_n) begin
+                    ar_bekle = 1'b0; aw_bekle = 1'b0; w_bekle = 1'b0;
+                    r_bekle  = 1'b0; b_bekle  = 1'b0;
+                    continue;
+                end
+
+                // --- AR kanali ---
+                if (ar_bekle) begin
+                    if (!vif.arvalid) begin
+                        ar_kararsiz++;
+                        `uvm_error(get_type_name(),
+                            "AR: arready gelmeden arvalid dusuruldu")
+                    end
+                    else if (vif.araddr !== ar_adr) begin
+                        ar_kararsiz++;
+                        `uvm_error(get_type_name(), $sformatf(
+                            "AR: el sikismadan once araddr degisti 0x%08h -> 0x%08h",
+                            ar_adr, vif.araddr))
+                    end
+                end
+                ar_bekle = vif.arvalid && !vif.arready;
+                if (ar_bekle) ar_adr = vif.araddr;
+
+                // --- AW kanali ---
+                if (aw_bekle) begin
+                    if (!vif.awvalid) begin
+                        aw_kararsiz++;
+                        `uvm_error(get_type_name(),
+                            "AW: awready gelmeden awvalid dusuruldu")
+                    end
+                    else if (vif.awaddr !== aw_adr) begin
+                        aw_kararsiz++;
+                        `uvm_error(get_type_name(), $sformatf(
+                            "AW: el sikismadan once awaddr degisti 0x%08h -> 0x%08h",
+                            aw_adr, vif.awaddr))
+                    end
+                end
+                aw_bekle = vif.awvalid && !vif.awready;
+                if (aw_bekle) aw_adr = vif.awaddr;
+
+                // --- W kanali ---
+                if (w_bekle) begin
+                    if (!vif.wvalid) begin
+                        w_kararsiz++;
+                        `uvm_error(get_type_name(),
+                            "W: wready gelmeden wvalid dusuruldu")
+                    end
+                    else if (vif.wdata !== w_veri || vif.wstrb !== w_strb) begin
+                        w_kararsiz++;
+                        `uvm_error(get_type_name(),
+                            "W: el sikismadan once wdata/wstrb degisti")
+                    end
+                end
+                w_bekle = vif.wvalid && !vif.wready;
+                if (w_bekle) begin
+                    w_veri = vif.wdata;
+                    w_strb = vif.wstrb;
+                end
+
+                // --- R kanali (slave -> master) ---
+                if (r_bekle) begin
+                    if (!vif.rvalid) begin
+                        r_kararsiz++;
+                        `uvm_error(get_type_name(),
+                            "R: rready gelmeden rvalid dusuruldu")
+                    end
+                    else if (vif.rdata !== r_veri || vif.rresp !== r_yanit) begin
+                        r_kararsiz++;
+                        `uvm_error(get_type_name(),
+                            "R: el sikismadan once rdata/rresp degisti")
+                    end
+                end
+                r_bekle = vif.rvalid && !vif.rready;
+                if (r_bekle) begin
+                    r_veri  = vif.rdata;
+                    r_yanit = vif.rresp;
+                end
+
+                // --- B kanali ---
+                if (b_bekle) begin
+                    if (!vif.bvalid) begin
+                        b_kararsiz++;
+                        `uvm_error(get_type_name(),
+                            "B: bready gelmeden bvalid dusuruldu")
+                    end
+                    else if (vif.bresp !== b_yanit) begin
+                        b_kararsiz++;
+                        `uvm_error(get_type_name(),
+                            "B: el sikismadan once bresp degisti")
+                    end
+                end
+                b_bekle = vif.bvalid && !vif.bready;
+                if (b_bekle) b_yanit = vif.bresp;
+
+                // --- El sikisan cevrimlerde X/Z denetimi ---
+                if (vif.arvalid && vif.arready && $isunknown(vif.araddr)) begin
+                    x_bilinmeyen++;
+                    `uvm_error(get_type_name(), "AR el sikismasinda araddr X/Z")
+                end
+                if (vif.wvalid && vif.wready &&
+                    ($isunknown(vif.wdata) || $isunknown(vif.wstrb))) begin
+                    x_bilinmeyen++;
+                    `uvm_error(get_type_name(), "W el sikismasinda wdata/wstrb X/Z")
+                end
+                if (vif.rvalid && vif.rready && $isunknown(vif.rresp)) begin
+                    x_bilinmeyen++;
+                    `uvm_error(get_type_name(), "R el sikismasinda rresp X/Z")
+                end
+            end
         endtask
 
         // --- Okuma kanali: AR el sikismasi -> R el sikismasi ---
@@ -551,6 +704,36 @@ package axil_uvm_pkg;
             $display("  [HATA] sayim tutarsiz: okuma=%0d yazma=%0d toplam=%0d",
                      axil_scoreboard::okuma_sayisi, axil_scoreboard::yazma_sayisi,
                      axil_scoreboard::toplam);
+
+        // -----------------------------------------------------------------
+        // Sinyal duzeyi kararlilik denetimleri (ARM IHI0022 A3.2.1)
+        // -----------------------------------------------------------------
+        if (axil_monitor::ar_kararsiz + axil_monitor::aw_kararsiz +
+            axil_monitor::w_kararsiz == 0)
+            $display("  [OK]   master kanallari kararli (AR/AW/W: VALID dusmedi, bilgi degismedi)");
+        else begin
+            $display("  [HATA] master kanal kararsizligi: AR=%0d AW=%0d W=%0d",
+                     axil_monitor::ar_kararsiz, axil_monitor::aw_kararsiz,
+                     axil_monitor::w_kararsiz);
+            ihlal += axil_monitor::ar_kararsiz + axil_monitor::aw_kararsiz +
+                     axil_monitor::w_kararsiz;
+        end
+
+        if (axil_monitor::r_kararsiz + axil_monitor::b_kararsiz == 0)
+            $display("  [OK]   slave kanallari kararli (R/B: VALID dusmedi, yanit degismedi)");
+        else begin
+            $display("  [HATA] slave kanal kararsizligi: R=%0d B=%0d",
+                     axil_monitor::r_kararsiz, axil_monitor::b_kararsiz);
+            ihlal += axil_monitor::r_kararsiz + axil_monitor::b_kararsiz;
+        end
+
+        if (axil_monitor::x_bilinmeyen == 0)
+            $display("  [OK]   el sikisan cevrimlerde X/Z bilinmeyen deger yok");
+        else begin
+            $display("  [HATA] %0d el sikismada X/Z deger",
+                     axil_monitor::x_bilinmeyen);
+            ihlal += axil_monitor::x_bilinmeyen;
+        end
 
         $display("  bilgi  : kismi yazma=%0d  en uzun islem=%0d ns",
                  axil_scoreboard::kismi_yazma, axil_scoreboard::en_uzun_ns);
