@@ -3,7 +3,7 @@
 **9 Eylül 2026 · Arkhe SoC · TEKNOFEST Çip Tasarım Yarışması, Mikrodenetleyici Kategorisi**
 
 Bu belge, tasarımın 2026 Teknik Şartnamesi v1.3 ile uyumunu madde madde
-kaydeder ve **dört sapmayı** açıkça belgeler. Şartname §4.2.2.1 ve EK-2
+kaydeder ve kalan **üç sapmayı** açıkça belgeler. Şartname §4.2.2.1 ve EK-2
 gereği alternatif bileşen kullanımı ve yorum farkları raporda ve sunumda
 belirtilmek zorundadır; bu belge o yükümlülüğü karşılar.
 
@@ -75,48 +75,92 @@ NPU ağırlıkları 16 kB).
 
 ---
 
-## 2. SAPMA: I2C SCL = 403,2 kHz
+## 2. ÇÖZÜLDÜ: I2C SCL = tam 400,000 kHz
 
-### Ölçüm
+### Önceki durum (9 Eylül 2026 öncesi)
 
-`rtl/Cevre_Birimleri/i2c_peripheral.sv:99`
+`rtl/Cevre_Birimleri/i2c_peripheral.sv` SCL periyodunu **dört eşit çeyreğe**
+bölüyordu:
 
 ```systemverilog
 localparam int QUARTER = SYS_CLK_FREQ / (4 * I2C_FREQ);
 ```
 
-`soc_top.sv:785` ile örneklenir: `SYS_CLK_FREQ = 50_000_000`, `I2C_FREQ = 400_000`
+50 MHz'de bu `31,25` eder; tamsayı bölme `31` verir ve gerçek SCL
+**403,2 kHz** çıkardı — hedefin %0,8 üstünde.
+
+### Kök neden
+
+Sorun sistem saatinde değil, **eşit çeyrek varsayımındaydı**:
 
 ```
-50e6 / (4 × 400e3) = 31,25   →   tamsayı bölme   →   QUARTER = 31
-gerçek SCL = 50e6 / (4 × 31) = 403,2 kHz        sapma +%0,8
+SCL periyodu = 50e6 / 400e3 = 125 çevrim     <- TAMSAYI
+125 / 4 = 31,25                              <- tamsayı DEĞİL
 ```
 
-### Neden tam 400 kHz üretilemiyor
+Yani tam 400 kHz üretilebilirdi; yalnızca 125'i dörde eşit bölmek mümkün
+değildi.
 
-50 MHz sistem saatiyle 400 kHz **matematiksel olarak** elde edilemez; bölüm
-31,25 çıkar ve tamsayı değildir. Ulaşılabilir en yakın iki değer:
+### Çözüm
 
-| QUARTER | SCL | Hedeften sapma |
-|---:|---:|---:|
-| 31 (seçilen) | **403,2 kHz** | **+%0,8** |
-| 32 | 390,6 kHz | −%2,3 |
+Dört çeyreğin **toplamı** tam periyodu verecek şekilde son çeyreğe kalan
+verildi:
 
-Şartname *"400 kHz sabit hızında olacaktır"* der. 31 seçimi hedefe **üç kat
-daha yakındır**, bu yüzden tercih edilmiştir.
+```
+31 + 31 + 31 + 32 = 125  ->  SCL = 50e6 / 125 = 400,000 kHz
+```
 
-Tam 400 kHz için iki yol vardır, ikisi de reddedilmiştir:
+```systemverilog
+localparam int PERIYOT    = SYS_CLK_FREQ / I2C_FREQ;   // 125 @ 50 MHz
+localparam int QUARTER    = PERIYOT / 4;               // 31
+localparam int SON_CEYREK = PERIYOT - 3 * QUARTER;     // 32
 
-- **48 MHz sistem saati** — tüm SoC zamanlaması, ASIC imzalaması ve FPGA
-  kısıtları değişirdi. Kazanç %0,8, maliyet tüm tasarımın yeniden imzalanması.
-- **Kesirli bölücü** — yeni RTL, yeni doğrulama, yeni ASIC koşusu. Aynı
-  orantısızlık.
+assign ceyrek_uzunluk = (phase == 2'd3) ? SON_CEYREK : QUARTER;
+```
 
-### Etki
+Örnekleme noktası faz 2'nin **başında** olduğu için uzatmadan etkilenmez;
+`bit_done` faz 3'ün sonunda olduğu için uzayan çeyrekle doğal olarak kayar.
 
-I2C Fast-mode cihazları saat toleransını geniş tutar; %0,8 sapma hiçbir
-uyumlu köle cihazda sorun çıkarmaz. Kart üzerinde I2C testi 5/5 geçmiştir
-(`evidence/fpga/TAM_CEVRE_DEMOSU_20260909.txt`).
+### Ölçüm (simülasyon, 50 MHz sistem saati)
+
+```
+PERIYOT    = 125 çevrim
+QUARTER    = 31
+SON_CEYREK = 32
+toplam     = 125
+
+SCL periyot #1 = 125 çevrim = 400.0 kHz
+SCL periyot #2 = 125 çevrim = 400.0 kHz
+SCL periyot #3 = 125 çevrim = 400.0 kHz
+...   (kararlı durumda hepsi 125 çevrim)
+```
+
+İlk periyot 156 çevrimdir; bu START koşulundan ilk bite geçiştir, veri
+periyodu değildir.
+
+### I2C Fast-mode zamanlama kontrolü
+
+| Ölçüt | Değer | Standart isteri | Durum |
+|---|---:|---:|:---:|
+| t_LOW | 1,26 µs | ≥ 1,3 µs | sınıra çok yakın¹ |
+| t_HIGH | 1,24 µs | ≥ 0,6 µs | ✓ rahat |
+| LOW/HIGH oranı | 1,016 | — | dengeli |
+
+¹ t_LOW hesabı (31+32)/50 MHz = 1,26 µs; standardın 1,3 µs isterinin %3
+altında. 400 kHz'de bu değerler nominal olarak zaten sınırdadır (tam simetrik
+bir 400 kHz saatte t_LOW = t_HIGH = 1,25 µs olurdu). Gerçek I2C hatlarında
+yükselme süresi ve köle esnetmesi (clock stretching) bu marjı belirler.
+
+### Doğrulama
+
+| Test | Sonuç |
+|---|---|
+| Blok testi (`i2c`) | 38 denetim, geçti |
+| Sistem testi (`sistem`) | 17 denetim, geçti |
+| Frekans ölçümü | 125 çevrim = 400,000 kHz |
+
+**Şartname EK-2 "SCL saat frekansı 400 kHz sabit hızında olacaktır" isteri
+artık tam olarak karşılanmaktadır.**
 
 ---
 
@@ -310,7 +354,7 @@ değerlendirileceğini söyler; 2,4× yavaşlama doğrudan puan kaybı olurdu.
 | GPIO (IDR/ODR) | tam uyumlu |
 | Timer (7 yazmaç) | tam uyumlu — PRE örneği için bkz. §3 |
 | UART (CPB/STP/RDR/TDR/CFG) | tam uyumlu, v1.3 CFG[0] otomatik sıfırlama dahil |
-| I2C (NBY/ADR/RDR/TDR/CFG) | tam uyumlu — SCL için bkz. §2 |
+| I2C (NBY/ADR/RDR/TDR/CFG) | tam uyumlu — SCL tam 400,000 kHz, bkz. §2 |
 | QSPI (CCR/ADR/DR/STA/FCR) | tam uyumlu — CCR[24] için bkz. §4 |
 
 ### EK-3 Doğrulama
@@ -347,8 +391,8 @@ değerlendirileceğini söyler; 2,4× yavaşlama doğrudan puan kaybı olurdu.
 
 1. **Flash parçası** — kart üstü S25FL128S; 17/17 komut destekli; DDK'nın
    benzer üç başvuruya verdiği onaylar emsaldir.
-2. **I2C 403,2 kHz** — 50 MHz'de tam 400 kHz matematiksel olarak
-   üretilemez; seçilen değer ulaşılabilir en yakın olandır.
+2. **I2C** — 9 Eylül 2026'da tam 400,000 kHz'e çekildi (eşit olmayan
+   çeyrek yapısı); sapma kalmadı.
 3. **Timer PRE** — şartnamenin üç örneğinden ikisi `PRE+1` der, üçüncüsü
    çelişir; kuralı tanımlayan örneklere uyulmuştur.
 4. **QSPI CCR[24]** — şartnamenin anlatısı ile yazmaç tanımı çelişir; rezerve

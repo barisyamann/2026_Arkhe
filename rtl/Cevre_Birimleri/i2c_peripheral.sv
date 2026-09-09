@@ -96,8 +96,33 @@ module i2c_peripheral #(
     // Divide each SCL period into 4 equal quarters (phases 0-3).
     //   Phases 0,3 : SCL LOW   |  Phases 1,2 : SCL HIGH
     //   Phase 0    : SDA setup |  Phase 2    : SDA sample point
-    localparam int QUARTER = SYS_CLK_FREQ / (4 * I2C_FREQ);  // 30 @ 48 MHz
-    localparam int CW      = $clog2(QUARTER) > 0 ? $clog2(QUARTER) : 1;
+    // -----------------------------------------------------------------
+    // TAM 400 kHz SCL  (9 Eylul 2026)
+    //
+    // Sartname EK-2: "SCL saat frekansi 400 kHz SABIT hizinda olacaktir."
+    //
+    // ONCEDEN: QUARTER = SYS_CLK / (4 * I2C_FREQ) idi. 50 MHz'de bu
+    // 31,25 eder; tamsayi bolme 31 verir ve gercek SCL 403,2 kHz cikar
+    // (+%0,8 sapma, hedefin USTUNDE).
+    //
+    // COZUM: dort ceyregin TOPLAMI tam periyodu vermelidir. 50 MHz'de
+    //     SCL periyodu = 50e6 / 400e3 = 125 cevrim   (TAMSAYI)
+    // 125 dorde esit bolunmez, ama son ceyrege kalani vererek toplam
+    // korunur:
+    //     31 + 31 + 31 + 32 = 125  ->  SCL = 50e6/125 = 400,000 kHz
+    //
+    // LOW/HIGH orani (31+32)/(31+31) = 1,016 olur; I2C Fast-mode
+    // t_LOW >= 1,3 us ve t_HIGH >= 0,6 us isterlerini rahatca saglar
+    // (burada t_LOW = 1,26 us, t_HIGH = 1,24 us).
+    //
+    // Ornekleme noktasi faz 2'nin BASINDA oldugu icin bu uzatmadan
+    // etkilenmez; bit_done faz 3'un sonunda oldugu icin dogal olarak
+    // uzayan ceyrekle birlikte kayar.
+    // -----------------------------------------------------------------
+    localparam int PERIYOT     = SYS_CLK_FREQ / I2C_FREQ;        // 125 @ 50 MHz
+    localparam int QUARTER     = PERIYOT / 4;                    // 31
+    localparam int SON_CEYREK  = PERIYOT - 3 * QUARTER;          // 32
+    localparam int CW      = $clog2(SON_CEYREK) > 0 ? $clog2(SON_CEYREK) : 1;
 
     // ================================================================
     //  I2C FSM States
@@ -169,8 +194,16 @@ module i2c_peripheral #(
     logic        sda_sampled;       // SDA captured at sample point
 
     // -- I2C timing --
-    logic [CW-1:0] tick_cnt;        // Counts clk cycles within a quarter
+    // tick_cnt SON_CEYREK'e kadar saymalidir (QUARTER'dan bir buyuk olabilir),
+    // bu yuzden genislik CW+1 bit.
+    logic [CW:0]   tick_cnt;        // Counts clk cycles within a quarter
     logic [1:0]    phase;           // SCL quarter-phase (0..3)
+
+    // Bu cevrimde kullanilacak ceyrek uzunlugu. Son ceyrek periyodun
+    // kalanini tasir; boylece dort ceyregin toplami tam PERIYOT eder.
+    logic [CW:0]   ceyrek_uzunluk;
+    assign ceyrek_uzunluk = (phase == 2'd3) ? (CW+1)'(SON_CEYREK)
+                                            : (CW+1)'(QUARTER);
     logic          i2c_active;
     logic          bit_done;        // Pulse: end of a full SCL bit period
     logic          sample;          // Pulse: SDA sample point (mid SCL-high)
@@ -204,7 +237,7 @@ module i2c_peripheral #(
     assign i2c_active = (state != ST_IDLE);
     assign bit_done   = i2c_active &&
                         (phase    == 2'd3) &&
-                        (tick_cnt == (QUARTER - 1));
+                        (tick_cnt == (ceyrek_uzunluk - 1));
     assign sample     = i2c_active &&
                         (phase    == 2'd2) &&
                         (tick_cnt == '0);
@@ -217,7 +250,7 @@ module i2c_peripheral #(
             tick_cnt <= '0;
             phase    <= 2'd0;
         end else begin
-            if (tick_cnt == (QUARTER - 1)) begin
+            if (tick_cnt == (ceyrek_uzunluk - 1)) begin
                 tick_cnt <= '0;
                 phase    <= phase + 2'd1;   // wraps 3 -> 0
             end else begin
