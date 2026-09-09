@@ -311,6 +311,41 @@ def main():
         hex_dest=BUILD_DIR / "fpga_demo.hex",
     )
 
+    # -------------------------------------------------------------------------
+    # NPU VE ETKILESIMLI DEMO - npu_demo.hex   (9 Eylul 2026)
+    #
+    # NPU'yu kart uzerinde, tb/npu_golden/ ile AYNI altin vektorle kosturur
+    # ve ayni beklenen degerlerle karsilastirir: sinif 3 (NO), olasiliklar
+    # [0, 225, 326, 3543]. "RTL'de gecti" degil "silikonda da ayni" demis
+    # oluruz.
+    #
+    # Ayrica anahtar/LED uzerinden etkilesimli kip sunar; juri anahtarlari
+    # cevirerek sistemi canli surebilir. Bilgisayar gerekmez.
+    # -------------------------------------------------------------------------
+    build_image(
+        gcc, objcopy, size,
+        name="npu_demo",
+        c_sources=[SRC_DIR / "npu_demo.c"],
+        asm_sources=[SRC_DIR / "crt0.S"],
+        linker_script=LINK_DIR / "app.ld",
+        image_bytes=APP_IMAGE_BYTES,
+        hex_dest=BUILD_DIR / "npu_demo.hex",
+    )
+
+    # UART_MIN - en kucuk olasi test (9 Eylul 2026)
+    # npu_demo hic cikti vermedi; bu imaj yalnizca UART'a yazar, baska
+    # hicbir cevre birimine dokunmaz. "UART tek basina calisiyor mu"
+    # sorusunu ayirmak icin.
+    build_image(
+        gcc, objcopy, size,
+        name="uart_min",
+        c_sources=[SRC_DIR / "uart_min.c"],
+        asm_sources=[SRC_DIR / "crt0.S"],
+        linker_script=LINK_DIR / "app.ld",
+        image_bytes=APP_IMAGE_BYTES,
+        hex_dest=BUILD_DIR / "uart_min.hex",
+    )
+
     copied = deploy_to_sim(APP_HEX_DEST)
 
     print("\n=== OZET ===")

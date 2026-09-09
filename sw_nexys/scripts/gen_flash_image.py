@@ -113,6 +113,17 @@ def main():
     else:
         print("UYARI: fpga_demo.hex yok, flash_fpga_demo.hex uretilmedi")
 
+    # NPU ve etkilesimli demo - agirliklar ZORUNLU (0x802000'de)
+    npud = APP_HEX.parent / "npu_demo.hex"
+    if npud.is_file():
+        uret(npud, DEST.parent / "flash_npu_demo.hex", "flash_npu")
+    else:
+        print("UYARI: npu_demo.hex yok, flash_npu_demo.hex uretilmedi")
+
+    umin = APP_HEX.parent / "uart_min.hex"
+    if umin.is_file():
+        uret(umin, DEST.parent / "flash_uart_min.hex", "flash_umin")
+
     core_test = APP_HEX.parent / "core_test.hex"
     if core_test.is_file():
         uret(core_test, DEST.parent / "flash_core_test.hex", "flash_core")

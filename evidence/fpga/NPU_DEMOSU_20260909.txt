@@ -1,0 +1,261 @@
+ARKHE SoC - NPU VE ETKILESIMLI DEMO - KART UZERI KOSU KAYDI
+9 Eylul 2026, Nexys A7-100T, 115200 8N1
+
+Bitstream : fpga/nexys_demo_20260908/bitstream/nexys_top.bit
+Firmware  : sw_nexys/src/npu_demo.c
+Flash     : sw_nexys/build/flash_npu_demo.bin @ 0x00800000
+            (uygulama 0x800000, FC agirliklari 0x802000)
+
+SONUC: 15 denetim, 15 gecti, 0 kaldi   (uc ardisik turda ayni)
+
+================================================================
+BU DEMONUN ASIL DEGERI
+================================================================
+
+tb/npu_golden/ altindaki deterministik test RTL SIMULASYONUNDA su
+girdiyle kosturulur:
+
+    q[i] = ((37*i + 13) mod 256) - 128        i = 0 .. 1959
+
+Bu demo AYNI vektoru FPGA uzerinde kosturur ve AYNI beklenen
+degerlerle karsilastirir:
+
+    olasiliklar Q0.12 = [0, 225, 326, 3543]     BIREBIR AYNI
+    sinif             = 3 (NO)                   BIREBIR AYNI
+
+Yani "RTL'de gecti" degil, "silikonda da ayni sonucu veriyor"
+diyebiliyoruz. Girdi vektoru formulle uretiliyor; formulun
+test_input_pattern.mem ile birebir ayni 490 kelimeyi urettigi
+once dogrulandi, boylece 2 kB'lik tablo imaja gomulmedi.
+
+================================================================
+AGIRLIK ZINCIRI KART UZERINDE KANITLANDI
+================================================================
+
+SRAM ucucudur; uretilmis cipte guc verildiginde TCM BOSTUR.
+Agirliklarin kalici kaynagi flash olmak zorundadir. Zincir:
+
+    flash 0x802000  ->  bootloader (bootloader.S:146-152)
+                    ->  TCM 0x20013800 (kelime 3584)
+                    ->  NPU compute engine
+
+Kart uzerinde olculen:
+    NPU STATUS = 0x00000008   ->  WEIGHTS_READY biti kurulu
+    ilk kelime = 0x060804FF   ->  fc_weights_packed32.mem ile ayni
+    sifir olmayan kelime = 4000 / 4000
+
+Agirliklar yuklenmezse FC toplayicisi bias'a esit kalir ve NPU HER
+girdiye ayni cevabi verir - main.c:394-397'de yasanmis gercek kusur.
+Bu bolum o kusurun tekrarlanmadigini her acilista dogrular.
+
+================================================================
+BULUNAN VE KAPATILAN KUSURLAR
+================================================================
+
+1) UART CFG YAZMACI YANLIS ADRESTE            [BENIM KOD HATAM]
+   U1_CFG icin UART1_BASE + 0x00 kullanilmisti; dogrusu + 0x10
+   (uart_peripheral.sv:13). Yanlis yazmac yoklandigi icin "iletim
+   tamamlandi" biti (bit 2) hicbir zaman kurulmuyor ve uart_putc
+   ILK KARAKTERDE sonsuza kadar donuyordu.
+
+   BELIRTI: kart hicbir sey yazmiyor, hicbir hata da vermiyor.
+   Tam sessizlik - en zor teshis edilen ariza bicimi.
+
+   Kok neden iki uart_putc'nin MAKINE KODU karsilastirilarak
+   bulundu: calisan fpga_demo 0x40020010, sessiz npu_demo
+   0x40020000 yokluyordu.
+
+2) CIKIS OLASILIKLARI YANLIS ADRESTEN OKUNDU  [BELGE HATASI]
+   main.c:401 "cikis olasiliklari 0..3 (out_addr = 0)" diyordu.
+   YANLIS: npu_csr.sv:143 reg_out_addr'i 0x1DAC = 7596 ile
+   ilklendirir ve main.c REG_OUT_ADDR'a HIC YAZMAZ - yani donanim
+   varsayilani gecerlidir.
+
+   O yoruma guvenilip TCM[0..3] okundu; okunan sey girdi tensorunun
+   ilk dort kelimesiydi: [4749, 1569, 6837, 3657]. Bunlarin Q0.12
+   sinirini (0-4095) asmasi ve toplamlarinin 4096 yerine 16812
+   olmasi yanlisligi ele verdi.
+
+   Dogru adres TCM[7596..7599] kullanilinca altin referansla
+   birebir eslesti. main.c'deki yaniltici yorum da duzeltildi.
+
+   Ayrica adresler artik VARSAYIMA BIRAKILMIYOR: her kosuda
+   REG_IN_ADDR ve REG_OUT_ADDR acikca yaziliyor.
+
+3) TOPLAM DENETIMI 4096 BEKLIYORDU           [BENIM TEST HATAM]
+   Eklenen butunluk denetimi olasiliklarin toplaminin tam 4096
+   olmasini bekliyordu; kart 4094 verdi. Denetim yanlisti:
+   softmax bolmesi TAMSAYIDIR (prob = exp * 4096 / sum_exp) ve her
+   sinifta asagi yuvarlanir. Altin referansin kendisi de 4094
+   verir: 0 + 225 + 326 + 3543 = 4094. Denetim 4090-4096 araligina
+   cevrildi.
+
+4) GPIO MOD KODLAMASI                         [BENIM KOD HATAM]
+   GPIO_MODE'a 0xFFFFFFFF yazilmisti; mod alani pin basina IKI
+   bittir (gpio_peripheral.sv:158) ve cikis kipi 0x55555555'tir.
+
+================================================================
+ETKILESIMLI KIP
+================================================================
+
+Anahtarlar GPIO girisine, LED'ler GPIO cikisina dogrudan baglidir
+(nexys_top.sv:177-178  SW -> gpio_i, LED -> gpio_o). Buton eklemek
+yeniden sentez gerektirdigi icin zaten bagli olan 16 anahtar
+kullanildi. Her anahtar degisimi UART'a da yazilir.
+
+    SW[0] ac -> NPU cikarimi kosar, sinif LED[1:0]'da
+    SW[1] ac -> olasilik[3] LED barinda
+    SW[2] ac -> sayac LED'lerde akar (sistem canli)
+    SW[3] ac -> anahtar deseni LED'lere yansir
+    hicbiri  -> yuruyen isik
+
+================================================================
+OLCULEN CIKARIM SURESI
+================================================================
+
+  152332 cevrim  =  yaklasik 3046 us @ 50 MHz
+
+Bu sure TCM'e 490 kelime yazmayi da icerir; saf cikarim daha
+kisadir. Uc ardisik kosuda 152307-152332 arasinda kaldi.
+
+================================================================
+KART CIKTISI (ilk tur)
+================================================================
+
+[ACILIS] npu_demo calisiyor
+
+================================================
+
+ ARKHE SoC - NPU VE ETKILESIMLI DEMO
+
+ TEKNOFEST 2026 - Takim Arkhe
+
+================================================
+
+
+
+--- 1. NPU agirliklari (flash -> TCM) ---
+
+  bilgi  NPU STATUS = 0x00000008
+
+  [OK]   donanim WEIGHTS_READY bayragi kurulu
+
+  bilgi  TCM taraniyor...
+
+  bilgi  agirlik bolgesi TCM[3584..7583]
+
+  bilgi  ilk kelime = 0x060804FF
+
+  bilgi  sifir olmayan kelime = 4000 / 4000
+
+  [OK]   agirliklar TCM'e yuklenmis
+
+  [OK]   ilk agirlik kelimesi beklenen deger
+
+
+
+--- 2. NPU cikarimi (altin vektor) ---
+
+  bilgi  girdi: q[i] = ((37*i + 13) mod 256) - 128
+
+  bilgi  1960 int8 = 490 kelime -> TCM[0..489]
+
+  [OK]   NPU cikarimi tamamlandi
+
+  [OK]   NPU artik mesgul degil
+
+  bilgi  olasiliklar Q0.12 = [0, 225, 326, 3543]
+
+  bilgi  sinif = 3   (0=SILENCE 1=UNKNOWN 2=YES 3=NO)
+
+  [OK]   sinif altin referansla ayni (3=NO)
+
+  bilgi  olasilik toplami = 4094  (tamsayi yuvarlama ile 4090-4096)
+
+  [OK]   olasiliklar butunluklu (toplam ~4096)
+
+  [OK]   olasilik[0] altin ile ayni
+
+  [OK]   olasilik[1] altin ile ayni
+
+  [OK]   olasilik[2] altin ile ayni
+
+  [OK]   olasilik[3] altin ile ayni
+
+  bilgi  ayni vektor RTL simulasyonunda da sinif 3 verir
+
+         (tb/npu_golden/tb_npu_golden.sv:135)
+
+
+
+--- 3. Tekrarlanabilirlik ---
+
+  bilgi  kosu 1 -> sinif 3
+
+  bilgi  kosu 2 -> sinif 3
+
+  bilgi  kosu 3 -> sinif 3
+
+  [OK]   uc kosu da ayni sonucu verdi
+
+  [OK]   sonuc yine 3 (NO)
+
+
+
+--- 4. Cikarim suresi ---
+
+  bilgi  olculen cevrim = 152332
+
+  bilgi  yaklasik 3046 us @ 50 MHz
+
+         (TCM'e yazma dahil; saf cikarim daha kisa)
+
+  [OK]   sure olculebildi
+
+
+
+--- 5. Etkilesimli kip (anahtarlar + LED'ler) ---
+
+  SW[0] -> NPU kosar, sinif LED[1:0]
+
+  SW[1] -> olasilik[3] LED barinda
+
+  SW[2] -> sayac LED'lerde akar
+
+  SW[3] -> anahtarlar LED'lere yansir
+
+  bos   -> yuruyen isik
+
+  bilgi  anahtarlari cevirin, degisim buraya yazilir
+
+
+
+  anahtar = 0x00000000  ->  yuruyen isik
+
+
+
+  bilgi  etkilesimli kip suresi doldu
+
+  [OK]   anahtarlar okunabildi
+
+
+
+================================================
+
+ SONUC: 15 gecti, 0 kaldi
+
+ NPU SILIKONDA ALTIN REFERANSLA AYNI
+
+================================================
+
+================================================================
+YENIDEN URETIM
+================================================================
+  cd sw_nexys
+  python scripts/build.py
+  python scripts/gen_flash_image.py
+  python -c "import struct; w=[l.strip() for l in open('build/flash_npu_demo.hex') if l.strip()]; open('build/flash_npu_demo.bin','wb').write(b''.join(struct.pack('<I',int(x,16)) for x in w))"
+  vivado -mode batch -source fpga/nexys_demo_20260908/firmware/build/gen_mcs_npu_demo.tcl
+  -> sw_nexys/build/arkhe_npu_demo.mcs  (QSPI'ye yazilir, PROG'a basilir)
+
+MCS 10 MB oldugu icin depoya alinmadi; .bit ve .bin'den uretilir.

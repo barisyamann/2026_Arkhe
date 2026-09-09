@@ -398,10 +398,24 @@ int main(void)
         //
         // TCM YERLESIMI (7680 kelime):
         //     0    ..  489   girdi tensoru (DMA buraya yazar)
-        //     0    ..    3   cikis olasiliklari (out_addr = 0)
         //     490  .. 3583   serbest
         //     3584 .. 7583   FC AGIRLIKLARI - DOKUNULMAZ
-        //     7584 .. 7679   serbest
+        //     7596 .. 7599   cikis olasiliklari
+        //     kalan          serbest
+        //
+        // 9 Eylul 2026 DUZELTMESI: bu tablo eskiden "0..3 cikis
+        // olasiliklari (out_addr = 0)" diyordu; YANLISTI. npu_csr.sv:143
+        // reg_out_addr'i 0x1DAC = 7596 ile ilklendirir ve bu dosya
+        // REG_OUT_ADDR'a (0x4006000C) HIC YAZMAZ - yani donanim
+        // varsayilani gecerlidir, cikis TCM'in basina degil 7596'ya
+        // yazilir.
+        //
+        // Buradaki kod etkilenmiyor cunku sonucu NPU_REG_CLASS
+        // yazmacindan okuyor. Ama yorum yaniltiyordu: npu_demo.c
+        // yazilirken bu satira guvenilip TCM[0..3] okundu ve girdi
+        // tensorunun ilk dort kelimesi olasilik sanildi
+        // ([4749, 1569, 6837, 3657] - Q0.12 sinirini asiyorlardi).
+        // Dogru adreste altin referansla birebir ayni: [0,225,326,3543].
         // ---------------------------------------------------------------
         uart_print("Clear TCM\n");
         for (int i = 0; i < 3584; i++) {
