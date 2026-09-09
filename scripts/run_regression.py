@@ -43,6 +43,52 @@ NPU = RTL / "npu"
 # Her test: ad, ust modul, kaynak dosyalar, gereken .mem dosyalari
 # -----------------------------------------------------------------------------
 TESTLER = [
+    # -------------------------------------------------------------------------
+    # SARTNAME UYUM TESTLERI  (9 Eylul 2026)
+    #
+    # Diger blok testleri "tasarim dogru calisiyor mu" sorusunu sorar.
+    # Bunlar farkli bir soru sorar: "SARTNAMEDE YAZAN CUMLE ne diyorsa
+    # TAM OLARAK o mu oluyor?"
+    #
+    # Her denetim sartnamenin ilgili cumlesini yorum olarak tasir ve o
+    # cumlenin dogrudan karsiligini olcer. Juri "su maddeyi sagliyor
+    # musunuz" diye sordugunda cevap tek bir test ciktisidir.
+    #
+    # QSPI testi ozellikle onemlidir: sartname 4-bayt adresleme ister ama
+    # secim mekanizmasi tanimlamaz. Test, CCR[24]=1 iken kontrolcunun
+    # GERCEKTEN dort bayt adres bastigini SCK kenarlarini sayarak kanitlar
+    # (3 bayt -> 40 kenar, 4 bayt -> 48 kenar).
+    # -------------------------------------------------------------------------
+    dict(
+        ad="sartname_timer",
+        top="tb_sartname_timer",
+        kaynak=[CEV/"timer_peripheral.sv",
+                TB/"sartname"/"tb_sartname_timer.sv"],
+        mem=[],
+    ),
+    dict(
+        ad="sartname_gpio",
+        top="tb_sartname_gpio",
+        kaynak=[CEV/"gpio_peripheral.sv",
+                TB/"sartname"/"tb_sartname_gpio.sv"],
+        mem=[],
+    ),
+    dict(
+        ad="sartname_uart",
+        top="tb_sartname_uart",
+        kaynak=[F1/"uart_pkg.sv", F1/"uart_tx.sv", F1/"uart_rx.sv",
+                F1/"uart_peripheral.sv",
+                TB/"sartname"/"tb_sartname_uart.sv"],
+        mem=[],
+    ),
+    dict(
+        ad="sartname_qspi",
+        top="tb_sartname_qspi",
+        kaynak=[CEV/"qspi_master.sv",
+                TB/"sartname"/"tb_sartname_qspi.sv"],
+        mem=[],
+    ),
+
     dict(
         ad="uart",
         top="uart_tb",

@@ -272,19 +272,46 @@ assign ccr_data_size    = reg_ccr[23:16];
 assign ccr_prescaler    = reg_ccr[30:25];
 assign ccr_clr_status   = reg_ccr[31];
 // -----------------------------------------------------------------------
-// CCR[24] - 4 BAYT ADRESLEME MODU
+// 4 BAYT ADRESLEME MODU
 //
-// Sartname QSPI_CCR[24] bitini REZERVE olarak birakir. Sartnamenin anlati
-// bolumu ise "Tum flash alanini kapsamak icin 4-bayt adresleme modu
-// destegi bulunacaktir" der; QSPI_ADR yazmac tanimi ise 3-bayt anlatir.
-// Bu iki ifadeyi uzlastirmak icin rezerve bit adres genisligi secicisi
-// olarak kullanilmistir:
+// SARTNAMEDEKI BOSLUK
+//   s.24 anlati  : "Tum flash alanini kapsamak icin 4-bayt adresleme modu
+//                   destegi bulunacaktir"
+//   s.26 QSPI_ADR: "READ, DOR, QOR ve PP komutunda 3-bayt olarak kullanilir.
+//                   Yani QSPI_ADR[23:0] bitleri adres olarak gonderilir"
+//   s.25 CCR[24] : "REZERVE"
 //
-//   CCR[24] = 0 -> 3 bayt adres (QSPI_ADR[23:0])  <- VARSAYILAN, sartname
-//   CCR[24] = 1 -> 4 bayt adres (QSPI_ADR[31:0])
+//   4-bayti secen bir mekanizma TANIMLANMAMISTIR. Sartname ayrica
+//   "Tanimlanmamis tum bit konumlari Yarismaci Tanimli / Rezerve'dir"
+//   (s.26) der; rezerve bitin yarismaci tarafindan tanimlanmasi bu
+//   cercevededir.
 //
-// Reset degeri 0 oldugu icin davranis sartnameyle birebir ayni kalir;
-// 4-bayt yalnizca yazilim acikca istediginde devreye girer.
+// SECILEN COZUM
+//   CCR[24] = 0 -> 3 bayt adres (QSPI_ADR[23:0])  <- RESET DEGERI, s.26
+//   CCR[24] = 1 -> 4 bayt adres (QSPI_ADR[31:0])  <- s.24 karsilanir
+//
+//   Reset degeri 0 oldugu icin varsayilan davranis s.26 ile BIREBIR
+//   aynidir; 4-bayt yalnizca yazilim acikca istediginde devreye girer.
+//
+// DEGERLENDIRILEN ALTERNATIFLER (9 Eylul 2026)
+//
+//   1) ADR[31:24] otomatik algilama - DENENDI VE GERI ALINDI
+//      "ust bayt doluysa 4 bayt gonder" kurali cazip goruluyordu cunku
+//      CCR[24] hic kullanilmadan kalirdi. Ancak tb_qspi_mock'un 4-bayt
+//      bolumu bunu CURUTTU: flash 4-bayt kipindeyken DUSUK adresler de
+//      (orn. 0x00000008) dort bayt gonderilmelidir. Otomatik algilama
+//      ust bayti sifir gordugu icin uc bayt gonderir, flash dorduncu
+//      bayti bekler ve okuma bir bayt kayar. Olculdu: iki denetim dustu.
+//
+//   2) 4-bayt komut varyantlari (0x13, 0x12, 0x0C)
+//      Sartname 17 zorunlu komut sayar; bu varyantlar listede YOKTUR.
+//
+//   3) Kip degistirme komutlari (0xB7 / 0xE9)
+//      Ayni sebep - sartnamenin listesinde yoktur.
+//
+//   Rezerve bit kullanimi, yazilimin adres genisligini ACIKCA secmesine
+//   izin veren tek yontemdir ve flash'in hangi kipte oldugundan bagimsiz
+//   dogru calisir.
 // -----------------------------------------------------------------------
 assign ccr_addr_4byte   = reg_ccr[24];
 
