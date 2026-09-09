@@ -30,6 +30,15 @@ module nexys_top (
     input  logic        JB_UART_RX,     // Pmod JB1 (D14) - moduldeki TX buraya
     output logic        JB_UART_TX,     // Pmod JB2 (F16) - moduldeki RX buraya
 
+    // JTAG hata ayiklama - Pmod JC  (9 Eylul 2026'da eklendi)
+    input  logic        JTAG_TCK,       // JC1 (K1)
+    input  logic        JTAG_TMS,       // JC2 (F6)
+    input  logic        JTAG_TDI,       // JC3 (J2)
+    output logic        JTAG_TDO,       // JC4 (G6)
+
+    // GPIO yon kontrolu (alt 8 bit) - Pmod JD  (9 Eylul 2026'da eklendi)
+    output logic [7:0]  GPIO_TXEN,
+
     // -------------------------------------------------------------------------
     // I2C Master - Pmod JA (22 Agustos 2026'da eklendi)
     //
@@ -156,6 +165,10 @@ module nexys_top (
     );
 
     // SoC Ana Modülünün Çağrılması
+    // GPIO yon kontrolu ara sinyali (16 bit; alt 8'i pine cikar)
+    logic [15:0] gpio_tx_en_w;
+    assign GPIO_TXEN = gpio_tx_en_w[7:0];
+
     soc_top u_soc (
         .clk_i          (clk_50mhz),
         .rst_ni         (rst_n_sync),
@@ -163,7 +176,9 @@ module nexys_top (
         // GPIO
         .gpio_i         (SW),
         .gpio_o         (LED),
-        .gpio_tx_en_o   (), // Kullanılmıyor
+        // Alt 8 bit Pmod JD'ye cikar; ust 8 bit kullanilmiyor.
+        // 9 Eylul 2026: onceden tamami bosta birakilmisti.
+        .gpio_tx_en_o   (gpio_tx_en_w),
 
         // UART 1 (USB-to-UART Bridge)
         .uart1_rxd      (UART_TXD_IN),
@@ -189,10 +204,16 @@ module nexys_top (
         .qspi_io_i      (QSPI_DQ),
 
         // JTAG (Kullanılmıyor - Kararsız çalışmayı önlemek için güvenli durumlara çekildi)
-        .jtag_tms       (1'b1),
-        .jtag_tck       (1'b0),
-        .jtag_tdi       (1'b0),
-        .jtag_tdo       (),
+        // JTAG - Pmod JC  (9 Eylul 2026)
+        //
+        // Onceden jtag_tck sabit 1'b0'a bagliydi; TAP durum makinesi hic
+        // saat almiyordu ve modul oluydu. Artik gercek pinlerden suruluyor.
+        // trst_n aktif-dusuk asenkron reset; pin ayrilmadigi icin '1'de
+        // birakildi - TAP zaten TMS ile bes cevrimde reset edilebilir.
+        .jtag_tms       (JTAG_TMS),
+        .jtag_tck       (JTAG_TCK),
+        .jtag_tdi       (JTAG_TDI),
+        .jtag_tdo       (JTAG_TDO),
         .jtag_trst_n    (1'b1)
     );
 

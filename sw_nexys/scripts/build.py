@@ -287,6 +287,30 @@ def main():
         hex_dest=BUILD_DIR / "core_test.hex",
     )
 
+    # -------------------------------------------------------------------------
+    # TAM CEVRE BIRIMI DEMOSU - fpga_demo.hex   (9 Eylul 2026'da eklendi)
+    #
+    # Yarismada juri hangi cevre birimini gormek isteyecegini onceden
+    # bilemiyoruz. Ana uygulama yalnizca timer, bus-fault ve I2C icin kisa
+    # bir acilis testi yapip cikarim dongusune giriyor.
+    #
+    # fpga_demo.c yedi cevre birimini TEK TEK, gozle dogrulanabilir bicimde
+    # calistirir: GPIO (dort pin modu, SET/CLEAR/TOGGLE), Timer (prescaler,
+    # otomatik yeniden yukleme, olay), I2C, QSPI (flash kimligi ve durum),
+    # DMA (bellekten bellege), UART-stream ve JTAG hata ayiklama birimi.
+    #
+    # JTAG AXI yazmac arayuzu uzerinden gosterilir; harici adaptor gerekmez.
+    # -------------------------------------------------------------------------
+    build_image(
+        gcc, objcopy, size,
+        name="fpga_demo",
+        c_sources=[SRC_DIR / "fpga_demo.c"],
+        asm_sources=[SRC_DIR / "crt0.S"],
+        linker_script=LINK_DIR / "app.ld",
+        image_bytes=APP_IMAGE_BYTES,
+        hex_dest=BUILD_DIR / "fpga_demo.hex",
+    )
+
     copied = deploy_to_sim(APP_HEX_DEST)
 
     print("\n=== OZET ===")

@@ -1,0 +1,159 @@
+ARKHE SoC - TAM CEVRE BIRIMI DEMOSU - KART UZERI KOSU KAYDI
+9 Eylul 2026, Nexys A7-100T, 115200 8N1 (Pmod JB / USB-TTL)
+
+Bitstream : fpga/nexys_demo_20260908/bitstream/nexys_top.bit
+Firmware  : sw_nexys/src/fpga_demo.c  (5092 bayt)
+Flash     : sw_nexys/build/flash_fpga_demo.bin @ 0x00800000
+
+SONUC: 34 denetim, 34 gecti, 0 kaldi
+
+================================================================
+BU KOSUYA GELIRKEN BULUNAN VE KAPATILAN GERCEK KUSURLAR
+================================================================
+
+1) BOOTLOADER - 2 kB SESSIZ KESME              [TASARIM KUSURU]
+   sw_nexys/src/bootloader.S
+   CHUNK_COUNT = 8 idi: 8 x 64 x 4 = 2048 bayt kopyaliyordu.
+   Ayni dosyanin yorumu "8 kB icin 32 islem gerekir" diyor ve link
+   betigi APP_IMAGE_BYTES = 8192 ayiriyordu; sabit kendi belgelenmis
+   niyetinin dortte biriydi.
+   main.c 2012 bayt oldugu icin siniri asmiyordu ve kusur bugune dek
+   gorulmedi. 4652 baytlik fpga_demo yuklenince yarisi eksik kaldi.
+   DUZELTME: CHUNK_COUNT 8 -> 32.
+
+2) UART-STREAM - FIFO TEMIZLEME TOPLAYICIYI SIFIRLAMIYOR  [RTL KUSURU]
+   rtl/Cevre_Birimleri/files_1/uart_stream_peripheral.sv
+   pack_cnt_r yalnizca rst_n ve pack_take ile sifirlaniyordu; fifo_clr
+   sonrasi yarim kalmis toplayici degeri bir sonraki cerceveye karisiyordu.
+   DUZELTME: fifo_clr_r toplayiciyi ve gecerlilik bayragini da sifirlar.
+
+================================================================
+DEMO TESTININ KENDI HATALARI (tasarim dogruydu, olcum yanlisti)
+================================================================
+
+3) TIMER OLAY BAYRAGI ZANNEDILEN SEY ASLINDA SAYAC
+   timer_peripheral.sv:73,116 - TIM_EVN 32 bitlik OLAY SAYACIDIR,
+   sayac her ARE'ye ulastiginda bir artar. Kesme kosulu da bit-0
+   degil, satir 81'deki (reg_tim_evn != 0).
+   Test (ev & 1) denetliyordu; 832 olay birikmisti ve 832 cift
+   oldugu icin bit-0 sifir cikti. Donanim dogru calisirken test
+   yanlis bakiyordu. Ikinci denetim de ((ev & 1) == 0) her cift
+   degerde gecerdi - yanlis sebeple yesildi.
+   DUZELTME: ev != 0 / ev == 0, ve okumadan once TIM_ENA = 0.
+
+4) QSPI KOMUTLARI VERI FAZINA HIC GIRMIYORDU
+   Bu, "yesil gorunen ama olcmeyen test"in ders niteliginde ornegidir.
+   Ilk surumde QSPI bolumu 4/4 [OK] veriyordu ve YANILTICIYDI:
+   denetimler yalnizca STA bit-0 (done) bayragina bakiyordu.
+   Uc bilgi satirinin ucu de 0xDEADBEEF donuyordu - bu deger
+   qspi_master.sv:247'de BOS FIFO'dan okuma halinde donen dolgu
+   desenidir, yani hicbir bayt gelmemisti.
+
+   KOK NEDEN: CCR[9:8] veri modu 00 birakilmisti. cmd_needs_data()
+   (satir 466) dm != 00 istiyor; 00 iken FSM veri fazini tamamen
+   atlayip DEASSERT_CS'e geciyor. done kuruluyor (komut "bitti"),
+   ama tek bayt bile okunmuyor.
+   Ayrica CCR[23:16] boyut alani N-1 kodlanir (satir 510:
+   total_bytes = alan + 1); test N yaziyordu.
+   Prescaler de 2 idi; bootloader 4 kullanir (bootloader.S:65-68 -
+   daha hizlisinda flash kenar tespitine yetisemiyor).
+
+   DUZELTME: bootloader'in kartta kanitlanmis 0x88FF0103 kodlamasi
+   ornek alindi; ayrica denetimler artik VERININ GELDIGINI olcuyor:
+     - STA bit-5 (rx_empty) okuma oncesi temiz mi
+     - donen deger 0xDEADBEEF dolgu deseni degil mi
+
+   KANIT (duzeltme sonrasi kart ciktisi):
+     flash kimligi   = 0xF0182001   Spansion S25FL128S (0x01 0x20 0x18)
+     0x800000 icerik = 0x1F002117   flash_fpga_demo.hex ILK KELIMESIYLE
+                                    BIREBIR AYNI - dogru adresten dogru veri
+
+   NOT: bit-31'in islemi baslattigi ilk tahminimdi, YANLIS. Satir 180'de
+   ccr_written her CCR yazimida kurulur; bit-31 yalnizca durum
+   bayraklarini temizler.
+
+================================================================
+KART CIKTISI (tam)
+================================================================
+
+--- 1. GPIO ---
+  [OK]   ODR yazma - LED'lerin hepsi yanmali
+  [OK]   CLEAR - ust 8 LED sondu
+  [OK]   SET - dort LED tekrar yandi
+  [OK]   TOGGLE - hepsi terslendi
+  bilgi  MODE=giris   (JD pinleri 0 olmali)
+  bilgi  MODE=cikis   (JD pinleri 1 olmali)
+  bilgi  MODE=od-0    (JD = ODR = 0xA5)
+  bilgi  MODE=od-1    (JD = ~ODR = 0x5A)
+  bilgi  anahtarlar (SW) = 0x00000040
+
+--- 2. Timer ---
+  [OK]   CLR sonrasi sayac sifir
+  [OK]   sayac ilerliyor
+  [OK]   ENA=0 iken sayac durdu
+  bilgi  biriken olay sayisi = 832
+  [OK]   ARE'ye ulasinca olay sayaci arti
+  [OK]   EVC olay sayacini sifirladi
+  bilgi  PRE=0 -> 56038   PRE=9 -> 5603
+  [OK]   prescaler sayimi yavaslatti
+
+--- 3. I2C ---
+  [OK]   NBY=0 yazildi -> 1'e kirpildi
+  [OK]   NBY=25 yazildi -> 4'e kirpildi
+  [OK]   ADR yalnizca 7 bit tutuyor
+  [OK]   TDR tam genislik korunuyor
+  [OK]   islem asili kalmadan sonlandi
+  bilgi  CFG = 0x00000002  (kole yoksa NACK beklenir)
+
+--- 4. QSPI ---
+  [OK]   RDID komutu tamamlandi
+  [OK]   RDID verisi FIFO'ya ulasti
+  bilgi  flash kimligi = 0xF0182001  (Spansion S25FL128S bekleniyor)
+  [OK]   kimlik dolgu deseni degil
+  [OK]   RDSR1 komutu tamamlandi
+  bilgi  durum yazmaci = 0x00000000
+  [OK]   flash'tan veri okundu
+  [OK]   okuma verisi FIFO'ya ulasti
+  bilgi  0x800000 icerigi = 0x1F002117  (uygulama ilk kelimesi)
+  [OK]   okunan veri dolgu deseni degil
+  [OK]   hata bayraklari temizlenebiliyor
+
+--- 5. DMA ---
+  [OK]   DMA aktarimi tamamlandi
+  [OK]   16 kelimenin hepsi dogru tasindi
+  bilgi  hedef[0] = 0xD0000000  hedef[15] = 0xD000000F
+
+--- 6. UART-stream (UART 2) ---
+  [OK]   CPB=50 (1 Mbps) yazildi
+  [OK]   STP=0 (1 stop bit)
+  [OK]   STP=2 (2 stop bit) kabul edildi
+  [OK]   FIFO temizleme sonrasi bos
+  bilgi  bu arayuz demo aracinin 1960 baytlik
+         cikarim vektorunu aldigi yoldur
+
+--- 7. JTAG hata ayiklama birimi ---
+  [OK]   DBG_ADDR geri okundu
+  [OK]   DBG_DATA geri okundu
+  [OK]   hata ayiklayici bellege yazdi
+  [OK]   hata ayiklayici bellekten okudu
+  [OK]   hata bayragi baslangicta temiz
+  bilgi  TAP arayuzu Pmod JC'de (TCK=JC1 TMS=JC2
+         TDI=JC3 TDO=JC4); harici adaptor ile erisilir
+
+================================================================
+ SONUC: 34 gecti, 0 kaldi
+ TUM CEVRE BIRIMLERI CALISIYOR
+================================================================
+
+================================================================
+YENIDEN URETIM
+================================================================
+  cd sw_nexys
+  python scripts/build.py
+  python scripts/gen_flash_image.py
+  python -c "import struct; w=[l.strip() for l in open('build/flash_fpga_demo.hex') if l.strip()]; open('build/flash_fpga_demo.bin','wb').write(b''.join(struct.pack('<I',int(x,16)) for x in w))"
+  vivado -mode batch -source fpga/nexys_demo_20260908/firmware/build/gen_mcs_fpga_demo.tcl
+  -> sw_nexys/build/arkhe_fpga_demo.mcs  (QSPI'ye yazilir, PROG'a basilir)
+
+MCS dosyasi 10 MB oldugu icin depoya alinmadi; .bit ve .bin'den
+yukaridaki komutla yeniden uretilir.

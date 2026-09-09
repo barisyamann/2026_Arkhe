@@ -45,6 +45,65 @@ set_property -dict { PACKAGE_PIN D18   IOSTANDARD LVCMOS33  PULLUP TRUE } [get_p
 set_property -dict { PACKAGE_PIN D14   IOSTANDARD LVCMOS33  PULLUP TRUE } [get_ports { JB_UART_RX }];
 set_property -dict { PACKAGE_PIN F16   IOSTANDARD LVCMOS33 } [get_ports { JB_UART_TX }];
 
+# --- JTAG Hata Ayıklama Arayüzü - Pmod JC ---
+#
+# 9 Eylül 2026'da eklendi. jtag_debug modülü tasarımda vardı ve
+# simülasyonda 27 denetimle doğrulanmıştı, ancak nexys_top.sv içinde
+# jtag_tck sabit 1'b0'a bağlıydı; TAP durum makinesi hiç saat almıyordu.
+# Demo günü jüri JTAG görmek isterse diye fiziksel pinlere çıkarıldı.
+#
+# Kablolama (Pmod JC üst sıra):
+#   JC1 (K1) <- TCK   (harici JTAG adaptöründen)
+#   JC2 (F6) <- TMS
+#   JC3 (J2) <- TDI
+#   JC4 (G6) -> TDO   (FPGA çıkışı)
+#   JC5/JC6  <- GND
+#
+# PULLUP: adaptör takılı değilken TMS/TDI boşta '1' okunur ve TAP
+# rastgele duruma geçmez. TCK'da pull-down tercih edilir; sahte saat
+# kenarı üretmemesi için.
+set_property -dict { PACKAGE_PIN K1  IOSTANDARD LVCMOS33  PULLDOWN TRUE } [get_ports { JTAG_TCK }];
+set_property -dict { PACKAGE_PIN F6  IOSTANDARD LVCMOS33  PULLUP   TRUE } [get_ports { JTAG_TMS }];
+set_property -dict { PACKAGE_PIN J2  IOSTANDARD LVCMOS33  PULLUP   TRUE } [get_ports { JTAG_TDI }];
+set_property -dict { PACKAGE_PIN G6  IOSTANDARD LVCMOS33 } [get_ports { JTAG_TDO }];
+
+# JTAG saati ana saatle ASENKRONDUR. Kısıt verilmezse Vivado bu yolları
+# ana saatle ilişkilendirmeye çalışır ve sahte ihlaller üretir.
+# soc_top içindeki mantık iki saat alanı arasında senkronizatör kullanır.
+create_clock -period 100.000 -name jtag_tck_clk [get_ports JTAG_TCK]
+
+# JTAG_TCK, Pmod JC1 (K1) uzerindedir ve bu pin CLOCK-CAPABLE (CCIO)
+# DEGILDIR. jtag_debug.sv icinde jtag_tck kenar tetiklemeli kullanildigi
+# icin Vivado ona global saat tamponu (BUFG) atamaya calisir ve
+# yerlestirme "Poor placement for routing between an IO pin and BUFG"
+# hatasiyla duser (9 Eylul 2026'da tam olarak bu yasandi).
+#
+# CLOCK_DEDICATED_ROUTE FALSE bu denetimi uyariya cevirir. Burada
+# guvenlidir cunku:
+#   - JTAG saati 100 ns periyotludur (10 MHz alti), hata ayiklama icindir
+#   - ana saat (clk_50mhz) ayri bir yoldan gelir ve etkilenmez
+#   - iki saat alani arasinda jtag_debug.sv senkronizator kullanir
+#   - saat gruplari asenkron tanimlanmistir (asagida)
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets JTAG_TCK_IBUF]
+# Saat gruplama kisiti asagida, clk_50mhz tanimindan SONRA verilir.
+# XDC sirali islenir; burada verilseydi clk_50mhz henuz tanimli olmazdi.
+
+# --- GPIO Yön Kontrolü (Pad tx_en) - Pmod JD ---
+#
+# 9 Eylül 2026'da eklendi. gpio_tx_en_o önceden boşta bırakılmıştı.
+# GPIO'nun dört pin modu (00 giriş, 01 çıkış, 10 açık drenaj-0,
+# 11 açık drenaj-1) blok testinde %95,6 kapsamayla doğrulandı ama
+# FPGA'da dışarıdan gözlenemiyordu. Alt 8 bit Pmod JD'ye verildi;
+# osiloskop veya LED ile pin yönü doğrudan görülebilir.
+set_property -dict { PACKAGE_PIN H4  IOSTANDARD LVCMOS33 } [get_ports { GPIO_TXEN[0] }];
+set_property -dict { PACKAGE_PIN H1  IOSTANDARD LVCMOS33 } [get_ports { GPIO_TXEN[1] }];
+set_property -dict { PACKAGE_PIN G1  IOSTANDARD LVCMOS33 } [get_ports { GPIO_TXEN[2] }];
+set_property -dict { PACKAGE_PIN G3  IOSTANDARD LVCMOS33 } [get_ports { GPIO_TXEN[3] }];
+set_property -dict { PACKAGE_PIN H2  IOSTANDARD LVCMOS33 } [get_ports { GPIO_TXEN[4] }];
+set_property -dict { PACKAGE_PIN G4  IOSTANDARD LVCMOS33 } [get_ports { GPIO_TXEN[5] }];
+set_property -dict { PACKAGE_PIN G2  IOSTANDARD LVCMOS33 } [get_ports { GPIO_TXEN[6] }];
+set_property -dict { PACKAGE_PIN F3  IOSTANDARD LVCMOS33 } [get_ports { GPIO_TXEN[7] }];
+
 # --- 16 Anahtar (Switches - Girişler) ---
 set_property -dict { PACKAGE_PIN J15   IOSTANDARD LVCMOS33 } [get_ports { SW[0] }];
 set_property -dict { PACKAGE_PIN L16   IOSTANDARD LVCMOS33 } [get_ports { SW[1] }];
@@ -84,6 +143,13 @@ set_property -dict { PACKAGE_PIN V11   IOSTANDARD LVCMOS33 } [get_ports { LED[15
 # --- Zamanlama Bölücü Kısıt Tanımı ---
 # 50 MHz iç saati elde etmek için üretilen saati Vivado zamanlama motoruna bildiriyoruz
 create_generated_clock -name clk_50mhz -source [get_ports CLK100MHZ] -divide_by 2 [get_pins bufg_clk/O]
+
+# JTAG saati ana saatle ASENKRONDUR (9 Eylul 2026'da eklendi).
+# Kisit verilmezse Vivado iki alan arasindaki yollari zamanlamaya calisir
+# ve sahte ihlaller uretir. soc_top icindeki jtag_debug modulu iki saat
+# alani arasinda senkronizator kullanir; bu kisit o gerceegi bildirir.
+# Ayni kisit ASIC tarafinda da vardir (constraints/design.sdc).
+set_clock_groups -asynchronous -group [get_clocks clk_50mhz] -group [get_clocks jtag_tck_clk]
 
 # =============================================================================
 #  QSPI NOR Flash - KART USTU Spansion S25FL128S (16 MB)

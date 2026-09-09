@@ -42,7 +42,16 @@
 
 # QSPI islem basina en fazla 256 bayt okunabilir (CCR[23:16] 8 bit).
 # 8 kB uygulama icin 32 islem gerekir.
-.equ CHUNK_COUNT,     8
+#
+# 9 Eylul 2026 DUZELTMESI: CHUNK_COUNT 8 idi, yani yalnizca 2 kB
+# kopyalaniyordu (8 x 64 x 4). Yukaridaki yorum 32 islem gerektigini
+# soyluyor ve link betigi 8 kB ayiriyor; sabit kendi niyetinin dortte
+# biriydi. 2 kB'i asan her uygulama SESSIZCE kesiliyordu.
+#
+# main.c 2012 bayt oldugu icin sigiyordu ve hata yillarca gorulmedi;
+# 4652 baytlik fpga_demo.c yuklenince kart okunamayan cikti verdi ve
+# kok neden boylece bulundu.
+.equ CHUNK_COUNT,     32
 .equ WORDS_PER_CHUNK, 64
 .equ CHUNK_BYTES,     256
 

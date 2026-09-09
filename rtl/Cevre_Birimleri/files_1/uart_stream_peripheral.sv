@@ -361,7 +361,32 @@ module uart_stream_peripheral
         end else begin
             pack_rd_d <= pack_rd_en;
 
-            if (pack_take) begin
+            // -----------------------------------------------------------------
+            // FIFO TEMIZLEME TOPLAYICIYI DA SIFIRLAR  (9 Eylul 2026)
+            //
+            // ONCEDEN: pack_cnt_r yalnizca rst_n ve pack_take ile
+            // sifirlaniyordu. Yazilim UARTS_FIFO_CLR yazdiginda FIFO
+            // bosaliyor (sync_fifo'nun rst_n girisi rst_n & ~fifo_clr_r'dir)
+            // ama TOPLAYICIDA asili kalan 1-3 kismi bayt duruyordu. O baytlar
+            // bir SONRAKI cercevenin ilk kelimesine karisiyordu; yani
+            // "FIFO temizle" komutu veri yolunu tam temizlemiyordu.
+            //
+            // GOZLENEN BELIRTI (8 Eylul 2026, demo_harness robustness):
+            //   oversized_frame senaryosu "kurtarma BASARISIZ" veriyordu;
+            //   fazladan bayt iceren bir cerceveden sonra denetleyici
+            //   hizalanamiyordu. back_to_back senaryosu tam siradayken
+            //   bes cerceveden dordune yanit veriyordu.
+            //
+            // fifo_clr_r tek saat darbesidir ve toplayici ile AYNI saat
+            // alanindadir; en yuksek oncelikli dal olarak toplayiciyi tam
+            // bilinen duruma dondurur.
+            // -----------------------------------------------------------------
+            if (fifo_clr_r) begin
+                pack_data_r  <= 32'b0;
+                pack_cnt_r   <= 3'd0;
+                pack_valid_r <= 1'b0;
+                pack_rd_d    <= 1'b0;
+            end else if (pack_take) begin
                 pack_valid_r <= 1'b0;
                 pack_cnt_r   <= 3'd0;
             end else if (pack_rd_d) begin

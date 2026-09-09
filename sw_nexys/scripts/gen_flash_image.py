@@ -101,6 +101,18 @@ def main():
     # zinciriyle cekirdek testi kosulabilir ve Spike ISS karsilastirmasi ASIC
     # kod yolunda da yapilabilir.
     # -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # 9 Eylul 2026: fpga_demo.hex - tam cevre birimi demosu
+    #
+    # Yarismada juri hangi cevre birimini gormek isteyecegini bilemiyoruz;
+    # bu imaj yedi birimi tek tek calistirip UART'a rapor yazar.
+    # -------------------------------------------------------------------------
+    fdemo = APP_HEX.parent / "fpga_demo.hex"
+    if fdemo.is_file():
+        uret(fdemo, DEST.parent / "flash_fpga_demo.hex", "flash_fdemo")
+    else:
+        print("UYARI: fpga_demo.hex yok, flash_fpga_demo.hex uretilmedi")
+
     core_test = APP_HEX.parent / "core_test.hex"
     if core_test.is_file():
         uret(core_test, DEST.parent / "flash_core_test.hex", "flash_core")
