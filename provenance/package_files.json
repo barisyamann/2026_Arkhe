@@ -5510,5 +5510,21 @@
  "docs/SUNUM_ICERIGI.md": {
   "bytes": 21730,
   "sha256": "11e453ea1349b6b69a8d24466cf26c774607845a54f5f3d799bd7e290b15ae43"
+ },
+ "fpga/nexys_demo_20260908/reports/power_impl.rpt": {
+  "bytes": 9224,
+  "sha256": "d05d5df4add781449ec26bac44ce99ae34b656b98503cd52bdcac2a29afea237"
+ },
+ "fpga/nexys_demo_20260908/reports/timing_impl.rpt": {
+  "bytes": 48119,
+  "sha256": "ee7f2d03f5e60448d461f19e6ec35fa40f41a32c9ec7c03fbc8ff59c142afdd2"
+ },
+ "fpga/nexys_demo_20260908/reports/timing_synth.rpt": {
+  "bytes": 42471,
+  "sha256": "9a2ed0a0710e1ffbde0c1defa98b14eabbc0f9e28e5bdad1c7adf67f7b021b3f"
+ },
+ "fpga/nexys_demo_20260908/reports/utilization_impl.rpt": {
+  "bytes": 11330,
+  "sha256": "238de3800854117f337c14cdc2fc9688382684b59a5b01a24e4b06b62b3637b4"
  }
 }
