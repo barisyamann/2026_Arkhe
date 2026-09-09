@@ -1,0 +1,77 @@
+
+There are no discarded input sections
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+IRAM             0x01000000         0x00002000         xr
+RAM              0x20000000         0x00002000         xrw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\fpga_demo.o
+LOAD C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\crt0.o
+
+.text           0x01000000     0x13e4
+                0x01000000                        . = ALIGN (0x4)
+ *(.init)
+ *(.text.start)
+ .text.start    0x01000000       0x52 C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\crt0.o
+                0x01000000                _start
+ *(.text*)
+ .text          0x01000052      0x194 C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\fpga_demo.o
+ .text.startup  0x010001e6      0x99a C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\fpga_demo.o
+                0x010001e6                main
+ .text          0x01000b80        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\crt0.o
+ *(.rodata*)
+ *fill*         0x01000b80        0x0 
+ .rodata.str1.4
+                0x01000b80      0x863 C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\fpga_demo.o
+                                0x85f (size before relaxing)
+                0x010013e4                        . = ALIGN (0x4)
+ *fill*         0x010013e3        0x1 
+
+.rela.dyn       0x010013e4        0x0
+ .rela.text.start
+                0x010013e4        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\fpga_demo.o
+
+.data           0x20000000        0x0 load address 0x010013e4
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __data_start = .
+ *(.data*)
+ .data          0x20000000        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\fpga_demo.o
+ .data          0x20000000        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\crt0.o
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __data_end = .
+                0x010013e4                        __data_load_start = LOADADDR (.data)
+
+.bss            0x20000000        0x0 load address 0x010013e4
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __bss_start = .
+ *(.bss*)
+ .bss           0x20000000        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\fpga_demo.o
+ .bss           0x20000000        0x0 C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\crt0.o
+ *(COMMON)
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __bss_end = .
+
+.sbss           0x20000000        0x8 load address 0x010013e4
+ .sbss          0x20000000        0x8 C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\fpga_demo.o
+
+.stack          0x20000008        0x8 load address 0x010013e4
+                0x20000010                        . = ALIGN (0x10)
+ *fill*         0x20000008        0x8 
+                0x20002000                        __stack_top = (ORIGIN (RAM) + LENGTH (RAM))
+OUTPUT(C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\fpga_demo.elf elf32-littleriscv)
+
+.comment        0x00000000       0x33
+ .comment       0x00000000       0x33 C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\fpga_demo.o
+                                 0x34 (size before relaxing)
+
+.riscv.attributes
+                0x00000000       0x38
+ .riscv.attributes
+                0x00000000       0x38 C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\fpga_demo.o
+ .riscv.attributes
+                0x00000038       0x36 C:\Users\ybari\2026_Arkhe\sw_nexys\build\fpga_demo\crt0.o

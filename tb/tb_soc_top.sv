@@ -566,7 +566,17 @@ module tb_soc_top;
         // =====================================================================
         fork : wait_stream_ready
             wait (uart_saw_stream_ready);
-            #(20_000_000 + BOOT_PAYI_NS);   // 20 ms + boot payi
+            // 20 -> 30 ms  (10 Eylul 2026)
+            //
+            // NEDEN BUYUTULDU: main.c'ye ikinci bir hata testi eklendi
+            // (DECERR, 0x40090000). Bu test iki UART mesaji daha yaziyor;
+            // 115200 baud'da 54 karakter = 4,69 ms. Ilk hata testinin
+            // yuku da eklenince uygulama "Stream ready"i 20 ms'lik
+            // pencereden SONRA yaziyordu.
+            //
+            // Olculdu: testbench log satiri 37'de pes ediyor, uygulama
+            // satir 38'de mesaji yaziyor - kil payi kaciriyorlardi.
+            #(30_000_000 + BOOT_PAYI_NS);   // 30 ms + boot payi
         join_any
         disable wait_stream_ready;
 

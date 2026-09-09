@@ -341,6 +341,43 @@ int main(void)
     uart_print("\n");
 
     // =========================================================================
+    // IKINCI HATA TURU: DECERR (adres cozulemedi)  - 10 Eylul 2026
+    //
+    // Yukaridaki 0x100 yazmasi SLVERR uretir: adres COZULDU (Boot ROM,
+    // Slave 0) ama slave istegi yerine getiremedi (salt okunur).
+    //
+    // DECERR farklidir: adres HICBIR slave araligina dusmez.
+    // axi_lite_interconnect.sv:455 bunu uretir.
+    //
+    // 0x4009_0000 secildi cunku son slave JTAG CSR 0x4008_0FFF-te biter;
+    // bu adres bilincli olarak haritanin disindadir.
+    //
+    // NEDEN EKLENDI: islevsel kapsama olcumu cov_axi_resp-i %66,7
+    // gosterdi - okay ve slverr geziliyordu, decerr gezilmiyordu.
+    // Sartname EK-3 islevsel kapsamada "%100-u hedeflemelidir" der.
+    // =========================================================================
+    uart_print("Decode fault test\n");
+    bus_fault_flag = 0;
+    *(volatile unsigned int *)0x40090000 = 0xCAFEBABE;   // haritada YOK -> DECERR
+
+    // Emniyet siniri 1000 - ilk hata testindeki 100000 DEGIL.
+    //
+    // NEDEN FARKLI: kesme birkac cevrimde gelir; buyuk sinir yalnizca
+    // kesme HIC gelmezse devreye girer. Ilk denemede burada da 100000
+    // kullanildi ve sistem testi kirildi: uygulama "Stream ready"i
+    // testbench'in 20 ms'lik bekleme penceresinden SONRA yazdi.
+    // Olculdu - testbench satir 37'de pes etti, uygulama satir 39'da
+    // mesaji yazdi. 1000 iterasyon hem koruma saglar hem pencereyi
+    // asmaz.
+    for (volatile int guard = 0; guard < 1000 && !bus_fault_flag; guard++) { }
+
+    uart_print("Decode fault @ 0x");
+    uart_print_hex32(bus_fault_addr);
+    uart_print(" ST=0x");
+    uart_print_hex8(bus_fault_st & 0xFF);
+    uart_print("\n");
+
+    // =========================================================================
     // I2C oz testi
     //
     // Kartta I2C kolesi YOK. Amac protokol motorunu uctan uca calistirmak:
