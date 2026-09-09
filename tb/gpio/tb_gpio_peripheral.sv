@@ -305,6 +305,69 @@ module tb_gpio_peripheral;
         // ---------------------------------------------------------------------
         // 9. Coklu pin ve global kesme
         // ---------------------------------------------------------------------
+        // ---------------------------------------------------------------
+        // 8b. PIN MODLARI  (9 Eylul 2026'da eklendi)
+        //
+        // gpio_peripheral.sv her pin icin IKI BIT mod tutar:
+        //     2'b00  giris (tx_en = 0)
+        //     2'b01  cikis (tx_en = 1)
+        //     2'b10  acik drenaj 0  (tx_en = ODR)
+        //     2'b11  acik drenaj 1  (tx_en = ~ODR)
+        //
+        // Test yalnizca MODE = 0xFFFFFFFF yaziyordu; bu TUM pinleri 2'b11
+        // yapar ve diger UC mod hic uyarilmiyordu. 9 Eylul 2026 kapsama
+        // olcumunde gpio_peripheral branch %64,5 ile bizim RTL'imizin en
+        // dusuk skorlu modulu cikti; sebebi tam olarak buydu.
+        //
+        // Acik drenaj modlari I2C benzeri paylasilan hatlar icindir ve
+        // tx_en'in ODR'ye baglanmasi kritik davranistir - yanlis uygulama
+        // veriyolu catismasi yaratir.
+        // ---------------------------------------------------------------
+        $display("  -- 8b. Pin modlari (giris / cikis / acik drenaj)");
+        kesmeleri_kapat();
+
+        // --- Mod 00: hepsi GIRIS - tx_en tamamen 0 olmali ---
+        axi_write(GPIO_MODE, 32'h0000_0000);
+        axi_write(GPIO_ODR,  32'hFFFF);          // ODR dolu ama etkisiz
+        @(posedge clk); @(posedge clk);
+        denetle("mod 00 (giris): tx_en tamami 0", {16'b0, gpio_tx_en_o}, 32'h0);
+
+        // --- Mod 01: hepsi CIKIS - tx_en tamamen 1 olmali ---
+        axi_write(GPIO_MODE, 32'h5555_5555);     // her pin cifti = 01
+        @(posedge clk); @(posedge clk);
+        denetle("mod 01 (cikis): tx_en tamami 1", {16'b0, gpio_tx_en_o}, 32'h0000_FFFF);
+
+        // --- Mod 10: ACIK DRENAJ 0 - tx_en = ODR ---
+        axi_write(GPIO_MODE, 32'hAAAA_AAAA);     // her pin cifti = 10
+        axi_write(GPIO_ODR,  32'hA5A5);
+        @(posedge clk); @(posedge clk);
+        denetle("mod 10 (acik drenaj 0): tx_en = ODR",
+                {16'b0, gpio_tx_en_o}, 32'h0000_A5A5);
+
+        axi_write(GPIO_ODR, 32'h0000);
+        @(posedge clk); @(posedge clk);
+        denetle("mod 10: ODR=0 iken tx_en=0", {16'b0, gpio_tx_en_o}, 32'h0);
+
+        // --- Mod 11: ACIK DRENAJ 1 - tx_en = ~ODR ---
+        axi_write(GPIO_MODE, 32'hFFFF_FFFF);     // her pin cifti = 11
+        axi_write(GPIO_ODR,  32'hA5A5);
+        @(posedge clk); @(posedge clk);
+        denetle("mod 11 (acik drenaj 1): tx_en = ~ODR",
+                {16'b0, gpio_tx_en_o}, 32'h0000_5A5A);
+
+        // --- Karisik mod: pinler ayri ayri yapilandirilabilmeli ---
+        // pin0=00 (giris), pin1=01 (cikis), pin2=10 (od0), pin3=11 (od1)
+        axi_write(GPIO_MODE, 32'hE4);            // 11_10_01_00
+        axi_write(GPIO_ODR,  32'h000F);          // alt dort pin 1
+        @(posedge clk); @(posedge clk);
+        // beklenen tx_en: pin0=0, pin1=1, pin2=ODR[2]=1, pin3=~ODR[3]=0
+        denetle("karisik mod: her pin bagimsiz yapilandirildi",
+                {28'b0, gpio_tx_en_o[3:0]}, 32'h6);
+
+        // Testi bilinen duruma dondur
+        axi_write(GPIO_MODE, 32'hFFFF_FFFF);
+        axi_write(GPIO_ODR,  32'h0000);
+
         $display("  -- 9. Coklu kaynak");
         gpio_i = 16'h0000;
         repeat (5) @(posedge clk);

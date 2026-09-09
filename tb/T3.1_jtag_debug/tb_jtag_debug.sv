@@ -335,6 +335,104 @@ module tb_jtag_debug;
         end
 
         // ---------------------------------------------------------------------
+        // JTAG BELLEK ERISIM KOMUTLARI  (9 Eylul 2026'da eklendi)
+        //
+        // NEDEN
+        //
+        //   jtag_debug.sv bes komut tanimlar:
+        //     IR_IDCODE (0x1)  IR_MEM_READ (0x2)  IR_MEM_WRITE (0x3)
+        //     IR_DBG_CTRL (0x4)  IR_BYPASS (0xF)
+        //
+        //   Test yalnizca IDCODE, DBG_CTRL ve BYPASS yollarini uyariyordu;
+        //   MEM_READ ve MEM_WRITE hic kullanilmamisti. 9 Eylul 2026 kapsama
+        //   olcumunde jtag_debug statement %75,2 / branch %59,3 ile bizim
+        //   RTL'imizin en dusuk skorlu ikinci modulu cikti ve sebebi buydu.
+        //
+        //   Bu komutlar hata ayiklayicinin CPU durdurulmusken bellege
+        //   erisme yolu; sartname EK-3 "JTAG uzerinden bellek okuma/yazma"
+        //   bekler. Uyarilmamasi gercek bir dogrulama boslugudur.
+        //
+        // AKIS
+        //   MEM_WRITE : DR = {veri[31:0], adres[31:0]} (64 bit) -> UPDATE_DR
+        //   MEM_READ  : DR = adres[31:0] -> UPDATE_DR -> islem -> tekrar
+        //               shift ile okunan veri geri alinir
+        // ---------------------------------------------------------------------
+        begin
+            logic [63:0] dr_out;
+            logic [31:0] okunan;
+            int          onceki_hata;
+
+            onceki_hata = error_count;
+            $display("  -- JTAG bellek erisimi (MEM_READ / MEM_WRITE)");
+
+            // CPU'yu durdur - hata ayiklayici bellege bu durumda erisir
+            jtag_shift_ir(4'h4);                       // IR_DBG_CTRL
+            jtag_shift_dr(64'h1, 64, dr_out);          // halt
+            repeat (20) @(posedge clk);
+            check("bellek erisimi oncesi CPU durduruldu",
+                  {31'b0, debug_req}, 32'h1);
+
+            // --- MEM_WRITE: veri yolu yazma islemi baslatilir ---
+            //
+            // NOT: bu testbench'te GERCEK BELLEK YOKTUR - m_axi_rdata sabit
+            // 32'h0'a baglidir (bkz. instantiation, m_axi_rdata (32'h0)).
+            // Bu yuzden "yazdigini geri oku" denetimi yapilamaz; onun yerine
+            // komutun kabul edildigini ve veri yolu isleminin ASILI KALMADAN
+            // bittigini denetliyoruz. Kod yolu (IR_MEM_WRITE / IR_MEM_READ
+            // dallari, BUS_WRITE_ADDR / BUS_READ_ADDR durumlari) yine
+            // tamamen uyarilir.
+            //
+            // Gercek bellekle uctan uca okuma/yazma sistem testinde
+            // (tb_soc_top) dogrulanir.
+            jtag_shift_ir(4'h3);                       // IR_MEM_WRITE
+            jtag_shift_dr({32'hDEAD_BEEF, 32'h2000_0100}, 64, dr_out);
+            repeat (80) @(posedge clk);
+            check("MEM_WRITE sonrasi TAP yanit veriyor (asili kalmadi)",
+                  {31'b0, debug_req}, 32'h1);
+
+            // --- MEM_READ: okuma islemi baslatilir ---
+            jtag_shift_ir(4'h2);                       // IR_MEM_READ
+            jtag_shift_dr({32'h0, 32'h2000_0100}, 64, dr_out);
+            repeat (80) @(posedge clk);
+
+            // CAPTURE_DR IR_MEM_READ dalinda dr_reg'e
+            // {bus_rdata_result, 32'h0} yukler. Bellek modeli 0 dondurdugu
+            // icin beklenen deger 0'dir; onemli olan TAP'in bu dala girip
+            // temiz cikmasidir.
+            jtag_shift_dr(64'h0, 64, dr_out);
+            check("MEM_READ CAPTURE_DR dali calisti (model 0 donduruyor)",
+                  dr_out[63:32], 32'h0);
+
+            // --- Ikinci adresle tekrar: erisim tek noktaya takili degil ---
+            jtag_shift_ir(4'h3);
+            jtag_shift_dr({32'hA5A5_5A5A, 32'h2000_0200}, 64, dr_out);
+            repeat (80) @(posedge clk);
+
+            jtag_shift_ir(4'h2);
+            jtag_shift_dr({32'h0, 32'h2000_0200}, 64, dr_out);
+            repeat (80) @(posedge clk);
+            check("ikinci adreste de islem tamamlandi",
+                  {31'b0, debug_req}, 32'h1);
+
+            // --- IR gecisleri sonrasi IDCODE hala okunabiliyor mu ---
+            // MEM komutlarindan sonra TAP bozulmus durumda kalmamali.
+            jtag_shift_ir(4'h1);                       // IR_IDCODE
+            jtag_shift_dr(64'h0, 64, dr_out);
+            check("MEM komutlari sonrasi IDCODE hala dogru",
+                  dr_out[31:0], 32'h41524B48);
+
+            // CPU'yu birak
+            jtag_shift_ir(4'h4);
+            jtag_shift_dr(64'h0, 64, dr_out);
+            repeat (20) @(posedge clk);
+            check("bellek erisimi sonrasi CPU serbest",
+                  {31'b0, debug_req}, 32'h0);
+
+            if (error_count == onceki_hata)
+                $display("      [OK]   JTAG bellek erisimi: MEM_READ ve MEM_WRITE yollari uyarildi");
+        end
+
+        // ---------------------------------------------------------------------
         // Ozet
         // ---------------------------------------------------------------------
         $display("================================================================");

@@ -4,7 +4,7 @@ Bu paket 7 Eylül 2026 tarihli **d45_anten2** koşusunun kaynakları, özgün ra
 
 ## 1. Tasarım
 
-Üst modül `soc_top`; CV32E40P (RV32IMC, FPU kapalı), NPU ve AXI-Lite çevre birimleri. Ana saat `clk_i`, reset `rst_ni`, JTAG saati `jtag_tck`. GPIO, UART, I2C, QSPI ve JTAG portları vardır; kesin arayüz `rtl/Memory/soc_top.sv` içindedir. PnR hedefi **10 ns**, final STA hedefi **20 ns**; 50 MHz temiz ASIC kapanışı iddia edilmez.
+Üst modül `soc_top`; CV32E40P (RV32IMC, FPU kapalı), NPU ve AXI-Lite çevre birimleri. Ana saat `clk_i`, reset `rst_ni`, JTAG saati `jtag_tck`. GPIO, UART, I2C, QSPI ve JTAG portları vardır; kesin arayüz `rtl/Memory/soc_top.sv` içindedir. PnR hedefi **10 ns**, özgün final STA hedefi **20 ns**; 50 MHz temiz ASIC kapanışı iddia edilmez. Aynı layout için 23 ns (43,5 MHz) periyotta yapılan **ek** imzalama analizinde setup 9/9 köşede pozitif ve 0 ihlalli yoldur; bkz. `reports/timing_23ns/`. Bu analiz özgün 20 ns raporlarının yerine geçmez, onlar `reports/timing/` altında değiştirilmeden korunur.
 
 ## 2. Araç ve ortam
 
@@ -90,6 +90,52 @@ Dokuz köşe: nom/min/max × TT(25°C,1,80V), SS(100°C,1,60V), FF(−40°C,1,95
 Esas GDS `results/gds/soc_top.gds`, üretici Magic. Magic/KLayout alternatifleri aynı dizinde; XOR raporu `reports/signoff/xor.xml`. Üç netlist rolü `_synth.v`, `_pnr.v`, `_powered.v` ile ayrılır. Tüm SPEF köşeleri `results/spef/{min,nom,max}` altındadır. GDS kaynaklı SPICE ile özgün LEF/DEF kaynaklı SPICE farklı adlarla tutulur.
 
 `provenance/output_mapping.json` her özgün rapor/çıktının kaynak adımını gösterir; dosya seçimi mtime'a dayanmaz. `provenance/requirements.json` zorunlu dosya listesi, `provenance/package_files.json` ve `asic/checksums/SHA256SUMS` bütünlük kayıtlarıdır.
+
+## 12.1 Harici arşiv — büyük fiziksel çıktılar
+
+Nihai GDSII, DEF, ODB, SPEF, netlist ve büyük raporlar Git deposunun makul
+boyut sınırlarını aştığı için tek bir arşivde, aynı deponun GitHub Release'i
+altında sunulur. DDK'nın 9 Eylül 2026 tarihli yazısında istenen bilgiler:
+
+| Bilgi | Değer |
+|---|---|
+| İndirme bağlantısı | https://github.com/barisyamann/2026_Arkhe/releases/tag/d45-anten2-20260908 |
+| Arşiv dosya adı | `d45_anten2-delivery.tar.gz.part001` |
+| Arşiv boyutu | 752.435.710 bayt (≈ 718 MiB) |
+| SHA-256 | `8768ecc5d2869b7eae032170e76874195222128220500259df203f14893c4901` |
+
+Aynı değerler makine tarafından okunabilir biçimde
+`provenance/release_assets.json` ve depo kökündeki
+`d45_anten2-delivery.tar.gz.sha256` dosyalarında da tutulur.
+
+**İçerik.** Arşiv, d45_anten2 koşusunun bu depoda tutulmayan büyük fiziksel
+çıktılarını içerir: `asic/results/gds/` (Magic ve KLayout GDSII), `results/def/`,
+`results/odb/`, `results/spef/{min,nom,max}/`, `results/netlist/`
+(`_synth.v`, `_pnr.v`, `_powered.v`), `results/sdf/` (dokuz köşe),
+`results/spice/` (LEF/DEF ve GDS kaynaklı), `reports/timing/` içindeki büyük
+köşe raporları ve `reports/power/` güç CSV'leri. Arşiv **kaynak dosyaların
+veya otomasyonun yerine geçmez**; ASIC akışını yeniden üretmek için gereken
+RTL, `config.yaml`, `filelist.f`, kısıtlar, betikler ve README bu depoda
+doğrudan bulunur.
+
+**Kullanım.** `python3 tools/restore_release.py --delivery` arşivi indirir,
+SHA-256'sını doğrular ve teslim ağacına açar. Doğrulama başarısız olursa betik
+durur; elle açmak gerekmez.
+
+Bağlantı değerlendirme süresi boyunca erişime açıktır ve bireysel erişim onayı
+gerektirmez.
+
+## 12.2 Akış değişikliği beyanı
+
+Bu teslimde **LibreLane Classic akışına eklenmiş özel bir adım, harici bir
+OpenROAD Tcl betiği veya elle yapılmış bir düzenleme yoktur.** Zamanlama
+kapanışı yalnızca akışın kendi yapılandırma değişkenleriyle sağlanmıştır
+(`PL_RESIZER_HOLD_SLACK_MARGIN`, `GRT_RESIZER_HOLD_SLACK_MARGIN`,
+`RUN_POST_GRT_RESIZER_TIMING`, `RUN_POST_GRT_DESIGN_REPAIR` ve benzeri;
+tam liste `config.yaml` içindedir). Hiçbir zorunlu akış veya signoff adımı
+devre dışı bırakılmamış, PDK / standart hücre kütüphanesi / SRAM modelleri
+/ zamanlama kısıtları değiştirilmemiştir. Nihai DEF, GDSII ve diğer fiziksel
+çıktılar üzerinde elle düzenleme yapılmamıştır.
 
 Git dalı kaynakları ve küçük raporları içerir. Büyük çıktılar aynı GitHub Release'in delivery arşivinde sunulur. Yalnız GitHub “Source code.zip” indirmek bütün fiziksel çıktıları vermez. `tools/restore_release.py --delivery` tam teslim ağacını oluşturur. **Final s.20 gereği `asic/run/` teslimde yalnız `.gitkeep` içerir; ham koşu teslim paketine dahil değildir.** Yeniden üretim taşınabilir `config.yaml` ile yapılır. Özgün rapor/config dosyalarındaki mutlak yollar tarihsel kayıttır.
 

@@ -303,6 +303,76 @@ module tb_npu_compute_engine;
                   (int'(class_o) == argmax),
                   $sformatf("class_o=%0d ama argmax=%0d", class_o, argmax));
 
+            // =================================================================
+            // 8 Eylul 2026'da eklenen degismez denetimleri
+            //
+            // Onceki surum yalnizca softmax toplamini ve argmax tutarliligini
+            // denetliyordu. Bu ikisi gecerken de motor yanlis calisabilir:
+            // negatif olasilik, sinif araligi disi deger, hicbir siniftan
+            // emin olmama veya AGIRLIK BOLGESININ EZILMESI bu iki denetimi
+            // gecerdi. Asagidakiler o bosluklari kapatir.
+            // =================================================================
+
+            // 3) Olasiliklar negatif olamaz.
+            //    Q0.12 softmax cikisi tanim geregi [0, 4096] araligindadir.
+            //    Negatif deger, isaretli/isaretsiz donusum hatasinin veya
+            //    tasmanin en dogrudan belirtisidir.
+            check($sformatf("%s: butun olasiliklar negatif degil", name),
+                  (p0 >= 0 && p1 >= 0 && p2 >= 0 && p3 >= 0),
+                  $sformatf("negatif olasilik: %0d/%0d/%0d/%0d", p0, p1, p2, p3));
+
+            // 4) Hicbir olasilik tek basina 4096'yi asamaz.
+            check($sformatf("%s: olasiliklar ust siniri asmiyor", name),
+                  (p0 <= 4112 && p1 <= 4112 && p2 <= 4112 && p3 <= 4112),
+                  $sformatf("sinir asildi: %0d/%0d/%0d/%0d", p0, p1, p2, p3));
+
+            // 5) class_o gecerli sinif araliginda (0..3).
+            //    Dort sinif vardir: silence, unknown, yes, no.
+            check($sformatf("%s: class_o 0..3 araliginda", name),
+                  (int'(class_o) >= 0 && int'(class_o) <= 3),
+                  $sformatf("gecersiz sinif: %0d", class_o));
+
+            // 6) Kazanan sinif gercekten baskin olmali.
+            //    Dort esit olasilik (her biri 1024) motorun hicbir sey
+            //    ogrenmedigi veya agirliklarin sifir oldugu anlamina gelir;
+            //    6 Eylul 2026'da tam bu belirti gozlendi (bias'a esit cikis).
+            // SILENCE (3. senaryo, sc_idx==2) HARIC.
+            //
+            // Girdi tamamen sessizken dort sinifin ESIT cikmasi (her biri
+            // 1024) DOGRU davranistir: model sessizlikte hicbir kelimeden
+            // emin olmamalidir. Ilk yazimda bu muafiyet yoktu ve test
+            // SILENCE senaryosunda basarisiz oluyordu - denetimin kendisi
+            // yanlisti, motor degil. Baskinlik yalnizca gercek konusma
+            // iceren senaryolarda (YES, NO) beklenir.
+            check($sformatf("%s: kazanan sinif baskin (enbuyuk=%0d)", name, enbuyuk),
+                  (sc_idx == 2) || (enbuyuk > 1200),
+                  $sformatf("hicbir sinif baskin degil - agirliklar sifir olabilir: %0d/%0d/%0d/%0d",
+                            p0, p1, p2, p3));
+
+            // 7) FC AGIRLIK BOLGESI BOZULMAMIS OLMALI.
+            //
+            //    TCM yerlesimi (7680 kelime):
+            //      0    ..  489   girdi tensoru
+            //      3584 .. 7583   FC AGIRLIKLARI - DOKUNULMAZ
+            //      7596 .. 7599   cikis olasiliklari
+            //
+            //    Motor agirlik bolgesine yazarsa bir sonraki cikarim sessizce
+            //    bozulur ve tek cikarimlik test bunu HIC gormez. Uc ornek
+            //    noktada agirliklarin hala sifirdan farkli oldugunu
+            //    denetliyoruz; motor bolgeyi ezmisse hepsi sifirlanirdi.
+            check($sformatf("%s: FC agirlik bolgesi ezilmemis", name),
+                  (tcm_mem[3584] !== 32'h0 || tcm_mem[5000] !== 32'h0 ||
+                   tcm_mem[7583] !== 32'h0),
+                  "TCM 3584..7583 agirlik bolgesi sifirlanmis - motor uzerine yazdi");
+
+            // 8) Cikis bolgesinde bilinmeyen (X/Z) deger olmamali.
+            //    Eksik reset veya okunmamis bellek X yayar; int'() donusumu
+            //    bunu sessizce 0'a cevirdigi icin toplam denetimi gecebilir.
+            check($sformatf("%s: cikis olasiliklarinda X/Z yok", name),
+                  (!$isunknown(tcm_mem[7596]) && !$isunknown(tcm_mem[7597]) &&
+                   !$isunknown(tcm_mem[7598]) && !$isunknown(tcm_mem[7599])),
+                  "cikis bolgesinde bilinmeyen bit var");
+
             // Senaryolar arasi karsilastirma icin sakla
             sc_probs[sc_idx][0] = p0;  sc_probs[sc_idx][1] = p1;
             sc_probs[sc_idx][2] = p2;  sc_probs[sc_idx][3] = p3;

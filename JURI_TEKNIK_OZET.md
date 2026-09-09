@@ -8,7 +8,9 @@ CV32E40P / RV32IMC (FPU kapalı), AXI4-Lite, NPU, iki UART, I2C, QSPI, GPIO, tim
 
 ## Fiziksel sonuçlar
 
-PnR 10 ns, signoff 20 ns. **50 MHz temiz kapanış yoktur.** 45,8 MHz sayısı ayrı bir periyotta doğrulanmış STA sonucu değildir ve ulaşılan frekans olarak sunulmaz.
+PnR 10 ns, özgün signoff 20 ns. **50 MHz temiz kapanış yoktur.** 45,8 MHz sayısı ayrı bir periyotta doğrulanmış STA sonucu değildir ve ulaşılan frekans olarak sunulmaz.
+
+**Ek imzalama analizi (9 Eylül 2026).** Aynı layout, hiçbir fiziksel değişiklik yapılmadan 23 ns (43,5 MHz) periyotla yeniden analiz edildi: setup 9/9 köşede pozitif, 0 ihlalli yol; hold 9/9 köşede pozitif. En kötü köşe `max_ss_100C_1v60` setup WNS +0,0810 ns. Periyot taraması 20/22/22,5/23/24 ns ile yapılmıştır; 22 ns hesapla yeterli görünmesine rağmen ölçümde −0,419 ns vermiştir. Yerleştirme, yönlendirme veya optimizasyon tekrarlanmamıştır; GDS, netlist, DRC, LVS, anten ve slew/kapasite/fanout sonuçları değişmez. Özgün 20 ns raporları `asic/reports/timing/` altında olduğu gibi korunur. Ayrıntı ve yeniden üretme: `asic/reports/timing_23ns/`.
 
 | Köşe | Setup slack ns | Hold slack ns |
 |---|---:|---:|

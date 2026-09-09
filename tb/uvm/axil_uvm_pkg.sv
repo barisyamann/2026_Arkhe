@@ -128,6 +128,25 @@ package axil_uvm_pkg;
         static int unsigned b_kararsiz;
         static int unsigned x_bilinmeyen;
 
+        // -------------------------------------------------------------------
+        // FONKSIYONEL KAPSAM (8 Eylul 2026'da eklendi)
+        //
+        // Sartname EK-3 "UVM-tabanli olasi scoreboarding" diyor; kapsam
+        // olcumu bunun dogal parcasidir. Sayilar tek basina bir sey
+        // KANITLAMAZ ama neyin HIC uyarilmadigini gosterir - dogrulamanin
+        // kor noktalari boyle bulunur.
+        //
+        // Burada olculen: hangi WSTRB desenleri gorundu, adres hangi
+        // araliklara dagildi, ardisik okuma serisi ne kadar uzadi.
+        // -------------------------------------------------------------------
+        static int unsigned strb_deseni [16];      // WSTRB 0..15 gorulme sayisi
+        static int unsigned ardisik_okuma;         // en uzun okuma serisi
+        static int unsigned mevcut_seri;
+        static bit          onceki_okumaydi;
+        static int unsigned adres_min;
+        static int unsigned adres_max;
+        static bit          adres_ilk;
+
         function new(string name, uvm_component parent);
             super.new(name, parent);
             ap = new("ap", this);
@@ -532,6 +551,33 @@ package axil_uvm_pkg;
             // Bayt/yarim-kelime yazmalari yasaldir (ornegin UART TDR).
             // Sayilir ki kapsamada gorunsun.
             if (it.tur == AXIL_YAZMA && it.strb != 4'b1111) kismi_yazma++;
+
+            // --- 7) Fonksiyonel kapsam toplama ---
+            if (it.tur == AXIL_YAZMA)
+                axil_monitor::strb_deseni[it.strb]++;
+
+            // Adres araligi: erisilen en dusuk/en yuksek adres
+            if (!axil_monitor::adres_ilk) begin
+                axil_monitor::adres_min = it.adres;
+                axil_monitor::adres_max = it.adres;
+                axil_monitor::adres_ilk = 1'b1;
+            end else begin
+                if (it.adres < axil_monitor::adres_min) axil_monitor::adres_min = it.adres;
+                if (it.adres > axil_monitor::adres_max) axil_monitor::adres_max = it.adres;
+            end
+
+            // Ardisik okuma serisi: DMA/NPU akisinin gercekten seri
+            // okuma yaptigini gosterir. Seri kisaysa veri yolu her
+            // kelimede kesiliyor demektir - performans sorununun izi.
+            if (it.tur == AXIL_OKUMA) begin
+                if (axil_monitor::onceki_okumaydi) axil_monitor::mevcut_seri++;
+                else                 axil_monitor::mevcut_seri = 1;
+                axil_monitor::onceki_okumaydi = 1'b1;
+                if (axil_monitor::mevcut_seri > axil_monitor::ardisik_okuma) axil_monitor::ardisik_okuma = axil_monitor::mevcut_seri;
+            end else begin
+                axil_monitor::onceki_okumaydi = 1'b0;
+                axil_monitor::mevcut_seri = 0;
+            end
         endfunction
 
         function void report_phase(uvm_phase phase);
@@ -733,6 +779,40 @@ package axil_uvm_pkg;
             $display("  [HATA] %0d el sikismada X/Z deger",
                      axil_monitor::x_bilinmeyen);
             ihlal += axil_monitor::x_bilinmeyen;
+        end
+
+        // -----------------------------------------------------------------
+        // Fonksiyonel kapsam denetimleri
+        // -----------------------------------------------------------------
+        if (axil_monitor::ardisik_okuma >= 4)
+            $display("  [OK]   ardisik okuma serisi olustu (en uzun %0d islem) - akis kesintisiz",
+                     axil_monitor::ardisik_okuma);
+        else begin
+            $display("  [HATA] ardisik okuma serisi cok kisa (%0d) - veri yolu her kelimede kesiliyor",
+                     axil_monitor::ardisik_okuma);
+            ihlal++;
+        end
+
+        if (axil_monitor::adres_max > axil_monitor::adres_min)
+            $display("  [OK]   adres araligi gercekten tarandi (0x%08h .. 0x%08h)",
+                     axil_monitor::adres_min, axil_monitor::adres_max);
+        else begin
+            $display("  [HATA] tek adrese erisildi - test tek noktada takili");
+            ihlal++;
+        end
+
+        $display("  kapsam : WSTRB desenleri -");
+        begin
+            int gorulen;
+            gorulen = 0;
+            for (int i = 0; i < 16; i++)
+                if (axil_monitor::strb_deseni[i] > 0) begin
+                    $display("           strb=0x%01h : %0d yazma", i,
+                             axil_monitor::strb_deseni[i]);
+                    gorulen++;
+                end
+            if (gorulen == 0)
+                $display("           (yazma islemi yok)");
         end
 
         $display("  bilgi  : kismi yazma=%0d  en uzun islem=%0d ns",

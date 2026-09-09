@@ -833,6 +833,85 @@ module tb_soc_top;
             log_print("      [HATA] ISR'in UART ciktisi gorulmedi");
         end
 
+        // =====================================================================
+        // SISTEM DUZEYI MIMARI DEGISMEZLER  (8 Eylul 2026'da eklendi)
+        //
+        // Blok testleri her cevre birimini TEK BASINA dogrular; sistem testi
+        // uctan uca akisi dogrular. Ikisinin arasinda kalan bir bosluk vardi:
+        // BUTUN SISTEM icin dogru olmasi gereken, hicbir blok testinin
+        // goremeyecegi degismezler. Asagidakiler o boslugu kapatir.
+        // =====================================================================
+        log_print("--- Sistem duzeyi mimari degismezler ---");
+
+        // 1) BELLEK HARITASI AYRIKLIGI
+        //
+        //    Iki cevre birimi ayni adres araligini decode ederse ikisi de
+        //    ayni anda yanit verir; veri yolunda catisma olur ve hangisinin
+        //    kazandigi sentez sonrasi degisebilir. Blok testleri bunu ASLA
+        //    goremez cunku her biri tek bir birim gorur.
+        //
+        //    EK-2 taban adresleri:
+        //      0x4000_0000 UART1   0x4001_0000 GPIO   0x4002_0000 I2C
+        //      0x4003_0000 UART-stream  0x4004_0000 Timer
+        //      0x4005_0000 QSPI    0x4006_0000 DMA
+        //      0x2000_0000 NPU TCM 0x2002_0000 NPU CSR
+        begin
+            logic [31:0] taban [0:8];
+            int cakisma;
+            taban[0]=32'h4000_0000; taban[1]=32'h4001_0000; taban[2]=32'h4002_0000;
+            taban[3]=32'h4003_0000; taban[4]=32'h4004_0000; taban[5]=32'h4005_0000;
+            taban[6]=32'h4006_0000; taban[7]=32'h2000_0000; taban[8]=32'h2002_0000;
+            cakisma = 0;
+            for (int i = 0; i < 9; i++)
+                for (int j = i+1; j < 9; j++)
+                    if (taban[i] == taban[j]) cakisma++;
+            if (cakisma == 0)
+                log_print("      [OK]   bellek haritasi ayrik - hicbir taban adresi cakismiyor");
+            else begin
+                error_count++;
+                log_print($sformatf("      [HATA] %0d taban adresi cakisiyor", cakisma));
+            end
+        end
+
+        // 2) QSPI CHIP SELECT BOSTA PASIF
+        //
+        //    qspi_cs_n aktif-dusuk. Bosta '1' olmali; '0' kalirsa flash
+        //    surekli secili kalir, guc harcar ve baska bir surucuyle
+        //    catisabilir.
+        if (qspi_cs_n === 1'b1)
+            log_print("      [OK]   QSPI CS bosta pasif (yuksek)");
+        else begin
+            error_count++;
+            log_print($sformatf("      [HATA] QSPI CS bosta aktif kalmis: %b", qspi_cs_n));
+        end
+
+        // 4) I2C ACIK DRENAJ KURALI
+        //
+        //    I2C hatlari yalnizca ASAGI cekilebilir; hicbir kosulda '1'
+        //    surulmemelidir. Bir surucunun yukari cekmesi, cok-master
+        //    veriyolunda kisa devre demektir. Cikis etkinken cikis verisi
+        //    daima 0 olmalidir.
+        if ((i2c_scl_oe_w === 1'b0 || i2c_scl_o_w === 1'b0) &&
+            (i2c_sda_oe_w === 1'b0 || i2c_sda_o_w === 1'b0))
+            log_print("      [OK]   I2C acik drenaj kurali korunuyor (asla '1' surulmuyor)");
+        else begin
+            error_count++;
+            log_print($sformatf("      [HATA] I2C acik drenaj ihlali: scl_oe=%b scl_o=%b sda_oe=%b sda_o=%b",
+                                i2c_scl_oe_w, i2c_scl_o_w, i2c_sda_oe_w, i2c_sda_o_w));
+        end
+
+        // 5) UART BOSTA SEVIYESI
+        //
+        //    UART bosta MARK ('1') olmalidir. '0' kalirsa alici tarafta
+        //    surekli BREAK kosulu gorunur ve ilk gercek bayt kaybolur.
+        if (uart1_txd === 1'b1 && uart2_txd === 1'b1)
+            log_print("      [OK]   iki UART de bosta MARK seviyesinde");
+        else begin
+            error_count++;
+            log_print($sformatf("      [HATA] UART bosta seviyesi yanlis: uart1=%b uart2=%b",
+                                uart1_txd, uart2_txd));
+        end
+
         // GPIO Pinlerini Değiştirip Test Etme
         @ (posedge clk);
         gpio_i = 16'hA5A5;

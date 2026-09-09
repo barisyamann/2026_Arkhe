@@ -1,0 +1,76 @@
+====================================================================
+ KOD KAPSAMA - KAYNAK GRUBUNA GORE
+====================================================================
+ Rapor: C:\Users\ybari\2026_Arkhe\evidence\coverage_sistem\codeCoverageReport
+ Cozumlenen modul: 60
+
+ grup                                modul statement    branch
+ --------------------------------------------------------------
+ BIZIM RTL                              27     81.6%     74.9%
+ CV32E40P (ucuncu taraf)                27     52.5%     52.6%
+ Testbench / model                       2     70.1%     50.6%
+ Paketler (kod yok)                      4     50.0%      0.0%
+
+ BIZIM RTL - en dusuk 10 modul (test eklemek icin oncelik sirasi)
+ --------------------------------------------------------------
+   npu_accelerator                        stmt   0.0%  branch 100.0%
+   68                                     stmt  44.6%  branch  54.8%
+   axil_protocol_checker                  stmt  53.8%  branch   0.0%
+   qspi_master                            stmt  58.0%  branch  40.7%
+   i2c_peripheral(SYS_CLK_FREQ=50000000)  stmt  64.2%  branch  49.6%
+   gpio_peripheral(AXI_ADDR_W=32)         stmt  67.2%  branch  53.6%
+   timer_peripheral(S_AXI_ADDR_WIDTH=32)  stmt  71.4%  branch  62.8%
+   npu_engine_axi_master                  stmt  71.4%  branch  60.0%
+   uart_tx                                stmt  72.7%  branch  58.8%
+   uart_stream_peripheral_default         stmt  81.1%  branch  64.9%
+
+ NOT
+   Paket modulleri yalnizca tip/sabit tanimi icerir; icinde
+   calistirilabilir kod yoktur. Kapsama metrigi bunlari %0
+   sayar ve genel ortalamayi haksiz yere dusurur.
+   CV32E40P ucuncu taraf bir cekirdektir ve PULP tarafindan
+   ayrica dogrulanmistir; bizim test kapsamimizin hedefi degildir.
+====================================================================
+
+====================================================================
+ EK: BLOK TESTLERI AYRI OLCUMU  (9 Eylul 2026)
+====================================================================
+
+ Sistem raporu (sistem_gercek_boot) cevre birimlerini yalnizca BOOT
+ sirasinda kullanildiklari kadar uyarir. Ornegin QSPI orada tek bir
+ okuma komutu gorur. Her blok kendi testinde ayri olculunce gercek
+ kapsama ortaya cikiyor:
+
+   blok testi     statement   branch
+   ---------------------------------
+   uart              80.2%     70.2%
+   sync_fifo         77.3%     92.9%
+   i2c               77.2%     86.4%
+   dma               82.7%     95.0%
+   gpio              65.3%     91.7%
+   qspi              73.0%     78.6%
+   timer             74.7%     69.0%
+   jtag_debug        61.7%     76.2%
+
+ qspi_master modulu tek basina:  statement 88.7%  branch 80.2%
+ (sistem raporunda ayni modul %58,0 / %40,7 gorunuyor)
+
+ KOMUT KAPSAMASI EKLEMESI
+
+   qspi_master.sv on yedi flash komutu tanimlar; test yalnizca CMD_READ
+   (0x03) yolunu uyariyordu. 9 Eylul 2026'da sekiz komut yolu eklendi:
+   WREN, RDID, RDSR1, PP (yazma dali), SE (silme), DOR (cift hat),
+   QOR (dort hat) ve kukla cevrim ust siniri.
+
+   QSPI blok testi: 30 -> 40 denetim.
+
+ SONUC
+
+   Genel %62,47 rakami uc farkli seyi karistiriyor ve kendi tasarimimizin
+   kalitesini gizliyor. Dogru okuma:
+
+     bizim RTL (sistem seviyesi)    statement %81,6  branch %74,9
+     blok testleri (kendi ortami)   statement %62-89 branch %69-95
+     CV32E40P (ucuncu taraf)        statement %52,5  branch %52,6
+     paketler (calistirilabilir
+       kod icermez)                 metrik %0 sayiyor

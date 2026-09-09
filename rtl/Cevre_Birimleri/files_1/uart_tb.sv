@@ -289,6 +289,36 @@ module uart_tb;
         axil_read (UART_STP_OFFSET, rd_val);
         check("STP = 10 (2 stop bit)", rd_val[1:0] == 2'b10);
 
+        // ---------------------------------------------------------------
+        // GERCEK GONDERIM ile stop-bit yollari  (9 Eylul 2026'da eklendi)
+        //
+        // Yukaridaki uc denetim yalnizca STP YAZMACINI yazip geri okuyor.
+        // uart_tx.sv icindeki ST_STOP15 ve ST_STOP2 durumlarina HIC
+        // girilmiyordu; 9 Eylul 2026 kapsama olcumunde uart_tx modulu
+        // statement %72,7 / branch %58,8 ile uart blogunun en dusuk skorlu
+        // parcasi cikti ve sebebi tam olarak buydu.
+        //
+        // Asagida her stop-bit ayariyla GERCEK bir bayt gonderilip
+        // loopback'ten geri okunuyor. Boylece:
+        //   STP=00 -> ST_STOP1  yolu
+        //   STP=01 -> ST_STOP15 yolu (yarim bit ek bekleme, half_cpb)
+        //   STP=10 -> ST_STOP2  yolu
+        // ucu de uyarilir ve alicinin bunlari dogru cozdugu denetlenir.
+        // ---------------------------------------------------------------
+        axil_write(UART_STP_OFFSET, 32'h01);     // 1,5 stop bit
+        test_tx_rx_loopback(8'h5A);
+
+        axil_write(UART_STP_OFFSET, 32'h02);     // 2 stop bit
+        test_tx_rx_loopback(8'hA5);
+
+        // Kenar deger: tum bitler 1 - stop bitinden ayirt edilebilmeli
+        axil_write(UART_STP_OFFSET, 32'h02);
+        test_tx_rx_loopback(8'hFF);
+
+        // Kenar deger: tum bitler 0 - start bitinden sonra hepsi bosluk
+        axil_write(UART_STP_OFFSET, 32'h01);
+        test_tx_rx_loopback(8'h00);
+
         // Testi 1 stop bit ile devam ettir
         axil_write(UART_STP_OFFSET, 32'h00);
     endtask

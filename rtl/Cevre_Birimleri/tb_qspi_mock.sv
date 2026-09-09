@@ -575,6 +575,111 @@ localparam int TEST_WORDS = 128;
         end
 
         // ---------------------------------------------------------------------
+        // KOMUT KAPSAMASI  (9 Eylul 2026'da eklendi)
+        //
+        // NEDEN
+        //
+        //   qspi_master.sv on yedi flash komutu tanimlar (CMD_READ, CMD_PP,
+        //   CMD_SE, CMD_RDID, CMD_WREN, ...) ama test yalnizca CMD_READ
+        //   (0x03) yolunu uyariyordu. 9 Eylul 2026 kapsama olcumunde
+        //   qspi_master statement %58,0 / branch %40,7 ile bizim RTL'imizin
+        //   en dusuk skorlu modulu cikti; sebebi tam olarak buydu.
+        //
+        //   Asagidaki denetimler komut/veri modu/kukla cevrim/veri boyutu
+        //   alanlarinin FARKLI DEGERLERLE surulmesini saglar. Amac flash
+        //   modelinin o komutlara verdigi cevabi dogrulamak DEGIL - mock
+        //   model hepsini gerceklemez - denetleyicinin komut cercevesini
+        //   dogru kurup islemi temiz bitirdigini gormektir.
+        //
+        // CCR bit alanlari (qspi_master.sv 267-275):
+        //   [7:0]   instr        [9:8]   data_mode    [10]  write_read_n
+        //   [15:11] dummy_cycles [23:16] data_size    [24]  4 bayt adres
+        //   [30:25] prescaler    [31]    clr_status
+        // ---------------------------------------------------------------------
+        begin
+            logic [31:0] sta;
+            int          onceki_hata;
+
+            onceki_hata = error_count;
+
+            // --- CMD_WREN (0x06): veri fazi YOK, yalnizca komut ---
+            // data_size = 0 yolu; denetleyici komutu yazip hemen bitmeli.
+            axi_write(32'h04, 32'h0000_0000);
+            axi_write(32'h00, {1'b0, 6'd2, 1'b0, 8'd0, 5'd0, 2'b00, 1'b0, 8'h06});
+            bekle_bitti();
+            axi_read(32'h0C, sta);
+            check("CMD_WREN (0x06) veri fazsiz tamamlandi",
+                  {31'b0, sta[0]}, 32'h1);
+
+            // --- CMD_RDID (0x9F): kimlik okuma, adres YOK, 3 bayt veri ---
+            axi_write(32'h00, {1'b0, 6'd2, 1'b0, 8'd3, 5'd0, 2'b00, 1'b0, 8'h9F});
+            bekle_bitti();
+            axi_read(32'h0C, sta);
+            check("CMD_RDID (0x9F) adres fazsiz okuma bitti",
+                  {31'b0, sta[0]}, 32'h1);
+
+            // --- CMD_RDSR1 (0x05): durum yazmaci okuma, 1 bayt ---
+            axi_write(32'h00, {1'b0, 6'd2, 1'b0, 8'd1, 5'd0, 2'b00, 1'b0, 8'h05});
+            bekle_bitti();
+            axi_read(32'h0C, sta);
+            check("CMD_RDSR1 (0x05) tek bayt okuma bitti",
+                  {31'b0, sta[0]}, 32'h1);
+
+            // --- CMD_PP (0x02): sayfa programlama - YAZMA yolu ---
+            // write_read_n = 1. Bu bit daha once HIC 1 yapilmamisti;
+            // denetleyicinin yazma dali tamamen uyarilmamis durumdaydi.
+            axi_write(32'h04, 32'h0000_0100);          // ADR
+            axi_write(32'h08, 32'hA5A5_5A5A);          // DR - yazilacak veri
+            axi_write(32'h00, {1'b0, 6'd2, 1'b0, 8'd4, 5'd0, 2'b00, 1'b1, 8'h02});
+            bekle_bitti();
+            axi_read(32'h0C, sta);
+            check("CMD_PP (0x02) YAZMA yolu tamamlandi",
+                  {31'b0, sta[0]}, 32'h1);
+
+            // --- CMD_SE (0xD8): sektor silme, adres var veri yok ---
+            axi_write(32'h04, 32'h0001_0000);
+            axi_write(32'h00, {1'b0, 6'd2, 1'b0, 8'd0, 5'd0, 2'b00, 1'b1, 8'hD8});
+            bekle_bitti();
+            axi_read(32'h0C, sta);
+            check("CMD_SE (0xD8) silme komutu tamamlandi",
+                  {31'b0, sta[0]}, 32'h1);
+
+            // --- CMD_DOR (0x3B): cift hatli okuma, data_mode = 01 ---
+            // data_mode alani daha once yalnizca 00 (tek hat) ile
+            // suruluyordu; 01 ve 10 dallari hic uyarilmamisti.
+            axi_write(32'h04, 32'h0000_0000);
+            axi_write(32'h00, {1'b0, 6'd2, 1'b0, 8'd4, 5'd8, 2'b01, 1'b0, 8'h3B});
+            bekle_bitti();
+            axi_read(32'h0C, sta);
+            check("CMD_DOR (0x3B) cift hat modu tamamlandi",
+                  {31'b0, sta[0]}, 32'h1);
+
+            // --- CMD_QOR (0x6B): dort hatli okuma, data_mode = 10 ---
+            axi_write(32'h00, {1'b0, 6'd2, 1'b0, 8'd4, 5'd8, 2'b10, 1'b0, 8'h6B});
+            bekle_bitti();
+            axi_read(32'h0C, sta);
+            check("CMD_QOR (0x6B) dort hat modu tamamlandi",
+                  {31'b0, sta[0]}, 32'h1);
+
+            // --- Kukla cevrim alaninin ust siniri ---
+            // dummy_cycles 5 bit; en buyuk deger 31. Sayacin tasmadigini
+            // ve islemin yine de bittigini denetler.
+            axi_write(32'h00, {1'b0, 6'd2, 1'b0, 8'd1, 5'd31, 2'b00, 1'b0, 8'h03});
+            bekle_bitti();
+            axi_read(32'h0C, sta);
+            check("kukla cevrim 31 (ust sinir) ile islem bitti",
+                  {31'b0, sta[0]}, 32'h1);
+
+            // --- Butun komutlar sonrasi hata bayragi olmamali ---
+            axi_read(32'h0C, sta);
+            check("komut kapsamasi sonrasi hata bayraklari temiz",
+                  {28'b0, sta[11:8]}, 32'h0);
+
+            if (error_count == onceki_hata)
+                $display("      [OK]   komut kapsamasi: 8 farkli komut yolu uyarildi");
+        end
+
+        // ---------------------------------------------------------------------
         // Ozet
         // ---------------------------------------------------------------------
         $display("================================================================");

@@ -1,7 +1,7 @@
 {
  "JURI_TEKNIK_OZET.md": {
-  "bytes": 5848,
-  "sha256": "8bf16cce21da80eea286d591d70aab4fbc199058243bc69fd062c72fd62c84b4"
+  "bytes": 6553,
+  "sha256": "02a86bd7634ec5cb96552efc58c03156844fa76ab5f39d5d56adf9cded903a1d"
  },
  "README.md": {
   "bytes": 2131,
@@ -12,8 +12,8 @@
   "sha256": "09f618d295b9679e21365b8c2bcdc9bd787c53ecee37a0fadc322510edd7499e"
  },
  "asic/README.md": {
-  "bytes": 10174,
-  "sha256": "275bf04e433b57933231a99d4d3b80fc28da6b0b8c5ca9d19341bf5ad6bde9f5"
+  "bytes": 12979,
+  "sha256": "36b97b1ffc1b5cdec47a56b3bc904f8532cbcd14fd2ba3985be5db71d79d7c07"
  },
  "asic/THIRD_PARTY.md": {
   "bytes": 7683,
@@ -34,10 +34,6 @@
  "asic/constraints/signoff_50mhz_hedef.sdc": {
   "bytes": 12808,
   "sha256": "35ad38ea9b2b60a40295498dfa6d4d33d70e5cced6b4915797d2cfe58415b00c"
- },
- "asic/constraints/signoff_50mhz_v2.sdc": {
-  "bytes": 13955,
-  "sha256": "8585648097bc1e8c6030a4155fba372559c03f2b3f6395b8d1e8f0ce039497c9"
  },
  "asic/environment/flake.lock": {
   "bytes": 3348,
@@ -1383,22 +1379,6 @@
   "bytes": 177895,
   "sha256": "a0b8e1f9c533e5b2fcd163827d38a5d6f7309c578ea87beb6b044453298303f4"
  },
- "evidence/packaging_config_check_runs/packaging_config_check/tmp/12b25fb8e18648aaae0db6e741f19527.bb.v": {
-  "bytes": 694,
-  "sha256": "2f17a3294cab2dfa131b17b45cebd154614888e4e97f318015e885be84a0dc69"
- },
- "evidence/packaging_config_check_runs/packaging_config_check/tmp/12b25fb8e18648aaae0db6e741f19527.bb.v_yosys.log": {
-  "bytes": 1964,
-  "sha256": "016d3021618f2cc65624713e504966470d59aa610140d17c5e44371d91a1df2e"
- },
- "evidence/packaging_config_check_runs/packaging_config_check/tmp/948e59ca8eed483db4d58a07cd933598.bb.v": {
-  "bytes": 124815,
-  "sha256": "380af675c15927c3502aace1dc403b6b8b1344edc3a6a5255fd56fda57cebd2b"
- },
- "evidence/packaging_config_check_runs/packaging_config_check/tmp/948e59ca8eed483db4d58a07cd933598.bb.v_yosys.log": {
-  "bytes": 54688,
-  "sha256": "99900588230b7e970b111fda9184f6a4e7ca4f21f14385f3cb088e8d8d073ee8"
- },
  "evidence/packaging_config_check_runs/packaging_config_check/warning.log": {
   "bytes": 0,
   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -2472,8 +2452,8 @@
   "sha256": "e5d1adceb36f84294fb5c56e81d1747f6c9e08d7ff002c2f69060ad5912f6026"
  },
  "rtl/Cevre_Birimleri/files_1/uart_tb.sv": {
-  "bytes": 18697,
-  "sha256": "da3f25a7a4bff8eb0eecfc3e55fa1be33d4510352fa8dca1e98664ed6b77c85e"
+  "bytes": 20135,
+  "sha256": "d9f30faa6a2eeee88c2136015aadf46e7d20117768b8eb39652e23ef8c940f89"
  },
  "rtl/Cevre_Birimleri/files_1/uart_tx.sv": {
   "bytes": 6429,
@@ -2500,8 +2480,8 @@
   "sha256": "0ac147b9407391646f6e469f64c12c6874eff285fa4afeda21163ab73581186d"
  },
  "rtl/Cevre_Birimleri/tb_qspi_mock.sv": {
-  "bytes": 28150,
-  "sha256": "8d08445d2d1e64ea45d5fb2c58d9c40d15c7d3b22089e1d0e9bb2db7f166b0a0"
+  "bytes": 33303,
+  "sha256": "c9ab14e34611cf1cc11f433d82ce824560012bfab38972f226b290192db34de3"
  },
  "rtl/Cevre_Birimleri/timer_peripheral.sv": {
   "bytes": 8929,
@@ -2550,10 +2530,6 @@
  "rtl/boot/boot.hex": {
   "bytes": 2304,
   "sha256": "3ef779d0426402ac3d46dd7cca70fb927ebd0f9a9495ba520b9fa33d8af6a948"
- },
- "rtl/boot/boot_monolithic_backup.hex": {
-  "bytes": 2304,
-  "sha256": "82a14625bd92d46a08cba0e98f9405de84383071c0f0c003020e9b3fee28007a"
  },
  "rtl/boot/boot_rom.sv": {
   "bytes": 2461,
@@ -4093,7 +4069,7 @@
  },
  "sw_nexys/build/core_test.hex": {
   "bytes": 20480,
-  "sha256": "232ab4a302b6717853fc8037d496364bbc9c81a2c4d78184fb88f2724751c1b2"
+  "sha256": "0ace61bdfd3093ffefac4dc71e97a176fe861765ebb0b82fc20befcb1264fe0a"
  },
  "sw_nexys/build/crt0.o": {
   "bytes": 1604,
@@ -4148,8 +4124,8 @@
   "sha256": "46c2a2b84ae6bea21130d218d225dccc1aa31a9a4be7dcf373188d488c203534"
  },
  "sw_nexys/src/core_test.c": {
-  "bytes": 9967,
-  "sha256": "5b83d8742be01880e0ad1552d73ef0f3bb5cbadeae1cbbd6f738e5e5e06cbd4f"
+  "bytes": 13546,
+  "sha256": "72f11b33331623b25f5b7fd5013a5c60b64d22a42b4cbe5798112c936662a832"
  },
  "sw_nexys/src/crt0.S": {
   "bytes": 521,
@@ -5176,16 +5152,16 @@
   "sha256": "29c3f1e5e441855f47df69a7c4238e6ad25d4e7d6114ac7244cd245df2a68d78"
  },
  "tb/T3.1_jtag_debug/tb_jtag_debug.sv": {
-  "bytes": 16720,
-  "sha256": "bbe27e2acf83bd8f217fc7137b6bebdd92bdfff890214ea2ab8021771bd491b8"
+  "bytes": 21384,
+  "sha256": "815fe0c784ede002811e8127c0e5d7570a9fd30c369ddc36379abcd0e03fbee6"
  },
  "tb/dma/tb_dma_controller.sv": {
   "bytes": 19846,
   "sha256": "aaec1c480d98aa3bd57f54e60c397bfdfc5da9334f69f3be9ae69941b43ba61b"
  },
  "tb/gpio/tb_gpio_peripheral.sv": {
-  "bytes": 13830,
-  "sha256": "75cb0678e98a882a2457dacd22be4b4e34ec5c2845496070c54188b05aa81e4f"
+  "bytes": 16875,
+  "sha256": "e4214007cfb2dfc06524f4ac3d42dce01e5f252dd1dbd12c6c4cbc3b76d9cc79"
  },
  "tb/npu_audio/dogrula_resmi.py": {
   "bytes": 4510,
@@ -5284,12 +5260,12 @@
   "sha256": "0c7421af64ad17372b2da82da8f916264b5cd33d6a7c11417b22872f29c00b51"
  },
  "tb/tb_npu_compute_engine.sv": {
-  "bytes": 12801,
-  "sha256": "4f9b663b0dc0edab8b641754ad5602b0690e91a162288d221b4e8e15466f2136"
+  "bytes": 16926,
+  "sha256": "0e32a832be80691f155ced3dabb5ab44cf1de7b52439ae72dbe54ca4cf9411e5"
  },
  "tb/tb_soc_top.sv": {
-  "bytes": 61839,
-  "sha256": "b2abc9fece11bf1de0a9c91f908d33404bd9f26eff6960678e28c29cbcca64d4"
+  "bytes": 65642,
+  "sha256": "ca17b89efdef4531175eb93f5a6c33365d5369bbf53b54127d355756af184dfe"
  },
  "tb/tb_sram_registered.sv": {
   "bytes": 4863,
@@ -5308,8 +5284,8 @@
   "sha256": "c1fa0aa0db30296a035401f00c96a0d12a4dcde8276e04cd56da73b85cfaa305"
  },
  "tb/uvm/axil_uvm_pkg.sv": {
-  "bytes": 32437,
-  "sha256": "0917220d95954bbc372a9f0b5dc490e05b2c8621c8bdf855c9fe11df5836b069"
+  "bytes": 36249,
+  "sha256": "86b26152ab119f2209e74ccef905006e0afa7e4e6c78929a35db218c718311cf"
  },
  "teknotest/dfx_runtime.txt": {
   "bytes": 111,
@@ -5484,15 +5460,51 @@
   "sha256": "1213aca025a0d9e82fa15881c1ed04073747ef25b0178865e2776f78906afc3f"
  },
  "evidence/spike_20260908/spike_iz.txt": {
-  "bytes": 7763,
-  "sha256": "43ff5c572bc8f74f32092742c24d534cced0a4d9545ead54d77b98d72f9dab5b"
+  "bytes": 14467,
+  "sha256": "869db8808455f5727833027b63d4855092770f8594644cc3dbab11afa71c8f71"
  },
  "evidence/spike_20260908/karsilastirma_sonucu.txt": {
   "bytes": 762,
-  "sha256": "41a1c504c4935757dd19a28521ad282d8883ab6111416197c40b4f80030e7577"
+  "sha256": "71e2447daf12b7fb68369364c568c91700d6aa52ff6a9f6616bf54beda88d783"
  },
  "dtr_demo/Ekran çıktısı_demo_sonucu.png": {
   "bytes": 139792,
   "sha256": "2ce0a1d54b8e088f139cc0efcdc76b271a481f523c9b65cb5de96ffbc3d54d93"
+ },
+ "asic/reports/timing_23ns/README.md": {
+  "bytes": 3130,
+  "sha256": "071506956ce95d7264a16b1c45ae2d716d70a3f527953ec4b56d6bbed93c5d55"
+ },
+ "asic/reports/timing_23ns/sonuc.txt": {
+  "bytes": 1741,
+  "sha256": "3aa0a167ccbe77fab09fba3e916e2d4fe40c63b2b951d0cb742e828606fe6358"
+ },
+ "asic/reports/timing_23ns/sta_tarama.tcl": {
+  "bytes": 3385,
+  "sha256": "ef8cd85f14ce00e04c9a6951bad2c48782fd88336f362ef3d37b68c85f9b43b0"
+ },
+ "evidence/asic/STA_23NS_20260909.txt": {
+  "bytes": 1741,
+  "sha256": "3aa0a167ccbe77fab09fba3e916e2d4fe40c63b2b951d0cb742e828606fe6358"
+ },
+ "scripts/sta_tarama.tcl": {
+  "bytes": 3385,
+  "sha256": "ef8cd85f14ce00e04c9a6951bad2c48782fd88336f362ef3d37b68c85f9b43b0"
+ },
+ "scripts/kapsam_analiz.py": {
+  "bytes": 4289,
+  "sha256": "3042c0a1c68b028089c34e1f918782b17560198d8aa2161d700a0bd0a45beede"
+ },
+ "evidence/dogrulama/KAPSAMA_ANALIZ_20260909.txt": {
+  "bytes": 3512,
+  "sha256": "e782c635c971d272fc996d3f578b6242b086c728004d5db70bb9538c4aad6865"
+ },
+ "evidence/dogrulama/GENISLETME_20260909.md": {
+  "bytes": 7674,
+  "sha256": "d2ee06fbca51a9ce112efa9e4585c446cf891d447ec2b6f6e020a4f48ca2eacc"
+ },
+ "d45_anten2-delivery.tar.gz.sha256": {
+  "bytes": 101,
+  "sha256": "d63bc716450da7f93f68941419ff725cb24f0ff55b59b44d8c6e85e97afff4cc"
  }
 }

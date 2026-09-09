@@ -240,6 +240,89 @@ int main(void)
         s[30] = cagri;
     }
 
+    /* =====================================================================
+     * IKINCI TUR GENISLETME (8 Eylul 2026)
+     *
+     * Sonuclar s[32..47] araligina yazilir; TCM'de yer vardir ve testbench
+     * imzayi s[31]'de aradigi icin o slot korunur.
+     * ===================================================================== */
+
+    /* --- Salt okunur CSR'lar ---
+     *
+     * Dokumanda "hicbir CSR yazimi yok" yaziyordu ve bu bilincliydi: trap
+     * kurulumu Spike ile RTL arasinda ortam farki yaratirdi. Ancak SALT
+     * OKUMA guvenlidir - iki ortam da ayni degeri dondurmeli ve buyruk
+     * dizisi ayni olmalidir. csrr buyrugunun kod cozumunu ve yazmaca
+     * yazmasini dogrular; bu yol daha once HIC uyarilmiyordu.
+     *
+     * mvendorid/marchid/mimpid CV32E40P'de 0'dir; mhartid tek cekirdekte 0.
+     * Degerin kendisi degil, IKI ORTAMDA AYNI OLMASI onemlidir. */
+    {
+        unsigned int csr;
+        __asm__ volatile ("csrr %0, mhartid"   : "=r"(csr));
+        s[32] = csr;
+        __asm__ volatile ("csrr %0, mvendorid" : "=r"(csr));
+        s[33] = csr;
+        __asm__ volatile ("csrr %0, marchid"   : "=r"(csr));
+        s[34] = csr;
+        __asm__ volatile ("csrr %0, mimpid"    : "=r"(csr));
+        s[35] = csr;
+        __asm__ volatile ("csrr %0, misa"      : "=r"(csr));
+        s[36] = csr;
+    }
+
+    /* --- Bit isleme desenleri ---
+     *
+     * Onceki tur mantik buyruklarini genel degerlerle uyariyordu. Asagidaki
+     * desenler bit sizmasini hedefler: yalniz-bir-bit, yalniz-bir-sifir ve
+     * komsu bit desenleri. Bir ALU dilimi komsusuna sizdiriyorsa (yerlestirme
+     * veya sentez hatasi) bu desenlerde gorunur, rastgele degerlerde
+     * gorunmeyebilir. */
+    {
+        volatile unsigned int bir = 1u;
+        unsigned int yuruyen = 0u, tersi = 0u;
+        int i2;
+        for (i2 = 0; i2 < 32; i2++) {
+            yuruyen ^= (bir << i2);              /* her bit sirayla 1 */
+            tersi   += ~(bir << i2);             /* her bit sirayla 0 */
+        }
+        s[37] = yuruyen;                          /* 0xFFFFFFFF olmali */
+        s[38] = tersi;
+        s[39] = 0xAAAAAAAAu ^ 0x55555555u;        /* komsu bit desenleri */
+        s[40] = (0xF0F0F0F0u & 0x0F0F0F0Fu);      /* 0 olmali */
+        s[41] = (0xF0F0F0F0u | 0x0F0F0F0Fu);      /* 0xFFFFFFFF olmali */
+    }
+
+    /* --- Bellek erisim desenleri: hizalanmis kelime siniri ---
+     *
+     * Bayt/yarim-kelime erisimleri onceki turda test edildi ama hep AYNI
+     * kelime icinde. Burada ardisik kelimelere yazip geri okuyoruz; adres
+     * artirma mantigi ve yazma-sonra-okuma yolu dogrulanir. Sonuclar
+     * toplanarak tek slota sigdirilir. */
+    {
+        volatile unsigned int tampon[8];
+        unsigned int toplam2 = 0u;
+        int i3;
+        for (i3 = 0; i3 < 8; i3++) tampon[i3] = (unsigned int)(i3 * 0x11111111u);
+        for (i3 = 7; i3 >= 0; i3--) toplam2 += tampon[i3];   /* ters sirada oku */
+        s[42] = toplam2;
+    }
+
+    /* --- Kosullu dallanmanin her iki yolu ---
+     *
+     * Onceki turda kosullar hep DOGRU cikacak sekilde kurulmustu; yani
+     * dallanmanin YANLIS yolu hic kosulmadi. Burada her iki yol da
+     * uyarilir: bir dal alinir, digeri alinmaz. */
+    {
+        volatile int d = 5;
+        unsigned int yol = 0u;
+        if (d > 0)  yol |= 1u;   else yol |= 2u;    /* dogru yol  */
+        if (d > 10) yol |= 4u;   else yol |= 8u;    /* yanlis yol */
+        if (d == 5) yol |= 16u;  else yol |= 32u;
+        if (d != 5) yol |= 64u;  else yol |= 128u;
+        s[43] = yol;              /* 1|8|16|128 = 153 beklenir */
+    }
+
     /* --- Imza: tamamlandigini gosterir --- */
     s[31] = 0xC0DE0001u;
 

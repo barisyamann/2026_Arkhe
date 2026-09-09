@@ -1,0 +1,37 @@
+d45_anten2 - 23 ns IMZALAMA STA SONUCU (9 Eylul 2026)
+=====================================================
+
+LAYOUT DEGISMEDI. Yalnizca imzalama saat periyodu 20 ns -> 23 ns.
+Girdiler teslim paketinden: results/netlist/soc_top_pnr.v,
+results/spef/{min,nom,max}/, results/lib/<kose>/, sky130 std hucre
+kutuphanesi ve SRAM makro lib'i. Kisitlar signoff_50mhz_hedef.sdc ile
+ayni (uncertainty 0,25/0,10 ; transition 0,15 ; JTAG 100 ns asenkron).
+
+PERIYOT TARAMASI (max_ss_100C_1v60 - en kotu kose)
+  20,0 ns   WNS -1,8149   115 ihlalli yol   <- mevcut teslim
+  22,0 ns   WNS -0,4190     3 ihlalli yol
+  22,5 ns   WNS -0,1691     1 ihlalli yol
+  23,0 ns   WNS +0,0810     0 ihlalli yol   <- KAPANIS
+  24,0 ns   WNS +0,5809     0 ihlalli yol
+
+23 ns = 43,5 MHz
+
+DOKUZ KOSE - 23 ns
+  kose                  setup WNS    setup ihlal   hold WNS    hold ihlal
+  nom_tt_025C_1v80       +4,9822          0         +0,3204        0
+  nom_ss_100C_1v60       +0,5975          0         +0,7504        0
+  nom_ff_n40C_1v95       +6,6872          0         +0,1648        0
+  min_tt_025C_1v80       +5,5667          0         +0,3196        0
+  min_ss_100C_1v60       +1,4208          0         +0,7484        0
+  min_ff_n40C_1v95       +7,1483          0         +0,1642        0
+  max_tt_025C_1v80       +4,4985          0         +0,3195        0
+  max_ss_100C_1v60       +0,0810          0         +0,7506        0
+  max_ff_n40C_1v95       +6,2395          0         +0,1643        0
+
+  SETUP 9/9 POZITIF, 0 ihlalli yol
+  HOLD  9/9 POZITIF, 0 ihlalli yol
+
+NOT
+  22 ns yeterli GORUNUYORDU (WNS -1,8149 + 2,0 = +0,185) ama gercek
+  olcum -0,419 verdi: en kotu yolun kaymasi tek basina yeterli degil,
+  ara yollar da hesaba giriyor. Tarama bu yuzden yapildi.
