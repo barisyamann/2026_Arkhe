@@ -239,6 +239,38 @@ Böylece her iki ifade de karşılanır.
 Rezerve'dir"* der; rezerve bitin yarışmacı tarafından tanımlanması bu
 çerçevededir.
 
+### Emsal DDK kararı — rezerve bit yorumu
+
+25 Mart 2025'te bir takım, şartnamenin QSPI veri yazmacı açıklamasındaki bir
+tutarsızlığı sormuştur (`Page[255:224]` ifadesinin 4 bayt değil 32 bayt
+göstermesi). DDK'nın cevabı:
+
+> *"MSB 4 bit'i reserved varsayıp 8 yazmaç çalışabilirsiniz."*
+
+DDK burada **rezerve bitlerin yarışmacı tarafından yorumlanmasını doğrudan
+önermiştir**. CCR[24] kullanımımız aynı çerçevededir: şartnamenin belirsiz
+bıraktığı bir noktada, varsayılan davranışı bozmayan bir tanım yapılmıştır.
+
+### DDK'nın belirsizlik karşısındaki tutumu
+
+| Tarih | Konu | DDK cevabı |
+|---|---|---|
+| 25 Mar 2025 | Yazmaç açıklamasında tutarsızlık | *"MSB 4 bit'i reserved varsayıp çalışabilirsiniz"* |
+| 29 Ağu 2025 | Flash değişimi (S25FL128S → W25Q16BV) | *"uygun olur"* |
+| 18 Ağu 2026 | Flash değişimi (→ W25Q128JV) | *"açıkça belgelenmesi koşuluyla kabul edilebilir"* |
+| 20 Ağu 2026 | Flash değişimi (→ S25FL256L) | *"açıkça belgelenmesi koşuluyla kabul edilebilir"* |
+
+Dört kararda da aynı çizgi görülür: şartname belirsiz olduğunda yarışmacının
+makul bir yorum yapması ve bunu belgelemesi yeterlidir.
+
+### Pratik not
+
+Kullanılan S25FL128S 16 MB'dır; 3 bayt adres (16 MB) tüm alanı zaten kapsar.
+4-bayt modu mevcut donanımda **hiç kullanılmamaktadır** — yalnızca daha büyük
+bir flash takılması durumu için tasarımda hazır bekler. Kart üzerindeki tüm
+işlemler 3 bayt adresle doğrulanmıştır (`flash kimligi = 0xF0182001`,
+`0x800000 icerik = 0x1F002117`).
+
 ---
 
 ## 5. Mimari not: NPU bellek erişimi
