@@ -82,6 +82,14 @@ TESTLER = [
         mem=[],
     ),
     dict(
+        ad="sartname_uart_stream",
+        top="tb_sartname_uart_stream",
+        kaynak=[F1/"uart_pkg.sv", F1/"uart_tx.sv", F1/"uart_rx.sv",
+                F1/"sync_fifo.sv", F1/"uart_stream_peripheral.sv",
+                TB/"sartname"/"tb_sartname_uart_stream.sv"],
+        mem=[],
+    ),
+    dict(
         ad="sartname_qspi",
         top="tb_sartname_qspi",
         kaynak=[CEV/"qspi_master.sv",
@@ -513,6 +521,18 @@ def test_kos(t, vivado_bin, kapsam=False, ek_tanim=None):
         # uretir ve xelab uretilen C dosyasini derleyemez:
         #     ERROR: [XSIM 43-3409] Failed to compile generated C file
         # Bayraklarin kendisi sorunsuz; yalnizca ayrac sorunuydu.
+        # -------------------------------------------------------------
+        # 9 Eylul 2026: FUNCTIONAL COVERAGE eklendi.
+        #
+        # Onceden yalnizca sbct (statement/branch/condition/toggle) yani
+        # KOD kapsamasi toplaniyordu. Sartname EK-3 ayrica "Functional
+        # Coverage" maddesi tanimlar ve "tanimlanan islevsel coverage
+        # noktalariyla her zaman %100'u hedeflemelidir" der.
+        #
+        # tb_soc_top icinde covergroup'lar zaten tanimliydi (GPIO, JTAG,
+        # AXI el sikismalari, kesme hatlari, DMA durumlari) ama
+        # toplanmiyordu. -covergroup bayragi bunlari veritabanina yazar.
+        # -------------------------------------------------------------
         kapsam_arg = ["--cc_type", "sbct",
                       "--cov_db_dir", (WORK / "covdb").as_posix(),
                       "--cov_db_name", t["ad"]]

@@ -785,6 +785,20 @@ module tb_soc_top;
             end
         end
 
+        // =====================================================================
+        // ISLEVSEL KAPSAMA: KALAN IKI SINIF  (10 Eylul 2026)
+        //
+        // Yukaridaki iki cikarim yalnizca sinif 3 (NO) ve sinif 0 (SILENCE)
+        // uretiyordu. Islevsel kapsama olcumu cov_npu_class'i %50, cov_gpio'yu
+        // %60 gosterdi. Sartname EK-3: "tanimlanan islevsel coverage
+        // noktalariyla her zaman %100'u hedeflemelidir."
+        //
+        // Desenler altin referans modeliyle taranarak bulundu; her biri
+        // farkli bir sinif uretir ve GPIO'ya farkli desen yazdirir.
+        // =====================================================================
+        cikarim_turu(8'h68, 16'hFFFF, "UNKNOWN (1)");
+        cikarim_turu(8'h84, 16'h5555, "YES (2)");
+
                 // ISR gercekten calisip UART'tan yazdirdi mi?
         // Sartname s.16: "... sonuclari UART arayuzu uzerinden yazdirmalidir."
         // DMA, UART-stream'den TCM'e tasimayi tamamladi mi?
@@ -1066,6 +1080,86 @@ module tb_soc_top;
         end
         uart2_rxd = 1'b1;                 // stop biti
         #(UART2_BIT_NS);
+    endtask
+
+    // ------------------------------------------------------------------
+    // BIR CIKARIM TURU KOSTUR VE SINIFI DOGRULA  (10 Eylul 2026)
+    //
+    // NEDEN EKLENDI
+    //   Islevsel kapsama olcumu (xcrg) su noktalarin eksik oldugunu
+    //   gosterdi:
+    //       cov_npu_class  %50   (4 sinifin 2'si)
+    //       cov_gpio       %60   (5 desenin 3'u)
+    //       cross irq x class %50
+    //   Kok neden aynidir: sistem testi yalnizca iki sinif uretiyordu
+    //   (0x55 -> NO, 0x80 -> SILENCE). Sartname EK-3 islevsel kapsamada
+    //   "%100'u hedeflemelidir" der.
+    //
+    //   Altin referans modeli (tb/npu_golden/golden_reference.py) ile
+    //   tarama yapilarak dort sinifi da ureten sabit desenler bulundu:
+    //       0x00 -> 3 NO        logits [-128,  76,  77, 114]
+    //       0x68 -> 1 UNKNOWN   logits [-128, 127, 127, 127]
+    //       0x80 -> 0 SILENCE   logits [  14,  14,  14,  14]
+    //       0x84 -> 2 YES       logits [  14,  13,  15,  14]
+    //
+    //   GPIO karsiliklari (main.c:528-540):
+    //       sinif 0 -> 0x0F0F   sinif 1 -> 0xFFFF
+    //       sinif 2 -> 0x5555   sinif 3 -> 0xAAAA
+    //
+    // Gorev, uygulamanin serbest kosan dongusune yarisa dayanikli
+    // bicimde baglanir: her "Stream ready" gorusunde tensoru gonderir,
+    // sonucu bekler, olmazsa tekrar dener.
+    // ------------------------------------------------------------------
+    task automatic cikarim_turu(input logic [7:0] desen,
+                                input logic [15:0] beklenen_gpio,
+                                input string       sinif_adi);
+        int  deneme;
+        bit  tur_gorundu;
+        begin
+            tur_gorundu = 1'b0;
+            log_print($sformatf("  -- CIKARIM: desen 0x%02h -> beklenen sinif %s (GPIO 0x%04h)",
+                                desen, sinif_adi, beklenen_gpio));
+
+            for (deneme = 0; deneme < 4 && gpio_o != beklenen_gpio; deneme++) begin
+                uart_saw_stream_ready = 1'b0;
+
+                fork : bekle_tur_g
+                    wait (uart_saw_stream_ready);
+                    #(30_000_000);
+                join_any
+                disable bekle_tur_g;
+
+                if (!uart_saw_stream_ready) begin
+                    log_print($sformatf("      [BILGI] deneme %0d: 'Stream ready' gelmedi", deneme));
+                end else begin
+                    tur_gorundu = 1'b1;
+                    uart2_send_tensor(desen);
+                    // Uygulama her turda dort bayt daha bekler (UART_RDR yolu)
+                    uart2_send_byte(8'hA1);
+                    uart2_send_byte(8'hB2);
+                    uart2_send_byte(8'hC3);
+                    uart2_send_byte(8'hD4);
+
+                    fork : bekle_sonuc_g
+                        wait (gpio_o == beklenen_gpio);
+                        #(30_000_000);
+                    join_any
+                    disable bekle_sonuc_g;
+                end
+            end
+
+            if (!tur_gorundu) begin
+                error_count++;
+                log_print($sformatf("      [HATA] %s turu: uygulama yeni tura girmedi", sinif_adi));
+            end else if (gpio_o == beklenen_gpio) begin
+                log_print($sformatf("      [OK]   %s sinifi dogru uretildi (GPIO 0x%04h)",
+                                    sinif_adi, gpio_o));
+            end else begin
+                error_count++;
+                log_print($sformatf("      [HATA] %s bekleniyordu - GPIO 0x%04h, beklenen 0x%04h",
+                                    sinif_adi, gpio_o, beklenen_gpio));
+            end
+        end
     endtask
 
     task automatic uart2_send_tensor(input logic [7:0] pattern);
