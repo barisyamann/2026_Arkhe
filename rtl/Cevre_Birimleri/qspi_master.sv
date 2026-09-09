@@ -101,6 +101,7 @@ logic [$clog2(FIFO_DEPTH):0] tx_wr_ptr, tx_rd_ptr;
 logic [$clog2(FIFO_DEPTH):0] rx_wr_ptr, rx_rd_ptr;
 logic tx_full, tx_empty, rx_full, rx_empty;
 logic tx_flush, rx_flush;
+logic reg_adr_4byte;        // QSPI_FCR[2] - 4 bayt adres kipi (kalici)
 
 assign tx_full  = (tx_wr_ptr[$clog2(FIFO_DEPTH)] != tx_rd_ptr[$clog2(FIFO_DEPTH)]) &&
                   (tx_wr_ptr[$clog2(FIFO_DEPTH)-1:0] == tx_rd_ptr[$clog2(FIFO_DEPTH)-1:0]);
@@ -147,6 +148,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         reg_adr       <= 32'h0;
         tx_flush      <= 1'b0;
         rx_flush      <= 1'b0;
+        reg_adr_4byte <= 1'b0;      // reset: 3 bayt adres (sartname s.26)
         tx_wr_ptr     <= '0;
         err_tx_full   <= 1'b0;
     end else begin
@@ -183,8 +185,12 @@ always_ff @(posedge clk or negedge rst_n) begin
                 ADDR_QSPI_DR: begin
                 end
                 ADDR_QSPI_FCR: begin
+                    // Bit 0 ve 1: flush darbeleri - kendilerini sifirlar
                     if (w_mask_lat[0] && w_data_lat[0]) rx_flush <= 1'b1;
                     if (w_mask_lat[1] && w_data_lat[1]) tx_flush <= 1'b1;
+                    // Bit 2: 4 bayt adres kipi - KALICI bayrak, kendini
+                    // sifirlamaz. Yazilan deger dogrudan saklanir.
+                    if (w_mask_lat[0]) reg_adr_4byte <= w_data_lat[2];
                 end
                 default:;
             endcase
@@ -249,7 +255,10 @@ always_ff @(posedge clk or negedge rst_n) begin
                     end
                 end
                 ADDR_QSPI_STA: s_axi_rdata <= reg_sta;
-                ADDR_QSPI_FCR: s_axi_rdata <= 32'h0;
+                // FCR geri okuma: flush bitleri ([1:0]) daima 0 doner
+                // (darbe olduklari icin), FCR[2] kip bayragi saklanan
+                // degeri doner. Boylece yazilim adres kipini dogrulayabilir.
+                ADDR_QSPI_FCR: s_axi_rdata <= {29'h0, reg_adr_4byte, 2'b00};
                 default:       s_axi_rdata <= 32'h0;
             endcase
         end
@@ -286,34 +295,62 @@ assign ccr_clr_status   = reg_ccr[31];
 //   (s.26) der; rezerve bitin yarismaci tarafindan tanimlanmasi bu
 //   cercevededir.
 //
-// SECILEN COZUM
-//   CCR[24] = 0 -> 3 bayt adres (QSPI_ADR[23:0])  <- RESET DEGERI, s.26
-//   CCR[24] = 1 -> 4 bayt adres (QSPI_ADR[31:0])  <- s.24 karsilanir
+// SECILEN COZUM - QSPI_FCR[2] + ADRES GENISLIGI (9 Eylul 2026)
 //
-//   Reset degeri 0 oldugu icin varsayilan davranis s.26 ile BIREBIR
-//   aynidir; 4-bayt yalnizca yazilim acikca istediginde devreye girer.
+//   ccr_addr_4byte = FCR[2]  VEYA  ADR[31:24] != 0
 //
-// DEGERLENDIRILEN ALTERNATIFLER (9 Eylul 2026)
+//   FCR[2]  ADR[31:24]     adres         gerekce
+//   ------  ----------     -----         -------
+//     0        0x00        3 bayt        s.26 ile BIREBIR (reset hali)
+//     0        != 0        4 bayt        adres 16 MB'i asiyor, zorunlu
+//     1        0x00        4 bayt        yazilim acik secim yapti
+//     1        != 0        4 bayt        ikisi birden
 //
-//   1) ADR[31:24] otomatik algilama - DENENDI VE GERI ALINDI
-//      "ust bayt doluysa 4 bayt gonder" kurali cazip goruluyordu cunku
-//      CCR[24] hic kullanilmadan kalirdi. Ancak tb_qspi_mock'un 4-bayt
-//      bolumu bunu CURUTTU: flash 4-bayt kipindeyken DUSUK adresler de
-//      (orn. 0x00000008) dort bayt gonderilmelidir. Otomatik algilama
-//      ust bayti sifir gordugu icin uc bayt gonderir, flash dorduncu
-//      bayti bekler ve okuma bir bayt kayar. Olculdu: iki denetim dustu.
+//   QSPI_CCR[24] HIC KULLANILMAZ ve daima 0 kalir.
 //
+// NEDEN CCR[24] DEGIL DE FCR[2]
+//
+//   Sartname CCR[24] icin yalnizca "REZERVE" yazar, baska hicbir sey
+//   soylemez. Buna karsilik QSPI_FCR maddesi (s.27) acikca sunu der:
+//
+//     "Tanimlanmamis tum bit konumlari Yarismaci Tanimli / Rezerve'dir."
+//
+//   Ayni cumle QSPI_STA icin de vardir, ancak QSPI_CCR tablosunda
+//   YOKTUR. Yani rezerve bit kullanma iznimiz FCR icin ACIKCA YAZILI,
+//   CCR icin degildir. FCR[2] secilerek sartnamenin kendi izin verdigi
+//   alanda kalinmistir.
+//
+//   FCR yazilabilir (RW) bir yazmactir ve [0]/[1] disindaki 30 biti
+//   bostur; bu tasarimda yalnizca [2] kullanilir.
+//
+// FCR[2] KALICIDIR
+//
+//   FCR[0] ve FCR[1] flush darbeleridir, kendilerini sifirlarlar.
+//   FCR[2] ise bir KIP bayragidir: yazilan deger saklanir ve yazilim
+//   degistirene kadar korunur.
+//
+// NEDEN ADRES GENISLIGI DE BAKILIYOR
+//
+//   Yalnizca adres genisligine bakmak YETMEZ: tb_qspi_mock'un 4-bayt
+//   bolumu bunu gosterdi. Flash 4-bayt kipindeyken DUSUK adresler de
+//   (orn. 0x00000008) dort bayt gonderilmelidir; adresin kendisinde bu
+//   bilgi yoktur. Olculdu: tek basina otomatik algilama iki denetim
+//   dusurdu. Bu yuzden acik secim yolu (FCR[2]) korunmustur.
+//
+//   Adres genisligi kontrolu ise ek guvenlik saglar: 16 MB'i asan bir
+//   adres verildiginde yazilim FCR[2]'yi kurmayi unutsa bile kontrolcu
+//   dort bayt basar.
+//
+// DEGERLENDIRILEN VE ELENEN ALTERNATIFLER
+//
+//   1) CCR[24] rezerve biti - yukarida acikland: dayanagi yazili degil
 //   2) 4-bayt komut varyantlari (0x13, 0x12, 0x0C)
 //      Sartname 17 zorunlu komut sayar; bu varyantlar listede YOKTUR.
-//
 //   3) Kip degistirme komutlari (0xB7 / 0xE9)
-//      Ayni sebep - sartnamenin listesinde yoktur.
-//
-//   Rezerve bit kullanimi, yazilimin adres genisligini ACIKCA secmesine
-//   izin veren tek yontemdir ve flash'in hangi kipte oldugundan bagimsiz
-//   dogru calisir.
+//      Ayni sebep. Ayrica karttaki S25FL128S 16 MB oldugu icin bu kip
+//      gercek donanimda dogrulanamaz, yalnizca simulasyonda kalirdi.
 // -----------------------------------------------------------------------
-assign ccr_addr_4byte   = reg_ccr[24];
+assign ccr_addr_4byte   = reg_adr_4byte || (reg_adr[31:24] != 8'h00);
 
 assign sta_fifo_err = {2'b00, err_tx_full, err_rx_empty | err_rx_full};
 assign reg_sta = {20'h0,

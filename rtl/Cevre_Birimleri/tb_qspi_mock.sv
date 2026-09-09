@@ -277,7 +277,13 @@ localparam int TEST_WORDS = 128;
 
         axi_write(32'h10, 32'h0000_0003);          // QSPI_FCR: iki FIFO'yu bosalt
         axi_write(32'h04, 32'h0000_0008);          // QSPI_ADR = 8
-        axi_write(32'h00, 32'h8907_0103);          // CCR: ayni + bit24 (4 bayt)
+        // 4 bayt adres kipi QSPI_FCR[2] ile secilir (9 Eylul 2026).
+        // Onceden CCR[24] kullaniliyordu; sartname o biti yalnizca
+        // "REZERVE" diye isaretler ve kullanma izni yazili degildir.
+        // FCR maddesi ise "Tanimlanmamis tum bit konumlari Yarismaci
+        // Tanimli / Rezerve'dir" der - izin ACIKCA yazilidir.
+        axi_write(32'h10, 32'h0000_0004);          // QSPI_FCR[2] = 4 bayt kipi
+        axi_write(32'h00, 32'h8807_0103);          // CCR: bit24 YOK
 
         waited = 0;
         forever begin
@@ -305,9 +311,11 @@ localparam int TEST_WORDS = 128;
         // CCR alan kodlamasi:
         //   [7:0] komut  [9:8] veri modu (00 yok / 01 x1 / 10 x2 / 11 x4)
         //   [10] yaz(1)/oku(0)  [15:11] dummy  [23:16] bayt-1
-        //   [24] 4-bayt adres   [30:25] prescaler  [31] durum temizle
+        //   [24] REZERVE (kullanilmiyor)  [30:25] prescaler  [31] durum temizle
+        //   4-bayt adres kipi QSPI_FCR[2] ile secilir
         // ---------------------------------------------------------------------
         sel_4byte = 1'b0;                        // 3-bayt modeline geri don
+        axi_write(32'h10, 32'h0000_0000);        // QSPI_FCR[2] = 0, 3 bayt kipi
         repeat (5) @(posedge clk);
 
         // --- RDID (0x9F): uretici/cihaz kimligi, 3 bayt tek hatli --------

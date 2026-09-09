@@ -208,7 +208,7 @@ PRE = 9  ->   5603 sayım        oran = 10,00×  =  (9+1)/(0+1)
 
 ---
 
-## 4. YORUM: QSPI 4 bayt adresleme — CCR[24] rezerve biti
+## 4. ÇÖZÜLDÜ: QSPI 4 bayt adresleme — QSPI_FCR[2] ile
 
 ### Şartnamedeki boşluk
 
@@ -220,94 +220,98 @@ PRE = 9  ->   5603 sayım        oran = 10,00×  =  (9+1)/(0+1)
 
 4-baytı seçecek bir mekanizma **tanımlanmamıştır**.
 
-### Seçilen çözüm
+### Neden CCR[24] değil de FCR[2]
+
+İlk sürümde `CCR[24]` rezerve biti seçici yapılmıştı. Ancak şartname
+metni yakından incelendiğinde şu ayrım görüldü:
+
+| Yazmaç | Şartnamenin ifadesi |
+|---|---|
+| QSPI_CCR[24] | yalnızca *"REZERVE"* — başka hiçbir şey demiyor |
+| QSPI_STA | *"Tanımlanmamış tüm bit konumları **Yarışmacı Tanımlı** / Rezerve'dir"* |
+| QSPI_FCR | *"Tanımlanmamış tüm bit konumları **Yarışmacı Tanımlı** / Rezerve'dir"* |
+
+**Rezerve bit kullanma iznimiz FCR için açıkça yazılı, CCR için değil.**
+Bu yüzden 9 Eylül 2026'da mekanizma `QSPI_FCR[2]`'ye taşındı.
+
+`QSPI_STA` da bu cümleyi taşır ama salt okunurdur (RO); yazılım oraya
+yazamayacağı için kontrol biti olarak kullanılamaz. `QSPI_FCR` ise
+yazılabilirdir (RW) ve `[0]`/`[1]` dışındaki 30 biti boştur.
+
+### Çözüm
+
+```systemverilog
+assign ccr_addr_4byte = reg_adr_4byte || (reg_adr[31:24] != 8'h00);
+```
+
+| FCR[2] | ADR[31:24] | Adres | Gerekçe |
+|:---:|:---:|---|---|
+| 0 | 0x00 | 3 bayt | s.26 ile **birebir** (reset hali) |
+| 0 | ≠ 0 | 4 bayt | adres 16 MB'ı aşıyor, zorunlu |
+| 1 | 0x00 | 4 bayt | yazılım açık seçim yaptı |
+| 1 | ≠ 0 | 4 bayt | ikisi birden |
+
+**`QSPI_CCR[24]` hiç kullanılmaz ve daima 0 kalır.**
+
+`FCR[2]` kalıcı bir kip bayrağıdır — `FCR[0]`/`FCR[1]` flush darbelerinin
+aksine kendini sıfırlamaz. Geri okumada da görünür, böylece yazılım kipi
+doğrulayabilir.
+
+### Neden adres genişliği de kontrol ediliyor
+
+Yalnızca adres genişliğine bakmak **yetmez**. `tb_qspi_mock`'un 4-bayt
+bölümü bunu ölçtü: flash 4-bayt kipindeyken **düşük** adresler de
+(örn. `0x00000008`) dört bayt gönderilmelidir; bu bilgi adresin kendisinde
+yoktur.
 
 ```
-CCR[24] = 0  ->  3 bayt adres (QSPI_ADR[23:0])   <- RESET DEĞERİ, s.26 birebir
-CCR[24] = 1  ->  4 bayt adres (QSPI_ADR[31:0])   <- s.24 karşılanır
-```
-
-Reset değeri 0 olduğu için **varsayılan davranış s.26 ile birebir aynıdır**;
-4 bayt yalnızca yazılım açıkça istediğinde devreye girer.
-
-Şartname s.26 ayrıca *"Tanımlanmamış tüm bit konumları **Yarışmacı Tanımlı** /
-Rezerve'dir"* der. Rezerve bitin yarışmacı tarafından tanımlanması bu
-çerçevededir.
-
-### Değerlendirilen ve elenen alternatifler
-
-Üç alternatif ölçülerek denendi (9 Eylül 2026):
-
-**1. `ADR[31:24]` otomatik algılama — denendi, GERİ ALINDI**
-
-"Üst bayt doluysa 4 bayt gönder" kuralı cazipti çünkü `CCR[24]` hiç
-kullanılmadan kalırdı. Ancak `tb_qspi_mock`'un 4-bayt bölümü bunu çürüttü:
-
-```
-Flash 4-bayt kipindeyken DÜŞÜK adresler de (örn. 0x00000008) dört bayt
-gönderilmelidir. Otomatik algılama üst baytı sıfır gördüğü için üç bayt
-gönderir, flash dördüncü baytı bekler, okuma bir bayt kayar.
-
-Ölçüldü: iki denetim düştü.
+Tek başına otomatik algılama denendi, iki denetim düştü:
   [HATA] 4-bayt: flash kelime 2: beklenen=0xa5a50002 gercek=0x000000ff
   [HATA] 4-bayt: flash kelime 3: beklenen=0xa5a50003 gercek=0x00000000
 ```
 
-**2. 4-bayt komut varyantları (0x13, 0x12, 0x0C)**
+Bu yüzden açık seçim yolu (`FCR[2]`) korundu. Adres genişliği kontrolü ek
+güvenlik sağlar: 16 MB'ı aşan bir adres verildiğinde yazılım `FCR[2]`'yi
+kurmayı unutsa bile kontrolcü dört bayt basar.
 
-Şartname 17 zorunlu komut sayar; bu varyantlar listede **yoktur**. Ayrıca
-`QSPI_ADR[31:24]` yine tanımsız kalırdı.
+### Elenen alternatifler
 
-**3. Kip değiştirme komutları (0xB7 Enter / 0xE9 Exit)**
+| Yöntem | Neden seçilmedi |
+|---|---|
+| CCR[24] rezerve biti | Kullanma izni şartnamede **yazılı değil** |
+| 4-bayt komut varyantları (0x13, 0x12, 0x0C) | Şartnamenin **17 zorunlu komut listesinde yok** |
+| Kip değiştirme komutları (0xB7 / 0xE9) | Aynı sebep; ayrıca karttaki S25FL128S 16 MB olduğu için gerçek donanımda **doğrulanamaz** |
 
-Aynı sebep — listede yok. Ayrıca kartta bulunan S25FL128S 16 MB olduğu için
-bu kip **gerçek donanımda doğrulanamaz**; yalnızca simülasyonda kalırdı.
+### Ölçüm — SCK kenar sayımı (`tb_sartname_qspi`)
 
-**Sonuç:** Rezerve bit kullanımı, yazılımın adres genişliğini açıkça
-seçmesine izin veren ve flash'ın hangi kipte olduğundan bağımsız doğru
-çalışan tek yöntemdir.
+```
+FCR[2]=0, ADR = 0x0012_3456   ->  40 kenar   (8 komut + 24 adres + 8 veri)
+FCR[2]=1, ADR = 0x12AB_CDEF   ->  48 kenar   (8 komut + 32 adres + 8 veri)
+FCR[2]=0, ADR = 0x34AB_CDEF   ->  48 kenar   (büyük adres, otomatik)
+CCR[24]=1 yazıldı              ->  40 kenar   (bit etkisiz - GERÇEKTEN REZERVE)
+```
 
-### Ölçüm — iki ayrı testte doğrulandı
+Son satır kritiktir: `CCR[24]`'e 1 yazılsa bile davranış değişmiyor.
 
-**`tb_qspi_mock` (mevcut blok testi, 40 denetim):**
-Flash modeli 4-bayt kipine alınır, `CCR[24]=1` ile okuma yapılır ve gelen
-verinin doğru kelime olduğu denetlenir. Test yorumu şöyle der:
+Ayrıca `tb_qspi_mock` (40 denetim) flash modelini 4-bayt kipine alıp
+`FCR[2]=1` ile okuma yapar ve gelen verinin doğru kelime olduğunu denetler.
+Test yorumu şöyle der:
 
 > *"Bu test AYIRT EDICIDIR: 4-bayt bekleyen flash'a yalnızca 3 bayt adres
 > gönderilirse model hâlâ adres fazındadır ve ilk veri baytını adresin son
 > baytı sanıp yutar. Okunan kelime kayar, denetim düşer."*
 
-**`tb_sartname_qspi` (yeni şartname uyum testi, 24 denetim):**
-SCK kenarları sayılarak adres fazının uzunluğu doğrudan ölçülür:
-
-```
-CCR[24]=0  ->  40 kenar   (8 komut + 24 adres + 8 veri)  = 3 bayt
-CCR[24]=1  ->  48 kenar   (8 komut + 32 adres + 8 veri)  = 4 bayt
-```
-
-Aradaki 8 kenar tam bir bayttır.
-
-### DDK'nın belirsizlik karşısındaki tutumu
-
-DDK, şartnamedeki belirsizliklerde yarışmacının makul yorum yapmasını uygun
-görmüştür. 25 Mart 2025'te bir takım QSPI veri yazmacı açıklamasındaki bir
-tutarsızlığı sorduğunda cevap şu olmuştur:
-
-> *"MSB 4 bit'i reserved varsayıp 8 yazmaç çalışabilirsiniz."*
-
-**Not:** Bu emsal bizim durumumuzla tam örtüşmez — DDK orada bir alanı
-*rezerve saymayı* önermiştir, biz ise rezerve bir alanı *kullanıyoruz*. Emsalin
-gösterdiği şey, DDK'nın şartname belirsizliklerinde yarışmacı yorumunu kabul
-ettiğidir. Asıl dayanağımız şartnamenin kendi cümlesidir: *"Tanımlanmamış tüm
-bit konumları Yarışmacı Tanımlı / Rezerve'dir."*
-
 ### Yazılım etkisi
 
-Mevcut yazılımların hiçbiri `CCR[24]` kullanmaz — `bootloader.S:39` zaten
-*"CCR[24] 4-bayt kipi burada GEREKMEZ"* notunu taşır. En yüksek kullanılan
-flash adresi `0x805E7F`'tir (~8 MB) ve karttaki S25FL128S 16 MB'dır; 3 bayt
-adres tüm alanı kapsar. 4-bayt modu yalnızca daha büyük bir flash takılması
-durumu için tasarımda hazır bekler.
+Yoktur. Mevcut yazılımların hiçbiri 16 MB'ı aşan adres kullanmaz (en yüksek
+kullanılan adres `0x805E7F`) ve karttaki S25FL128S 16 MB'dır; 3 bayt adres
+tüm alanı kapsar. `bootloader.S` ve `fpga_demo.c` hiçbir 4-bayt kip biti
+yazmaz.
+
+### Şartname uyumu
+
+Bu değişiklikle QSPI bölümünde **şartnamede yazılı izni olmayan hiçbir
+kullanım kalmamıştır**. `tb_sartname_qspi` 27 denetimin tamamını geçer.
 
 ---
 
@@ -466,5 +470,5 @@ değerlendirileceğini söyler; 2,4× yavaşlama doğrudan puan kaybı olurdu.
 3. **Timer PRE** — şartnamenin üç örneğinden ikisi `PRE+1` der, üçüncüsü
    çelişir; kuralı tanımlayan örneklere uyulmuştur.
 4. **QSPI 4-bayt adresleme** — şartname 4-bayt ister ama seçim mekanizması
-   tanımlamaz; rezerve CCR[24] biti kullanıldı. Üç alternatif ölçülerek
-   elendi (biri denendi ve testi kırdı).
+   tanımlamaz. Şartnamenin *"Yarışmacı Tanımlı"* dediği `QSPI_FCR[2]`
+   kullanıldı; `CCR[24]` hiç kullanılmıyor.

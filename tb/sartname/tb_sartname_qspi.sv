@@ -8,10 +8,12 @@
 //
 //  Sartname s.24 "Tum flash alanini kapsamak icin 4-bayt adresleme modu
 //  destegi bulunacaktir" der, ama s.26'daki QSPI_ADR tanimi 3 bayt anlatir
-//  ve 4-bayti secen bir bit TANIMLAMAZ. Bu bosluk CCR[24] rezerve biti ile
-//  doldurulmustur (bkz. evidence/sartname/SARTNAME_UYUMU_VE_SAPMALAR.md).
+//  ve 4-bayti secen bir bit TANIMLAMAZ. Bu bosluk QSPI_FCR[2] ile
+//  doldurulmustur - sartname FCR icin "Tanimlanmamis tum bit konumlari
+//  Yarismaci Tanimli / Rezerve'dir" der, yani izin ACIKCA yazilidir.
+//  QSPI_CCR[24] hic kullanilmaz ve daima 0 kalir.
 //
-//  Bu testin en kritik bolumu, CCR[24]=1 iken kontrolcunun GERCEKTEN dort
+//  Bu testin en kritik bolumu, FCR[2]=1 iken kontrolcunun GERCEKTEN dort
 //  bayt adres bastigini SCK kenarlarini sayarak kanitlamasidir. Boylece
 //  "4-bayt destegi var" iddiasi belge degil OLCUM olur.
 //
@@ -19,7 +21,7 @@
 //    x1 / x2 / x4 veri genisligi        (CCR[9:8])
 //    veri boyutu N-1 kodlamasi          (CCR[23:16])
 //    prescaler N+1 kodlamasi            (CCR[30:25])
-//    3 bayt / 4 bayt adres              (CCR[24], varsayilan 3)
+//    3 bayt / 4 bayt adres              (QSPI_FCR[2], varsayilan 3)
 //    SPI mod 0 - SCK bosta 0            (s.24)
 //    QSPI_STA bit haritasi              (s.26)
 //    QSPI_FCR flush ve otomatik sifirlanma (s.27)
@@ -262,7 +264,7 @@ module tb_sartname_qspi;
                       (sck_sayaci >= 31) && (sck_sayaci <= 33), sck_sayaci);
 
         // ====================================================================
-        madde("s.25 QSPI_CCR[24]=0 (VARSAYILAN): 3 bayt adres - sartname QSPI_ADR[23:0] tanimi");
+        madde("s.26 QSPI_ADR: varsayilan UC bayt adres (FCR[2]=0, ust bayt 0)");
         // ====================================================================
         axi_write(QSPI_CCR, 32'h8000_0000);
         bosa_don();
@@ -272,28 +274,84 @@ module tb_sartname_qspi;
         axi_write(QSPI_CCR, (32'd2 << 25) | (32'd1 << 8) | (32'd0 << 16) | CMD_READ);
         v = 0;
         while (v[0] == 1'b0) axi_read(QSPI_STA, v);
-        $display("      bilgi  CCR[24]=0 -> SCK kenari = %0d", sck_sayaci);
+        $display("      bilgi  FCR[2]=0, ADR ust bayt 0 -> SCK kenari = %0d", sck_sayaci);
         // komut 8 + adres 24 (3 bayt) + veri 8 = 40 kenar
-        denetle_kosul("CCR[24]=0 -> UC bayt adres (8+24+8 = 40 kenar)",
+        denetle_kosul("varsayilan UC bayt adres (8+24+8 = 40 kenar)",
                       (sck_sayaci >= 39) && (sck_sayaci <= 41), sck_sayaci);
 
         // ====================================================================
-        madde("s.24 \"Tum flash alanini kapsamak icin 4-BAYT ADRESLEME MODU destegi bulunacaktir\" - CCR[24]=1 ile OLCULDU");
+        madde("s.24 \"Tum flash alanini kapsamak icin 4-BAYT ADRESLEME MODU destegi bulunacaktir\" - QSPI_FCR[2] ile OLCULDU");
         // ====================================================================
         axi_write(QSPI_CCR, 32'h8000_0000);
         bosa_don();
         axi_write(QSPI_FCR, 32'd3);
         axi_write(QSPI_ADR, 32'h12AB_CDEF);     // 32 bit tam adres
-        // CCR[24]=1 -> dort bayt adres
-        axi_write(QSPI_CCR, (32'd2 << 25) | (32'd1 << 24) | (32'd1 << 8) |
+        // QSPI_FCR[2] = 1 -> dort bayt adres kipi
+        axi_write(QSPI_FCR, 32'd4);
+        axi_write(QSPI_CCR, (32'd2 << 25) | (32'd1 << 8) |
                             (32'd0 << 16) | CMD_READ);
         v = 0;
         while (v[0] == 1'b0) axi_read(QSPI_STA, v);
-        $display("      bilgi  CCR[24]=1 -> SCK kenari = %0d", sck_sayaci);
+        $display("      bilgi  FCR[2]=1 -> SCK kenari = %0d", sck_sayaci);
         // komut 8 + adres 32 (4 bayt) + veri 8 = 48 kenar
-        denetle_kosul("CCR[24]=1 -> DORT bayt adres (8+32+8 = 48 kenar)",
+        denetle_kosul("FCR[2]=1 -> DORT bayt adres (8+32+8 = 48 kenar)",
                       (sck_sayaci >= 47) && (sck_sayaci <= 49), sck_sayaci);
         $display("      bilgi  3 bayt ile 4 bayt arasindaki fark 8 kenar = 1 bayt");
+
+        // ----------------------------------------------------------------
+        // IKINCI YOL: CCR[24]'e HIC DOKUNMADAN 4 bayt
+        //
+        // Sartname CCR[24]'u yalnizca "REZERVE" diye isaretler ve
+        // "Tanimlanmamis bit konumlari Yarismaci Tanimli" cumlesi
+        // QSPI_CCR tablosunda GECMEZ (yalnizca STA ve FCR'de gecer).
+        // Bu belirsizlik nedeniyle tasarim ikinci bir yol daha sunar:
+        // adresin ust bayti doluysa rezerve bite hic dokunulmadan da
+        // dort bayt gonderilir. Boylece s.24 isteri her iki yorumda da
+        // karsilanmis olur.
+        // ----------------------------------------------------------------
+        axi_write(QSPI_CCR, 32'h8000_0000);
+        bosa_don();
+        axi_write(QSPI_FCR, 32'd3);
+        axi_write(QSPI_FCR, 32'd0);             // FCR[2]=0 - kip KAPALI
+        axi_write(QSPI_ADR, 32'h34AB_CDEF);     // ust bayt DOLU
+        axi_write(QSPI_CCR, (32'd2 << 25) | (32'd1 << 8) |
+                            (32'd0 << 16) | CMD_READ);
+        v = 0;
+        while (v[0] == 1'b0) axi_read(QSPI_STA, v);
+        $display("      bilgi  FCR[2]=0, ADR ust bayt dolu -> SCK kenari = %0d",
+                 sck_sayaci);
+        denetle_kosul("kip kapali ama buyuk adres -> yine dort bayt",
+                      (sck_sayaci >= 47) && (sck_sayaci <= 49), sck_sayaci);
+
+        // Ucuncu durum: her ikisi de sifir -> uc bayt (varsayilan korunuyor)
+        axi_write(QSPI_CCR, 32'h8000_0000);
+        bosa_don();
+        axi_write(QSPI_FCR, 32'd3);
+        axi_write(QSPI_ADR, 32'h0012_3456);     // ust bayt 0
+        axi_write(QSPI_CCR, (32'd2 << 25) | (32'd1 << 8) |
+                            (32'd0 << 16) | CMD_READ);
+        v = 0;
+        while (v[0] == 1'b0) axi_read(QSPI_STA, v);
+        $display("      bilgi  FCR[2]=0, ADR ust bayt 0 -> SCK kenari = %0d",
+                 sck_sayaci);
+        denetle_kosul("ikisi de kapali -> UC bayt (s.26 varsayilani)",
+                      (sck_sayaci >= 39) && (sck_sayaci <= 41), sck_sayaci);
+
+        // ----------------------------------------------------------------
+        // CCR[24] GERCEKTEN REZERVE: yazilsa bile davranis degismez
+        // ----------------------------------------------------------------
+        axi_write(QSPI_CCR, 32'h8000_0000);
+        bosa_don();
+        axi_write(QSPI_FCR, 32'd3);
+        axi_write(QSPI_FCR, 32'd0);             // kip kapali
+        axi_write(QSPI_ADR, 32'h0012_3456);     // ust bayt 0
+        axi_write(QSPI_CCR, (32'd2 << 25) | (32'd1 << 24) | (32'd1 << 8) |
+                            (32'd0 << 16) | CMD_READ);   // CCR[24]=1 YAZILDI
+        v = 0;
+        while (v[0] == 1'b0) axi_read(QSPI_STA, v);
+        $display("      bilgi  CCR[24]=1 yazildi -> SCK kenari = %0d", sck_sayaci);
+        denetle_kosul("CCR[24] REZERVE - yazilmasi davranisi degistirmiyor",
+                      (sck_sayaci >= 39) && (sck_sayaci <= 41), sck_sayaci);
 
 
         // ====================================================================
