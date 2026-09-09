@@ -50,6 +50,57 @@ Tarihsel aday logları ve test kaynakları pakette korunmuştur. 5–6 Eylül NP
 
 8 Eylül QSPI testinde yeni FIFO negatif senaryolarıyla 30 kontrol geçmiştir. Kaynak/test kayıtlarının tarih ve kapsamları `evidence/` altında tutulur. Son UVM veya kod kapsamı için tamamlanmamış loglar başarı kabul edilmez.
 
+## Regresyon ve kod kapsama
+
+9 Eylül 2026 itibarıyla regresyon **16 test / 454 denetim** ile tamamı
+geçmektedir. Bütün testler kendi kendini kontrol eder; hata varsa koşum
+`$fatal` ile düşer.
+
+| Test | Denetim | Test | Denetim |
+|---|---:|---|---:|
+| npu_dogruluk | 77 | npu_blok | 27 |
+| uart | 42 | jtag_debug | 27 |
+| qspi | 40 | sync_fifo | 24 |
+| dma | 39 | sistem | 17 |
+| i2c | 38 | sistem_gercek_boot | 17 |
+| gpio | 37 | npu_hizlanma | 2 |
+| timer | 36 | npu_golden | 1 |
+| uvm_axi_agent | 29 | cekirdek_izi | 1 |
+
+Kod kapsama **üç ayrı seviyede** ölçülür ve hangi seviyeden söz edildiği
+belirtilmelidir:
+
+| Seviye | Statement | Branch |
+|---|---:|---:|
+| Blok testleri (her modül kendi ortamında) | %93,6 – %97,5 | %70,8 – %92,4 |
+| Bizim yazdığımız RTL (sistem seviyesi) | %81,6 | %74,9 |
+| Genel rapor (CV32E40P ve paketler dahil) | %62,5 | %44,6 |
+
+Blok testi ölçümleri:
+
+| Blok | Statement | Branch |
+|---|---:|---:|
+| timer | %97,5 | %74,7 |
+| gpio | %96,9 | %92,4 |
+| uart | %96,9 | %87,7 |
+| sync_fifo | %96,5 | %77,3 |
+| npu_blok | %96,4 | %88,0 |
+| dma | %96,1 | %82,7 |
+| i2c | %95,6 | %79,4 |
+| qspi | %94,4 | %73,0 |
+| jtag_debug | %93,6 | %70,8 |
+
+Genel rapordaki %62,5 / %44,6 rakamı **üç farklı şeyi birlikte sayar**:
+bizim yazdığımız RTL, üçüncü taraf CV32E40P çekirdeği ve çalıştırılabilir
+kod içermeyen SystemVerilog paket dosyaları. Paketler yalnızca tip ve sabit
+tanımı içerir; kapsama metriği bunları %0 sayarak ortalamayı düşürür.
+CV32E40P PULP Platform tarafından ayrıca doğrulanmış bir çekirdektir ve
+bizim test kapsamımızın hedefi değildir. Ayrıştırma
+`scripts/kapsam_analiz.py` ile yeniden üretilebilir; çıktı
+`evidence/dogrulama/KAPSAMA_ANALIZ_20260909.txt` altındadır.
+
+Kapsama, şartname EK-3'te **"Opsiyonel***"** olarak işaretlidir.
+
 8 Eylül 16:18 FPGA bitstream'inin yönlendirme sonrası WNS +1,218 ns, hold +0,055 ns; tüm tanımlı zamanlama kısıtları sağlanmıştır.
 
 8 Eylül 17:31'de yarışma paketiyle gelen `demo_harness.py` aracı, public dataset'in tamamıyla kart üzerinde koşulmuştur. Ham çıktılar `fpga/demo_teknofest/sonuclar/` altındadır.

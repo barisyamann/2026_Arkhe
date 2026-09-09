@@ -30,47 +30,24 @@
    sayar ve genel ortalamayi haksiz yere dusurur.
    CV32E40P ucuncu taraf bir cekirdektir ve PULP tarafindan
    ayrica dogrulanmistir; bizim test kapsamimizin hedefi degildir.
+
+ BLOK TESTLERI - her modul kendi test ortaminda
+ --------------------------------------------------------------
+   blok                  statement     branch
+   dma                       96.1%      82.7%
+   gpio                      96.9%      92.4%
+   i2c                       95.6%      79.4%
+   jtag_debug                93.6%      70.8%
+   npu_blok                  96.4%      88.0%
+   qspi                      94.4%      73.0%
+   sync_fifo                 96.5%      77.3%
+   timer                     97.5%      74.7%
+   uart                      96.9%      87.7%
+
+   Sistem raporu cevre birimlerini yalnizca boot sirasinda
+   kullanildiklari kadar uyarir; blok testleri gercek kapsamayi
+   gosterir. Raporlar build/cov_<blok>/ altinda uretilir:
+     python scripts/run_regression.py --coverage
+     xcrg -cov_db_dir build/regression/covdb -cov_db_name <blok> \
+          -report_dir build/cov_<blok> -report_format html
 ====================================================================
-
-====================================================================
- EK: BLOK TESTLERI AYRI OLCUMU  (9 Eylul 2026)
-====================================================================
-
- Sistem raporu (sistem_gercek_boot) cevre birimlerini yalnizca BOOT
- sirasinda kullanildiklari kadar uyarir. Ornegin QSPI orada tek bir
- okuma komutu gorur. Her blok kendi testinde ayri olculunce gercek
- kapsama ortaya cikiyor:
-
-   blok testi     statement   branch
-   ---------------------------------
-   uart              80.2%     70.2%
-   sync_fifo         77.3%     92.9%
-   i2c               77.2%     86.4%
-   dma               82.7%     95.0%
-   gpio              65.3%     91.7%
-   qspi              73.0%     78.6%
-   timer             74.7%     69.0%
-   jtag_debug        61.7%     76.2%
-
- qspi_master modulu tek basina:  statement 88.7%  branch 80.2%
- (sistem raporunda ayni modul %58,0 / %40,7 gorunuyor)
-
- KOMUT KAPSAMASI EKLEMESI
-
-   qspi_master.sv on yedi flash komutu tanimlar; test yalnizca CMD_READ
-   (0x03) yolunu uyariyordu. 9 Eylul 2026'da sekiz komut yolu eklendi:
-   WREN, RDID, RDSR1, PP (yazma dali), SE (silme), DOR (cift hat),
-   QOR (dort hat) ve kukla cevrim ust siniri.
-
-   QSPI blok testi: 30 -> 40 denetim.
-
- SONUC
-
-   Genel %62,47 rakami uc farkli seyi karistiriyor ve kendi tasarimimizin
-   kalitesini gizliyor. Dogru okuma:
-
-     bizim RTL (sistem seviyesi)    statement %81,6  branch %74,9
-     blok testleri (kendi ortami)   statement %62-89 branch %69-95
-     CV32E40P (ucuncu taraf)        statement %52,5  branch %52,6
-     paketler (calistirilabilir
-       kod icermez)                 metrik %0 sayiyor

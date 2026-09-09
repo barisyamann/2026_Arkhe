@@ -1,7 +1,7 @@
 {
  "JURI_TEKNIK_OZET.md": {
-  "bytes": 6553,
-  "sha256": "02a86bd7634ec5cb96552efc58c03156844fa76ab5f39d5d56adf9cded903a1d"
+  "bytes": 8412,
+  "sha256": "b55eb1c444bfbd9bb4b294bb0d5eb26ec6cdc09d6ab52ec72ff87b8367d1ccf5"
  },
  "README.md": {
   "bytes": 2131,
@@ -2468,8 +2468,8 @@
   "sha256": "a3e120cb572b466c7f51068b5fd0df93b572135584a4c86a693e9fdc3211784b"
  },
  "rtl/Cevre_Birimleri/i2c_peripheral_tb.sv": {
-  "bytes": 18754,
-  "sha256": "57906b3b41d8897cddc52506b044f1f136374f579f6604353a93d0a5dc148be2"
+  "bytes": 23469,
+  "sha256": "992d6d0316f6d7c44e7b47dbcb2a35e873b704ede194d4f3705c17ac6ce91da5"
  },
  "rtl/Cevre_Birimleri/jtag_debug.sv": {
   "bytes": 23374,
@@ -5492,12 +5492,12 @@
   "sha256": "ef8cd85f14ce00e04c9a6951bad2c48782fd88336f362ef3d37b68c85f9b43b0"
  },
  "scripts/kapsam_analiz.py": {
-  "bytes": 4289,
-  "sha256": "3042c0a1c68b028089c34e1f918782b17560198d8aa2161d700a0bd0a45beede"
+  "bytes": 6811,
+  "sha256": "3a829598ab349acc8041d942e790035a3166e1ab92af3864ee96fa24d5dff24d"
  },
  "evidence/dogrulama/KAPSAMA_ANALIZ_20260909.txt": {
-  "bytes": 3512,
-  "sha256": "e782c635c971d272fc996d3f578b6242b086c728004d5db70bb9538c4aad6865"
+  "bytes": 2828,
+  "sha256": "9bdf9d0005b88925c29f3a0cbb89671873b6db76d2cf70892d761d264d11f318"
  },
  "evidence/dogrulama/GENISLETME_20260909.md": {
   "bytes": 7674,

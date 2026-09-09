@@ -143,6 +143,23 @@ module i2c_peripheral_tb;
         sda_drv = 1'bz; // Hattı serbest bırak
     endtask
 
+    // Kole ADRESE NACK verir - cihaz yok veya mesgul senaryosu.
+    //
+    // 9 Eylul 2026'da eklendi. i2c_peripheral.sv ST_ADDR_ACK durumunda
+    // sda_sampled yuksekse (NACK) ST_STOP'a gecer ve islemi iptal eder.
+    // Bu dal HIC uyarilmamisti; testte kole her zaman ACK veriyordu.
+    // Gercek bir veriyolunda adres NACK'i en sik karsilasilan durumdur
+    // (yanlis adres, cihaz takili degil, cihaz mesgul).
+    task rx_addr_and_nack(output logic [7:0] data);
+        for (int i = 7; i >= 0; i--) begin
+            @(posedge scl);
+            data[i] = sda;
+        end
+        @(negedge scl);
+        sda_drv = 1'bz;      // NACK: hatti serbest birak, yukari cekilir
+        @(negedge scl);
+    endtask
+
     // Sanal kole -> master veri gonderimi.
     //
     // IKI DUZELTME:
@@ -411,6 +428,109 @@ module i2c_peripheral_tb;
         axil_write(8'h0C, 32'hA5A5_5A5A);
         axil_read(8'h0C, rdata);
         check("I2C_TDR: 0xA5A55A5A desen korunuyor", rdata, 32'hA5A5_5A5A);
+
+        // ---------------------------------------------------------------------
+        // NACK YOLU VE BAYT SAYISI VARYASYONLARI  (9 Eylul 2026'da eklendi)
+        //
+        // NEDEN
+        //
+        //   Onceki testlerde butun islemler NBY=2 ile kosuluyor ve kole HER
+        //   ZAMAN ACK veriyordu. Bunun iki sonucu vardi:
+        //
+        //     a) ST_ADDR_ACK icindeki NACK dali (sda_sampled yuksek ->
+        //        ST_STOP) hic uyarilmiyordu. Gercek veriyolunda adres NACK'i
+        //        en sik karsilasilan durumdur.
+        //
+        //     b) Bayt sayaci mantigi (byte_cnt + 1 < op_nby karsilastirmasi
+        //        ve shift_out secim case'i) yalnizca iki bayt yolunda
+        //        calisiyordu; 1, 3 ve 4 bayt dallari uyarilmamisti.
+        //
+        //   9 Eylul 2026 kapsama olcumunde i2c_peripheral branch %70,6 ile
+        //   bizim RTL'imizin en dusuk skorlu moduluydu; sebep buydu.
+        // ---------------------------------------------------------------------
+        $display("--- NACK yolu ve bayt sayisi varyasyonlari ---");
+
+        // --- Adres NACK: islem iptal edilmeli, mesgul bayragi dusmelidir ---
+        begin
+            logic [7:0] rbyte;
+            axil_write(8'h00, 32'd2);            // NBY = 2
+            axil_write(8'h04, 32'h5A);           // ADR
+            axil_write(8'h0C, 32'hBEEF);         // TDR
+            axil_write(8'h10, 32'h01);           // TX_EN
+
+            fork
+                begin
+                    wait_start();
+                    rx_addr_and_nack(rbyte);     // kole NACK veriyor
+                end
+                begin
+                    // Islem NACK sonrasi kendiliginden bitmelidir.
+                    // Zaman asimi olursa asagidaki denetim yakalar.
+                    repeat (4000) @(posedge clk);
+                end
+            join_any
+            disable fork;
+
+            repeat (200) @(posedge clk);
+            axil_read(8'h10, rdata);
+            check("NACK sonrasi TX_EN temizlendi (islem iptal)",
+                  {31'b0, rdata[0]}, 32'h0);
+        end
+
+        // Durumu temizle
+        axil_write(8'h10, 32'h00);
+        repeat (50) @(posedge clk);
+
+        // --- NBY = 1: tek bayt yazma ---
+        begin
+            logic [7:0] rbyte;
+            axil_write(8'h00, 32'd1);            // NBY = 1
+            axil_write(8'h04, 32'h5A);
+            axil_write(8'h0C, 32'h00000077);
+            axil_write(8'h10, 32'h01);
+
+            wait_start();
+            rx_byte_and_ack(rbyte);              // adres
+            check("NBY=1: adres dogru", rbyte, (8'h5A << 1) | 8'h00);
+            rx_byte_and_ack(rbyte);              // tek veri bayti
+            check("NBY=1: tek bayt gonderildi", rbyte, 8'h77);
+            wait_stop();
+
+            repeat (100) @(posedge clk);
+            axil_read(8'h10, rdata);
+            check("NBY=1: TX_DONE kuruldu", {31'b0, rdata[1]}, 32'h1);
+        end
+
+        axil_write(8'h10, 32'h00);
+        repeat (50) @(posedge clk);
+
+        // --- NBY = 4: dort bayt yazma, sayacin ust siniri ---
+        begin
+            logic [7:0] rbyte;
+            axil_write(8'h00, 32'd4);            // NBY = 4
+            axil_write(8'h04, 32'h5A);
+            axil_write(8'h0C, 32'h44332211);     // LSB once: 11 22 33 44
+            axil_write(8'h10, 32'h01);
+
+            wait_start();
+            rx_byte_and_ack(rbyte);              // adres
+            rx_byte_and_ack(rbyte);
+            check("NBY=4: bayt 0", rbyte, 8'h11);
+            rx_byte_and_ack(rbyte);
+            check("NBY=4: bayt 1", rbyte, 8'h22);
+            rx_byte_and_ack(rbyte);
+            check("NBY=4: bayt 2", rbyte, 8'h33);
+            rx_byte_and_ack(rbyte);
+            check("NBY=4: bayt 3 (son)", rbyte, 8'h44);
+            wait_stop();
+
+            repeat (100) @(posedge clk);
+            axil_read(8'h10, rdata);
+            check("NBY=4: TX_DONE kuruldu", {31'b0, rdata[1]}, 32'h1);
+        end
+
+        axil_write(8'h10, 32'h00);
+        repeat (50) @(posedge clk);
 
         // =====================================================================
         // Sartname s.615: testler manuel inceleme gerektirmeden kendi kendini
