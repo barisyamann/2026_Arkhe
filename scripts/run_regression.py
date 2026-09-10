@@ -138,6 +138,24 @@ TESTLER = [
                 TB/"tb_axi_w_yakalama.sv"],
         mem=[],
     ),
+    dict(
+        # AXI4-Lite'in SERBEST biraktigi ama testlerimizin hic
+        # denemedigi davranislar: B/R kanali geri basinci. Mevcut
+        # testler BREADY/RREADY'yi hep yuksek tutuyordu.
+        ad="axi_protokol",
+        top="tb_axi_protokol",
+        kaynak=[MEM/"sram_module.sv",
+                TB/"tb_axi_protokol.sv"],
+        mem=[],
+    ),
+    dict(
+        # Dar alanlarda yapilan aritmetigin sinir degerlerde tasip
+        # tasmadigini tarar (QSPI presc=63 hatasinin sinifi).
+        ad="sinir_degerleri",
+        top="tb_sinir_degerleri",
+        kaynak=[TB/"tb_sinir_degerleri.sv"],
+        mem=[],
+    ),
 
     dict(
         ad="uart",
