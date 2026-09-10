@@ -97,6 +97,48 @@ TESTLER = [
         mem=[],
     ),
 
+    # -------------------------------------------------------------------------
+    # SINIR DURUM TESTLERI  (10 Eylul 2026)
+    #
+    # Dis bir denetim iki islevsel hata buldu; ikisi de mevcut 21 testin ve
+    # %100 islevsel kapsamanin DISINDA kalmisti. Kapsama, TANIMLANAN
+    # noktalarin kapsandigini gosterir; tum RTL durumlarinin dogrulandigini
+    # GOSTERMEZ. Bu iki test o boslugu kapatir.
+    # -------------------------------------------------------------------------
+    dict(
+        # sram_module, W el sikismasinda WDATA/WSTRB kaydetmiyordu; fiziksel
+        # yazma canli sinyalleri ornekliyordu. AW gec gelirse master veriyi
+        # degistirmekte AXI'ye gore serbest oldugundan YANLIS veri yaziliyordu.
+        # Duzeltme geri alindiginda testin basarisiz oldugu dogrulandi.
+        ad="sram_w_yakalama",
+        top="tb_sram_w_yakalama",
+        kaynak=[MEM/"sram_module.sv",
+                TB/"tb_sram_w_yakalama.sv"],
+        mem=[],
+    ),
+    dict(
+        # qspi_master tam periyodu (prescaler+1) alti bitte hesapliyordu;
+        # presc=63 icin 64 sifira sariyor ve SCK kenari hic uretilmiyordu.
+        # Aritmetik yedi bite cikarildi.
+        ad="qspi_presc_sinir",
+        top="tb_qspi_presc_sinir",
+        kaynak=[TB/"tb_qspi_presc_sinir.sv"],
+        mem=[],
+    ),
+    dict(
+        # Ayni W-yakalama hatasi uart_peripheral ve
+        # uart_stream_peripheral'da da vardi (tarama ile bulundu,
+        # sonda ile olculdu: 0xAB yerine 0xFFFFFFFF yaziliyordu).
+        # Bu test duzeltmenin geri gelmedigini garanti eder.
+        ad="axi_w_yakalama",
+        top="tb_axi_w_yakalama",
+        kaynak=[F1/"uart_pkg.sv", F1/"uart_tx.sv", F1/"uart_rx.sv",
+                F1/"sync_fifo.sv", F1/"uart_peripheral.sv",
+                F1/"uart_stream_peripheral.sv",
+                TB/"tb_axi_w_yakalama.sv"],
+        mem=[],
+    ),
+
     dict(
         ad="uart",
         top="uart_tb",

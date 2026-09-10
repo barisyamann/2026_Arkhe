@@ -42,6 +42,24 @@ module sram_module #(
     logic w_active;
     logic [AXI_ADDR_W-1:0] aw_addr_reg;
 
+    // W KANALI VERISI EL SIKISMASINDA KAYDEDILIR  (10 Eylul 2026)
+    //
+    // NEDEN
+    //   Once yalnizca `w_active` bayragi kuruluyordu; WDATA/WSTRB
+    //   hicbir yere kaydedilmiyordu. Fiziksel yazma ise
+    //       wr_en = aw_active && w_active && !bvalid
+    //   kosuluyla CANLI s_axil_wdata/wstrb sinyallerini ornekliyordu.
+    //
+    //   AXI4-Lite'ta W ve AW kanallari BAGIMSIZDIR. W once gelirse el
+    //   sikismasi biter, WREADY duser ve master o andan itibaren
+    //   WDATA'yi degistirmekte SERBESTTIR. AW bir cevrim sonra gelince
+    //   wr_en yukselir ve artik DEGISMIS veri yazilir.
+    //
+    //   Adres tarafinda bu zaten dogru yapiliyordu (aw_addr_reg);
+    //   veri tarafindaki eksiklik bir asimetriydi.
+    logic [AXI_DATA_W-1:0] w_data_reg;
+    logic [3:0]            w_strb_reg;
+
     localparam logic [1:0] RESP_OKAY = 2'b00;
 
     // --- AXI Yazma Kontrol Yazmaçları (Async reset içerir) ---
@@ -50,6 +68,8 @@ module sram_module #(
             aw_active      <= 1'b0;
             w_active       <= 1'b0;
             aw_addr_reg    <= '0;
+            w_data_reg     <= '0;
+            w_strb_reg     <= '0;
             s_axil_awready <= 1'b0;
             s_axil_wready  <= 1'b0;
             s_axil_bvalid  <= 1'b0;
@@ -67,6 +87,8 @@ module sram_module #(
             // Veri handshake
             if (s_axil_wvalid && s_axil_wready) begin
                 w_active      <= 1'b1;
+                w_data_reg    <= s_axil_wdata;   // el sikismasinda YAKALA
+                w_strb_reg    <= s_axil_wstrb;
                 s_axil_wready <= 1'b0;
             end else if (!w_active) begin
                 s_axil_wready  <= s_axil_wvalid;
@@ -221,9 +243,9 @@ module sram_module #(
                 .clk0   (clk),
                 .csb0   (~sec_w),                 // aktif dusuk
                 .web0   (~sec_w),                 // aktif dusuk
-                .wmask0 (s_axil_wstrb),
+                .wmask0 (w_strb_reg),            // el sikismasinda kaydedildi
                 .addr0  (wmaddr),
-                .din0   (s_axil_wdata),
+                .din0   (w_data_reg),            // el sikismasinda kaydedildi
                 .dout0  (),                       // kullanilmiyor
 
                 // Port 1 - okuma
@@ -294,10 +316,10 @@ module sram_module #(
     always_ff @(posedge clk) begin
         if (wr_en) begin
             if (waddr < RAM_DEPTH) begin
-                if (s_axil_wstrb[0]) ram[waddr][7:0]   <= s_axil_wdata[7:0];
-                if (s_axil_wstrb[1]) ram[waddr][15:8]  <= s_axil_wdata[15:8];
-                if (s_axil_wstrb[2]) ram[waddr][23:16] <= s_axil_wdata[23:16];
-                if (s_axil_wstrb[3]) ram[waddr][31:24] <= s_axil_wdata[31:24];
+                if (w_strb_reg[0]) ram[waddr][7:0]   <= w_data_reg[7:0];
+                if (w_strb_reg[1]) ram[waddr][15:8]  <= w_data_reg[15:8];
+                if (w_strb_reg[2]) ram[waddr][23:16] <= w_data_reg[23:16];
+                if (w_strb_reg[3]) ram[waddr][31:24] <= w_data_reg[31:24];
             end
         end
     end

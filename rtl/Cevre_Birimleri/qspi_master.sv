@@ -368,13 +368,26 @@ assign sta_rx_empty = rx_empty;
 assign sta_tx_full  = tx_full;
 assign sta_tx_empty = tx_empty;
 
-logic [5:0]  sck_cnt;
-logic [5:0]  sck_tam_periyot;
+// PRESCALER TASMASI DUZELTILDI  (10 Eylul 2026)
+//
+// NEDEN 7 BIT
+//   Bu sinyaller 6 bitti ve tam periyot (ccr_prescaler + 1) olarak
+//   hesaplaniyordu. ccr_prescaler alti bit oldugundan en buyuk deger
+//   63'tur ve 63 + 1 = 64, alti bitte SIFIRA sarar:
+//       presc=62 -> tam_periyot=63, yarim=31   (calisir)
+//       presc=63 -> tam_periyot= 0, yarim= 0   (SCK kenari URETILMEZ)
+//   Yani en yavas prescaler ayari QSPI'yi tamamen susturuyordu.
+//
+//   Tam periyot 1..64 araligini kapsadigi icin yedi bit gerekir.
+//   sck_cnt de ayni genislikte olmali, yoksa karsilastirmalar
+//   (sck_cnt >= sck_tam_periyot - 1) yanlis genislikte yapilir.
+logic [6:0]  sck_cnt;
+logic [6:0]  sck_tam_periyot;
 logic        presc_sifir;
 logic        sck_en;
 logic        sck_int;
 logic        sck_edge_rise, sck_edge_fall;
-logic [5:0]  sck_half_period;
+logic [6:0]  sck_half_period;
 
 // =============================================================================
 // SCK yarim periyodu - EN AZ 1 (yani 2 cevrim)
@@ -433,7 +446,8 @@ logic [5:0]  sck_half_period;
 //
 // P >= 1 icin eski sayac yolu aynen korunur.
 assign presc_sifir     = (ccr_prescaler == 6'h0);
-assign sck_tam_periyot = presc_sifir ? 6'd1 : (ccr_prescaler + 6'd1);
+assign sck_tam_periyot = presc_sifir ? 7'd1
+                                    : ({1'b0, ccr_prescaler} + 7'd1);
 assign sck_half_period = (sck_tam_periyot >> 1);
 
 always_ff @(posedge clk or negedge rst_n) begin
@@ -457,13 +471,13 @@ always_ff @(posedge clk or negedge rst_n) begin
         end
         // Sayac 0..(tam-1): cnt < half -> SCK dusuk, cnt >= half -> yuksek
         // SPI Mode 0: dusen kenarda veri degisir, yukselende ornekleni r.
-        else if (sck_cnt >= sck_tam_periyot - 6'd1) begin
+        else if (sck_cnt >= sck_tam_periyot - 7'd1) begin
             sck_cnt       <= '0;
             sck_int       <= 1'b0;
             sck_edge_fall <= 1'b1;
         end else begin
-            sck_cnt <= sck_cnt + 6'd1;
-            if (sck_cnt + 6'd1 == sck_half_period) begin
+            sck_cnt <= sck_cnt + 7'd1;
+            if (sck_cnt + 7'd1 == sck_half_period) begin
                 sck_int       <= 1'b1;
                 sck_edge_rise <= 1'b1;
             end

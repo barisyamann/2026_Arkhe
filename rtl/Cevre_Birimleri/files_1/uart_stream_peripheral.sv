@@ -86,9 +86,28 @@ module uart_stream_peripheral
     logic [31:0] wr_mask;
     logic [31:0] wr_data;
 
-    assign wr_mask = {{8{s_axil_wstrb[3]}}, {8{s_axil_wstrb[2]}},
-                      {8{s_axil_wstrb[1]}}, {8{s_axil_wstrb[0]}}};
-    assign wr_data = s_axil_wdata & wr_mask;
+
+    // W KANALI VERISI EL SIKISMASINDA KAYDEDILIR  (10 Eylul 2026)
+    //
+    // NEDEN
+    //   Once yalnizca `w_active_r` bayragi kuruluyordu; WDATA/WSTRB
+    //   kaydedilmiyordu. Yazma ise `aw_active_r && w_active_r` kosulu
+    //   saglandiginda, yani AW gec gelirse SONRAKI cevrimde yapiliyordu
+    //   ve o an CANLI s_axil_wdata ornekleniyordu.
+    //
+    //   AXI4-Lite'ta AW ve W BAGIMSIZ kanallardir. W once gelirse el
+    //   sikismasi biter, WREADY duser ve master WDATA'yi degistirmekte
+    //   SERBESTTIR. Sonda ile OLCULDU: 0x000000AB yazilmasi gerekirken
+    //   0xFFFFFFFF yaziliyordu.
+    //
+    //   Adres tarafinda bu zaten dogru yapiliyordu (aw_addr_r); veri
+    //   tarafindaki eksiklik bir ASIMETRIYDI. Ayni hata
+    //   sram_module.sv'de de vardi ve ayni sekilde duzeltildi.
+    logic [AXI_DATA_W-1:0] w_data_r;
+    logic [3:0]            w_strb_r;
+    assign wr_mask = {{8{w_strb_r[3]}}, {8{w_strb_r[2]}},
+                      {8{w_strb_r[1]}}, {8{w_strb_r[0]}}};
+    assign wr_data = w_data_r & wr_mask;
 
     logic [31:0]          reg_stp_r;
     logic [7:0]           reg_tdr_r;
@@ -219,6 +238,8 @@ module uart_stream_peripheral
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             aw_active_r    <= 1'b0;
+w_data_r      <= '0;
+w_strb_r      <= '0;
             w_active_r     <= 1'b0;
             aw_addr_r      <= '0;
             s_axil_awready <= 1'b0;
@@ -253,6 +274,8 @@ module uart_stream_peripheral
             // Yazma verisi handshake (el sıkışması)
             if (s_axil_wvalid && s_axil_wready) begin
                 w_active_r    <= 1'b1;
+                w_data_r      <= s_axil_wdata;   // el sikismasinda YAKALA
+                w_strb_r      <= s_axil_wstrb;
                 s_axil_wready <= 1'b0;
             end else if (!w_active_r)
                 s_axil_wready <= s_axil_wvalid;
@@ -269,21 +292,21 @@ module uart_stream_peripheral
 
                     UART_STP_OFFSET: reg_stp_r <= (reg_stp_r & ~wr_mask) | wr_data;
 
-                    UART_TDR_OFFSET: if (s_axil_wstrb[0]) reg_tdr_r <= s_axil_wdata[7:0];
+                    UART_TDR_OFFSET: if (w_strb_r[0]) reg_tdr_r <= w_data_r[7:0];
 
                     UART_CFG_OFFSET: begin
-                        if (s_axil_wdata[CFG_TX_EN])
+                        if (w_data_r[CFG_TX_EN])
                             reg_cfg_r[CFG_TX_EN]  <= 1'b1;
                         // Donanım o an set etmiyorsa yazılımın (0 yazarak) temizlemesine izin ver
-                        if (!s_axil_wdata[CFG_RX_DONE] && !rx_done_w)
+                        if (!w_data_r[CFG_RX_DONE] && !rx_done_w)
                             reg_cfg_r[CFG_RX_DONE] <= 1'b0;
-                        if (!s_axil_wdata[CFG_TX_DONE] && !tx_done_w)
+                        if (!w_data_r[CFG_TX_DONE] && !tx_done_w)
                             reg_cfg_r[CFG_TX_DONE] <= 1'b0;
                     end
 
                     UARTS_FIFO_CLR_OFFSET: begin
                         // Bit 0 yazılınca FIFO sıfırla
-                        if (s_axil_wdata[0]) fifo_clr_r <= 1'b1;
+                        if (w_data_r[0]) fifo_clr_r <= 1'b1;
                     end
 
                     UARTS_IRQ_EN_OFFSET: reg_irq_en_r <= (reg_irq_en_r & ~wr_mask) | wr_data;
