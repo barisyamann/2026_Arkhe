@@ -611,6 +611,88 @@ def _xcrg(vivado_bin, args, log_adi):
     return rc
 
 
+def _islevsel_ozet(rapor_dizini):
+    """xcrg islevsel kapsama raporundan kapsama noktalarini cikarir.
+
+    grp0.html icindeki her satir bir cover point'tir:
+        <ad> <beklenen> <kapsanmayan> <kapsanan> <yuzde> ...
+    """
+    grp = Path(rapor_dizini) / "functionalCoverageReport" / "grp0.html"
+    if not grp.is_file():
+        return None
+    metin = grp.read_text(encoding="utf-8", errors="replace")
+    noktalar = {}
+    for satir in re.findall(r"<tr.*?</tr>", metin, re.S):
+        h = [re.sub(r"<[^>]+>", "", x).strip()
+             for x in re.findall(r"<td.*?</td>", satir, re.S)]
+        if len(h) >= 5 and h[0].startswith("cov_"):
+            # Ad sutunu "cov_uar ...cov_uart2_fifo" gibi kirpilmis
+            # gelebiliyor; son kelime gercek addir.
+            ad = h[0].split()[-1]
+            try:
+                noktalar[ad] = (int(h[1]), int(h[2]), int(h[3]), float(h[4]))
+            except ValueError:
+                continue
+    return noktalar or None
+
+
+def islevsel_kapsam(vivado_bin):
+    """Islevsel kapsamayi TUM testlerin BIRLESIMI olarak raporlar.
+
+    NEDEN BIRLESIM ELLE HESAPLANIYOR
+      xcrg'nin -cov_db_dir ile tum veritabanlarini birlestirmesi bu
+      projede calismiyor: veritabanlarini listeliyor ama
+        "WARNING : No Functional coverage DBs have been found"
+        "ERROR   : No Functional Coverage Databases have been found"
+      deyip cikiyor (build/regression/xcrg_fcov.log). Tek veritabani
+      -cov_db_name ile verildiginde ise sorunsuz rapor uretiyor.
+
+      Bu yuzden her veritabani icin ayri rapor uretip kapsama
+      noktalarini burada birlestiriyoruz. Bir nokta HERHANGI bir
+      testte kapsandiysa kapsanmis sayilir - kapsama zaten boyle
+      tanimlidir.
+
+    NEDEN GEREKLI
+      Olcum 10 Eylul 2026'da %92,08'de takilmisti, cunku rapor
+      yalnizca sistem_gercek_boot veritabanindan uretiliyordu. Yeni
+      kapsanan noktalar (cov_axi_resp/decerr ve dort sinifli
+      cov_npu_class) "sistem" testinde uretiliyor. Tek basina
+      "sistem" %94,17 veriyor.
+    """
+    covdb = WORK / "covdb"
+    fdb = covdb / "xsim.covdb"
+    if not fdb.is_dir():
+        return None
+
+    birlesik = {}
+    kaynak = {}
+    for db in sorted(x.name for x in fdb.iterdir() if x.is_dir()):
+        hedef = WORK / "fcov_rapor" / db
+        shutil.rmtree(hedef, ignore_errors=True)
+        hedef.mkdir(parents=True, exist_ok=True)
+        _xcrg(vivado_bin, ["-cov_db_dir", covdb.as_posix(),
+                           "-cov_db_name", db,
+                           "-report_dir", hedef.as_posix(),
+                           "-report_format", "html"], "xcrg_fcov_%s.log" % db)
+        noktalar = _islevsel_ozet(hedef)
+        if not noktalar:
+            continue
+        for ad, (bekl, eksik, kaps, yuzde) in noktalar.items():
+            onceki = birlesik.get(ad)
+            if onceki is None or kaps > onceki[2]:
+                birlesik[ad] = (bekl, eksik, kaps, yuzde)
+                kaynak[ad] = db
+
+    if not birlesik:
+        return None
+
+    top_bekl = sum(v[0] for v in birlesik.values())
+    top_kaps = sum(v[2] for v in birlesik.values())
+    return dict(noktalar=birlesik, kaynak=kaynak,
+                beklenen=top_bekl, kapsanan=top_kaps,
+                yuzde=(100.0 * top_kaps / top_bekl) if top_bekl else 0.0)
+
+
 def kapsam_raporu(vivado_bin):
     """Kod kapsama raporlarini uretir.
 
@@ -775,6 +857,24 @@ def main():
             print("=" * 70)
         else:
             print(" Kapsama raporu uretilemedi - build/regression/xcrg_*.log")
+
+        f = islevsel_kapsam(a.vivado)
+        if f:
+            print("")
+            print("=" * 70)
+            print(" ISLEVSEL KAPSAMA  (tum testlerin birlesimi)")
+            print("")
+            for ad in sorted(f["noktalar"]):
+                bekl, eksik, kaps, _ = f["noktalar"][ad]
+                isaret = "  " if eksik == 0 else " <"
+                print(f"   {ad:<24} {kaps:>3}/{bekl:<3}"
+                      f"  [{f['kaynak'][ad]}]{isaret}")
+            print("")
+            print(f"   TOPLAM  {f['kapsanan']}/{f['beklenen']}"
+                  f"  = %{f['yuzde']:.2f}")
+            print("=" * 70)
+        else:
+            print(" Islevsel kapsama raporu uretilemedi")
 
     return 1 if kalan else 0
 

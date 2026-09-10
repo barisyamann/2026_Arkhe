@@ -269,10 +269,34 @@ module tb_soc_top;
         }
 
         // Veri yolu hata kaynagi - hangi kopru bildirdi
+        // BUYRUK KOPRUSU HATASI YAPISAL OLARAK IMKANSIZ  (10 Eylul 2026)
+        //
+        //   obi_to_axi_simple.sv:167 -> bus_err_o = (bresp != OKAY)
+        //   yani hata yalnizca bir AXI kolesi OKAY disinda yanit
+        //   verdiginde dogar.
+        //
+        //   Buyruk veri yolunun YALNIZCA IKI hedefi var
+        //   (soc_top.sv:534 "instr_to_rom"):
+        //       0x00xxxxxx -> boot_rom      her zaman RESP_OKAY
+        //       digerleri  -> u_instruction_ram (sram_module)
+        //                    sram_module.sv:101,106 her zaman RESP_OKAY;
+        //                    aralik disi adres kirpilir, hata uretmez
+        //   Buyruk tarafinda cozucu (decoder) hatasi diye bir yol yok;
+        //   DECERR ancak veri yolundaki axi_lite_interconnect'te olusur.
+        //
+        //   Bu yuzden {instr_bus_err, data_bus_err} = 2'b10 ERISILEMEZ.
+        //   Kapsanamayan bir bin olarak birakmak yerine illegal_bins
+        //   yapiyoruz: boylece hem islevsel kapsama durustce %100
+        //   olculur hem de bu bin CANLI BIR ONERME haline gelir -
+        //   ileride biri buyruk yoluna hata dondurebilen bir kole
+        //   eklerse simulasyon hata verir.
+        //
+        //   2'b11 (iki koprude ayni cevrimde hata) da ayni sebeple
+        //   erisilemez ve zaten hicbir bine dusmuyordu.
         cov_fault_src: coverpoint {uut.instr_bus_err, uut.data_bus_err} {
-            bins yok        = {2'b00};
-            bins veri_kopru = {2'b01};
-            bins buyruk_kopru = {2'b10};
+            bins         yok          = {2'b00};
+            bins         veri_kopru   = {2'b01};
+            illegal_bins buyruk_kopru = {2'b10, 2'b11};
         }
 
         // AXI yanit kodlari - SLVERR bilerek uretiliyor (Boot ROM yazmasi)
@@ -610,6 +634,11 @@ module tb_soc_top;
             uart2_send_byte(8'hB2);
             uart2_send_byte(8'hC3);
             uart2_send_byte(8'hD4);
+
+            // FIFO seviyesinin tum bantlarini tara (islevsel kapsama).
+            // Guvenli an: DMA bitti, FIFO'yu bosaltan baska bir istemci
+            // yok, bu yuzden baytlar birikir.
+            uart2_fifo_tara();
         end
 
         // NPU donanım motorunun hesaplamayı bitirmesini dinamik olarak bekle
@@ -1090,6 +1119,47 @@ module tb_soc_top;
         end
         uart2_rxd = 1'b1;                 // stop biti
         #(UART2_BIT_NS);
+    endtask
+
+    // ------------------------------------------------------------------
+    // UART2 FIFO SEVIYE TARAMASI  (10 Eylul 2026)
+    //
+    // NEDEN EKLENDI
+    //   xcrg islevsel kapsama raporu cov_uart2_fifo'yu %40'ta gosterdi
+    //   (5 bandin 2'si). Sistem testi UART2'ye yalnizca dort baytlik
+    //   basliklar gonderiyordu, bu da sadece "bos" ve "az" bantlarina
+    //   dokunuyor. Sartname EK-3 islevsel kapsamada "%100'u hedeflemelidir"
+    //   der.
+    //
+    //   Bantlar (tb_soc_top.sv cov_uart2_fifo, FIFO_DEPTH = 256):
+    //       bos {0}  az {1:63}  orta {64:191}  cok {192:255}  dolu {256}
+    //
+    // NEDEN BURADA GUVENLI
+    //   Bu gorev yalnizca "DMA done" goruldukten sonra cagrilir. O anda
+    //   FIFO'yu bosaltan hicbir istemci yoktur (DMA durdu, urun yazilimi
+    //   UART2'yi serbest dongude yoklamiyor), bu yuzden seviye tekduze
+    //   artar ve 256'da doyar - sync_fifo yazmayi full_r ile engeller.
+    //
+    // MALIYET
+    //   UART2 1 Mbps'te calisir (UART2_BIT_NS = 1000), yani bayti 10 us.
+    //   256 bayt = 2,56 ms. 30 ms'lik test penceresine rahat sigar.
+    // ------------------------------------------------------------------
+    task automatic uart2_fifo_tara();
+        int gonderilen;
+        begin
+            log_print("[TB] UART2 FIFO seviye taramasi: 256 bayt gonderiliyor");
+            for (gonderilen = 0; gonderilen < 256; gonderilen++) begin
+                uart2_send_byte(gonderilen[7:0]);
+            end
+            log_print($sformatf("      UART2 FIFO seviyesi = %0d (beklenen 256)",
+                                uut.u_uart2.fifo_level));
+            if (uut.u_uart2.fifo_level !== 9'd256) begin
+                error_count++;
+                log_print("      [HATA] UART2 FIFO 256'ya dolmadi");
+            end else begin
+                log_print("      [OK] UART2 FIFO tum seviye bantlarini tarayip doldu");
+            end
+        end
     endtask
 
     // ------------------------------------------------------------------

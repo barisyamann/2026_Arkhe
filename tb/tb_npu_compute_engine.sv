@@ -192,6 +192,30 @@ module tb_npu_compute_engine;
         // pozitif sinyal demektir.
         run_scenario("SENARYO 3 (SILENCE)", 32'h80808080);
 
+        // -------------------------------------------------------------
+        // Senaryo 4 ve 5: EKSIK KALAN IKI SINIF  (10 Eylul 2026)
+        //
+        // NEDEN EKLENDI
+        //   xcrg islevsel kapsama raporu cov_class'i %50'de gosterdi
+        //   (dort sinifin ikisi). Ustteki uc senaryo yalnizca iki sinif
+        //   uretiyor - olculen class_o degerleri sirasiyla 3, 3 ve 0'dir,
+        //   yani "SENARYO 1 (YES)" ve "SENARYO 2 (NO)" adlari yanilticidir:
+        //   ikisi de NO (sinif 3) veriyor. Sartname EK-3 islevsel
+        //   kapsamada "%100'u hedeflemelidir" der.
+        //
+        // DESENLER NEREDEN GELIYOR
+        //   Altin referans modeliyle (tb/npu_golden/golden_reference.py)
+        //   yapilan tarama, gercek agirliklarla dort sinifi da ureten
+        //   sabit bayt desenlerini verdi; ayni desenler sistem testinde
+        //   de kullaniliyor (tb_soc_top.sv, cikarim_turu):
+        //       0x00 -> 3 NO        0x68 -> 1 UNKNOWN
+        //       0x80 -> 0 SILENCE   0x84 -> 2 YES
+        //   Burada tensor 32 bitlik kelimelerle dolduruldugu icin bayt
+        //   dort kez tekrarlanir.
+        // -------------------------------------------------------------
+        run_scenario("SENARYO 4 (UNKNOWN)", 32'h68686868);
+        run_scenario("SENARYO 5 (YES)",     32'h84848484);
+
 
         // =====================================================================
         // Senaryolar birbirinden ayirt edilebiliyor mu? (B4 koruma denetimi)
@@ -281,7 +305,7 @@ module tb_npu_compute_engine;
         // DEGISMEZ DENETIMLERI
         // =====================================================================
         begin
-            int p0, p1, p2, p3, toplam, enbuyuk, argmax;
+            int p0, p1, p2, p3, toplam, enbuyuk, argmax, enkucuk;
 
             p0 = int'(tcm_mem[7596]);  p1 = int'(tcm_mem[7597]);
             p2 = int'(tcm_mem[7598]);  p3 = int'(tcm_mem[7599]);
@@ -298,6 +322,11 @@ module tb_npu_compute_engine;
             if (p1 > enbuyuk) begin enbuyuk = p1; argmax = 1; end
             if (p2 > enbuyuk) begin enbuyuk = p2; argmax = 2; end
             if (p3 > enbuyuk) begin enbuyuk = p3; argmax = 3; end
+
+            enkucuk = p0;
+            if (p1 < enkucuk) enkucuk = p1;
+            if (p2 < enkucuk) enkucuk = p2;
+            if (p3 < enkucuk) enkucuk = p3;
 
             check($sformatf("%s: class_o argmax ile tutarli", name),
                   (int'(class_o) == argmax),
@@ -344,9 +373,30 @@ module tb_npu_compute_engine;
             // SILENCE senaryosunda basarisiz oluyordu - denetimin kendisi
             // yanlisti, motor degil. Baskinlik yalnizca gercek konusma
             // iceren senaryolarda (YES, NO) beklenir.
-            check($sformatf("%s: kazanan sinif baskin (enbuyuk=%0d)", name, enbuyuk),
-                  (sc_idx == 2) || (enbuyuk > 1200),
-                  $sformatf("hicbir sinif baskin degil - agirliklar sifir olabilir: %0d/%0d/%0d/%0d",
+            //
+            // ESIK DEGIL YAYILIM  (10 Eylul 2026)
+            //
+            //   Ilk yazimda denetim "enbuyuk > 1200" idi. Bu, aranan
+            //   ozelligin (agirliklar sifir mi?) yalnizca kaba bir
+            //   vekiliydi ve dusuk guvenli ama TAMAMEN SAGLIKLI bir
+            //   cikisi hataya dusuruyordu:
+            //       SENARYO 5 (YES) -> 1021/932/1120/1021, enbuyuk 1120
+            //   Burada sinif 2 gercekten kazaniyor, olasiliklar
+            //   birbirinden farkli ve argmax tutarli; sorun girdinin
+            //   dusuk guvenli olmasi, motorun bozuk olmasi degil.
+            //
+            //   Aranan bozukluk sudur: agirliklar sifir oldugunda cikis
+            //   yalnizca bias'tir ve dort olasilik BIREBIR ESIT olur
+            //   (4096/4 = 1024 her biri). Bunun dogru olcusu mutlak
+            //   buyukluk degil YAYILIMDIR (enbuyuk - enkucuk). Bozuk
+            //   durumda yayilim tam olarak 0'dir.
+            //
+            //   SILENCE (sc_idx == 2) muafiyeti korunuyor: sessizlikte
+            //   dort sinifin esit cikmasi dogru davranistir.
+            check($sformatf("%s: kazanan sinif baskin (yayilim=%0d, enbuyuk=%0d)",
+                            name, enbuyuk - enkucuk, enbuyuk),
+                  (sc_idx == 2) || ((enbuyuk - enkucuk) > 64),
+                  $sformatf("olasiliklar neredeyse esit - agirliklar sifir olabilir: %0d/%0d/%0d/%0d",
                             p0, p1, p2, p3));
 
             // 7) FC AGIRLIK BOLGESI BOZULMAMIS OLMALI.
