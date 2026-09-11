@@ -1,10 +1,18 @@
-# ARKHE — d45_anten2 ASIC teslimi
+# ARKHE — K_diyot ASIC teslimi
 
-Bu paket 7 Eylül 2026 tarihli **d45_anten2** koşusunun kaynakları, özgün raporları ve fiziksel çıktılarıdır. **Temiz signoff değildir.** İhlaller gizlenmemiştir; akış final görünümleri ürettikten sonra ertelenmiş denetim hatalarıyla sıfırdan farklı çıkmıştır. `asic/reports/general/error.log` korunmuştur.
+Bu paket 11 Eylül 2026 tarihli **K_diyot** koşusunun kaynakları, raporları ve fiziksel çıktılarıdır.
+
+**Beyan edilen çalışma noktası: 23 ns (43,5 MHz). Dokuz PVT köşesinin tamamında setup ve hold pozitiftir, setup TNS sıfırdır.**
+
+Bu koşu, RTL'de 10 Eylül 2026'da bulunan dört işlevsel hatanın (üç modülde AXI W kanalı veri kaybı, QSPI prescaler taşması) düzeltilmesinden sonra alınan ilk tam koşudur. Önceki tüm ASIC koşuları — d45_anten2 dahil — düzeltme öncesi RTL ile yapılmıştı; kaynak eşitliği artık `scripts/rtl_manifest.py` ile her koşu öncesi kanıtlanmaktadır.
+
+Açık kalan kalemler gizlenmemiştir; §11'de sayısal olarak verilmiş ve kaynakları belirtilmiştir.
 
 ## 1. Tasarım
 
-Üst modül `soc_top`; CV32E40P (RV32IMC, FPU kapalı), NPU ve AXI-Lite çevre birimleri. Ana saat `clk_i`, reset `rst_ni`, JTAG saati `jtag_tck`. GPIO, UART, I2C, QSPI ve JTAG portları vardır; kesin arayüz `rtl/Memory/soc_top.sv` içindedir. PnR hedefi **10 ns**, özgün final STA hedefi **20 ns**; 50 MHz temiz ASIC kapanışı iddia edilmez. Aynı layout için 23 ns (43,5 MHz) periyotta yapılan **ek** imzalama analizinde setup 9/9 köşede pozitif ve 0 ihlalli yoldur; bkz. `reports/timing_23ns/`. Bu analiz özgün 20 ns raporlarının yerine geçmez, onlar `reports/timing/` altında değiştirilmeden korunur.
+Üst modül `soc_top`; CV32E40P (RV32IMC, FPU kapalı), NPU ve AXI-Lite çevre birimleri. Ana saat `clk_i`, reset `rst_ni`, JTAG saati `jtag_tck`. GPIO, UART, I2C, QSPI ve JTAG portları vardır; kesin arayüz `rtl/Memory/soc_top.sv` içindedir.
+
+**Saat hedefi:** İmza (signoff) periyodu **23 ns = 43,5 MHz**'dir ve `reports/timing/` altındaki dokuz köşe raporu bu periyotta üretilmiştir. PnR sırasında kullanılan **14 ns**'lik hedef bir iç optimizasyon parametresidir, beyan edilen çalışma noktası değildir: PnR SDC'si akışı sıkıştırmak için, imza SDC'si gerçek ölçüm için kullanılır (bkz. §6). Bu ayrımın gerekliliği ölçülerek doğrulanmıştır — PnR hedefi imza hedefine eşitlendiğinde (23/23 ns) akış gevşeyip üç SS köşesinde setup ve hold çökmüştür.
 
 ## 2. Araç ve ortam
 
@@ -65,14 +73,32 @@ Bağımsız GDS DRC deneylerindeki sonuçlar standart akış raporunun yerine ge
 
 Her köşenin internal/switching/leakage/toplam tahmini `reports/power/<corner>/power.rpt`; `irdrop.rpt`, `net-VPWR.csv`, `net-VGND.csv` aynı dizindedir. Açık VCD/SAIF aktivite girdisi kullanılmadığından değerler **tahminidir**. Besleme/köşe, saat ve kaynak varsayımları özgün rapor/config içinde korunur; özel kaynak konumu `VSRC_LOC_FILES` ayarıyla belirlenir. Ölçülmüş kart güç tüketimi olarak sunulmaz.
 
-## 11. Özgün signoff özeti
+## 11. Signoff özeti — K_diyot, 23 ns (43,5 MHz)
 
-| Kalem | d45_anten2 sonucu |
+### Dokuz köşe zamanlama
+
+| Köşe | Setup WNS | Setup TNS | Hold WNS |
+|---|---:|---:|---:|
+| min_ss_100C_1v60 | +1,5562 | 0,0 | +1,1638 |
+| nom_ss_100C_1v60 | +0,7078 | 0,0 | +1,1717 |
+| max_ss_100C_1v60 | +0,3965 | 0,0 | +1,1817 |
+| min_tt_025C_1v80 | +5,7672 | 0,0 | +0,5841 |
+| nom_tt_025C_1v80 | +5,2083 | 0,0 | +0,5885 |
+| max_tt_025C_1v80 | +4,9112 | 0,0 | +0,5943 |
+| min_ff_n40C_1v95 | +7,3622 | 0,0 | +0,3738 |
+| nom_ff_n40C_1v95 | +6,8813 | 0,0 | +0,3770 |
+| max_ff_n40C_1v95 | +6,3171 | 0,0 | +0,3813 |
+
+**Setup 9/9 pozitif, hold 9/9 pozitif, TNS 9/9 sıfır.**
+
+### Fiziksel doğrulama ve açık kalemler
+
+| Kalem | K_diyot sonucu |
 |---|---:|
-| Setup worst slack | −1,8149 ns |
-| Hold worst slack | +0,1642 ns |
-| Setup / hold ihlalli yol | 115 / 0 |
-| En kötü köşe setup TNS | −34,7940 ns |
+| Setup worst slack (23 ns) | **+0,3965 ns** |
+| Hold worst slack (23 ns) | **+0,3738 ns** |
+| Setup / hold ihlalli yol | **0 / 0** |
+| En kötü köşe setup TNS | **0,0000 ns** |
 | Anten net / pin | 0 / 0 |
 | Detailed-route DRC | 0 |
 | KLayout DRC | 0 |
