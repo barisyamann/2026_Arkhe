@@ -380,28 +380,78 @@ Böylece PDF Bölüm 6.2'nin *"Nihai GDSII görünümünden çıkarılan ve LVS'
 
 ## 12.1 Büyük fiziksel çıktıların konumu
 
-Nihai GDSII, DEF, ODB, SPEF, netlist ve büyük raporların **tamamı bu depoda,
-`asic/results/` ve `asic/reports/` altında doğrudan bulunmaktadır**. Teslim
-için harici bir arşive veya indirme bağlantısına ihtiyaç yoktur.
+Nihai GDSII, DEF, ODB, SPEF, netlist ve büyük raporların **tamamı bu
+depoda**, `asic/results/` ve `asic/reports/` altında doğrudan
+bulunmaktadır.
 
 | Çıktı | Konum | Boyut |
 |---|---|---:|
-| Nihai GDSII | `results/gds/soc_top.gds` | 365 MB |
-| Magic / KLayout GDSII | `results/gds/soc_top.magic.gds`, `soc_top.klayout.gds` | |
-| Nihai DEF | `results/def/soc_top.def` | 288 MB |
-| ODB | `results/odb/soc_top.odb` | |
-| Netlistler | `results/netlist/soc_top_{synth,pnr,powered}.v` | |
-| SPEF (üç RC köşesi) | `results/spef/{min,nom,max}/` | |
+| Nihai GDSII | `results/gds/soc_top.gds` | 382 MB |
+| Magic GDSII | `results/gds/soc_top.magic.gds` | 382 MB |
+| KLayout GDSII | `results/gds/soc_top.klayout.gds` | 215 MB |
+| Nihai DEF | `results/def/soc_top.def` | 301 MB |
+| ODB | `results/odb/soc_top.odb` | 783 MB |
+| Magic MAG | `results/mag/soc_top.mag` | 492 MB |
+| Netlistler | `results/netlist/soc_top_{synth,pnr,powered}.v` | 227 MB (powered) |
+| SPEF (üç RC köşesi) | `results/spef/{min,nom,max}/` | 199–211 MB |
 | SDF (dokuz köşe) | `results/sdf/<köşe>/` | |
-| SPICE | `results/spice/` | |
+| **SPICE (nihai GDSII'den)** | `results/spice/soc_top.spice` | 119 MB |
 | Zamanlama raporları | `reports/timing/` + dokuz köşe alt dizini | |
-| Güç raporları | `reports/power/` + dokuz köşe alt dizini | |
+| Güç raporları | `reports/power/` + dokuz köşe alt dizini | 110 MB (net-VPWR) |
 
-> **Not.** Önceki teslimlerde (`d45_anten2`, 8 Eylül 2026) bu büyük çıktılar
-> depo boyut sınırı nedeniyle ayrı bir GitHub Release arşivinde sunuluyordu.
-> Bu teslimde böyle bir ayrım **yoktur**; tüm çıktılar depo içindedir ve
-> `asic/checksums/SHA256SUMS` ile `provenance/package_files.json` üzerinden
-> bütünlükleri doğrulanabilir (`make asic_verify`).
+`asic/` dizininin tamamı **249 dosya / 4,68 GB**'dır.
+
+### Git LFS
+
+100 MB'ı aşan dosyalar GitHub'ın dosya başına sınırı nedeniyle **Git
+LFS** ile saklanır (`.gitattributes` kuralları: `*.gds`, `*.def`,
+`*.odb`, `*.mag`, `*.spef`, `*.sdf`, SPICE, netlist ve büyük raporlar).
+Depoyu klonlarken bu dosyaların gerçek içeriğinin inmesi için LFS
+kurulu olmalıdır:
+
+```bash
+git lfs install
+git clone <depo-adresi>
+# zaten klonladıysanız:
+git lfs pull
+```
+
+LFS kurulu değilse bu dosyalar birkaç yüz baytlık işaretçi metni olarak
+görünür. Kontrol:
+
+```bash
+git lfs ls-files        # 34 dosya listelenmelidir
+git lfs fsck            # "Git LFS fsck OK"
+```
+
+### Yedek arşiv (bulut)
+
+LFS'e erişilemediği durumlar için `asic/` dizininin tamamı tek arşiv
+olarak da sunulmaktadır. Arşiv, depodaki dosyaların **birebir
+kopyasıdır**; ayrı veya farklı bir koşum değildir.
+
+| | |
+|---|---|
+| Dosya adı | `arkhe_soc_S_final2_fiziksel_ciktilar.tar.gz` |
+| Boyut | **692.043.282 bayt** (660 MiB / 692 MB) |
+| SHA-256 | `395134199f8e0b1b84b6a3aed989a0825207897a9006e6cd5f169fc7739329e0` |
+| İndirme bağlantısı | *(yüklendikten sonra yazılacak)* |
+| İçerik | `asic/` dizininin tamamı: **249 dosya**, açılmış hâli 4,68 GB — nihai GDSII (`soc_top.gds`), Magic ve KLayout GDSII, nihai DEF, ODB, MAG, üç RC köşesi SPEF, dokuz köşe SDF, nihai GDSII'den çıkarılan SPICE, üç netlist, dokuz köşe zamanlama ve güç raporları, `config.yaml`, `filelist.f`, `rtl_manifest.txt`, kısıt dosyaları (`constraints/`), `checksums/SHA256SUMS` |
+| Arşiv biçimi | `tar -czf` — açıldığında tek bir `asic/` dizini oluşturur |
+
+Doğrulama:
+
+```bash
+sha256sum -c arkhe_soc_S_final2_fiziksel_ciktilar.tar.gz.sha256
+tar -xzf arkhe_soc_S_final2_fiziksel_ciktilar.tar.gz
+```
+
+> **Not.** Önceki teslimlerde (`d45_anten2`, 8 Eylül 2026) bu büyük
+> çıktılar ayrı bir GitHub Release arşivinde sunuluyordu. Bu teslimde
+> çıktılar **depo içindedir** (LFS ile); bulut arşivi yalnızca yedektir.
+> Bütünlük `asic/checksums/SHA256SUMS` ve
+> `provenance/package_files.json` üzerinden doğrulanır
+> (`make asic_verify`).
 
 ## 12.2 Akış değişikliği beyanı
 
