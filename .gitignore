@@ -1,39 +1,5 @@
 /.delivery_downloads/
 __pycache__/
-/asic/macros/sky130_sram_2kbyte_1rw1r_32x512_8/gds/sky130_sram_2kbyte_1rw1r_32x512_8.gds
-/asic/reports/power/net-VGND.csv
-/asic/reports/power/net-VPWR.csv
-/asic/reports/timing/max_ff_n40C_1v95/max.rpt
-/asic/reports/timing/max_ss_100C_1v60/max.rpt
-/asic/reports/timing/max_tt_025C_1v80/max.rpt
-/asic/reports/timing/min_ff_n40C_1v95/max.rpt
-/asic/reports/timing/min_ss_100C_1v60/max.rpt
-/asic/reports/timing/min_tt_025C_1v80/max.rpt
-/asic/reports/timing/nom_ff_n40C_1v95/max.rpt
-/asic/reports/timing/nom_ss_100C_1v60/max.rpt
-/asic/reports/timing/nom_tt_025C_1v80/max.rpt
-/asic/results/def/soc_top.def
-/asic/results/gds/soc_top.gds
-/asic/results/gds/soc_top.klayout.gds
-/asic/results/gds/soc_top.magic.gds
-/asic/results/netlist/soc_top_pnr.v
-/asic/results/netlist/soc_top_powered.v
-/asic/results/netlist/soc_top_synth.v
-/asic/results/odb/soc_top.odb
-/asic/results/sdf/max_ff_n40C_1v95/soc_top__max_ff_n40C_1v95.sdf
-/asic/results/sdf/max_ss_100C_1v60/soc_top__max_ss_100C_1v60.sdf
-/asic/results/sdf/max_tt_025C_1v80/soc_top__max_tt_025C_1v80.sdf
-/asic/results/sdf/min_ff_n40C_1v95/soc_top__min_ff_n40C_1v95.sdf
-/asic/results/sdf/min_ss_100C_1v60/soc_top__min_ss_100C_1v60.sdf
-/asic/results/sdf/min_tt_025C_1v80/soc_top__min_tt_025C_1v80.sdf
-/asic/results/sdf/nom_ff_n40C_1v95/soc_top__nom_ff_n40C_1v95.sdf
-/asic/results/sdf/nom_ss_100C_1v60/soc_top__nom_ss_100C_1v60.sdf
-/asic/results/sdf/nom_tt_025C_1v80/soc_top__nom_tt_025C_1v80.sdf
-/asic/results/spef/max/soc_top.max.spef
-/asic/results/spef/min/soc_top.min.spef
-/asic/results/spef/nom/soc_top.nom.spef
-/asic/results/spice/soc_top_gds.spice
-/asic/results/spice/soc_top_lef_def.spice
 /fpga/JURI_FPGA_TESTI/arkhe_jury.mcs
 /fpga/nexys_demo_20260908/firmware/build/arkhe_demo_flash.mcs
 
@@ -83,5 +49,3 @@ __pycache__/
 fpga/*/build/
 
 # S_final2 kosusunda uretilen buyuk ciktilar (LFS asamasina birakildi)
-/asic/results/mag/soc_top.mag
-/asic/results/spice/soc_top.spice

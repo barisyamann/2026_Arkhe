@@ -1,1 +1,39 @@
+# Metin dosyalarinda satir sonu donusumu yapilmasin.
+# ASIC akisi cikitlarinin bayt duzeyinde korunmasi gerekir; CRLF/LF
+# donusumu SHA-256 saglamalarini bozar.
 * -text
+
+# ---------------------------------------------------------------------
+#  Git LFS - buyuk fiziksel tasarim ciktilari
+#
+#  GitHub tek dosya icin 100 MB sinir koyar. Asagidaki cikti turleri
+#  bu siniri asar ve Git LFS ile saklanir. Depo yapisi degismez;
+#  klonlandiginda dosyalar normal yerlerinde olur.
+#
+#  Kaynak dosyalar (RTL, testbench, config, constraints, betikler) ve
+#  makul boyuttaki raporlar normal git'te tutulur - DDK'nin 12 Eylul
+#  2026 tarihli yazisindaki ayrim budur.
+# ---------------------------------------------------------------------
+
+# Fiziksel tasarim gorunumleri
+*.gds       filter=lfs diff=lfs merge=lfs -text
+*.def       filter=lfs diff=lfs merge=lfs -text
+*.odb       filter=lfs diff=lfs merge=lfs -text
+*.mag       filter=lfs diff=lfs merge=lfs -text
+
+# Parazitik ve gecikme dosyalari
+*.spef      filter=lfs diff=lfs merge=lfs -text
+*.sdf       filter=lfs diff=lfs merge=lfs -text
+
+# GDS'ten cikarilan SPICE netlisti (1,8 milyon transistor)
+asic/results/spice/*.spice   filter=lfs diff=lfs merge=lfs -text
+
+# Post-PnR netlistleri (kaynak RTL LFS'e ALINMAZ)
+asic/results/netlist/*.v     filter=lfs diff=lfs merge=lfs -text
+
+# Dugum bazli guc sonuclari ve en buyuk zamanlama raporlari
+asic/reports/power/net-*.csv       filter=lfs diff=lfs merge=lfs -text
+asic/reports/timing/*/max.rpt      filter=lfs diff=lfs merge=lfs -text
+
+# SRAM makrosunun GDS gorunumu
+asic/macros/*/gds/*.gds      filter=lfs diff=lfs merge=lfs -text
