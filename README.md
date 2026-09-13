@@ -16,7 +16,7 @@ RISC-V (CV32E40P) tabanlı, TFLite Micro Speech modelini donanımda
 | **LVS** | `Circuits match uniquely` (GDS'ten çıkarılan netlist) |
 | **DRC** | KLayout **0** · Routing **0** · XOR **0** · Magic 7.658 (makro kaynaklı, belgeli) |
 | **Anten** | 0 / 0 |
-| **Doğrulama** | 36/36 test · 689 denetim · 9/9 mutasyon yakalandı |
+| **Doğrulama** | 37/37 test · 702 denetim · 9/9 mutasyon yakalandı |
 | **FPGA** | route error 0 · WNS +1,572 ns · WHS +0,042 ns |
 
 Beyan edilen çalışma noktası **43,2 MHz** (23,148 ns). ASIC koşu
@@ -56,7 +56,7 @@ Ayrıntı: [`asic/README.md`](asic/README.md).
 ## RTL doğrulamasını çalıştırma
 
 ```bash
-python scripts/run_regression.py       # 36 test, 689 denetim
+python scripts/run_regression.py       # 37 test, 702 denetim
 python scripts/hata_enjeksiyon.py      # 9 mutasyon kampanyası
 ```
 

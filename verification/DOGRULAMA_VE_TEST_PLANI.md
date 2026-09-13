@@ -116,7 +116,7 @@ Hepsi self-checking; elle inceleme gerekmez.
 
 ## 3. Sonuç
 
-    Regresyon        : 36/36 test, 689 denetim
+    Regresyon        : 37/37 test, 702 denetim
     Hata enjeksiyonu : 9/9 mutasyon yakalandı, 0 kaçtı
     İşlevsel kapsam  : 52/52 covergroup = %100
     Kod kapsamı      : %81,7 statement / %75,1 branch (bizim RTL)
@@ -152,8 +152,8 @@ Bu yöntem iki kez **dekoratif test** ortaya çıkardı ve düzeltildi:
 |---|---|---|
 | Gate-level simülasyon | Netlist iki araçla **sıfır hatayla derlendi**; işlevsel koşum X yayılımı nedeniyle sonuç vermedi (6.296 reset'siz FF — sky130 `dfxtp` hücreleri reset pini taşımaz). Şartname istemiyor. | `kanitlar/GATE_LEVEL_SIM.md` |
 | Formal doğrulama | Yapılmadı. Şartname istemiyor. | — |
-| UVM agent'ları pasif | Trafiği izler, üretmez. Aktif altyapı (driver/sequencer/sequence) **eklendi** ama teslim edilen regresyon pasif modda koşar. | `kanitlar/UVM_U1_U6_UYGULAMA.md` |
-| NPU agent kapsamı %52,1 | `strb %33`, `yanit %33` — NPU motoru TCM'e hep tam kelime yazar, TCM hep OKAY döner. Pasif izlemeyle **kapatılamaz**, eksiklik değil. | `kanitlar/UVM_YAPILABILECEKLER.md` |
+| Aktif UVM testi tasarıma sürmez | `uvm_aktif` regresyona **bağlandı** (13 denetim) ve bağımsız bir arayüz + davranışsal AXI4-Lite slave üzerinde koşar. Tasarıma sürmez: `soc_bus_if` / `npu_eng_if` pasif gözlem noktalarıdır (`assign` ile bağlı, sürekli atama driver'ı ezer) ve SoC'ta boş AXI slave portu yoktur. Tasarıma bağlamak RTL değişikliği gerektirir ve teslim edilen GDS'nin kaynak SHA-256 bütünlüğünü bozardı. **Tasarımın AXI uyumu pasif agent (401.729 işlem) + 5 SVA checker ile doğrulanır**; `uvm_aktif` UVM ortamının kendi altyapısını doğrular. | `AXI_UVM_KAPSAM_MATRISI.md` §5 |
+| NPU agent kapsamı %52,1 | `strb %33`, `yanit %33` — NPU motoru TCM'e hep tam kelime yazar, TCM hep OKAY döner. Pasif izlemeyle **kapatılamaz**, eksiklik değil. Aktif testte `strb` kapsamı %100'e çıkar. | `kanitlar/UVM_YAPILABILECEKLER.md` |
 | Güç sonuçları tahminî | Açık switching activity girdisi yok; şartname izin veriyor (§9.10). | `asic/README.md` |
 
 Ek iyileştirme önerileri değer/maliyet sıralı olarak

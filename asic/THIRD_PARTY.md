@@ -16,7 +16,7 @@ asagida verilmistir.
 | Depodaki konum | `rtl/cv32e40p-master/` |
 | Lisans | Solderpad Hardware License v0.51 (Apache 2.0 tabanli) |
 | Lisans dosyasi | `licenses/cv32e40p-LICENSE` |
-| Sartname durumu | ZORUNLU - sartname s.282 bu cekirdegin kullanilmasini sart kosuyor |
+| Sartname durumu | ZORUNLU - sartname Bolum 4.2.2 bu cekirdegin kullanilmasini sart kosuyor |
 
 ### Yapilandirma
 

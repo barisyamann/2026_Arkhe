@@ -1,6 +1,14 @@
-# ARKHE — d45_anten2 jüri teknik özeti
+# ARKHE — S_final2 jüri teknik özeti
 
-8 Eylül 2026 teslim hazırlığı. Esas fiziksel koşu **d45_anten2**; başka koşunun iyi metrikleriyle birleştirilmemiştir. Sentez kaynakları Git `d800acb` ile eşleşir.
+13 Eylül 2026 teslim. Esas fiziksel koşu **`S_final2`**; başka koşunun
+iyi metrikleriyle birleştirilmemiştir. Teslim edilen `asic/config.yaml`
+bu koşuda fiilen kullanılan yapılandırmanın birebir kendisidir
+(`results/config/resolved.json` ile karşılaştırılarak doğrulanmıştır).
+
+`S_final2`, önceki `d45_anten2` koşusunun yerini alır. Fark: şartname
+§6.2'nin zorunlu tuttuğu **nihai GDSII'den çıkarılmış SPICE** ile
+koşulmuştur (`MAGIC_EXT_USE_GDS=true`) ve imzalama doğrudan 23,148 ns'de
+yapılmıştır — sonradan yapılan bir periyot taraması değildir.
 
 ## Mimari
 
@@ -8,37 +16,85 @@ CV32E40P / RV32IMC (FPU kapalı), AXI4-Lite, NPU, iki UART, I2C, QSPI, GPIO, tim
 
 ## Fiziksel sonuçlar
 
-PnR 10 ns, özgün signoff 20 ns. **50 MHz temiz kapanış yoktur.** 45,8 MHz sayısı ayrı bir periyotta doğrulanmış STA sonucu değildir ve ulaşılan frekans olarak sunulmaz.
+**Esas koşu: `S_final2`** (13 Eylül 2026). PnR hedefi **14 ns**, imzalama
+ve beyan edilen çalışma noktası **23,148 ns = 43,2 MHz**. Dokuz PVT
+köşesinin tamamında setup ve hold pozitiftir, TNS sıfırdır.
 
-**Ek imzalama analizi (9 Eylül 2026).** Aynı layout, hiçbir fiziksel değişiklik yapılmadan 23 ns (43,5 MHz) periyotla yeniden analiz edildi: setup 9/9 köşede pozitif, 0 ihlalli yol; hold 9/9 köşede pozitif. En kötü köşe `max_ss_100C_1v60` setup WNS +0,0810 ns. Periyot taraması 20/22/22,5/23/24 ns ile yapılmıştır; 22 ns hesapla yeterli görünmesine rağmen ölçümde −0,419 ns vermiştir. Yerleştirme, yönlendirme veya optimizasyon tekrarlanmamıştır; GDS, netlist, DRC, LVS, anten ve slew/kapasite/fanout sonuçları değişmez. Özgün 20 ns raporları `asic/reports/timing/` altında olduğu gibi korunur. Ayrıntı ve yeniden üretme: `asic/reports/timing_23ns/`.
+**50 MHz temiz kapanış yoktur** ve ulaşılan frekans olarak sunulmaz.
+
+43,2 MHz'in seçilme nedeni: 43.200.000 / 400.000 = 108, yani I2C SCL
+bölücüsü tam sayı çıkar ve EK-2'nin "SCL 400 kHz sabit" isteri tam
+karşılanır.
+
+> `constraints/design.sdc` içindeki `20.0` satırı kullanılan değer
+> değildir; `CLOCK_PERIOD` ortam değişkeni tanımsızsa devreye giren
+> yedektir. Üretilen `results/sdc/pnr_resolved.sdc` `-period 14.0000`
+> yazar, akış logları `clk_period = 14 ns` basar. Ayrıntı:
+> `asic/README.md` §6.
+
+### Dokuz köşe STA (23,148 ns)
 
 | Köşe | Setup slack ns | Hold slack ns |
 |---|---:|---:|
-| nom_tt_025C_1v80 | +1,3803 | +0,3204 |
-| nom_ss_100C_1v60 | −1,2962 | +0,7504 |
-| nom_ff_n40C_1v95 | +2,4939 | +0,1648 |
-| min_tt_025C_1v80 | +1,7364 | +0,3196 |
-| min_ss_100C_1v60 | −0,8395 | +0,7484 |
-| min_ff_n40C_1v95 | +2,8082 | +0,1642 |
-| max_tt_025C_1v80 | +0,9267 | +0,3195 |
-| max_ss_100C_1v60 | −1,8149 | +0,7506 |
-| max_ff_n40C_1v95 | +2,0799 | +0,1643 |
+| nom_tt_025C_1v80 | +2,8271 | +0,4936 |
+| nom_ss_100C_1v60 | +0,8350 | +1,0878 |
+| nom_ff_n40C_1v95 | +3,6716 | +0,2625 |
+| min_tt_025C_1v80 | +3,2330 | +0,4891 |
+| min_ss_100C_1v60 | +1,3439 | +1,0749 |
+| min_ff_n40C_1v95 | +4,0363 | +0,2730 |
+| max_tt_025C_1v80 | +2,3327 | +0,4966 |
+| max_ss_100C_1v60 | **+0,2782** | +0,7100 |
+| max_ff_n40C_1v95 | +3,2157 | **+0,0380** |
 
-Kaynak: `asic/reports/timing/summary.rpt`; ayrıntılı WNS/TNS ve yollar ilgili köşe dizinlerindedir. SRAM'in yalnız TT modeli vardır; FF/SS için de bu model kullanılmıştır.
+En kötü setup `max_ss_100C_1v60` (+0,2782 ns), en kötü hold
+`max_ff_n40C_1v95` (+0,0380 ns). **Negatif slack yoktur.**
+
+Kaynak: `asic/reports/timing/summary.rpt`. SRAM'in yalnız TT modeli
+vardır; FF/SS köşelerinde de bu model kullanılmıştır — bu bir
+yaklaşımdır ve raporda böyle belirtilmiştir.
+
+### İmzalama kontrolleri
 
 | Kontrol | Sonuç |
 |---|---:|
-| Hold | 9/9 köşede pozitif; 0 ihlalli yol |
-| Setup | 115 ihlalli yol |
-| Anten net/pin | 0 / 0 |
-| Detailed route / KLayout DRC | 0 / 0 |
-| Magic DRC, özgün LEF/DEF kontrolü | 7.658 |
-| Özgün LEF/DEF LVS | Circuits match uniquely |
-| Ek GDS kaynaklı LVS | Circuits match uniquely; SRAM içi kapsam dışında |
-| XOR / PDN ihlali | 0 / 0 |
-| Slew / kapasite / fanout | 19.341 / 1.888 / 11 |
-| Lint hata / uyarı / latch | 0 / 818 / 0 |
-| Bağlantısız / kritik bağlantısız pin | 257 / 0 |
+| Setup (9 köşe) | **9/9 pozitif, 0 ihlalli yol, TNS 0** |
+| Hold (9 köşe) | **9/9 pozitif, 0 ihlalli yol, TNS 0** |
+| Anten net / pin | **0 / 0** |
+| Detailed-route DRC | **0** |
+| KLayout DRC | **0** |
+| XOR farkı | **0** |
+| PDN ihlali | **0** |
+| LVS (LEF/DEF kaynaklı) | **Circuits match uniquely** |
+| **LVS (nihai GDSII kaynaklı)** | **Circuits match uniquely** |
+| LVS hata sayacı | 0 (cihaz/net/pin/özellik farkı hepsi 0) |
+| Magic DRC | **7.658** — tamamı `nwell.4`, makro kaynaklı (aşağıda) |
+| Max slew / max cap / fanout | 16.030 / 1.952 / 81 |
+
+### Nihai GDSII'den çıkarılan SPICE (§6.2)
+
+`MAGIC_EXT_USE_GDS=true` ile koşulmuştur: SPICE **nihai GDSII'den**
+çıkarılmış, LVS'te kullanılan netlist budur.
+
+| | |
+|---|---:|
+| SPICE dosyası | 119 MB |
+| Çıkarılan transistör | **1.809.268** |
+| Black-box girdi | **0** |
+
+Gerçek cihaz modelleri (`sky130_fd_pr__pfet_01v8_hvt`,
+`nfet_01v8`) w/l değerleriyle çıkarılmıştır.
+
+### Tasarım büyüklüğü
+
+| | |
+|---|---:|
+| Die | 3832,40 × 4249,24 µm |
+| Toplam örnek | 2.053.906 |
+| Standart hücre | 269.735 |
+| SRAM makrosu | 23 (2 KiB × 23 = **46 KiB**) |
+| Anten diyotu | 2.233 |
+| Yerleşim doluluğu | %50,3 |
+| Toplam güç | ~105,7 mW |
 
 ## Magic DRC değerlendirmesi
 
@@ -52,20 +108,38 @@ Tarihsel aday logları ve test kaynakları pakette korunmuştur. 5–6 Eylül NP
 
 ## Regresyon ve kod kapsama
 
-9 Eylül 2026 itibarıyla regresyon **16 test / 454 denetim** ile tamamı
-geçmektedir. Bütün testler kendi kendini kontrol eder; hata varsa koşum
-`$fatal` ile düşer.
+13 Eylül 2026 itibarıyla (HEAD) regresyon **37 test / 702 denetim** ile
+tamamı geçmektedir. Bütün testler kendi kendini kontrol eder; hata varsa
+koşum `$fatal` ile düşer. Koşum: `python scripts/run_regression.py`
 
 | Test | Denetim | Test | Denetim |
 |---|---:|---|---:|
-| npu_dogruluk | 77 | npu_blok | 27 |
-| uart | 42 | jtag_debug | 27 |
-| qspi | 40 | sync_fifo | 24 |
-| dma | 39 | sistem | 17 |
-| i2c | 38 | sistem_gercek_boot | 17 |
-| gpio | 37 | npu_hizlanma | 2 |
-| timer | 36 | npu_golden | 1 |
-| uvm_axi_agent | 29 | cekirdek_izi | 1 |
+| npu_dogruluk | 77 | sartname_gpio | 15 |
+| npu_blok | 43 | sartname_uart_stream | 15 |
+| uart | 42 | interconnect_adres | 13 |
+| qspi | 40 | uvm_aktif | 13 |
+| dma | 39 | wstrb_kismi_yazma | 11 |
+| i2c | 38 | i2c_scl_frekans | 9 |
+| uvm_axi_agent | 38 | jtag_yanit_kodu | 9 |
+| gpio | 37 | sram_registered | 6 |
+| timer | 36 | axi_protokol | 6 |
+| sartname_qspi | 27 | qspi_sck_olcum | 5 |
+| jtag_debug | 27 | sram_w_yakalama | 4 |
+| sartname_timer | 25 | qspi_presc_sinir | 4 |
+| sync_fifo | 24 | axi_w_yakalama | 4 |
+| sartname_uart | 20 | i2c_scl_periyot | 4 |
+| sistem | 20 | i2c_saat_germe | 4 |
+| sistem_gercek_boot | 20 | jtag_cdc | 4 |
+| npu_accelerator | 16 | sinir_degerleri | 3 |
+| | | npu_hizlanma | 2 |
+| | | npu_golden | 1 |
+| | | cekirdek_izi | 1 |
+
+Önceki sürümlerde bildirilen "16 test / 454 denetim" 9 Eylül tarihlidir;
+aradan geçen sürede 21 yeni test eklenmiştir (şartname uyum testleri,
+sınır durum testleri, SRAM/AXI yazma yakalama, WSTRB kısmi yazma, QSPI
+prescaler/SCK ölçümü, I2C saat germe, JTAG CDC, interconnect adres
+çözme, NPU accelerator sarmalayıcı ve aktif UVM testi).
 
 Kod kapsama **üç ayrı seviyede** ölçülür ve hangi seviyeden söz edildiği
 belirtilmelidir:

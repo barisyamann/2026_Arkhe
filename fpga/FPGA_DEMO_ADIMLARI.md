@@ -56,94 +56,276 @@ birkaç saniye sürer.
 
 ---
 
-## Adım 3 — Demo aracını tanı (donanımsız)
+## Demo A — TEKNOFEST'in resmi aracı (`demo_harness.py`)
 
-Karta dokunmadan önce aracın çalıştığını görün:
+Bu, jürinin kullanacağı araçtır. Çalışma dizini:
 
-```bash
-cd fpga/nexys_demo_20260908/demo
+```powershell
+cd C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\demo
+```
+
+### A-1. Araç ayakta mı (kart gerekmez)
+
+```powershell
 python demo_harness.py --version
+python demo_harness.py ports
 ```
 
-Sahte cihazla deneme (kart bağlı olmasa da çalışır):
+`ports` bağlı COM portlarını listeler. **İki port göreceksiniz** ve ikisi de
+lazım (aşağıya bakın).
 
-```bash
-python demo_harness.py selftest
+### A-2. İki portu da belirle
+
+Bu demo **iki ayrı seri hat** kullanır — tek port yetmez:
+
+| Rol | Ne | Nereden | ICD'deki varsayılan |
+|---|---|---|---|
+| **core** | Kartın durum/sonuç çıktısı | Kart üstü USB-UART (C4/D4) | `COM16` @ 115200 |
+| **stream** | NPU'ya veri sürülen hat | **Harici 3,3 V UART-TTL modülü, Pmod JB** | `COM12` @ 1000000 |
+
+**Pmod JB bağlantısı zorunludur** (Demo A için):
+
+| Pmod JB | FPGA pini | Modül tarafı |
+|---|---|---|
+| JB1 | `D14` | modülün **TX**'i |
+| JB2 | `F16` | modülün **RX**'i |
+| JB5 veya JB6 | GND | modülün GND'si |
+
+> Modülün TX'i JB1'e, RX'i JB2'ye gider (çapraz). GND'yi bağlamayı unutmayın.
+
+### A-2b. Flash imajını yaz — **bu adım şart**
+
+`nexys_top.bit` yalnızca FPGA mantığını yükler. Uygulama yazılımı ve NPU
+ağırlıkları **flash'ta** durur ve `.bit` onu değiştirmez. Demo A'nın
+beklediği firmware `flash_demo.bin`'dir (`Stream ready` banner'ını yazan,
+`[IRQ] Class: N` döndüren sürüm).
+
+> **Belirti:** Flash'ta başka bir imaj varsa (örn. `flash_npu_demo.bin` —
+> interaktif NPU demosu) kart çalışır, seri terminale kendi testini
+> basar, ama `demo_harness` her örnekte **TIMEOUT** alır. Kart bozuk
+> değildir; sadece yanlış uygulama yüklüdür.
+
+**1) MCS üret** — Vivado Tcl konsolunda:
+
+```tcl
+cd C:/Users/ybari/2026_Arkhe/fpga/nexys_demo_20260908/firmware/build
+write_cfgmem -format mcs -size 16 -interface SPIx4 \
+  -loadbit  "up 0x00000000 C:/Users/ybari/2026_Arkhe/fpga/nexys_demo_20260908/bitstream/nexys_top.bit" \
+  -loaddata "up 0x00800000 C:/Users/ybari/2026_Arkhe/fpga/nexys_demo_20260908/firmware/build/flash_demo.bin" \
+  -file     "C:/Users/ybari/2026_Arkhe/fpga/nexys_demo_20260908/firmware/build/arkhe_stream_demo.mcs" -force
 ```
 
----
+**2) Programla** — Hardware Manager:
 
-## Adım 4 — ICD dosyasını doğrula
+1. **Add Configuration Memory Device** → `s25fl128s...`
+2. **Program Configuration Memory Device** → `arkhe_stream_demo.mcs`
+3. Erase + Program + Verify işaretli
+4. Bitince kartı yeniden başlat (güç anahtarı veya **PROG** düğmesi)
 
-ICD (Arayüz Tanım Dokümanı) zaten hazırlanmıştır: `arkhe_icd.json`
+**3) Doğrula** — banner geliyor mu:
 
-```bash
-python demo_harness.py validate -i arkhe_icd.json
+```powershell
+python demo_harness.py probe -c arkhe_icd.json --seconds 15
 ```
 
-**Beklenen:** doğrulama hatasız geçer. Hata verirse çıktıdaki alan adını
-not edip bana iletin — ICD'de düzeltilecek bir alan var demektir.
+`Stream ready` satırını görmelisin. Görmüyorsan flash yazılmamıştır.
 
----
+> Flash yerleşimi: `0x800000` uygulama, `0x802000` NPU ağırlıkları.
 
-## Adım 5 — Gerçek kartla çalıştır
+### A-3. ICD'yi kendi portlarınla güncelle
 
-```bash
-python demo_harness.py run -i arkhe_icd.json --port COM7
+`arkhe_icd.json` içinde iki port alanı var. Kendi COM numaralarını yaz:
+
+```powershell
+python -c "import json;p='arkhe_icd.json';d=json.load(open(p,encoding='utf-8'));d['stream']['port']['port']='COM12';d['core']['port']['port']='COM16';json.dump(d,open(p,'w',encoding='utf-8'),ensure_ascii=False,indent=2);print('stream',d['stream']['port']['port'],'core',d['core']['port']['port'])"
 ```
 
-`COM7` yerine **Adım 1'de not ettiğiniz portu** yazın.
+`COM12` / `COM16` yerine **A-1'de gördüğün gerçek numaraları** yaz.
 
-**Grafik arayüz tercih ederseniz:**
+### A-4. ICD'yi doğrula
 
-```bash
-python demo_gui.py
+```powershell
+python demo_harness.py validate -c arkhe_icd.json
 ```
 
-GUI'de: ICD dosyasını seçin → COM portunu seçin → **Run**.
+> Dikkat: bayrak `-c` (veya `--config`), `-i` **değil**.
 
----
+**Beklenen:** hatasız geçer.
 
-## Adım 6 — Sonucu kontrol et
+### A-5. Donanımsız prova (isteğe bağlı)
 
-Araç sonuçları şuraya yazar:
-
-```
-demo/results/ARKHE_<tarih>_<saat>/
+```powershell
+python demo_harness.py run -c arkhe_icd.json --dry-run
 ```
 
-İçinde çerçeve kayıtları, ölçülen süreler ve özet rapor bulunur.
+> **Bu adımda her senaryo KALDI/zaman aşımı verir — normaldir.**
+> `--dry-run` sahte bir cihaz canlandırmaz; portu açmadan koşar, yani
+> yanıt verecek kimse yoktur. Sadece aracın çöküp çökmediğini, ICD'nin
+> okunduğunu ve `results/` klasörünün yazıldığını gösterir.
+> Gerçek sonuç için A-6'ya geç.
 
-**Referans:** Daha önce alınmış bir koşu `demo/results/ARKHE_20260908_173100`
-altında durmaktadır; yeni koşunuzu onunla karşılaştırabilirsiniz.
+### A-6. Gerçek koşum
 
-### Beklenen davranış
+```powershell
+python demo_harness.py run -c arkhe_icd.json --manifest public_dataset/manifest.csv --data-dir public_dataset
+```
 
-| Ne | Beklenen |
+> **`--manifest` vermeyi atlama.** Verilmezse araç **sentetik** veri
+> üretir (`synthetic_0000`...), bunların altın referansı olmadığı için
+> `golden_agreement_pct` **hesaplanamaz** ve çıktıda
+> *"veri setinde 'golden' sütunu yok"* uyarısı görürsün. Referans
+> koşumumuz (156/156, %100) tam olarak yukarıdaki komutla alınmıştır.
+
+Portları ICD'ye yazmak yerine komut satırından da verebilirsin:
+
+```powershell
+python demo_harness.py run -c arkhe_icd.json --stream-port COM12 --core-port COM16
+```
+
+Kısa deneme için `-n 20` ekle (20 örnek). Sağlamlık senaryolarını atlamak
+için `--no-robustness`.
+
+**Grafik arayüz:**
+
+```powershell
+python demo_harness.py gui
+```
+
+### A-7. Sonuç
+
+Çıktı: `results/ARKHE_<tarih>_<saat>/` — içinde `summary.json`,
+`samples.csv`, `robustness.csv`, `report.md`.
+
+Referans koşumuz `fpga/demo_teknofest/sonuclar/` altındadır. Karşılaştır:
+
+| Ölçüt | Referans değer |
 |---|---|
-| Bağlantı | Araç kartı bulur, el sıkışma başarılı |
-| Çerçeveleme | Sağlama toplamı hataları **0** |
-| Sonuç | Her çerçeve için sınıflandırma çıktısı döner |
-| Altın vektör | `[0, 225, 326, 3543]` |
+| `total_samples` / `answered` | 156 / 156 |
+| `timeouts` | **0** |
+| `golden_agreement_pct` | **100.0** |
+| `mismatch_count` | **0** |
+| Gecikme (medyan) | 7,74 ms |
+| Hızlanma | 183× (yazılım referansı 1418 ms) |
+| Sağlamlık | 9 geçti / 1 atlandı |
+
+`golden_agreement_pct = 100.0` ve `timeouts = 0` görüyorsan demo başarılıdır.
 
 ---
 
-## Adım 7 — Kart üstü kendi testlerimiz (isteğe bağlı ama önerilir)
+## Demo B — Bizim kendi tam test firmware'imiz (`run_jury.py`)
 
-Demo aracının yanı sıra kendi doğrulama firmware'imiz de vardır:
+Demo A sınıflandırma doğruluğunu ölçer. Demo B **SoC'un tamamını**
+sınar: CPU, D-RAM, NPU TCM, GPIO, Timer, DMA, bus fault, I2C, UART2 ve
+uçtan uca NPU çıkarımı. Tek USB kablosuyla çalışır, Pmod gerekmez.
 
-| Test | Sonuç |
+Çalışma dizini:
+
+```powershell
+cd C:\Users\ybari\2026_Arkhe\fpga\JURI_FPGA_TESTI
+```
+
+### B-1. Dosyaları donanımsız doğrula
+
+```powershell
+python run_jury.py --validate
+```
+
+Karta bağlanmaz, sadece yerel girdi dosyalarını denetler.
+
+### B-2. Flash imajını yaz (bu adım şart)
+
+Demo B'nin test yazılımı **flash'ta** durur; sadece `.bit` yüklemek
+yetmez. İki dosya gerekir:
+
+- `nexys_usb_top.bit` — bu klasörde, hazır
+- `flash_jury.bin` — bu klasörde, hazır (flash'a `0x00800000` adresine)
+
+**Vivado Hardware Manager:**
+
+1. Open Target → Auto Connect
+2. Kartın konfigürasyon belleğini seç (`s25fl128s...`)
+3. **Add Configuration Memory Device** → **Program Configuration Memory Device**
+4. Dosya olarak `flash_jury.bin`, **başlangıç adresi `0x00800000`**;
+   Erase + Program + Verify işaretli
+5. Sonra **Program Device** ile `nexys_usb_top.bit`
+
+> **Tek `.mcs` tercih edersen** (depoda yok, türetilmiş dosyadır) Vivado
+> Tcl konsolunda üret:
+>
+> ```tcl
+> cd C:/Users/ybari/2026_Arkhe/fpga/JURI_FPGA_TESTI
+> write_cfgmem -format mcs -size 16 -interface SPIx4 \
+>   -loadbit "up 0x00000000 nexys_usb_top.bit" \
+>   -loaddata "up 0x00800000 flash_jury.bin" \
+>   -file arkhe_jury.mcs -force
+> ```
+>
+> Sonra tek dosya olarak `arkhe_jury.mcs`'i programla.
+
+> **Karıştırma:** `nexys_usb_top.bit` (Demo B) ile
+> `nexys_demo_20260908/bitstream/nexys_top.bit` (Demo A) **farklı
+> sürümlerdir** — boot ROM'ları ve pin haritaları ayrıdır.
+
+### B-3. Portu bul
+
+```powershell
+python -m serial.tools.list_ports
+```
+
+Başka seri terminal açıksa **kapat** — aynı COM iki programda açılamaz.
+
+### B-4. Tam koşum (elle kontroller dahil)
+
+```powershell
+python run_jury.py --port COM16
+```
+
+`Hazir... CPU RESET...` yazısını görünce **CPU RESET düğmesine bir kez bas.**
+Sonra test bitene kadar bir daha resetleme.
+
+**Elle yapacakların** (otomatik bölüm bittikten sonra istenir):
+
+1. 16 anahtarın **hepsini 0** yap → Enter
+2. **Hepsini 1** yap → Enter
+3. **Tekrar 0** yap → Enter
+4. LED desenleri gösterilir: desen doğruysa `e`, yanlışsa `h` yaz
+
+> Anahtarları değiştirirken **CPU RESET'e basma.**
+> Geçen sefer koşum `Anahtarlar 0 okunmadi` ile düştü — 1. adımda
+> anahtarların gerçekten hepsi aşağıda olduğundan emin ol.
+
+### B-5. Yalnız otomatik bölüm (elle kontrol istemezsen)
+
+```powershell
+python run_jury.py --port COM16 --skip-manual
+```
+
+Anahtar/LED bölümü rapora **SKIP** yazılır. Jüriye tam kanıt vermek
+için **B-4'ü** tercih et.
+
+Daha uzun koşum: `--rounds 20` (yedi örnek 140 kez çalışır).
+
+### B-6. Sonuç
+
+Program `juri_board_<tarih>_<saat>.json` ve aynı adlı `.log` üretir.
+
+**Aranan:** JSON'da `passed = true` ve logun son satırında `GECTI`.
+
+| Aşama | Beklenen |
 |---|---|
-| Çevre birimi testleri | **34/34** |
-| NPU testleri | **15/15** |
-| Self-checking boot | `sistem_gercek_boot` ile doğrulandı |
+| Öztestler | her turda 83 kontrol |
+| NPU çıkarımı | 7 örnek × tur sayısı, sınıf referansla birebir |
+| Çevre birimi | 34/34 |
+| NPU testleri | 15/15 |
+| `manual_gpio` | `PASS` (B-4) veya `SKIP` (B-5) |
 
-Bunları çalıştırmak için `JURI_FPGA_TESTI/` sürümünü yükleyin ve
-seri terminalden (115200 8N1) çıktıyı izleyin. Testler otomatik koşar
-ve sonucu ekrana basar.
+Hata, zaman aşımı veya Ctrl+C durumunda test **geçmiş sayılmaz**;
+rapor kısmi sonucu kaydeder.
 
-> Bu sürümü yükledikten sonra demo için **Adım 2'yi tekrarlayıp**
-> `nexys_top.bit` geri yüklemeyi unutmayın.
+### B-7. Demo A'ya geri dön
+
+Demo B'nin flash imajı Demo A'nınkini ezer. Demo A'yı tekrar
+çalıştıracaksan **Adım 2'yi tekrarla** ve `nexys_top.bit`'i geri yükle.
 
 ---
 
@@ -152,10 +334,16 @@ ve sonucu ekrana basar.
 Tam liste: `fpga/nexys_demo_20260908/constraints/nexys4ddr.xdc`
 (her pinin gerekçesi yorumlarda yazılıdır).
 
-### Demo için gereken — başka bağlantı yok
+### Hangi demo neyi kullanır
 
-Resmi demo aracı kart üzerindeki **USB-UART köprüsünü** kullanır.
-PMOD'lara hiçbir şey takmadan çalışır.
+| | Demo A (`demo_harness.py`) | Demo B (`run_jury.py`) |
+|---|---|---|
+| Kart üstü USB-UART | **evet** (`core`, 115200) | **evet** (tek bağlantı) |
+| Pmod JB UART-TTL | **evet** (`stream`, 1 Mbps) — zorunlu | hayır |
+| Diğer Pmod'lar | gerekmez | gerekmez |
+
+Demo B tek USB kablosuyla çalışır. **Demo A ayrıca Pmod JB'ye harici
+3,3 V UART-TTL modülü ister** (aşağıdaki JB tablosuna bakın).
 
 | Sinyal | FPGA pini | Açıklama |
 |---|---|---|
@@ -186,8 +374,9 @@ direnç önerilir** (güvenilir yükselme kenarı için).
 | **JB2** | `F16` | `JB_UART_TX` | FPGA **çıkışı** → modülün RX'i |
 | JB5 / JB6 | — | GND | |
 
-Harici 3,3 V UART-TTL modülü gerekir. Demo aracı bu hattı
-kullanmaz; NPU'ya ayrı bir kanaldan veri sürmek isterseniz.
+Harici 3,3 V UART-TTL modülü gerekir. **Demo A bu hattı kullanır**
+(`stream` portu) — bağlantısız Demo A koşamaz. Demo B bu hatta
+ihtiyaç duymaz, tek USB ile çalışır.
 
 ### Pmod JC — JTAG hata ayıklama (opsiyonel)
 

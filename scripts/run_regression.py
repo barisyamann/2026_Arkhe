@@ -634,6 +634,37 @@ TESTLER = [
         ek_bayrak=["-L", "uvm"],
         elab_bayrak=["-L", "uvm"],
     ),
+    # -------------------------------------------------------------------------
+    # AKTIF UVM TESTI  (13 Eylul 2026)
+    #
+    # uvm_axi_agent PASIF izler: gercek NPU trafigi yalnizca tam-word
+    # erisim ve OKAY yanit urettigi icin strb (tek_bayt/yarim) ve yanit
+    # (SLVERR/DECERR) bin'leri UYARILAMIYORDU - islevsel kapsam %52,1'de
+    # takiliyordu.
+    #
+    # Bu test agent'lari UVM_ACTIVE kurar ve sequence kosar:
+    #   axil_wstrb_seq    - kismi yazma desenlerini hedefler
+    #   axil_yanit_seq    - SLVERR/DECERR uretir
+    #   axil_rastgele_seq - kisitli-rastgele trafik
+    #   axil_sanal_seq    - iki arayuz eszamanli (hakemlik baskisi)
+    #
+    # Kaynak listesi uvm_axi_agent ile AYNIDIR; fark yalnizca
+    # +UVM_TESTNAME plusarg'idir.
+    # -------------------------------------------------------------------------
+    dict(
+        ad="uvm_aktif",
+        top="tb_soc_top",
+        kaynak=None,
+        ek_kaynak=[TB/"uvm"/"axil_if.sv", TB/"uvm"/"axil_uvm_pkg.sv",
+                   MEM/"axil_protocol_checker.sv",
+                   TB/"spi_flash_model.sv", TB/"tb_soc_top.sv"],
+        tanim=["UVM_AXI", "UVM_AKTIF"],
+        mem=["app.hex", "app_sim.hex", "boot.hex", "flash.hex",
+             "flash_sim.hex", "fc_weights_packed32.mem"],
+        mem_zorunlu=False,
+        ek_bayrak=["-L", "uvm"],
+        elab_bayrak=["-L", "uvm"],
+    ),
     dict(
         ad="sistem_gercek_boot",
         top="tb_soc_top",
@@ -825,7 +856,27 @@ def test_kos(t, vivado_bin, kapsam=False, ek_tanim=None):
     # xsim'in kendi logu ayri dosyaya; stdout'u sim.log'a aliyoruz.
     # Ikisi ayni dosya olursa her satir IKI KEZ yazilir ve denetim sayilari
     # iki katina cikar - ilk surumde tam olarak bu oldu.
-    rc, out = komut([xsim, "snap", "-tclbatch", "run.tcl", "-log", "xsim.log"],
+    # -------------------------------------------------------------------
+    # plusarg (13 Eylul 2026)
+    #
+    # DIKKAT: Windows'ta xsim.bat sarmalayicisi "-testplusarg AD=DEGER"
+    # icindeki '=' isaretinde arguman bolyor ve xsim yardim ekrani
+    # basiyor ("Expected a switch but found a"). Bu yuzden UVM testi
+    # plusarg ile DEGIL, derleme zamani makrosuyla secilir
+    # (tanim=["UVM_AXI","UVM_AKTIF"] -> tb_soc_top icindeki `ifdef).
+    #
+    # Alan yine de duruyor: '=' icermeyen plusarg'lar sorunsuz gecer.
+    # -------------------------------------------------------------------
+    plusarg = []
+    for pa in t.get("plusarg", []):
+        plusarg += ["-testplusarg", str(pa)]
+
+    # NOT: xsim arguman ayristirmasi hassastir. Snapshot adi ("snap")
+    # ILK sirada, plusarg'lar EN SONDA olmalidir. Yanlis sirada
+    # "Expected a switch but found a" hatasiyla YARDIM EKRANI basar ve
+    # simulasyon hic kosmaz (belirti: "DENETIM YOK").
+    rc, out = komut([xsim, "snap", "-tclbatch", "run.tcl",
+                     "-log", "xsim.log"] + plusarg,
                     d, d / "sim.log")
     sure = time.time() - t0
 

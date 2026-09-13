@@ -1,8 +1,36 @@
-# Cevre birimlerinin saat bagimliligi: ASIC 43,5 MHz etkisi
-# (11 Eylul 2026, olculdu)
+# Cevre birimlerinin saat bagimliligi: ASIC 43,2 MHz
+# (11 Eylul 2026 olculdu · 13 Eylul 2026 guncellendi)
 
-Bulgu: cevre birimi bolucileri **50 MHz sistem saatine gore**
-sabit kodlanmis. ASIC beyani ise 23 ns = **43,5 MHz**.
+> **GUNCELLEME (13 Eylul 2026).** Bu belge ilk yazildiginda iki sey
+> farkliydi:
+>
+> 1. **Saat hedefi 43,5 MHz varsayilmisti.** Nihai kosum (`S_final2`)
+>    **43,2 MHz** (23,148 ns) ile imzalanmistir.
+> 2. **Bolenler sabit kodluydu.** Artik `soc_top.sv` icinde tek bir
+>    `SYS_CLK_HZ` parametresi cevre birimlerine gecirilir
+>    (satir 764, 781, 800); asagidaki "sabit kodlu yerler" bolumu
+>    **tarihsel kayittir**.
+>
+> **Sonuc degisti ve iyilesti:** 43,2 MHz'de I2C boleni **tam sayi**
+> cikar (43.200.000 / 400.000 = **108**) ve SCL **tam 400.000,0 Hz**
+> olur — sapma **%0**. 43,5 MHz'de bolen 109 olup SCL 399.082,6 Hz
+> (-%0,23) olurdu. Frekansin 43,2 secilmesinin nedeni tam olarak budur.
+
+| Durum | Bolen | Gercek SCL | Sapma |
+|---|---:|---:|---:|
+| FPGA 50 MHz | 125 | 400.000,0 Hz | **%0** |
+| **ASIC 43,2 MHz (nihai)** | **108** | **400.000,0 Hz** | **%0** |
+| *(eski varsayim 43,5 MHz)* | *109* | *399.082,6 Hz* | *-%0,23* |
+
+EK-2'nin "SCL 400 kHz sabit" isteri **her iki hedefte de tam**
+karsilanir.
+
+---
+
+## Tarihsel kayit (11 Eylul 2026, duzeltme oncesi)
+
+Asagidaki olcumler bolenlerin sabit kodlu oldugu donemde alinmistir ve
+sorunun nasil tespit edilip giderildigini belgeler.
 
 # 1. SABIT KODLU YERLER
 

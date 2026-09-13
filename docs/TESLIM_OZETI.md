@@ -13,7 +13,7 @@ görünümüdür. Her bölüm kendi `OKUBENI.md` dosyasıyla açıklanmıştır.
 | **Beyan edilen çalışma noktası** | 23,148 ns = **43,2 MHz** |
 | **Dokuz PVT köşesi** | setup ve hold **9/9 pozitif**, TNS sıfır (koşu **S_final2**) |
 | **Fiziksel signoff** | KLayout DRC 0 · LVS temiz · XOR 0 · anten 0/0 · route DRC 0 · illegal overlap 0 |
-| **Regresyon** | **36/36 test, 689 denetim** |
+| **Regresyon** | **37/37 test, 702 denetim** |
 | **İşlevsel kapsam** | **52/52 = %100** |
 | **Kod kapsamı (bizim RTL)** | %81,7 statement / %75,1 branch |
 | **Hata enjeksiyonu** | **9/9 mutasyon yakalanıyor** |

@@ -49,3 +49,8 @@ __pycache__/
 fpga/*/build/
 
 # S_final2 kosusunda uretilen buyuk ciktilar (LFS asamasina birakildi)
+
+# Vivado MCS ve PRM - .bit + .bin'den turetilir, kullanici uretir
+# (nasil uretilecegi fpga/FPGA_DEMO_ADIMLARI.md icinde yazilidir)
+*.mcs
+*.prm

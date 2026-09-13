@@ -100,6 +100,40 @@ PnR girdisi `constraints/design.sdc`, signoff girdisi `constraints/signoff_50mhz
 
 İki ayrı SDC kullanılmasının gerekçesi ve ölçülmüş kanıtı bu bölümün devamındadır; tek SDC'yi iki rol için kullanmak ölçülerek elenmiştir.
 
+**`design.sdc` içindeki `20.0` sayısı hakkında** (sık sorulan)
+
+`constraints/design.sdc` dosyasında `set clk_period 20.0` satırı görülür.
+Bu **kullanılan değer değildir**; yalnızca `CLOCK_PERIOD` ortam değişkeni
+tanımsızsa devreye giren yedek değerdir:
+
+```tcl
+if {[info exists ::env(CLOCK_PERIOD)]} {
+    set clk_period $::env(CLOCK_PERIOD)
+} else {
+    set clk_period 20.0        ;# yalnizca yedek - akista kullanilmaz
+}
+```
+
+Akış `config.yaml`'daki `CLOCK_PERIOD: 14`'ü daima ortam değişkeni olarak
+geçirir, dolayısıyla 20.0 dalına hiç girilmez. Üç bağımsız kanıt:
+
+| Kanıt | Nerede | Değer |
+|---|---|---|
+| Çözümlenmiş PnR SDC | `results/sdc/pnr_resolved.sdc` | `create_clock ... -period 14.0000` |
+| Akış logları | `reports/*/openroad-*.log` (ilk satırlar) | `design.sdc: clk_period = 14 ns` |
+| Signoff STA saat kenarı | `reports/timing/*/max.rpt` | `11.573999` = 23,148 / 2 |
+
+Kendiniz doğrulamak için:
+
+```bash
+grep create_clock asic/results/sdc/pnr_resolved.sdc
+grep -m1 "clk_period" asic/reports/routing/openroad-detailedrouting.log
+```
+
+Özetle üç sayının rolleri: **14 ns** PnR optimizasyon hedefi (fiilen
+kullanılan), **23,148 ns** signoff ve beyan edilen çalışma noktası (dokuz
+köşenin tamamı bu periyotta), **20,0 ns** yalnızca ölü yedek satır.
+
 **Diğer kısıtlar** (tamamı `results/sdc/` içinde, gerekçeleri SDC yorumlarında):
 
 | Kısıt | Değer |
@@ -282,7 +316,21 @@ En kötü değerler: setup **+0,2782 ns** (max_ss), hold **+0,0380 ns** (max_ff)
 
 ### Bu koşuya özgü yapılandırma
 
-Teslim edilen `config.yaml`, bu koşuda fiilen kullanılan yapılandırmanın birebir kendisidir (`results/config/resolved.json` ile karşılaştırılarak doğrulanmıştır). Tasarım hedefleri önceki koşularla **aynı** kalmıştır (`CLOCK_PERIOD 14`, `SYS_CLK_HZ=43200000`, signoff 23,148 ns, 57 kaynak); yalnızca saat ağacı ve hold onarım parametreleri ayarlanmıştır:
+Teslim edilen `config.yaml`, bu koşuda fiilen kullanılan yapılandırmanın birebir kendisidir. **Bu iddia yeniden üretilebilir:**
+
+```bash
+python scripts/config_karsilastir.py
+```
+
+Betik, teslim edilen `config.yaml` ile koşumun kendi ürettiği `results/config/resolved.json` dosyasını karşılaştırır ve gerçek tasarım farkı varsa sıfırdan farklı çıkış kodu döner. Ölçülen sonuç:
+
+| | |
+|---|---:|
+| Aynı anahtar | **380** |
+| Akış türetmesi (mutlak yol / ortam) | 30 |
+| **Gerçek tasarım farkı** | **0** |
+
+30 fark, akışın koşum sırasında kendi eklediği mutlak yollardır (PDK hücre dosyaları, `DESIGN_DIR`, `KLAYOUT_*`, `FALLBACK_SDC`). Bunlar teslim dosyasında bulunmaz çünkü makineye özgüdür ve başka bir makinede yeniden çözülür. Tam döküm: `provenance/config_comparison.json`. Tasarım hedefleri önceki koşularla **aynı** kalmıştır (`CLOCK_PERIOD 14`, `SYS_CLK_HZ=43200000`, signoff 23,148 ns, 57 kaynak); yalnızca saat ağacı ve hold onarım parametreleri ayarlanmıştır:
 
     CTS_MACRO_CLUSTERING_SIZE          4       (önce: sınırsız)
     CTS_MACRO_CLUSTERING_MAX_DIAMETER  200     (önce: sınırsız)

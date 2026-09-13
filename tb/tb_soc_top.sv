@@ -1690,12 +1690,226 @@ module tb_soc_top;
         end
     end
 
+    // -------------------------------------------------------------------------
+    // AKTIF UVM ARAYUZU + REFERANS SLAVE  (13 Eylul 2026)
+    //
+    // NEDEN AYRI BIR ARAYUZ
+    //   Aktif test'i once soc_bus_if uzerinde kosturmayi denedik. CALISMAZ:
+    //   soc_bus_if'in tum sinyalleri "assign soc_bus_if.awaddr = uut.merged_m_awaddr"
+    //   seklinde tasarima SUREKLI BAGLIDIR. Driver ayni sinyale '<=' ile
+    //   yazdiginda surekli atama onu ayni delta'da EZER. Belirti buydu:
+    //       "AW: el sikismadan once awaddr degisti 0x20000100 -> 0x20001ffc"
+    //       "AR olmadan R yaniti geldi - eslesmeyen okuma"
+    //   Yani driver'in yazdigi adres hic gorunmedi, gorulen sey CPU'nun
+    //   kendi trafigiydi. Pasif gozlem noktasi tanim geregi surulemez.
+    //
+    //   SoC'ta bos (kullanilmayan) bir AXI slave portu da yoktur; aktif
+    //   agent'i tasarima baglamak RTL degisikligi gerektirirdi. Teslim
+    //   asamasinda RTL'e dokunmak dogru is degildir.
+    //
+    // BU BLOK NE YAPAR
+    //   Bagimsiz bir axil_if ve ona bagli davranissal bir AXI4-Lite slave
+    //   modeli yaratir. Aktif sequence'ler burada GERCEK el sikismasi
+    //   yapar; boylece pasif izlemenin uyaramadigi kapsam bin'leri
+    //   (strb tek_bayt/yarim, yanit SLVERR/DECERR) gercekten uyarilir.
+    //
+    // KAPSAM ICIN ANLAMI - DURUSTCE
+    //   Bu, TASARIM dogrulamasi DEGILDIR; UVM ortaminin (driver, sequence,
+    //   scoreboard, coverage) kendi dogrulamasidir. Tasarimin AXI uyumu
+    //   pasif agent + 5 SVA protokol checker ile olculur. Bu ayrim
+    //   DOGRULAMA_VE_TEST_PLANI.md icinde yazilidir.
+    // -------------------------------------------------------------------------
+`ifdef UVM_AKTIF
+    axil_if aktif_if (.clk(clk), .rst_n(rst_n));
+
+    // Davranissal AXI4-Lite slave: 1 KB bellek + kasitli hata bolgesi
+    logic [31:0] aktif_bellek [0:255];
+
+    // Bellegi SIFIRLA. Baslatilmazsa okunan her kelime X doner ve
+    // monitor haklı olarak "rdata TAMAMEN X" hatasi verir.
     initial begin
+        for (int i = 0; i < 256; i++) aktif_bellek[i] = 32'h0;
+    end
+
+    // Master tarafi sinyalleri: driver yazana kadar TANIMLI olmalidir.
+    // Birakilirsa X kalir ve monitor reset sirasinda "VALID yuksek"
+    // (ar=x) hatasi uretir.
+    initial begin
+        aktif_if.awaddr  = 32'h0;  aktif_if.awvalid = 1'b0;
+        aktif_if.wdata   = 32'h0;  aktif_if.wstrb   = 4'h0;
+        aktif_if.wvalid  = 1'b0;   aktif_if.bready  = 1'b0;
+        aktif_if.araddr  = 32'h0;  aktif_if.arvalid = 1'b0;
+        aktif_if.rready  = 1'b0;
+    end
+
+    // Yazma kanali
+    initial begin
+        aktif_if.awready = 1'b0;
+        aktif_if.wready  = 1'b0;
+        aktif_if.bvalid  = 1'b0;
+        aktif_if.bresp   = 2'b00;
+        forever begin
+            logic [31:0] adr;
+            logic [31:0] dat;
+            logic [3:0]  strb;
+            // Reset bitene kadar bekle - reset sirasinda hicbir kanal
+            // el sikismasi baslatilmaz (AXI kurali).
+            if (!rst_n) begin
+                aktif_if.awready <= 1'b0;
+                aktif_if.wready  <= 1'b0;
+                aktif_if.bvalid  <= 1'b0;
+                @(posedge rst_n);
+            end
+            begin
+                // AW kabul
+                wait (aktif_if.awvalid);
+                @(negedge clk); aktif_if.awready <= 1'b1;
+                @(posedge clk); adr = aktif_if.awaddr;
+                @(negedge clk); aktif_if.awready <= 1'b0;
+
+                // W kabul
+                wait (aktif_if.wvalid);
+                @(negedge clk); aktif_if.wready <= 1'b1;
+                @(posedge clk); dat = aktif_if.wdata; strb = aktif_if.wstrb;
+                @(negedge clk); aktif_if.wready <= 1'b0;
+
+                // Bayt seridine gore yaz
+                if (adr[31:12] == 20'hDEAD0) begin
+                    // Kasitli hata bolgesi - SLVERR uretir (kapsam bin'i)
+                    aktif_if.bresp <= 2'b10;
+                end else begin
+                    if (strb[0]) aktif_bellek[adr[9:2]][ 7: 0] = dat[ 7: 0];
+                    if (strb[1]) aktif_bellek[adr[9:2]][15: 8] = dat[15: 8];
+                    if (strb[2]) aktif_bellek[adr[9:2]][23:16] = dat[23:16];
+                    if (strb[3]) aktif_bellek[adr[9:2]][31:24] = dat[31:24];
+                    aktif_if.bresp <= 2'b00;
+                end
+
+                @(negedge clk); aktif_if.bvalid <= 1'b1;
+                wait (aktif_if.bready);
+                @(posedge clk);
+                @(negedge clk); aktif_if.bvalid <= 1'b0;
+            end
+        end
+    end
+
+    // Okuma kanali
+    initial begin
+        aktif_if.arready = 1'b0;
+        aktif_if.rvalid  = 1'b0;
+        aktif_if.rdata   = 32'h0;
+        aktif_if.rresp   = 2'b00;
+        forever begin
+            logic [31:0] adr;
+            if (!rst_n) begin
+                aktif_if.arready <= 1'b0;
+                aktif_if.rvalid  <= 1'b0;
+                @(posedge rst_n);
+            end
+            begin
+                wait (aktif_if.arvalid);
+                @(negedge clk); aktif_if.arready <= 1'b1;
+                @(posedge clk); adr = aktif_if.araddr;
+                @(negedge clk); aktif_if.arready <= 1'b0;
+
+                if (adr[31:12] == 20'hDEAD0) begin
+                    aktif_if.rresp <= 2'b11;          // DECERR bin'i
+                    aktif_if.rdata <= 32'h0;
+                end else begin
+                    aktif_if.rresp <= 2'b00;
+                    aktif_if.rdata <= aktif_bellek[adr[9:2]];
+                end
+
+                @(negedge clk); aktif_if.rvalid <= 1'b1;
+                wait (aktif_if.rready);
+                @(posedge clk);
+                @(negedge clk); aktif_if.rvalid <= 1'b0;
+            end
+        end
+    end
+
+    // Aktif kosumda simulasyonu sinirla: sequence'ler bitince UVM
+    // objection duser, ama tasarim kendi $finish'ine kadar kosmasin.
+    initial begin
+        #20_000_000;                       // 20 ms - sequence'ler icin bol
+        $display("[UVM] aktif kosum zaman siniri - bitiriliyor");
+        $finish;
+    end
+`endif
+
+    initial begin
+        // Monitor'lere arayuz (pasif yol - her zaman gerekli)
         uvm_pkg::uvm_config_db#(axil_uvm_pkg::axil_vif)::set(
             null, "uvm_test_top.env.agent.mon", "vif", npu_eng_if);
         uvm_pkg::uvm_config_db#(axil_uvm_pkg::axil_vif)::set(
             null, "uvm_test_top.env.soc_agent.mon", "vif", soc_bus_if);
-        uvm_pkg::run_test("axil_passive_test");
+
+        // ---------------------------------------------------------------
+        // AKTIF YOL (13 Eylul 2026)
+        //
+        // axil_aktif_test agent'lari UVM_ACTIVE kurar ve driver yaratir.
+        // Driver de monitor gibi vif ister; asagidaki iki set olmadan
+        // "virtual arayuz alinamadi" UVM_FATAL'i alinir.
+        //
+        // Pasif kosumda bu iki girdi yalnizca config_db'de durur,
+        // hicbir driver yaratilmadigi icin okunmaz - maliyeti yoktur.
+        // ---------------------------------------------------------------
+`ifdef UVM_AKTIF
+        // AKTIF KOSUM: driver'lar BAGIMSIZ arayuze surer.
+        //
+        // npu_eng_if ve soc_bus_if pasif gozlem noktalaridir - sinyalleri
+        // "assign" ile tasarima baglidir ve SURULEMEZ (surekli atama
+        // driver'i ezer). Bu yuzden her iki driver da aktif_if'e baglanir;
+        // monitor'ler ise yukarida gercek tasarim noktalarinda kalir.
+        uvm_pkg::uvm_config_db#(axil_uvm_pkg::axil_vif)::set(
+            null, "uvm_test_top.env.agent.drv", "vif", aktif_if);
+        uvm_pkg::uvm_config_db#(axil_uvm_pkg::axil_vif)::set(
+            null, "uvm_test_top.env.soc_agent.drv", "vif", aktif_if);
+        // Aktif kosumda monitor'ler de aktif_if'i izler: olculen kapsam
+        // sequence'lerin URETTIGI trafiktir, CPU'nun kendi trafigi degil.
+        uvm_pkg::uvm_config_db#(axil_uvm_pkg::axil_vif)::set(
+            null, "uvm_test_top.env.soc_agent.mon", "vif", aktif_if);
+`else
+        uvm_pkg::uvm_config_db#(axil_uvm_pkg::axil_vif)::set(
+            null, "uvm_test_top.env.agent.drv", "vif", npu_eng_if);
+        uvm_pkg::uvm_config_db#(axil_uvm_pkg::axil_vif)::set(
+            null, "uvm_test_top.env.soc_agent.drv", "vif", soc_bus_if);
+`endif
+
+        // ---------------------------------------------------------------
+        // TEST SECIMI
+        //
+        // Once "axil_passive_test" SABIT yaziliydi; bu, aktif testin
+        // hicbir sekilde secilememesi demekti.
+        //
+        // NEDEN plusarg DEGIL, `define
+        //   Ilk cozum +UVM_TESTNAME plusarg'iydi. Windows'ta CALISMIYOR:
+        //   Vivado'nun xsim.bat sarmalayicisi argumanlari yeniden
+        //   ayristiriyor ve "-testplusarg UVM_TESTNAME=axil_aktif_test"
+        //   icindeki '=' isaretinde boluyor. Belirti:
+        //       "Expected a switch but found a"
+        //   ve simulasyon hic kosmadan xsim YARDIM EKRANI basiyor.
+        //   Tirnaklama, --testplusarg ve arguman sirasi denendi; hicbiri
+        //   sarmalayiciyi asmiyor.
+        //
+        //   Derleme zamani makrosu bu katmani tamamen atlar ve
+        //   regresyonun zaten kullandigi "tanim" alanina oturur.
+        //
+        // Plusarg yine de DESTEKLENIR: elle xsim/baska simulatorde
+        // kosanlar icin oncelik sirasi plusarg > makro > pasif.
+        // ---------------------------------------------------------------
+        begin
+            string test_adi;
+            if (!$value$plusargs("UVM_TESTNAME=%s", test_adi)) begin
+`ifdef UVM_AKTIF
+                test_adi = "axil_aktif_test";
+`else
+                test_adi = "axil_passive_test";
+`endif
+            end
+            $display("[UVM] kosulacak test: %s", test_adi);
+            uvm_pkg::run_test(test_adi);
+        end
     end
 
     // BAGIMSIZ CAPRAZ KONTROL
@@ -1718,9 +1932,20 @@ module tb_soc_top;
         if (npu_eng_if.rvalid  && npu_eng_if.rready)  ham_r++;
         if (npu_eng_if.bvalid  && npu_eng_if.bready)  ham_b++;
         // SoC ana yolu - ayni saat alani
+        // AKTIF KIPTE KAYNAK FARKLIDIR
+        //   Aktif kosumda monitor'ler aktif_if'i izler (driver oraya
+        //   surer). Ham sayimi soc_bus_if'ten almak elma ile armut
+        //   karsilastirmasi olur ve "monitor islem DUSURDU" yanlis
+        //   alarmini uretir. Bu yuzden kaynak da aktif_if'tir.
+`ifdef UVM_AKTIF
+        if (aktif_if.arvalid && aktif_if.arready) ham_ar++;
+        if (aktif_if.rvalid  && aktif_if.rready)  ham_r++;
+        if (aktif_if.bvalid  && aktif_if.bready)  ham_b++;
+`else
         if (soc_bus_if.arvalid && soc_bus_if.arready) ham_ar++;
         if (soc_bus_if.rvalid  && soc_bus_if.rready)  ham_r++;
         if (soc_bus_if.bvalid  && soc_bus_if.bready)  ham_b++;
+`endif
     end
 
     // $finish'te MUTLAKA kosar - UVM report_phase'ine guvenilemez.

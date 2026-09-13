@@ -1,0 +1,312 @@
+{
+  "passed": true,
+  "physical_board_test": true,
+  "port": "COM16",
+  "seed": 20260905,
+  "rounds": 3,
+  "inferences": [
+    {
+      "name": "rastgele_sinif2_yes",
+      "class": 2,
+      "probs": [
+        19,
+        1197,
+        1439,
+        1439
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 1,
+      "chunk": 0
+    },
+    {
+      "name": "ses_no",
+      "class": 3,
+      "probs": [
+        194,
+        1217,
+        369,
+        2314
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 1,
+      "chunk": 0
+    },
+    {
+      "name": "rastgele_sinif0_silence",
+      "class": 0,
+      "probs": [
+        1820,
+        1261,
+        873,
+        139
+      ],
+      "cycles_including_isr_and_uart": 321866,
+      "passed": true,
+      "round": 1,
+      "chunk": 0
+    },
+    {
+      "name": "ses_yes",
+      "class": 2,
+      "probs": [
+        234,
+        282,
+        3364,
+        214
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 1,
+      "chunk": 0
+    },
+    {
+      "name": "deterministik_golden",
+      "class": 3,
+      "probs": [
+        0,
+        225,
+        326,
+        3543
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 1,
+      "chunk": 0
+    },
+    {
+      "name": "rastgele_sinif1_unknown",
+      "class": 1,
+      "probs": [
+        0,
+        3381,
+        65,
+        648
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 1,
+      "chunk": 0
+    },
+    {
+      "name": "rastgele_sinif3_no",
+      "class": 3,
+      "probs": [
+        0,
+        821,
+        1562,
+        1712
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 1,
+      "chunk": 0
+    },
+    {
+      "name": "rastgele_sinif1_unknown",
+      "class": 1,
+      "probs": [
+        0,
+        3381,
+        65,
+        648
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 2,
+      "chunk": 17
+    },
+    {
+      "name": "rastgele_sinif2_yes",
+      "class": 2,
+      "probs": [
+        19,
+        1197,
+        1439,
+        1439
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 2,
+      "chunk": 17
+    },
+    {
+      "name": "rastgele_sinif3_no",
+      "class": 3,
+      "probs": [
+        0,
+        821,
+        1562,
+        1712
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 2,
+      "chunk": 17
+    },
+    {
+      "name": "deterministik_golden",
+      "class": 3,
+      "probs": [
+        0,
+        225,
+        326,
+        3543
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 2,
+      "chunk": 17
+    },
+    {
+      "name": "rastgele_sinif0_silence",
+      "class": 0,
+      "probs": [
+        1820,
+        1261,
+        873,
+        139
+      ],
+      "cycles_including_isr_and_uart": 321866,
+      "passed": true,
+      "round": 2,
+      "chunk": 17
+    },
+    {
+      "name": "ses_yes",
+      "class": 2,
+      "probs": [
+        234,
+        282,
+        3364,
+        214
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 2,
+      "chunk": 17
+    },
+    {
+      "name": "ses_no",
+      "class": 3,
+      "probs": [
+        194,
+        1217,
+        369,
+        2314
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 2,
+      "chunk": 17
+    },
+    {
+      "name": "rastgele_sinif2_yes",
+      "class": 2,
+      "probs": [
+        19,
+        1197,
+        1439,
+        1439
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 3,
+      "chunk": 127
+    },
+    {
+      "name": "rastgele_sinif1_unknown",
+      "class": 1,
+      "probs": [
+        0,
+        3381,
+        65,
+        648
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 3,
+      "chunk": 127
+    },
+    {
+      "name": "ses_yes",
+      "class": 2,
+      "probs": [
+        234,
+        282,
+        3364,
+        214
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 3,
+      "chunk": 127
+    },
+    {
+      "name": "ses_no",
+      "class": 3,
+      "probs": [
+        194,
+        1217,
+        369,
+        2314
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 3,
+      "chunk": 127
+    },
+    {
+      "name": "rastgele_sinif3_no",
+      "class": 3,
+      "probs": [
+        0,
+        821,
+        1562,
+        1712
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 3,
+      "chunk": 127
+    },
+    {
+      "name": "deterministik_golden",
+      "class": 3,
+      "probs": [
+        0,
+        225,
+        326,
+        3543
+      ],
+      "cycles_including_isr_and_uart": 321999,
+      "passed": true,
+      "round": 3,
+      "chunk": 127
+    },
+    {
+      "name": "rastgele_sinif0_silence",
+      "class": 0,
+      "probs": [
+        1820,
+        1261,
+        873,
+        139
+      ],
+      "cycles_including_isr_and_uart": 321866,
+      "passed": true,
+      "round": 3,
+      "chunk": 127
+    }
+  ],
+  "selftests": 2,
+  "manual_gpio": "PASS: 16 anahtar, yukselen/dusen kenar IRQ, dort LED deseni",
+  "limits": [
+    "I2C: harici slave yok; yalnizca bos hat islem tamamlanmasi",
+    "QSPI: boot okuma; flash yazma/silme ve tum opcode modlari yok",
+    "D-RAM: 1KB test alani; calisan stack ve tum 8KB hucreler yok",
+    "JTAG debug/halt/resume, CPU tum ISA ve ASIC zamanlama kapsami yok",
+    "NPU: 7 referans vektorun tekrari; yeni ses/veri dogrulugu iddiasi yok"
+  ]
+}

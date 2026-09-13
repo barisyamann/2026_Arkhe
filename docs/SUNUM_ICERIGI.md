@@ -33,8 +33,8 @@ Tek cümlelik özet:
 
 | | |
 |---|---|
-| Fiziksel tasarım | DRC 0 · LVS eşleşiyor · Anten 0 |
-| Zamanlama | Setup **9/9** · Hold **9/9** @ 43,5 MHz |
+| Fiziksel tasarım | Detailed-route DRC 0 · KLayout DRC 0 · LVS eşleşiyor · Anten 0 · Magic DRC'de 7.658 açık bulgu (§10.4-b) |
+| Zamanlama | Setup **9/9** · Hold **9/9** @ **43,2 MHz** |
 | Fonksiyonel | FPGA'da **156/156** altın referans uyumu |
 
 ---
@@ -111,8 +111,8 @@ açık kaynak.
 
 ### Bu bölümün en güçlü noktası: Spike ISS karşılaştırması
 
-Şartname s.569 çekirdeğin bir komut kümesi simülatörü (ISS) ile
-doğrulanmasını bekliyor. Yaptığımız:
+Şartname EK-3, çekirdeğin komut izlerinin bir komut kümesi simülatörü
+(ISS) ile karşılaştırılmasını bekliyor. Yaptığımız:
 
 | | Değer |
 |---|---:|
@@ -285,27 +285,73 @@ köşegen dışı hücre yok.
 
 | Katman | Ne denetler | Sonuç |
 |---|---|---|
-| SVA (`axil_protocol_checker`) | Sinyal/çevrim düzeyi | 0 ihlal |
-| **UVM passive agent** | İşlem düzeyi | **81.032 işlem, 0 ihlal** |
+| SVA — 5 × `axil_protocol_checker` | Sinyal/çevrim düzeyi | **0 ihlal** |
+| UVM — 2 passive agent | İşlem düzeyi | **401.729 işlem, 0 ihlal** |
 
-UVM ajanının denetimleri:
+**Beş SVA denetleyicisi** bind edilmiştir ve `UVM_AXI` bayrağı olmadan
+da her regresyon koşumunda aktiftir: birleşik master yolu, CPU veri
+portu (M0), JTAG master (M1), DMA master (M2), NPU motoru.
 
-- Yanıt kodu geçerliliği (AXI4-Lite'ta EXOKAY olamaz)
-- Askıda kalmış işlem (>10 µs)
-- Yazmada `WSTRB == 0` (hiçbir bayt yazılmaz)
-- Adres 4 bayta hizalı
+**İki UVM agent:**
+
+| Agent | Bağlantı noktası | İşlem |
+|---|---|---:|
+| `env.agent` | NPU motoru → TCM | 162.064 |
+| `env.soc_agent` | `merged_m_*` — **tüm SoC trafiği** | 239.665 |
+
+### Şartname §5.2 kapsam kanıtı
+
+> "Çevre birimleri ve YZ hızlandırıcının AXI/AXI-Lite arayüzlerinin en
+> azından protocol-check düzeyinde AXI agent'larıyla doğrulanması."
+
+SoC ana yolu agent'ının covergroup'u **13 ayrı bölge bin'i** tutar ve
+ölçülen **bölge kapsamı %100,0**'dır — yani Boot ROM, I-RAM, D-RAM,
+NPU belleği, **GPIO, Timer, UART1, UART2, I2C, QSPI, NPU CSR, DMA,
+JTAG** bölgelerinin **tamamı** gerçek trafikle uyarılmıştır.
+
+Hangi çevre biriminin hangi agent/checker/test tarafından görüldüğü,
+ölçülmüş sayılarla: **`verification/AXI_UVM_KAPSAM_MATRISI.md`**
+
+### UVM ajanının denetimleri
+
+- Yanıt kodu geçerliliği (AXI4-Lite'ta EXOKAY olamaz) — **0**
+- Askıda kalmış işlem (>10 µs) — **0**
+- Yazmada `WSTRB == 0` (hiçbir bayt yazılmaz) — **0**
+- Adres 4 bayta hizalı — tümü
 - **Kararlılık** (ARM IHI0022 A3.2.1): VALID yükseldikten sonra READY
-  gelene kadar düşürülemez, adres/veri/strobe değiştirilemez
-- El sıkışan çevrimlerde X/Z bilinmeyen değer
+  gelene kadar düşürülemez, adres/veri/strobe değiştirilemez — **0 ihlal**
+- El sıkışan çevrimlerde X/Z bilinmeyen değer — **0**
+- Monitör kaçırma çapraz kontrolü: ham sinyal sayımı = monitör sayımı
 
-Fonksiyonel kapsam: en uzun ardışık okuma serisi **40.512 işlem** —
-DMA/NPU akışının kesintisiz çalıştığını gösterir.
+### Referans bellek modeli (veri doğruluğu)
 
-> **Anlatılacak:** Şartname EK-3 "tam teşekküllü UVM ortamı beklenmemektedir,
-> protokol kontrolü yeterlidir" diyor. Biz protokol kontrolünün ötesine geçip
-> işlem düzeyi scoreboard ve fonksiyonel kapsam ekledik.
+Protokol doğru ama **veri yanlış yere yazıldı** hatalarını yakalar:
+SoC yolunda 3.647 adres izlendi, **1.038 okumada yazılan değer birebir
+geri okundu**.
 
-**Kaynak:** `tb/uvm/axil_uvm_pkg.sv`
+### Fonksiyonel kapsam
+
+| | NPU agent | SoC agent |
+|---|---:|---:|
+| İşlem türü | %100,0 | %100,0 |
+| **Adres bölgesi** | %75,0 | **%100,0** |
+| WSTRB deseni | %33,3 | %66,7 |
+| Yanıt kodu | %33,3 | %100,0 |
+
+NPU agent'ının düşük kalması bir boşluk değil: gerçek NPU motoru
+yalnızca tam-word erişim yapar ve slave her zaman OKAY döner. Pasif
+izleme var olmayan trafiği uyaramaz. Bu bin'leri kapatmak için **aktif
+test** eklenmiştir (`uvm_aktif`) — sequence'ler kısmi WSTRB ve
+SLVERR/DECERR üretir, `strb` kapsamı %100'e çıkar.
+
+> **Anlatılacak:** Şartname EK-3 "tam teşekküllü UVM ortamı
+> beklenmemektedir, protokol kontrolü yeterlidir" diyor. Biz protokol
+> kontrolünün ötesine geçip işlem düzeyi scoreboard, referans bellek
+> modeli ve fonksiyonel kapsam ekledik; ayrıca aktif sequence altyapısı
+> yazıp regresyona bağladık.
+
+**Kaynak:** `tb/uvm/axil_uvm_pkg.sv` ·
+`verification/AXI_UVM_KAPSAM_MATRISI.md`
 
 ---
 
@@ -358,21 +404,34 @@ Makro: `sky130_sram_2kbyte_1rw1r_32x512_8` (2 kB, çift portlu)
 
 ### 9.1 Regresyon
 
-**16 test · 452 denetim · tamamı geçiyor**
+**37 test · 702 denetim · tamamı geçiyor**
+*(13 Eylül 2026, HEAD — `python scripts/run_regression.py`)*
 
 | Test | Denetim | Test | Denetim |
 |---|---:|---|---:|
-| npu_dogruluk | 77 | npu_blok | 27 |
-| uart | 42 | jtag_debug | 27 |
-| qspi | 40 | sync_fifo | 24 |
-| dma | 39 | sistem | 17 |
-| gpio | 37 | sistem_gercek_boot | 17 |
-| timer | 36 | npu_hizlanma | 2 |
-| i2c | 29 | npu_golden | 1 |
-| uvm_axi_agent | 29 | cekirdek_izi | 1 |
+| npu_dogruluk | 77 | sartname_gpio | 15 |
+| npu_blok | 43 | sartname_uart_stream | 15 |
+| uart | 42 | interconnect_adres | 13 |
+| qspi | 40 | **uvm_aktif** | **13** |
+| dma | 39 | wstrb_kismi_yazma | 11 |
+| i2c | 38 | i2c_scl_frekans | 9 |
+| uvm_axi_agent | 38 | jtag_yanit_kodu | 9 |
+| gpio | 37 | sram_registered | 6 |
+| timer | 36 | axi_protokol | 6 |
+| sartname_qspi | 27 | qspi_sck_olcum | 5 |
+| jtag_debug | 27 | sram_w_yakalama | 4 |
+| sartname_timer | 25 | qspi_presc_sinir | 4 |
+| sync_fifo | 24 | axi_w_yakalama | 4 |
+| sartname_uart | 20 | i2c_scl_periyot | 4 |
+| sistem | 20 | i2c_saat_germe | 4 |
+| sistem_gercek_boot | 20 | jtag_cdc | 4 |
+| npu_accelerator | 16 | sinir_degerleri | 3 |
+| | | npu_hizlanma | 2 |
+| | | npu_golden | 1 |
+| | | cekirdek_izi | 1 |
 
 Bütün testler **kendi kendini kontrol eder** (self-checking); hata varsa
-koşum başarısız biter. Şartname s.615 bunu zorunlu tutuyor.
+koşum başarısız biter. Şartname EK-3 bunu zorunlu tutuyor.
 
 ### 9.2 Kod kapsama
 
@@ -395,9 +454,9 @@ belirtilmelidir**:
 
 | Katman | Yöntem | Sonuç |
 |---|---|---|
-| Blok | 11 çevre birimi testbench'i | 452 denetimin çoğu |
-| Sistem | Tam SoC, gerçek boot zinciri | 17 denetim |
-| Protokol | SVA + UVM passive agent | 81.032 işlem |
+| Blok | 19 testbench (çevre birimi + sınır durum) | 702 denetimin çoğu |
+| Sistem | Tam SoC, gerçek boot zinciri | 40 denetim (2 test) |
+| Protokol | 5 × SVA + 2 UVM passive agent | 401.729 işlem |
 | Komut kümesi | **Spike ISS** karşılaştırması | 927 buyruk, 0 uyuşmazlık |
 | Uçtan uca | FPGA + resmi demo aracı | 156/156 |
 
@@ -427,15 +486,16 @@ kullanılmamıştır.
 
 | Kontrol | Sonuç |
 |---|---|
-| Yönlendirme DRC | **0** |
+| Yönlendirme (detailed-route) DRC | **0** |
 | KLayout DRC | **0** |
+| Magic DRC | **7.658** — tamamı `nwell.4`, makro kaynaklı (§10.4-b) |
 | Anten ihlali (net / pin) | **0 / 0** |
 | LVS — LEF/DEF kaynaklı | **Circuits match uniquely** |
 | LVS — GDS kaynaklı | **Circuits match uniquely** |
 | XOR | **0** |
 | Güç şebekesi (PDN) ihlali | **0** |
-| **Setup @ 23 ns (43,5 MHz)** | **9/9 köşe pozitif, 0 ihlal** |
-| **Hold** | **9/9 köşe pozitif, 0 ihlal** |
+| **Setup @ 23,148 ns (43,2 MHz)** | **9/9 köşe pozitif, 0 ihlal** (worst +0,2782 ns) |
+| **Hold** | **9/9 köşe pozitif, 0 ihlal** (worst +0,0380 ns) |
 
 Dokuz köşe: nom/min/max (RC) × TT(25 °C, 1,80 V) / SS(100 °C, 1,60 V) /
 FF(−40 °C, 1,95 V)
@@ -476,14 +536,23 @@ tapın MAGLEF görünümü ihlalli. KLayout aynı GDS'te 0 veriyor. Ancak bunu
 'çözülmüş' saymıyoruz — tek bir aracın temiz sonucu diğerinin kural
 kapsamını doğrulamaz."
 
-**c) Signoff periyodu 20 ns yerine 23 ns**
+**c) İki ayrı SDC: PnR 14 ns, signoff 23,148 ns**
 
-Söylenecek: "Özgün koşu 20 ns hedefiyle imzalandı ve üç SS köşesinde 115
-ihlalli yol verdi — bu raporlar teslimde **değiştirilmeden** duruyor.
-Layout'a hiç dokunmadan, aynı netlist ve parazitiklerle periyot taraması
-yaptık: 23 ns'de setup 9/9 köşede pozitif ve 0 ihlal. Ek analiz olarak
-`asic/reports/timing_23ns/` altında ayrı sunulur, özgün raporun yerine
-geçmez."
+Söylenecek: "İki farklı kısıt dosyası kullanıyoruz ve bu bilinçli bir
+tercih. PnR'a 14 ns veriyoruz — optimizasyonu zorlamak için. İmzalama
+ise 23,148 ns'de yapılıyor ve beyan ettiğimiz çalışma noktası bu:
+**43,2 MHz**. Dokuz PVT köşesinin tamamında setup ve hold pozitif,
+TNS sıfır. Bu ek bir analiz değil, akışın kendi imza adımının
+(`OpenROAD.STAPostPNR`) çıkarılmış SPEF ile ürettiği sonuç."
+
+43,2 MHz'in seçilme nedeni sorulursa: 43.200.000 / 400.000 = 108, yani
+I2C SCL bölücüsü tam sayı çıkıyor ve EK-2'nin "SCL 400 kHz sabit"
+isteri **tam** karşılanıyor.
+
+> `constraints/design.sdc` içinde görülen `20.0` sayısı kullanılan değer
+> değildir; yalnızca `CLOCK_PERIOD` ortam değişkeni tanımsızsa devreye
+> giren yedek satırdır. Üretilen `results/sdc/pnr_resolved.sdc`
+> `-period 14.0000` yazar. Ayrıntı: `asic/README.md` §6.
 
 ---
 
@@ -498,22 +567,66 @@ geçmez."
 
 ### Resmi demo aracıyla ölçülen sonuç
 
-| Metrik | Değer |
-|---|---:|
-| Gönderilen örnek | 156 |
-| **Altın referans uyumu** | **%100,00 (156/156)** |
-| Uyuşmazlık | 0 |
-| Zaman aşımı | 0 |
-| Gecikme (medyan / p95 / maks) | 7,74 / 8,78 / 21,58 ms |
-| Ölçülen hızlanma | 183,3× |
-| Sağlamlık senaryoları | **9/10** (+1 opsiyonel atlandı) |
+**İki bağımsız koşum, aynı sonuç** — 8 Eylül ve 13 Eylül:
 
-> **Dürüstlükle söylenecek:** Başarısız tek senaryo `back_to_back` — aralıksız
-> beş çerçevenin dördüne yanıt geldi. Tek başına koşulduğunda üç bağımsız
-> tekrarda 5/5 geçti. Kök nedeni bulduk: `uart_stream_peripheral.sv`
-> içindeki toplayıcı sayacı FIFO temizleme komutuyla sıfırlanmıyor.
-> Düzeltmesi hazır ancak ASIC teslimi yamasız RTL'e SHA-256 ile bağlı
-> olduğu için bu teslime dahil edilmedi.
+| Metrik | 8 Eylül | **13 Eylül (son)** |
+|---|---:|---:|
+| Gönderilen örnek | 156 | **156** |
+| **Altın referans uyumu** | %100,00 | **%100,00 (156/156)** |
+| Uyuşmazlık | 0 | **0** |
+| Zaman aşımı | 0 | **0** |
+| Gecikme (medyan / p95) | 7,74 / 8,78 ms | 7,87 / 11,56 ms |
+| Ölçülen hızlanma | 183,3× | 180,1× |
+| Sağlamlık senaryoları | 9/10 | **9/10** (+1 opsiyonel atlandı) |
+
+Ham çıktılar: `evidence/fpga_demo_20260913/` ve
+`fpga/demo_teknofest/sonuclar/`.
+
+> Söylenecek: "Bu sonucu iki ayrı günde, iki ayrı koşumda aldık. Aradaki
+> hızlanma farkı (183,3× / 180,1×) ölçüm gürültüsüdür; **uyum oranı her
+> ikisinde de tam %100**."
+
+### Kart üzerinde tam SoC testi (kendi doğrulama firmware'imiz)
+
+Demo aracı sınıflandırma doğruluğunu ölçer. Ayrıca **SoC'un tamamını**
+kart üzerinde sınayan kendi test firmware'imiz vardır
+(`fpga/JURI_FPGA_TESTI/run_jury.py`, 13 Eylül 2026):
+
+| | |
+|---|---:|
+| Sonuç | **GEÇTİ** (`passed: true`) |
+| Öztest | **2 × 83 kontrol** |
+| NPU çıkarımı | **21** (7 vektör × 3 tur), referansla 0 uyuşmazlık |
+| Kullanıcı arayüzü | **PASS** — 16 anahtar, yükselen/düşen kenar IRQ, 4 LED deseni |
+
+Kapsanan zincir: Flash → CPU açılışı → CPU aritmetik/mantık/çarpma-bölme
+ve uç durumlar → D-RAM → NPU TCM (15 banka) → GPIO → Timer (3 kesme) →
+DMA (banka sınırı, koruma kelimeleri) → Bus fault → I2C → UART2 tüm bayt
+değerleri → NPU uçtan uca (UART2 → DMA → çıkarım → ISR).
+
+Dört sınıfın (SILENCE/UNKNOWN/YES/NO) tamamı kapsandı; üç turun hepsinde
+aynı sınıf üretildi. Elle kontroller **atlanmadı**.
+
+Ham çıktı: `evidence/fpga_juri_20260913/`.
+
+> Kapsam dışı kalanlar raporda açıkça listelidir: I2C harici slave,
+> QSPI flash yazma/silme, JTAG halt/resume, CPU tam ISA.
+
+> **Dürüstlükle söylenecek:** Başarısız tek senaryo `back_to_back` —
+> aralıksız beş çerçevenin dördüne yanıt geldi. **İki koşumda da birebir
+> aynı sonuç**, yani rastgele bir kararsızlık değil, deterministik ve kök
+> nedeni bilinen bir sınır.
+>
+> Kök nedeni tek satıra indirdik: `rtl/cevre/uart_stream_peripheral.sv`
+> içindeki toplayıcı sayacı `pack_cnt_r`, yalnızca reset ve tam kelime
+> okumasıyla sıfırlanıyor; `UARTS_FIFO_CLR` komutuyla sıfırlanmıyor. Bir
+> önceki senaryodan devreden yarım kelime kalıntısı sonraki çerçeveyi
+> kaydırıyor. Kanıt: senaryo **tek başına koşulduğunda üç bağımsız
+> tekrarda 5/5 geçiyor**.
+>
+> Düzeltmesi hazır, ancak ASIC teslimi yamasız RTL'e SHA-256 ile bağlı
+> olduğu için bu teslime **bilerek** dahil edilmedi — dahil edilseydi
+> teslim edilen GDS'nin kaynak hash'i tutmazdı.
 
 ---
 
@@ -521,7 +634,8 @@ geçmez."
 
 Üç cümlelik kapanış:
 
-> Fiziksel tasarımı tamamlanmış, DRC ve LVS'ten temiz geçen, dokuz PVT
+> Fiziksel tasarımı tamamlanmış, detailed-route ve KLayout DRC'sinden
+> temiz geçen, LVS'i eşleşen, dokuz PVT
 > köşesinde setup ve hold kapanışı sağlanmış bir SoC teslim ediyoruz.
 >
 > Yapay zekâ hızlandırıcısı FPGA üzerinde resmi demo aracıyla 156 vektörde
@@ -535,9 +649,8 @@ geçmez."
 ## Ek: Jüri sorabilir — hazır cevaplar
 
 **"Neden 50 MHz değil?"**
-PnR hedefi 10 ns'ydi, özgün signoff 20 ns. 20 ns'de üç SS köşesinde ihlal
-vardı ve bunu gizlemedik. Layout değişmeden yapılan tarama 23 ns'de (43,5 MHz)
-9/9 temiz kapanış gösterdi. Frekans yarışmanın puanlama ölçütü değil;
+PnR hedefi 14 ns, imzalama 23,148 ns. Dokuz köşenin tamamında setup ve
+hold pozitif (43,2 MHz). Frekans yarışmanın puanlama ölçütü değil;
 biz temiz kapanışı tercih ettik.
 
 **"Slew ihlallerini neden kapatmadınız?"**
