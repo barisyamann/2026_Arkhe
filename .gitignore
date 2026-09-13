@@ -36,3 +36,52 @@ __pycache__/
 /asic/results/spice/soc_top_lef_def.spice
 /fpga/JURI_FPGA_TESTI/arkhe_jury.mcs
 /fpga/nexys_demo_20260908/firmware/build/arkhe_demo_flash.mcs
+
+# ---------------------------------------------------------------------
+#  13 Eylul 2026 - depo temizligi
+#
+#  Asagidakiler TESLIM KAPSAMINDA DEGILDIR ve git'e girmemelidir:
+#    - Onceki kosularin yedekleri (geri donus icin yerelde tutulur)
+#    - Indirilen ham arsivler (yeniden uretilebilir)
+#    - Arac tarafindan uretilen gecici log ve build ciktilari
+# ---------------------------------------------------------------------
+
+# Onceki ASIC kosularinin yerel yedekleri
+/yedek_S_saat/
+/yedek_S_hold2/
+/yedek_K_diyot/
+/sunucu_yedek/
+/delivery/
+
+# Sunucudan indirilen ham arsivler
+/indirilen/
+/_indirilen/
+
+# Simulasyon ve sentez calisma alanlari
+/build/
+/vivado/
+/dtr_demo/
+/teknotest/
+/teknotest_pack/
+
+# Vivado gecici dosyalari
+vivado*.log
+vivado*.jou
+vivado*.backup.log
+vivado*.backup.jou
+xcrg.log
+utilization_synth.rpt
+dfx_runtime.txt
+.Xil/
+
+# Python
+__pycache__/
+*.pyc
+
+# Vivado proje calisma alanlari (yeniden uretilebilir)
+# Bitstream, raporlar ve constraint'ler AYRI dizinlerde korunur.
+fpga/*/build/
+
+# S_final2 kosusunda uretilen buyuk ciktilar (LFS asamasina birakildi)
+/asic/results/mag/soc_top.mag
+/asic/results/spice/soc_top.spice

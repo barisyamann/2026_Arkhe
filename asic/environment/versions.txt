@@ -1,15 +1,61 @@
-ARKHE d45_anten2 packaging audit - 2026-09-08
-Original run: 2026-09-07; platform Debian 12 x86_64 (Google Compute Engine).
-LibreLane: 3.0.6, Classic; upstream tag/commit pinned by flake.lock.
-LibreLane flake revision: ba7193bff33d68941683b2963b90aa30cea117d1
-PDK: sky130A; Open PDKs/ciel revision 8afc8346a57fe1ab7934ba5a6056ea8b43078e71
-Standard cells: sky130_fd_sc_hd
-Yosys 0.62; Verilator 5.044; Magic 8.3.623; Netgen 1.5.316; KLayout 0.30.7.
-OpenROAD build commit dcf36133a369abc8f3c5e5738cd4d82e4903c0e0 (original environment record).
-Exact invoked executables: original run step COMMANDS files in raw-run archive.
-OpenRAM was not run. Prepared SRAM: sky130_sram_2kbyte_1rw1r_32x512_8.
-SRAM has only TT 1.8V 25C timing model, reused in the nine STA corners.
-PnR 10 ns; signoff 20 ns. Final timing still has setup violations.
-From repository root: nix develop ./asic/environment
-Then: export PDK_ROOT=<installed PDK parent containing sky130A>; cd asic; make asic_run
-Validation: make asic_verify (after restoring release artifacts).
+ARKHE SoC - ASIC akis ortam ve surum bilgileri
+Teslim edilen kosu: S_final2 (13 Eylul 2026)
+Platform: Debian 12 x86_64
+
+-- PDF Bolum 1.4'un istedigi sekiz alan --
+
+Kullanilan LibreLane surumu      : 3.0.6
+LibreLane commit / flake revizyonu: ba7193bff33d68941683b2963b90aa30cea117d1
+                                    (upstream etiket/commit flake.lock ile sabitlenmistir)
+Kullanilan LibreLane akisi       : Classic
+Kullanilan PDK adi               : sky130A
+Open PDKs (ciel) commit kimligi  : 8afc8346a57fe1ab7934ba5a6056ea8b43078e71
+Kullanilan standart hucre kut.   : sky130_fd_sc_hd
+Kullanilan OpenRAM surumu        : OpenRAM kullanilmadi
+                                   (hazir PDK makrosu kullanildi:
+                                    sky130_sram_2kbyte_1rw1r_32x512_8, 23 ornek)
+
+Akisi calistirmak icin gerekli komutlar:
+    # depo kokunden
+    nix develop ./asic/environment
+    export PDK_ROOT=<sky130A iceren PDK ust dizini>
+    cd asic
+    make asic_run
+    # dogrulama
+    make asic_verify
+
+-- Akista kullanilan arac surumleri --
+
+Yosys      0.62
+Verilator  5.044
+Magic      8.3.623
+Netgen     1.5.316
+KLayout    0.30.7
+OpenROAD   build commit dcf36133a369abc8f3c5e5738cd4d82e4903c0e0
+
+Her adimda fiilen calistirilan komutlar, ham kosu arsivindeki adim
+dizinlerinde bulunan COMMANDS dosyalarindadir.
+
+-- Saat hedefleri --
+
+PnR (design.sdc)        : 14 ns      -- ic optimizasyon hedefi
+Signoff (signoff SDC)   : 23,148 ns  -- BEYAN EDILEN calisma noktasi
+Beyan edilen frekans    : 43,2 MHz
+
+Iki farkli SDC kullanilmasinin gerekcesi asic/README.md Bolum 6'da
+aciklanmistir; her iki SDC de results/sdc/ altinda teslim edilmistir.
+
+-- Zamanlama sonucu (dokuz PVT kosesi, 23,148 ns) --
+
+Setup : 9/9 POZITIF   TNS 9/9 sifir   ihlalli yol 0
+Hold  : 9/9 POZITIF   TNS 9/9 sifir   ihlalli yol 0
+
+En dar koseler: setup +0,2782 ns (max_ss), hold +0,0380 ns (max_ff)
+
+-- SRAM zamanlama modeli notu --
+
+Hazir SRAM makrosunun yalnizca TT 1,8 V 25 C Liberty modeli
+bulunmaktadir; bu model dokuz STA kosesinin tamaminda yeniden
+kullanilmistir. Gerekce ve etkisinin olcumu asic/README.md Bolum 5
+ile final_teslim/02_dogrulama/kanitlar/SRAM_KOSE_MODELI_OLCUMU.md
+icinde aciklanmistir (DDK 10 Eylul 2026 karariyla kabul edilmistir).

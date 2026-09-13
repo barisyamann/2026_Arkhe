@@ -435,15 +435,17 @@ değerlendirileceğini söyler; 2,4× yavaşlama doğrudan puan kaybı olurdu.
 
 | Madde | Öncelik | Durum |
 |---|---|:---:|
-| Protokol kontrolleri | Zorunlu | ✓ UVM AXI4-Lite agent |
+| Protokol kontrolleri | Zorunlu | ✓ UVM, **iki** AXI4-Lite agent, 401.729 işlem |
 | YZ hızlandırıcı testleri | Zorunlu | ✓ self-checking |
 | Sistem seviyesi testler | Zorunlu | ✓ |
 | Çekirdek testleri (Spike ISS) | Elden gelenin en iyisi | ✓ 927 komut, 0 fark |
 | Doğrulama planı | Elden gelenin en iyisi | ✓ |
-| Blok seviyesi testler | Opsiyonel | ✓ 11 blok |
-| Code coverage | Opsiyonel | ✓ %81,6 satır / %74,9 dal |
+| Blok seviyesi testler | Opsiyonel | ✓ **17 blok** |
+| Code coverage | Opsiyonel | ✓ %81,7 satır / %75,1 dal (bizim RTL) |
 
-**Güncel RTL ile regresyon: 16/16 test, 454 denetim, tamamı geçti.**
+**Güncel RTL ile regresyon: 35/35 test, 677 denetim, tamamı geçti** (12 Eylül 2026). Eklenen testler: 10-11 Eylül'de düzeltilen dört RTL hatası için `sram_w_yakalama`, `axi_w_yakalama`, `qspi_presc_sinir`, `axi_protokol`, `sinir_degerleri`; 12 Eylül'de ASIC saat hedefi için `i2c_scl_frekans` ve `i2c_scl_periyot`, UVM kapsam genişletmesinin açığa çıkardığı bayt-seçmeli yazma boşluğu için `wstrb_kismi_yazma`, hata enjeksiyonunun ortaya çıkardığı iki dekoratif test yerine `qspi_sck_olcum`, ve blok testi bulunmayan iki büyük modül için `interconnect_adres` (13 slave adres çözme) ile `npu_accelerator`; JTAG saat alani gecisi icin `jtag_cdc`; kullanilmayan giris portu taramasinin ortaya cikardigi iki islevsel eksiklik icin `jtag_yanit_kodu` (AXI yanit kodu denetimi) ve `i2c_saat_germe` (I2C clock stretching).
+
+Testlerin gerçekten hata yakaladığı **ölçülmüştür**: `scripts/hata_enjeksiyon.py` RTL'e kasıtlı hata sokup ilgili testin kırmızıya döndüğünü doğrular. 7/7 mutasyon yakalanmaktadır; kampanya sonrası 57/57 RTL dosyası birebir korunur. Döküm: `evidence/denetim_20260910/HATA_ENJEKSIYONU.md`.
 
 ### §5.2 Ödül Minimum Kriterleri — 5/5
 

@@ -4,30 +4,30 @@
 
         +----------Local Count, excluding submodules.
         | 
-    70884 wires
-    88594 wire bits
-     1004 public wires
-    18108 public wire bits
+    71037 wires
+    88919 wire bits
+     1017 public wires
+    18293 public wire bits
        25 ports
        79 port bits
-    83657 cells
-    19705   $_ANDNOT_
-     4010   $_AND_
+    83950 cells
+    19816   $_ANDNOT_
+     3984   $_AND_
        75   $_DFFE_PN0N_
-     5254   $_DFFE_PN0P_
-       71   $_DFFE_PN1P_
+     5406   $_DFFE_PN0P_
+       75   $_DFFE_PN1P_
      6216   $_DFFE_PP_
-      546   $_DFF_PN0_
-       31   $_DFF_PN1_
+      542   $_DFF_PN0_
+       33   $_DFF_PN1_
        80   $_DFF_P_
-    16189   $_MUX_
-     2097   $_NAND_
-     3850   $_NOR_
-     2233   $_NOT_
-     2503   $_ORNOT_
-    10507   $_OR_
-     3094   $_XNOR_
-     7173   $_XOR_
+    16195   $_MUX_
+     2112   $_NAND_
+     3857   $_NOR_
+     2247   $_NOT_
+     2530   $_ORNOT_
+    10488   $_OR_
+     3095   $_XNOR_
+     7176   $_XOR_
        23   sky130_sram_2kbyte_1rw1r_32x512_8
 
    Area for cell type $_ANDNOT_ is unknown!

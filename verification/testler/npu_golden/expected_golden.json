@@ -1,0 +1,189 @@
+{
+  "test_kind": "deterministic_unit_test_not_real_audio",
+  "input_count_int8": 1960,
+  "tcm_word_count": 490,
+  "input_formula": "q[i] = ((37*i + 13) mod 256) - 128",
+  "first_16_input_int8": [
+    -115,
+    -78,
+    -41,
+    -4,
+    33,
+    70,
+    107,
+    -112,
+    -75,
+    -38,
+    -1,
+    36,
+    73,
+    110,
+    -109,
+    -72
+  ],
+  "first_16_depthwise_checkpoints": [
+    {
+      "flat_index": 0,
+      "t_out": 0,
+      "f_out": 0,
+      "d_out": 0,
+      "conv_acc": 94276,
+      "centered_output": 71
+    },
+    {
+      "flat_index": 1,
+      "t_out": 0,
+      "f_out": 0,
+      "d_out": 1,
+      "conv_acc": -103731,
+      "centered_output": 0
+    },
+    {
+      "flat_index": 2,
+      "t_out": 0,
+      "f_out": 0,
+      "d_out": 2,
+      "conv_acc": 71925,
+      "centered_output": 65
+    },
+    {
+      "flat_index": 3,
+      "t_out": 0,
+      "f_out": 0,
+      "d_out": 3,
+      "conv_acc": -23897,
+      "centered_output": 0
+    },
+    {
+      "flat_index": 4,
+      "t_out": 0,
+      "f_out": 0,
+      "d_out": 4,
+      "conv_acc": -157107,
+      "centered_output": 0
+    },
+    {
+      "flat_index": 5,
+      "t_out": 0,
+      "f_out": 0,
+      "d_out": 5,
+      "conv_acc": 55094,
+      "centered_output": 32
+    },
+    {
+      "flat_index": 6,
+      "t_out": 0,
+      "f_out": 0,
+      "d_out": 6,
+      "conv_acc": -112519,
+      "centered_output": 0
+    },
+    {
+      "flat_index": 7,
+      "t_out": 0,
+      "f_out": 0,
+      "d_out": 7,
+      "conv_acc": -148943,
+      "centered_output": 0
+    },
+    {
+      "flat_index": 8,
+      "t_out": 0,
+      "f_out": 1,
+      "d_out": 0,
+      "conv_acc": 59820,
+      "centered_output": 45
+    },
+    {
+      "flat_index": 9,
+      "t_out": 0,
+      "f_out": 1,
+      "d_out": 1,
+      "conv_acc": -96103,
+      "centered_output": 0
+    },
+    {
+      "flat_index": 10,
+      "t_out": 0,
+      "f_out": 1,
+      "d_out": 2,
+      "conv_acc": 8071,
+      "centered_output": 7
+    },
+    {
+      "flat_index": 11,
+      "t_out": 0,
+      "f_out": 1,
+      "d_out": 3,
+      "conv_acc": -39685,
+      "centered_output": 0
+    },
+    {
+      "flat_index": 12,
+      "t_out": 0,
+      "f_out": 1,
+      "d_out": 4,
+      "conv_acc": -197980,
+      "centered_output": 0
+    },
+    {
+      "flat_index": 13,
+      "t_out": 0,
+      "f_out": 1,
+      "d_out": 5,
+      "conv_acc": 20482,
+      "centered_output": 12
+    },
+    {
+      "flat_index": 14,
+      "t_out": 0,
+      "f_out": 1,
+      "d_out": 6,
+      "conv_acc": -26786,
+      "centered_output": 0
+    },
+    {
+      "flat_index": 15,
+      "t_out": 0,
+      "f_out": 1,
+      "d_out": 7,
+      "conv_acc": -132438,
+      "centered_output": 0
+    }
+  ],
+  "depthwise_centered_min": 0,
+  "depthwise_centered_max": 178,
+  "fc_acc": [
+    -566992,
+    149030,
+    156762,
+    216460
+  ],
+  "fc_logits_int8": [
+    -128,
+    79,
+    83,
+    109
+  ],
+  "softmax_exp_q012": [
+    0,
+    261,
+    377,
+    4096
+  ],
+  "softmax_sum_exp": 4734,
+  "probabilities_q012": [
+    0,
+    225,
+    326,
+    3543
+  ],
+  "probabilities_float_approx": [
+    0.0,
+    0.054931640625,
+    0.07958984375,
+    0.864990234375
+  ],
+  "expected_class_index": 3,
+  "expected_class_name": "NO"
+}

@@ -2,9 +2,9 @@
 
 Bu paket 11 Eylül 2026 tarihli **K_diyot** koşusunun kaynakları, raporları ve fiziksel çıktılarıdır.
 
-**Beyan edilen çalışma noktası: 23 ns (43,5 MHz). Dokuz PVT köşesinin tamamında setup ve hold pozitiftir, setup TNS sıfırdır.**
+**Beyan edilen çalışma noktası: 23,148 ns (43,2 MHz). Dokuz PVT köşesinin tamamında setup ve hold pozitiftir, setup TNS sıfırdır.**
 
-Bu koşu, RTL'de 10 Eylül 2026'da bulunan dört işlevsel hatanın (üç modülde AXI W kanalı veri kaybı, QSPI prescaler taşması) düzeltilmesinden sonra alınan ilk tam koşudur. Önceki tüm ASIC koşuları — d45_anten2 dahil — düzeltme öncesi RTL ile yapılmıştı; kaynak eşitliği artık `scripts/rtl_manifest.py` ile her koşu öncesi kanıtlanmaktadır.
+Bu koşu, RTL'de 10 Eylül 2026'da bulunan dört işlevsel hatanın (üç modülde AXI W kanalı veri kaybı, QSPI prescaler taşması) düzeltilmesinden sonra alınan ilk tam koşudur. Önceki ASIC koşuları (örn. `d45_anten2`) düzeltme öncesi RTL ile yapılmıştı ve teslim edilmemektedir; kaynak eşitliği artık `scripts/rtl_manifest.py` ile her koşu öncesi kanıtlanmaktadır.
 
 Açık kalan kalemler gizlenmemiştir; §11'de sayısal olarak verilmiş ve kaynakları belirtilmiştir.
 
@@ -12,18 +12,42 @@ Açık kalan kalemler gizlenmemiştir; §11'de sayısal olarak verilmiş ve kayn
 
 Üst modül `soc_top`; CV32E40P (RV32IMC, FPU kapalı), NPU ve AXI-Lite çevre birimleri. Ana saat `clk_i`, reset `rst_ni`, JTAG saati `jtag_tck`. GPIO, UART, I2C, QSPI ve JTAG portları vardır; kesin arayüz `rtl/Memory/soc_top.sv` içindedir.
 
-**Saat hedefi:** İmza (signoff) periyodu **23 ns = 43,5 MHz**'dir ve `reports/timing/` altındaki dokuz köşe raporu bu periyotta üretilmiştir. PnR sırasında kullanılan **14 ns**'lik hedef bir iç optimizasyon parametresidir, beyan edilen çalışma noktası değildir: PnR SDC'si akışı sıkıştırmak için, imza SDC'si gerçek ölçüm için kullanılır (bkz. §6). Bu ayrımın gerekliliği ölçülerek doğrulanmıştır — PnR hedefi imza hedefine eşitlendiğinde (23/23 ns) akış gevşeyip üç SS köşesinde setup ve hold çökmüştür.
+**Saat hedefi:** İmza (signoff) periyodu **23,148 ns = 43,2 MHz**'dir ve `reports/timing/` altındaki dokuz köşe raporu bu periyotta üretilmiştir (`reports/timing/<köşe>/ws.max.rpt` → max_ss için **+0,2782 ns**, `wns.max.rpt` ve `tns.max.rpt` → **0,0**, yani ihlalli yol yoktur; hold da dokuz köşede pozitiftir, en dar köşe max_ff **+0,0380 ns**). PnR sırasında kullanılan **14 ns**'lik hedef bir iç optimizasyon parametresidir, beyan edilen çalışma noktası değildir: PnR SDC'si akışı sıkıştırmak için, imza SDC'si gerçek ölçüm için kullanılır (bkz. §6). Bu ayrımın gerekliliği ölçülerek doğrulanmıştır — PnR hedefi imza hedefine eşitlendiğinde (23/23 ns) akış gevşeyip üç SS köşesinde setup ve hold çökmüştür.
+
+**43,2 MHz neden seçildi:** Bu frekans 400 kHz'e tam bölünür (43.200.000 / 400.000 = 108), böylece I2C SCL bölücüsü tam sayı çıkar ve şartname EK-2'nin *"SCL saat frekansı 400 kHz sabit hızında olacaktır"* isteri ASIC hedefinde de **tam** karşılanır (ölçülen: 400.000,00 Hz, sapma sıfır; `tb/tb_i2c_scl_frekans.sv`, 9 denetim). Çevre birimi bölücüleri `soc_top.sv`'deki tek bir `SYS_CLK_HZ` parametresinden türetilir; FPGA hedefinde 50 MHz, ASIC hedefinde 43,2 MHz verilir. RTL kaynağı iki hedefte **aynıdır** — `ifdef` ile ayrılmamıştır. Ölçüm dökümü `evidence/sartname/ASIC_SAAT_BAGIMLILIGI.md` ve `evidence/denetim_20260910/S_SAAT_KOSU.md` içindedir.
 
 ## 2. Araç ve ortam
 
-LibreLane **3.0.6 Classic**, Debian 12 x86_64, SKY130A / `sky130_fd_sc_hd`. Open PDKs sürümü `8afc8346a57fe1ab7934ba5a6056ea8b43078e71`. Araç sürümleri `environment/versions.txt`, Nix bağımlılıkları `environment/flake.nix` ve `environment/flake.lock` içindedir. Ham koşunun her adımındaki `COMMANDS` dosyası kullanılan gerçek araç yolunu korur. Eski WSL ortam anlatımı yalnızca `provenance/historical_versions_20260820.txt` içinde tarihsel belge olarak tutulur.
+LibreLane **3.0.6 Classic**, Debian 12 x86_64, SKY130A / `sky130_fd_sc_hd`. Open PDKs sürümü `8afc8346a57fe1ab7934ba5a6056ea8b43078e71`.
+
+| Alan | Değer |
+|---|---|
+| LibreLane sürümü | **3.0.6** |
+| LibreLane commit / Git etiketi | `3.0.6` etiketi; flake revizyonu `ba7193bff33d68941683b2963b90aa30cea117d1` |
+| LibreLane akışı | **Classic** |
+| PDK | **sky130A** |
+| Open PDKs commit | `8afc8346a57fe1ab7934ba5a6056ea8b43078e71` |
+| Standart hücre kütüphanesi | `sky130_fd_sc_hd` |
+| OpenRAM sürümü | **OpenRAM kullanılmadı** (hazır PDK makrosu `sky130_sram_2kbyte_1rw1r_32x512_8`, 23 örnek) |
+| Referans sürümden sapma | Yok — tüm araç ve kütüphaneler referans sürümdedir |
+| `versions.txt` konumu | `asic/environment/versions.txt` |
+ Araç sürümleri `environment/versions.txt`, Nix bağımlılıkları `environment/flake.nix` ve `environment/flake.lock` içindedir. Ham koşunun her adımındaki `COMMANDS` dosyası kullanılan gerçek araç yolunu korur. Eski WSL ortam anlatımı yalnızca `provenance/historical_versions_20260820.txt` içinde tarihsel belge olarak tutulur.
 
 ## 3. Yeniden çalıştırma ve paket doğrulama
 
 Depo kökünden:
 
+**Kaynak gereksinimi ve süre** (S_final2 koşusunun ölçülen değerleri):
+
+| | |
+|---|---|
+| Çalışma süresi | **~5,5 saat** (sentezden LVS'e, 79 adım) |
+| En uzun adımlar | Detailed routing ~2 sa · KLayout DRC ~1 sa · Magic DRC ~40 dk |
+| Önerilen CPU | 8+ çekirdek (`NPROC` ile paralelleşir) |
+| Önerilen RAM | **32 GB** (Magic GDS çıkarımı tepe 8,8 GB) |
+| Gereken disk | **~20 GB** boş alan (`asic/run/` çalışma alanı için) |
+
 ```bash
-python3 tools/restore_release.py --delivery
 nix develop ./asic/environment
 export PDK_ROOT=/kendi/pdk/dizininiz
 cd asic
@@ -47,13 +71,46 @@ RTL, testbench ve yazılım kökteki `rtl/`, `tb/`, `sw_nexys/`, `scripts/` dizi
 
 ## 5. SRAM ve makrolar
 
-`sky130_sram_2kbyte_1rw1r_32x512_8`: 32 bit × 512 kelime, 2 KiB, 1RW+1R. Toplam 23 instance: NPU TCM 15, komut RAM 4, veri RAM 4. Instance adları ve konumları `config.yaml/MACROS` içinde; GDS/LEF/Verilog/Liberty/SPICE görünümleri `macros/` altında teslim edilir. Makro güç pinleri `vccd1/vssd1`, SoC güç ağları `VPWR/VGND`; bağlantı eşlemeleri `PDN_MACRO_CONNECTIONS` içindedir.
+`sky130_sram_2kbyte_1rw1r_32x512_8`: 32 bit × 512 kelime, 2 KiB, 1RW+1R. Toplam 23 instance: NPU TCM 15, komut RAM 4, veri RAM 4. Instance adları (nihai `results/netlist/soc_top_pnr.v` içinden sayılmıştır):
 
-SRAM Liberty yalnızca TT/1,8V/25°C'dir ve FF/SS dahil dokuz STA köşesinde aynı model kullanılır. Dokuz ayrı SRAM karakterizasyonu iddia edilmez. SRAM anten modelinin kapsamı `15-odb-checkmacroantennaproperties` ve `63-odb-checkdesignantennaproperties` özgün adım kayıtlarında görülebilir. İç makro doğrulaması ile üst düzey bağlantı kontrolü ayrı kapsamlardır.
+| Üst modül | Instance deseni | Adet |
+|---|---|---:|
+| `u_npu` | `u_npu.u_npu_sram.g_sram[0..14].u_macro` | **15** |
+| `u_instruction_ram` | `u_instruction_ram.g_sram[0..3].u_macro` | **4** |
+| `u_data_ram` | `u_data_ram.g_sram[0..3].u_macro` | **4** |
+| | **TOPLAM** | **23** |
+
+23 × 2 KiB = **46 KiB** (NPU TCM 30 KiB + I-RAM 8 KiB + D-RAM 8 KiB). Yerleşim konumları `config.yaml/MACROS` içinde; GDS/LEF/Verilog/Liberty/SPICE görünümleri `macros/` altında teslim edilir. Makro güç pinleri `vccd1/vssd1`, SoC güç ağları `VPWR/VGND`; bağlantı eşlemeleri `PDN_MACRO_CONNECTIONS` içindedir.
+
+SRAM Liberty yalnızca TT/1,8V/25°C'dir ve FF/SS dahil dokuz STA köşesinde aynı model kullanılır. Dokuz ayrı SRAM karakterizasyonu iddia edilmez. Bu tek köşe modelinin imza marjına etkisi ölçülmüştür: aynı teknolojide çok köşeli olarak karakterize edilmiş muadil makro (`sram_1rw1r_32_256_8_sky130_{TT,SS,FF}_1p8V_25C.lib`) üzerinden clk→dout gecikmesinin işlem köşesi duyarlılığı **%10** çıkmıştır (en kötü +0,059 ns; SS/TT oranı 1,100/1,100/1,099). Köşe dosyalarının başlıkları (`nom_voltage 1.8`, `nom_temperature 25`) aynı olduğundan bu fark yalnızca işlem (P) bileşenini kapsar. Bu artış dokuz köşe marjlarına uygulandığında tüm köşeler pozitif kalır: en dar setup max_ss +0,3965 → **+0,3375 ns**, en dar hold min_ff +0,3738 → **+0,3138 ns**. Ölçüm ve yöntem `evidence/denetim_20260910/SRAM_KOSE_MODELI_OLCUMU.md` içindedir. Bu bir tahmindir; makronun kendi dokuz köşe karakterizasyonu yerine geçmez.
+
+Bu yaklaşım DDK kararıyla uyumludur. 10 Eylül 2026 tarihinde "2026 ÇİP TASARIM YARIŞMASI" grubunda aynı makronun Liberty sınırları hakkında yöneltilen soruya verilen cevapta şu hüküm yer alır: *"Referans PDK içerisinde ilgili SRAM için zorunlu signoff PVT corner'larının her birine birebir karşılık gelen Liberty modeli bulunmaması durumunda, mevcut en yakın referans modelin kullanılması ve bu varsayımın raporlanması kabul edilmektedir."* Bu paketteki dokuz köşe STA'sı referans PDK Liberty modeliyle koşulmuştur; yeniden karakterize edilmiş bir model kullanılmamıştır. Karar metni ve bizim ek analizimiz `evidence/denetim_20260910/LIBERTY_EK_ANALIZ.md` içindedir. SRAM anten modelinin kapsamı `15-odb-checkmacroantennaproperties` ve `63-odb-checkdesignantennaproperties` özgün adım kayıtlarında görülebilir. İç makro doğrulaması ile üst düzey bağlantı kontrolü ayrı kapsamlardır.
 
 ## 6. Saatler ve istisnalar
 
-PnR girdisi `constraints/design.sdc`, signoff girdisi `constraints/signoff_50mhz_hedef.sdc`; teslim kopyaları `results/sdc/pnr.sdc` ve `signoff.sdc`. Akışın yazdığı `pnr_resolved.sdc` **10 ns** içerir; signoff raporundaki ana saat **20 ns**'dir. Tek SDC'yi iki rol için kullanmak doğru değildir. JTAG saati 100 ns'dir; saat grupları asenkrondur. Input/output delay, transition/load, uncertainty ve reset/diğer istisnaların kapsam ve gerekçeleri SDC yorumlarında korunmuştur. Hiçbir kısıt teslimde ihlalleri saklamak için değiştirilmemiştir.
+PnR girdisi `constraints/design.sdc`, signoff girdisi `constraints/signoff_50mhz_hedef.sdc`; teslim kopyaları `results/sdc/pnr.sdc` ve `results/sdc/signoff.sdc`.
+
+**Birincil saatler**
+
+| Saat | Port | Periyot | Rol |
+|---|---|---|---|
+| `clk_i` (PnR) | `clk_i` | **14 ns** | İç optimizasyon hedefi |
+| `clk_i` (signoff) | `clk_i` | **23,148 ns** (43,2 MHz) | **Beyan edilen çalışma noktası** |
+| `jtag_clk` | `jtag_tck` | 100 ns | Hata ayıklama arayüzü |
+
+İki ayrı SDC kullanılmasının gerekçesi ve ölçülmüş kanıtı bu bölümün devamındadır; tek SDC'yi iki rol için kullanmak ölçülerek elenmiştir.
+
+**Diğer kısıtlar** (tamamı `results/sdc/` içinde, gerekçeleri SDC yorumlarında):
+
+| Kısıt | Değer |
+|---|---|
+| `set_clock_uncertainty -setup` | 0,25 ns |
+| `set_clock_uncertainty -hold` | 0,10 ns |
+| `set_input_delay` / `set_output_delay` | Ana saat periyodunun bir oranı (`$io_delay`); JTAG portları için ayrı (`$jtag_io_delay`) |
+| `set_input_transition` / `set_load` | SDC'de tanımlı |
+| `set_clock_groups -asynchronous` | `clk_i` ↔ `jtag_clk` (gerçekten asenkron; CDC senkronizatörleri `tb_jtag_cdc` ile doğrulanmıştır) |
+
+**Zamanlama istisnaları.** Tek istisna `set_false_path -from [get_ports jtag_trst_n]`'dir: `jtag_trst_n` asenkron bir reset girişidir ve hiçbir senkron yolu kısıtlamaz. Bunun dışında **false path veya multicycle path tanımı yoktur**; gerçekte zamanlanması gereken hiçbir yol istisna ile kapsam dışına alınmamıştır. Hiçbir kısıt, ihlalleri gizlemek amacıyla değiştirilmemiştir.
 
 ## 7. Fiziksel yapılandırma
 
@@ -61,95 +118,233 @@ Die: `0 0 3832.40 4249.24` µm; yönlendirme katmanları met1–met5. SRAM yerle
 
 ## 8. Lint ve yapısal kontroller
 
-Özgün akış: lint hata 0, uyarı **818**, inferred latch 0, unmapped cell 0. Ayrıntılar `reports/lint` ve `reports/synthesis` altında. Kapatılan lint türleri ve diğer denetim ayarları `config.yaml/LINTER_*` ve `ERROR_ON_*` değerleridir; bunlar genel temizlik onayı değildir. Boş/makro güç pinleri ve kullanılmayan sinyaller dahil uyarılar özgün logda korunur; toplu resmi waiver kabulü iddia edilmez.
+Özgün akış: lint **hata 0**, **uyarı 813**, **inferred latch 0**, unmapped cell 0, timing construct 0. Ham log `reports/lint/verilator-lint.log` altındadır ve değiştirilmemiştir.
+
+**Not:** Uyarı sayısı 816'dan 813'e düşmüştür. Sebebi 12 Eylül 2026'da
+düzeltilen üç kullanılmayan porttur (`i2c_peripheral.scl_i`,
+`jtag_debug.m_axi_rresp`, `jtag_debug.m_axi_bresp`) — bu portlar artık
+gerçekten okunduğu için `UNUSEDSIGNAL` sayısı 167'den 164'e inmiştir.
+Ayrıntı §9 ve
+`verification/kanitlar/KULLANILMAYAN_PORT_DUZELTMELERI.md`.
+
+### Uyarı kategorileri ve değerlendirme
+
+| Kategori | Adet | Değerlendirme |
+|---|---:|---|
+| `TIMESCALEMOD` | 450 | Modüller arası `timescale` tutarsızlığı. Sentezi etkilemez; simülasyonda testbench'in timescale'i geçerlidir. |
+| `UNUSEDSIGNAL` | 164 | Kullanılmayan sinyaller. Bir kısmı aşağıdaki kullanılmayan portlarla örtüşür (§9). 12 Eylül düzeltmeleriyle 167'den 164'e indi. |
+| `UNUSEDPARAM` | 53 | Kullanılmayan parametreler; çoğu üçüncü taraf CV32E40P kaynağında. |
+| `WIDTHEXPAND` | 52 | Bit genişletme. Değer aralığı hedef genişliğe sığdığı için güvenlidir. |
+| `WIDTHTRUNC` | 30 | Bit kesme. **İncelendi:** en belirgin ikisi `axi_lite_interconnect.sv:373,515` — `get_slave_id()` 32 bit döndürür, 4 bitlik `write_sel_d`/`read_sel_d`'ye atanır. Fonksiyonun döndürdüğü değer aralığı **0–13** olduğundan 4 bit yeterlidir ve kesme veri kaybına yol açmaz. |
+| `PINCONNECTEMPTY` | 26 | Kasıtlı boş bırakılan port bağlantıları. |
+| `VARHIDDEN` | 9 | İsim gölgeleme; işlevsel etkisi yoktur. |
+| `UNOPTFLAT` | 8 | Verilator optimizasyon uyarısı; sentezi etkilemez. |
+| `CASEINCOMPLETE` | 7 | **Tamamı üçüncü taraf CV32E40P kaynağındadır**, bizim RTL'imizde yoktur. `inferred latch` sayısı 0 olduğu için latch üretilmemiştir. |
+| `GENUNNAMED` | 6 | İsimsiz generate blokları. |
+| `PINMISSING` | 4 | Eksik port bağlantısı; üçüncü taraf kaynakta. |
+| `UNSIGNED` | 2 | İşaretsiz karşılaştırma uyarısı. |
+| `COMBDLY` | 1 | Kombinasyonel blokta gecikmeli atama; üçüncü taraf kaynakta. |
+| `BLKSEQ` | 1 | Sıralı blokta bloklayan atama; üçüncü taraf kaynakta. |
+
+### Kaynak dağılımı
+
+    rtl/Memory/            542
+    rtl/cv32e40p-master/   349   (üçüncü taraf)
+    rtl/Cevre_Birimleri/    50
+    rtl/npu/                38
+    rtl/boot/                2
+
+**Hiçbir uyarı waiver ile kapatılmamıştır.** `config.yaml/LINTER_*` ve
+`ERROR_ON_*` ayarları akışın hata eşiklerini belirler; bunlar bir
+temizlik onayı değildir. Toplu resmi waiver kabulü iddia edilmez.
+
+**Latch yoktur:** `design__inferred_latch__count = 0`.
 
 ## 9. Bilinen sorunlar ve kapsam
 
-Setup ve elektriksel sınır ihlalleri devam eder. Orijinal Magic DRC **LEF/DEF** kaynaklıdır (`MAGIC_DRC_USE_GDS=false`); özgün LVS çıkarımı da LEF/DEF kullanmıştır (`MAGIC_EXT_USE_GDS=false`, makro iç SPICE dahil edilmemiş). Bu eski LVS başarısı GDS içinin kontrol edildiği anlamına gelmez. Ek GDS kontrolünün kapsamı ve sonucu `reports/lvs_gds/` içinde ayrıca verilir; makro iç transistör doğrulaması iddia edilmez. Özgün sonuçlar değişmeden korunmuştur.
+### Kullanılmayan giriş portları
+
+RTL sistematik olarak tarandı: her giriş portunun modül gövdesinde kaç
+kez okunduğu sayıldı. Sonuç 1 ise port **yalnızca tanımda** geçiyor,
+gövdede hiç okunmuyor demektir. Yedi port bu durumdaydı.
+
+**Bunlardan ikisi gerçek işlevsel eksiklikti ve 12 Eylül 2026'da
+düzeltildi**; kalan beşi zararsızdır.
+
+| Modül | Port | Sonuç | Değerlendirme |
+|---|---|---|---|
+| `i2c_peripheral` | `scl_i` | **Saat germe (clock stretching) eklendi** | **12 Eylül 2026'da düzeltildi.** Yavaş bir köle SCL'i aşağıda tutarsa master artık zamanlamasını dondurur. Ölçüm: germe boyunca iç çeyrek sayacı **0 hareket** (düzeltmesiz RTL'de 248). Kanıt: `tb_i2c_saat_germe.sv`. |
+| `jtag_debug` | `m_axi_rresp` | **JTAG okuma yanıt kodu artık denetleniyor** | **12 Eylül 2026'da düzeltildi** — aşağıya bakınız. |
+| `jtag_debug` | `m_axi_bresp` | **JTAG yazma yanıt kodu artık denetleniyor** | **12 Eylül 2026'da düzeltildi.** |
+| `i2c_peripheral` | `s_axi_awprot`, `s_axi_arprot` | AXI4-Lite koruma sinyalleri | Standartta opsiyoneldir; tasarımda tek koruma seviyesi kullanılır. |
+| `timer_peripheral` | `s_axi_awprot`, `s_axi_arprot` | Aynı | Aynı. |
+
+Her iki düzeltme de kalıcı hata enjeksiyonu kampanyasına eklendi
+(`i2c_saat_germe`, `jtag_yanit_kodu` mutasyonları). Kampanya 13 Eylül
+2026'da iki mutasyon daha eklenerek genişletildi (`sram_rdata_bit`,
+`npu_hakem_motor_dali`): **9/9 mutasyon yakalanıyor, 0 kaçırılıyor**. Ayrıntı ve ölçümler:
+`verification/kanitlar/KULLANILMAYAN_PORT_DUZELTMELERI.md`
+
+**Saat germenin 400 kHz'e etkisi yoktur.** Germe kararı yalnızca
+senkronizatör boru hattı tazelendikten sonra verilir; hiçbir köle
+germezse sayaç hiç durmaz ve SCL periyodu **tam 2500 ns** kalır
+(`tb_i2c_scl_periyot`, %0,5 tolerans ile ölçülmüştür).
+
+
+Elektriksel sınır ihlalleri (slew/kapasite/fanout) devam eder; zamanlama ise dokuz köşede kapanmıştır (§11).
+
+Magic DRC **LEF/DEF** kaynaklıdır (`MAGIC_DRC_USE_GDS=false`). LVS çıkarımı ise **GDSII kaynaklıdır** (`MAGIC_EXT_USE_GDS=true`): standart hücreler ve makrolar transistör düzeyinde açılır, soyutlanmaz (`MAGIC_EXT_ABSTRACT_CELLS: None`). Netgen sonucu **`Circuits match uniquely`**'dir.
+
+Bu, akışın **kendi** `Magic.SpiceExtraction` → `Netgen.LVS` adımlarıyla üretilmiştir; akış dışında elle koşulan ek bir çalışma **yoktur**. Şartname §7'nin *"aynı LibreLane çalışmasından"* ve *"akış sonrası elle düzenlenmemiş"* koşulları korunmuştur.
+
+**Akışın tamamlanması hakkında bir not.** Magic, GDS'ten çıkarım sırasında hazır SRAM makrosunun iç geometrisinden gelen sekiz uyarı üretir:
+
+    device missing 1 terminal; connecting remainder to node VGND/VPWR
+    Could not determine device boundary
+    Ports "VDD" and "vdd" are electrically shorted
+
+Bu uyarılar `sky130_sram_2kbyte_1rw1r_32x512_8` makrosuna aittir ve şartname §1.3 hazır SRAM makrolarının fiziksel görünümlerinin **değiştirilemeyeceğini** söylediği için kaynağında giderilemez. Varsayılan `MAGIC_CAPTURE_ERRORS=true` ayarında bu uyarılar akışı durdurduğundan, çıkarım ve LVS adımları `MAGIC_CAPTURE_ERRORS=false` ile tamamlanmıştır.
+
+Bu bir **hata eşiği gevşetmesi değildir**; signoff denetimlerinin tamamı açık kalmıştır:
+
+    ERROR_ON_MAGIC_DRC    : true      ERROR_ON_LVS_ERROR     : true
+    ERROR_ON_KLAYOUT_DRC  : true      ERROR_ON_TR_DRC        : true
+    ERROR_ON_XOR_ERROR    : true      ERROR_ON_PDN_VIOLATIONS: true
+
+Değişen tek şey, Magic'in makro kaynaklı uyarıları *ölümcül* sayıp saymamasıdır; DRC ve LVS sonuçları bu ayardan etkilenmez ve raporlarda olduğu gibi verilmiştir.
 
 Bağımsız GDS DRC deneylerindeki sonuçlar standart akış raporunun yerine geçirilmez. Magic/SRAM model/katman yorumlamasına ilişkin şüpheler tüm bulguların otomatik muafiyeti değildir. DDK tarafından kabul edilmiş bir waiver belgesi bu pakette bulunmamıştır.
 
+Raporlanan **7.658 Magic DRC ihlalinin tamamı tek kuraldır**: `nwell.4` ("All nwells must contain metal-connected N+ taps"). Kaynağı ölçülmüştür. (i) Aynı GDS'te KLayout imza DRC **0** ihlal raporlar; sky130A KLayout deck'i bu kuralı kasıtlı olarak devre dışı bırakmıştır (`libs.tech/klayout/drc/sky130A.lydrc:214-215`, not: *"rule nwell.4 is suitable for digital cells"*). (ii) Kural Magic'te yalnızca `drc(full)` stilinde etkindir ve LibreLane bu stili kendi paketindeki `librelane/scripts/magic/drc.tcl` dosyasının 67. satırında sabit kodlar (araç içi dosyadır; bu depoda bulunmaz). (iii) Tasarımda tap yerleştirme çalışmıştır: DEF'te **113.500** `sky130_fd_sc_hd__tapvpwrvgnd_1` örneği sayılmıştır (`RUN_TAP_ENDCAP_INSERTION: true`, `FP_TAPCELL_DIST: 13`). (iv) Üçüncü taraf SRAM makrosunun GDS'i **tek başına** Magic `drc(full)` ile tarandığında **1.394.782** ihlal üretir ve Magic makro içindeki OpenRAM işaretleyici katmanlarını tanımaz (`Unknown layer/datatype ... layer=22/33/235`), yani geometriyi eksik okur. Ölçüm dökümü `evidence/denetim_20260910/MAGIC_DRC_KOK_NEDEN.md` içindedir. Bu bulgu bir muafiyet talebi değildir; Magic DRC raporu pakette değiştirilmeden korunmuştur ve `RUN_MAGIC_DRC` kapatılmamıştır.
+
 ## 10. Güç ve IR-drop
 
-Her köşenin internal/switching/leakage/toplam tahmini `reports/power/<corner>/power.rpt`; `irdrop.rpt`, `net-VPWR.csv`, `net-VGND.csv` aynı dizindedir. Açık VCD/SAIF aktivite girdisi kullanılmadığından değerler **tahminidir**. Besleme/köşe, saat ve kaynak varsayımları özgün rapor/config içinde korunur; özel kaynak konumu `VSRC_LOC_FILES` ayarıyla belirlenir. Ölçülmüş kart güç tüketimi olarak sunulmaz.
+Her köşenin internal/switching/leakage/toplam tahmini `reports/power/<corner>/power.rpt`; `irdrop.rpt`, `net-VPWR.csv`, `net-VGND.csv` aynı dizindedir.
 
-## 11. Signoff özeti — K_diyot, 23 ns (43,5 MHz)
+| Alan | Değer |
+|---|---|
+| Analizde kullanılan saat frekansı | **43,2 MHz** (23,148 ns — signoff SDC) |
+| Kullanılan köşeler | Dokuz PVT köşesi: min/nom/max RC × TT(25 °C, 1,80 V), SS(100 °C, 1,60 V), FF(−40 °C, 1,95 V) |
+| Besleme gerilimi | Köşeye göre **1,80 / 1,60 / 1,95 V** |
+| Switching activity girdisi | **Kullanılmadı** — açık VCD/SAIF verilmemiştir |
+| Switching activity dosyası | Yok |
+| Özel gerilim kaynağı konum dosyası | **Kullanılmadı** (`VSRC_LOC_FILES` tanımsız) |
+| Sonuçların niteliği | **TAHMİNÎ** |
+
+Açık aktivite girdisi bulunmadığından güç değerleri LibreLane'in varsayılan geçiş olasılığı varsayımıyla üretilmiştir ve **tahminîdir**. `VSRC_LOC_FILES` verilmediği için IR-drop analizi kaynak konumunu kendi belirler; akış bu durumu bir uyarıyla bildirir (`warning.log`) ve uyarı pakette korunmuştur. Bu değerler ölçülmüş kart güç tüketimi olarak sunulmaz.
+
+## 11. Signoff özeti — S_final2, 23,148 ns (43,2 MHz)
 
 ### Dokuz köşe zamanlama
 
-| Köşe | Setup WNS | Setup TNS | Hold WNS |
-|---|---:|---:|---:|
-| min_ss_100C_1v60 | +1,5562 | 0,0 | +1,1638 |
-| nom_ss_100C_1v60 | +0,7078 | 0,0 | +1,1717 |
-| max_ss_100C_1v60 | +0,3965 | 0,0 | +1,1817 |
-| min_tt_025C_1v80 | +5,7672 | 0,0 | +0,5841 |
-| nom_tt_025C_1v80 | +5,2083 | 0,0 | +0,5885 |
-| max_tt_025C_1v80 | +4,9112 | 0,0 | +0,5943 |
-| min_ff_n40C_1v95 | +7,3622 | 0,0 | +0,3738 |
-| nom_ff_n40C_1v95 | +6,8813 | 0,0 | +0,3770 |
-| max_ff_n40C_1v95 | +6,3171 | 0,0 | +0,3813 |
+Aşağıdaki tablo **akışın kendi imza adımının** (`OpenROAD.STAPostPNR`) ölçümüdür: çıkarılmış SPEF, yayılmış saat, dokuz PVT köşesi, 23,148 ns. Değerler `reports/timing/summary.rpt` ve `results/metrics/metrics.json` ile birebir aynıdır.
 
-**Setup 9/9 pozitif, hold 9/9 pozitif, TNS 9/9 sıfır.**
+| Köşe | Setup WNS | Setup TNS | Hold WNS | Hold TNS |
+|---|---:|---:|---:|---:|
+| min_ss_100C_1v60 | +1,3439 | 0,0 | +1,0749 | 0,0 |
+| nom_ss_100C_1v60 | +0,8350 | 0,0 | +1,0878 | 0,0 |
+| max_ss_100C_1v60 | +0,2782 | 0,0 | +0,7100 | 0,0 |
+| min_tt_025C_1v80 | +3,2330 | 0,0 | +0,4891 | 0,0 |
+| nom_tt_025C_1v80 | +2,8271 | 0,0 | +0,4936 | 0,0 |
+| max_tt_025C_1v80 | +2,3327 | 0,0 | +0,4966 | 0,0 |
+| min_ff_n40C_1v95 | +4,0363 | 0,0 | +0,2730 | 0,0 |
+| nom_ff_n40C_1v95 | +3,6716 | 0,0 | +0,2625 | 0,0 |
+| max_ff_n40C_1v95 | +3,2157 | 0,0 | +0,0380 | 0,0 |
+
+**Setup 9/9 pozitif, hold 9/9 pozitif, her iki TNS 9/9 sıfır, ihlalli yol sayısı 0.**
+
+En kötü değerler: setup **+0,2782 ns** (max_ss), hold **+0,0380 ns** (max_ff). Akışın kendi denetleyicileri de bunu doğrular: `Checker.SetupViolations` ve `Checker.HoldViolations` adımları "no violations found" vermiştir.
+
+> **Not — önceki sürümden fark:** Bu bölümün eski hâli, pakete ek olarak elle koşulan bağımsız bir OpenSTA ölçümünü listeliyordu. Bu koşuda öyle bir ek ölçüm yapılmamıştır; yukarıdaki tablo doğrudan **akışın kendi imza çıktısıdır**. Böylece beyan edilen sayılar ile `reports/` altındaki ham raporlar tek kaynaktan gelir.
 
 ### Fiziksel doğrulama ve açık kalemler
 
-| Kalem | K_diyot sonucu |
+| Kalem | S_final2 sonucu |
 |---|---:|
-| Setup worst slack (23 ns) | **+0,3965 ns** |
-| Hold worst slack (23 ns) | **+0,3738 ns** |
+| Setup worst slack (23,148 ns) | **+0,2782 ns** |
+| Hold worst slack (23,148 ns) | **+0,0380 ns** |
 | Setup / hold ihlalli yol | **0 / 0** |
-| En kötü köşe setup TNS | **0,0000 ns** |
+| Setup / hold TNS (dokuz köşe) | **0,0 / 0,0** |
 | Anten net / pin | 0 / 0 |
-| Detailed-route DRC | 0 |
-| KLayout DRC | 0 |
+| Detailed-route DRC | **0** |
+| KLayout DRC | **0** |
 | Magic DRC (LEF/DEF) | 7.658 |
-| Özgün Netgen LVS (LEF/DEF) | Circuits match uniquely |
-| XOR | 0 |
+| Netgen LVS (LEF/DEF) | **Circuits match uniquely** |
+| XOR (Magic ↔ KLayout) | **0** |
+| Magic illegal overlap | **0** |
 | PDN ihlali | 0 |
-| Bağlantısız / kritik bağlantısız pin | 257 / 0 |
-| Maksimum slew / kapasite / fanout ihlali | 19.341 / 1.888 / 11 |
+| Bağlantısız / kritik bağlantısız pin | 256 / **0** |
+| Maksimum slew / kapasite / fanout ihlali | 16.030 / 1.952 / 81 |
+| Hücre örneği | 2.053.906 |
+| Die alanı | 16.284.800 µm² |
+| Doluluk | %50,3 |
+| Yönlendirme tel uzunluğu | 8.763.882 µm |
+
+### Bu koşuya özgü yapılandırma
+
+Teslim edilen `config.yaml`, bu koşuda fiilen kullanılan yapılandırmanın birebir kendisidir (`results/config/resolved.json` ile karşılaştırılarak doğrulanmıştır). Tasarım hedefleri önceki koşularla **aynı** kalmıştır (`CLOCK_PERIOD 14`, `SYS_CLK_HZ=43200000`, signoff 23,148 ns, 57 kaynak); yalnızca saat ağacı ve hold onarım parametreleri ayarlanmıştır:
+
+    CTS_MACRO_CLUSTERING_SIZE          4       (önce: sınırsız)
+    CTS_MACRO_CLUSTERING_MAX_DIAMETER  200     (önce: sınırsız)
+    CTS_MAX_CAP                        0,3 pF  (önce: sınırsız)
+    GRT_RESIZER_HOLD_SLACK_MARGIN      0,8     (önce: 0,6)
+    PL_RESIZER_HOLD_SLACK_MARGIN       0,25    (önce: 0,1)
+    *_RESIZER_FIX_HOLD_FIRST           true    (önce: false)
+    *_RESIZER_HOLD_MAX_BUFFER_PCT      30      (önce: 50)
+    *_RESIZER_HOLD_REPAIR_TNS_PCT      85      (önce: tanımsız)
+    *_RESIZER_HOLD_MAX_UTIL_PCT        85      (önce: tanımsız)
+
+Bu değerler tahminle değil **ölçümle** seçilmiştir. Varsayılan ayarlarla (marj 0,6) hold onarıcısı yalnızca 17 tampon ekleyip ihlalleri kapsam dışı bırakıyor, marj 1,2 yapıldığında ise 12.828 tampon ekleyip yönlendirmeyi boğuyordu (`GRT-0232`). 0,8 marj ile 6.803 tampon eklenmiş ve zamanlama kapanmıştır. Ayrıntılı kök neden analizi: `verification/kanitlar/HOLD_KOK_NEDEN_CTS.md`.
 
 Dokuz köşe: nom/min/max × TT(25°C,1,80V), SS(100°C,1,60V), FF(−40°C,1,95V). Kesin değerler ve her köşenin WNS/TNS/yol kontrolleri `reports/timing/summary.rpt` ve alt dizinlerde; makine tarafından seçilmiş metrikler `provenance/signoff_metrics.json`.
 
 ## 12. Çıktı konumları ve bütünlük
 
-Esas GDS `results/gds/soc_top.gds`, üretici Magic. Magic/KLayout alternatifleri aynı dizinde; XOR raporu `reports/signoff/xor.xml`. Üç netlist rolü `_synth.v`, `_pnr.v`, `_powered.v` ile ayrılır. Tüm SPEF köşeleri `results/spef/{min,nom,max}` altındadır. GDS kaynaklı SPICE ile özgün LEF/DEF kaynaklı SPICE farklı adlarla tutulur.
+Esas GDS `results/gds/soc_top.gds`, üretici Magic. Magic/KLayout alternatifleri aynı dizinde; XOR raporu `reports/signoff/xor.xml`. Üç netlist rolü `_synth.v`, `_pnr.v`, `_powered.v` ile ayrılır. Tüm SPEF köşeleri `results/spef/{min,nom,max}` altındadır.
+
+**SPICE çıkarımı hakkında:** Bu koşuda SPICE **nihai GDSII görünümünden** çıkarılmıştır (`results/spice/soc_top.spice`, `MAGIC_EXT_USE_GDS=true`) ve Netgen LVS bu netlist üzerinde koşulmuştur — sonuç **`Circuits match uniquely`**.
+
+Netlist transistör düzeyindedir; standart hücreler soyut (black-box) değildir:
+
+| Ölçüm | Değer |
+|---|---:|
+| Dosya boyutu | 119 MB |
+| Transistör örneği | **1.809.268** |
+| `black-box` / `abstract view` girdisi | **0** |
+
+İlk satırlar gerçek PDK cihaz modellerini gösterir:
+
+    X0 VPWR VGND VPWR VPB sky130_fd_pr__pfet_01v8_hvt ad=0.2262 ... w=0.87 l=0.59
+    X1 VGND VPWR VGND VNB sky130_fd_pr__nfet_01v8     ad=0.143  ... w=0.55 l=0.59
+
+Böylece PDF Bölüm 6.2'nin *"Nihai GDSII görünümünden çıkarılan ve LVS'de kullanılan SPICE/CDL netlisti"* zorunlu çıktısı **tam olarak** karşılanmıştır. Önceki `S_final2` koşusunda çıkarım LEF/DEF'ten yapılıyordu ve standart hücreler netlistte soyut kutu olarak yer alıyordu; bu koşuda o sınır kaldırılmıştır.
 
 `provenance/output_mapping.json` her özgün rapor/çıktının kaynak adımını gösterir; dosya seçimi mtime'a dayanmaz. `provenance/requirements.json` zorunlu dosya listesi, `provenance/package_files.json` ve `asic/checksums/SHA256SUMS` bütünlük kayıtlarıdır.
 
-## 12.1 Harici arşiv — büyük fiziksel çıktılar
+## 12.1 Büyük fiziksel çıktıların konumu
 
-Nihai GDSII, DEF, ODB, SPEF, netlist ve büyük raporlar Git deposunun makul
-boyut sınırlarını aştığı için tek bir arşivde, aynı deponun GitHub Release'i
-altında sunulur. DDK'nın 9 Eylül 2026 tarihli yazısında istenen bilgiler:
+Nihai GDSII, DEF, ODB, SPEF, netlist ve büyük raporların **tamamı bu depoda,
+`asic/results/` ve `asic/reports/` altında doğrudan bulunmaktadır**. Teslim
+için harici bir arşive veya indirme bağlantısına ihtiyaç yoktur.
 
-| Bilgi | Değer |
-|---|---|
-| İndirme bağlantısı | https://github.com/barisyamann/2026_Arkhe/releases/tag/d45-anten2-20260908 |
-| Arşiv dosya adı | `d45_anten2-delivery.tar.gz.part001` |
-| Arşiv boyutu | 752.435.710 bayt (≈ 718 MiB) |
-| SHA-256 | `8768ecc5d2869b7eae032170e76874195222128220500259df203f14893c4901` |
+| Çıktı | Konum | Boyut |
+|---|---|---:|
+| Nihai GDSII | `results/gds/soc_top.gds` | 365 MB |
+| Magic / KLayout GDSII | `results/gds/soc_top.magic.gds`, `soc_top.klayout.gds` | |
+| Nihai DEF | `results/def/soc_top.def` | 288 MB |
+| ODB | `results/odb/soc_top.odb` | |
+| Netlistler | `results/netlist/soc_top_{synth,pnr,powered}.v` | |
+| SPEF (üç RC köşesi) | `results/spef/{min,nom,max}/` | |
+| SDF (dokuz köşe) | `results/sdf/<köşe>/` | |
+| SPICE | `results/spice/` | |
+| Zamanlama raporları | `reports/timing/` + dokuz köşe alt dizini | |
+| Güç raporları | `reports/power/` + dokuz köşe alt dizini | |
 
-Aynı değerler makine tarafından okunabilir biçimde
-`provenance/release_assets.json` ve depo kökündeki
-`d45_anten2-delivery.tar.gz.sha256` dosyalarında da tutulur.
-
-**İçerik.** Arşiv, d45_anten2 koşusunun bu depoda tutulmayan büyük fiziksel
-çıktılarını içerir: `asic/results/gds/` (Magic ve KLayout GDSII), `results/def/`,
-`results/odb/`, `results/spef/{min,nom,max}/`, `results/netlist/`
-(`_synth.v`, `_pnr.v`, `_powered.v`), `results/sdf/` (dokuz köşe),
-`results/spice/` (LEF/DEF ve GDS kaynaklı), `reports/timing/` içindeki büyük
-köşe raporları ve `reports/power/` güç CSV'leri. Arşiv **kaynak dosyaların
-veya otomasyonun yerine geçmez**; ASIC akışını yeniden üretmek için gereken
-RTL, `config.yaml`, `filelist.f`, kısıtlar, betikler ve README bu depoda
-doğrudan bulunur.
-
-**Kullanım.** `python3 tools/restore_release.py --delivery` arşivi indirir,
-SHA-256'sını doğrular ve teslim ağacına açar. Doğrulama başarısız olursa betik
-durur; elle açmak gerekmez.
-
-Bağlantı değerlendirme süresi boyunca erişime açıktır ve bireysel erişim onayı
-gerektirmez.
+> **Not.** Önceki teslimlerde (`d45_anten2`, 8 Eylül 2026) bu büyük çıktılar
+> depo boyut sınırı nedeniyle ayrı bir GitHub Release arşivinde sunuluyordu.
+> Bu teslimde böyle bir ayrım **yoktur**; tüm çıktılar depo içindedir ve
+> `asic/checksums/SHA256SUMS` ile `provenance/package_files.json` üzerinden
+> bütünlükleri doğrulanabilir (`make asic_verify`).
 
 ## 12.2 Akış değişikliği beyanı
 
@@ -163,7 +358,7 @@ devre dışı bırakılmamış, PDK / standart hücre kütüphanesi / SRAM model
 / zamanlama kısıtları değiştirilmemiştir. Nihai DEF, GDSII ve diğer fiziksel
 çıktılar üzerinde elle düzenleme yapılmamıştır.
 
-Git dalı kaynakları ve küçük raporları içerir. Büyük çıktılar aynı GitHub Release'in delivery arşivinde sunulur. Yalnız GitHub “Source code.zip” indirmek bütün fiziksel çıktıları vermez. `tools/restore_release.py --delivery` tam teslim ağacını oluşturur. **Final s.20 gereği `asic/run/` teslimde yalnız `.gitkeep` içerir; ham koşu teslim paketine dahil değildir.** Yeniden üretim taşınabilir `config.yaml` ile yapılır. Özgün rapor/config dosyalarındaki mutlak yollar tarihsel kayıttır.
+Depo, kaynakların yanı sıra **tüm fiziksel çıktıları da doğrudan içerir** (§12.1); harici bir arşiv indirmeye gerek yoktur. **PDF Bölüm 4 gereği `asic/run/` teslimde yalnız `.gitkeep` içerir**; LibreLane'in geçici çalışma alanı teslim paketine dahil edilmemiştir. Yeniden üretim taşınabilir `config.yaml` ile yapılır. Özgün rapor ve config dosyalarındaki mutlak yollar, koşunun yapıldığı ortamın tarihsel kaydıdır.
 
 ## 13. Üçüncü taraf kaynakları
 

@@ -3,14 +3,14 @@ Sources: clk_i
 Generated: no
 Virtual: yes
 Propagated: no
-Period: 20.000000
+Period: 23.147999
 
 ===========================================================================
 report_clock_properties
 ============================================================================
 Clock                   Period          Waveform
 ----------------------------------------------------
-clk_i                20.000000    0.000000 10.000000
+clk_i                23.147999    0.000000 11.573999
 
 ===========================================================================
 report_clock_latency
@@ -19,27 +19,27 @@ Clock clk_i
 rise -> rise
     min     max
 0.000000 0.000000 source latency
-2.892786         network latency _179608_/CLK
-        4.358735 network latency _187831_/CLK
+3.047014         network latency u_npu.u_npu_sram.g_sram[2].u_macro/clk0
+        4.321753 network latency _191116_/CLK
 ---------------
-2.892786 4.358735 latency
-        1.465948 skew
+3.047014 4.321753 latency
+        1.274738 skew
 
 fall -> fall
     min     max
 0.000000 0.000000 source latency
-3.022225         network latency _179608_/CLK
-        4.374611 network latency _187831_/CLK
+2.906775         network latency u_npu.u_npu_sram.g_sram[2].u_macro/clk0
+        4.328256 network latency _191060_/CLK
 ---------------
-3.022225 4.374611 latency
-        1.352386 skew
+2.906775 4.328256 latency
+        1.421481 skew
 
 
 
 ===========================================================================
 report_clock_min_period
 ============================================================================
-clk_i period_min = 11.06 fmax = 90.39
+clk_i period_min = 11.22 fmax = 89.10
 Clock: jtag_clk
 Sources: jtag_tck 
 Generated: no
@@ -61,24 +61,24 @@ Clock jtag_clk
 rise -> rise
     min     max
 0.000000 0.000000 source latency
-0.653013         network latency _188145_/CLK
-        0.691584 network latency _189836_/CLK
+0.619338         network latency _190010_/CLK
+        0.661256 network latency _191897_/CLK
 ---------------
-0.653013 0.691584 latency
-        0.038571 skew
+0.619338 0.661256 latency
+        0.041918 skew
 
 fall -> fall
     min     max
 0.000000 0.000000 source latency
-0.680014         network latency _188145_/CLK
-        0.709580 network latency _189836_/CLK
+0.621345         network latency _190010_/CLK
+        0.657732 network latency _191897_/CLK
 ---------------
-0.680014 0.709580 latency
-        0.029566 skew
+0.621345 0.657732 latency
+        0.036387 skew
 
 
 
 ===========================================================================
 report_clock_min_period
 ============================================================================
-jtag_clk period_min = 4.01 fmax = 249.43
+jtag_clk period_min = 4.42 fmax = 226.19

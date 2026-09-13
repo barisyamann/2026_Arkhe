@@ -46,12 +46,41 @@ def main():
 
     # Bu kosumda URETILMEYEN dosyalar manifestten DUSURULUR.
     # Sessizce atlanmaz - asagida ayrica raporlanir.
-    #   soc_top_lef_def.spice : K_diyot'ta LEF/DEF tabanli spice
-    #       cikarimi yapilmadi (GDS tabanli yapildi).
+    #
+    #   S_hold2 (13 Eylul 2026) SPICE cikarimini LEF/DEF gorunumunden
+    #   yapar (MAGIC_EXT_USE_GDS=false) ve LVS'i o netlist uzerinde
+    #   kosar -> "Circuits match uniquely".
+    #
+    #   Onceki K_diyot kosusunda ise GDS tabanli ek bir cikarim ve ona
+    #   dayali ek bir LVS calismasi vardi. S_hold2'de bu EK calisma
+    #   TEKRARLANMADI, dolayisiyla su dosyalar uretilmez:
+    #       results/spice/soc_top_gds.spice
+    #       reports/lvs_gds/*         (ek GDS-LVS raporlari)
+    #   Bu, standart akisin istedigi LVS'nin eksik oldugu anlamina
+    #   GELMEZ; yalnizca GDS ici transistor duzeyinde EK bir dogrulama
+    #   iddia edilmedigini belirtir. Ayrinti: asic/README.md §12.
+    #
     #   *.mcs : FPGA flash imajlari; buyuk binary olduklari icin
     #       depoda tutulmuyor, ASIC teslimiyle ilgisiz.
     DUSUR = (
+
+        # S_final2 (13 Eylul 2026): SPICE artik GDS'ten cikariliyor
+        # (MAGIC_EXT_USE_GDS=true) ve adi soc_top.spice'dir.
+        # Eski LEF/DEF tabanli ad artik uretilmez.
         "asic/results/spice/soc_top_lef_def.spice",
+        "asic/reports/lvs_gds/env.tcl",
+        "asic/reports/lvs_gds/extract.log",
+        "asic/reports/lvs_gds/lvs.netgen.json",
+        "asic/reports/lvs_gds/lvs.netgen.rpt",
+        "asic/reports/lvs_gds/lvs_script.lvs",
+        "asic/reports/lvs_gds/netgen.log",
+        "asic/reports/lvs_gds/netgen_env.tcl",
+        "asic/reports/lvs_gds/run.py",
+        "asic/reports/lvs_gds/status.json",
+        # Eski d45_anten2 GitHub Release kaydi - bu teslimde harici
+        # arsiv YOK, tum ciktilar depo icinde (asic/README.md 12.1).
+        "provenance/release_assets.json",
+        "d45_anten2-delivery.tar.gz.sha256",
         "fpga/JURI_FPGA_TESTI/arkhe_jury.mcs",
         "fpga/nexys_demo_20260908/firmware/build/arkhe_demo_flash.mcs",
     )

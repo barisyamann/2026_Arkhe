@@ -1,0 +1,4648 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Xcrg Code Coverage Report - File</title>	
+<link type="text/css" rel="stylesheet" href="cssCodeCov/file.css">
+
+<!--script type="text/javascript" src=".js/.stickyheader.js"></script-->  
+
+</head>
+
+
+<body>
+
+<div class='header'>
+<a  class='logo'>  </a>
+<div class='header-right'>
+<a href='dashboard.html'>Dashboard</a>
+<a href='files.html'>Files</a>
+<a href='modules.html'>Modules</a>
+</div>
+</div>
+<br clear=all>
+
+<div class=fader>
+
+<div class = fileHTMLlayout>
+
+<div class='fileSummary'>
+<font size='2' face='verdana' padding-left:'2px'><b> File Summary of C:/Users/ybari/2026_Arkhe/rtl/Memory/sram_module.sv </b></font>
+<br clear=all>
+<br clear=all>
+<font face='arial' color=black style='font-size: 12px'>
+<table class='fileSummaryTable'>
+<tr>
+<td class='fileSummaryTable' bgcolor='#BCC7CC' width='50px'> File ID </td>
+<td class='fileSummaryTable' bgcolor='#BCC7CC' width='60px'> Modules Count </td>
+<td class='fileSummaryTable' bgcolor='#BCC7CC' width='100px'> Total Instances Count </td>
+<td class='fileSummaryTable' bgcolor='#BCC7CC' width='80px'> Total Lines</td>
+<td class='fileSummaryTable' bgcolor='#BCC7CC' width='80px'> Total Statements</td>
+<td class='fileSummaryTable' bgcolor='#BCC7CC' width='80px'> Statement Coverage Score</td>
+<td class='fileSummaryTable' bgcolor='#BCC7CC' width='70px'> Show Statement Coverage </td>
+<td class='fileSummaryTable' bgcolor='#BCC7CC' width='80px'> Branch Coverage Score</td>
+<td class='fileSummaryTable' bgcolor='#BCC7CC' width='70px'> Show Branch Coverage </td>
+<td class='fileSummaryTable' bgcolor='#BCC7CC' width='80px'> Condition Coverage Score</td>
+<td class='fileSummaryTable' bgcolor='#BCC7CC' width='70px'> Show Condition Coverage </td>
+<td class='fileSummaryTable' bgcolor='#BCC7CC' width='80px'> Toggle Coverage Score</td>
+<td class='fileSummaryTable' bgcolor='#BCC7CC' width='70px'> Show Toggle Coverage </td>
+</tr>
+<tr>
+<td class='fileSummaryTable'>2</td>
+<td class='fileSummaryTable'>1</td>
+<td class='fileSummaryTable'>3</td>
+<td class='fileSummaryTable'>51</td>
+<td class='fileSummaryTable'>55</td>
+<td class='fileSummaryTable'>98.1818</td>
+<td class='fileSummaryTable' bgcolor='#FFFFFF' align='center'>
+<label class = 'fileLineCovContainer'>
+<input type='checkbox' id='checkbox_file_linecov' onclick="checkdisplay('checkbox_file_linecov', 'file_linecov');
+openFileContent('button_file_linecov');">
+<span class='fileLineCovCheckmark'> </span> </label>
+</td>
+<td class='fileSummaryTable'>93.1034</td>
+<td class='fileSummaryTable' bgcolor='#FFFFFF' align='center'>
+<label class = 'fileBranchCovContainer'>
+<input type='checkbox' id='checkbox_file_branchcov' onclick="checkdisplay('checkbox_file_branchcov', 'file_branchcov');
+openFileContent('button_file_branchcov');">
+<span class='fileBranchCovCheckmark'> </span> </label>
+</td>
+<td class='fileSummaryTable'>87.5</td>
+<td class='fileSummaryTable' bgcolor='#FFFFFF' align='center'>
+<label class = 'fileCondCovContainer'>
+<input type='checkbox' id='checkbox_file_condcov' onclick="checkdisplay('checkbox_file_condcov', 'file_condcov');
+openFileContent('button_file_condcov');">
+<span class='fileCondCovCheckmark'> </span> </label>
+</td>
+<td class='fileSummaryTable'>38.49</td>
+<td class='fileSummaryTable' bgcolor='#FFFFFF' align='center'>
+<label class = 'fileToggleCovContainer'>
+<input type='checkbox' id='checkbox_file_togglecov' onclick="checkdisplay('checkbox_file_togglecov', 'file_togglecov');
+openFileContent('button_file_togglecov');">
+<span class='fileToggleCovCheckmark'> </span> </label>
+</td>
+</tr>
+</table>
+</font>
+</div>
+<hr>
+<div class ='linesSection' style='padding-left:20px; padding-right:20px;'>
+<font face='arial' color=black style='font-size: 14px'>
+<div style='display:none' id='file_linecov'>
+<button class='fileCollapsible' id='button_file_linecov'> <font size='4' color=#009933> &#9776; </font>
+ Statement Coverage of File 2 : C:/Users/ybari/2026_Arkhe/rtl/Memory/sram_module.sv</button> 
+<div class='fileContent'>
+<br clear=all>
+<font size='2' face='arial' style='padding-left:6px'> Statement Coverage Summary for File : C:/Users/ybari/2026_Arkhe/rtl/Memory/sram_module.sv</font>
+<br clear=all>
+<table class='fileScoreTable'>
+<tr>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Total Statements </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Covered Statements </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Uncovered Statements </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Statement Coverage Score </th>
+</tr>
+<tr>
+<td class='fileScoreTable'>55</td>
+<td class='fileScoreTable' bgcolor='#FFFFC2'>54</td>
+<td class='fileScoreTable' bgcolor='#FFD2D2'>1</td>
+<td class='fileScoreTable' bgcolor='#98FF98'>98.1818</td>
+</tr>
+</table>
+<br clear=all>
+<div class='lineCoverageTable'>
+<table class='lineTable'>
+<tr>
+<th class='lineTable' style='background-color:#ccffff; line-height:0;' width='80px'> LineNumber </th>
+<th class='lineTable' style='background-color:#FFEB99; line-height:0;'> LineContent </th>
+<th class='lineTable' style='background-color:#80FFBF; line-height:1;' width='140px'> Execution Count </th>
+<th class='lineTable' style='background-color:#FFE6E6; line-height:1;' width='140px'> Num Of Statements </th>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>1</td>
+<td class='lineTable'> <pre class='codegrey'>`timescale 1ns / 1ps</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>2</td>
+<td class='lineTable'> <pre class='codegrey'>// Description: Parametric 8 kB SRAM module with a standard AXI4-Lite Slave Interface.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>3</td>
+<td class='lineTable'> <pre class='codegrey'>//              Supports 4-bit write strobes (byte write enable) for BRAM inference in Vivado.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>4</td>
+<td class='lineTable'> <pre class='codegrey'>//              Refactored to separate RAM array logic from asynchronous resets.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>5</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>6</td>
+<td class='lineTable'> <pre class='codegrey'>module sram_module #(</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>7</td>
+<td class='lineTable'> <pre class='codegrey'>    parameter int AXI_ADDR_W = 32,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>8</td>
+<td class='lineTable'> <pre class='codegrey'>    parameter int AXI_DATA_W = 32,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>9</td>
+<td class='lineTable'> <pre class='codegrey'>    parameter int RAM_DEPTH  = 2048 // 2048 words * 4 bytes = 8 kB</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>10</td>
+<td class='lineTable'> <pre class='codegrey'>)(</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>11</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    clk,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>12</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    rst_n,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>13</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>14</td>
+<td class='lineTable'> <pre class='codegrey'>    // --- AXI4-Lite Slave Arayüzü ---</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>15</td>
+<td class='lineTable'> <pre class='codegrey'>    // Yazma Adresi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>16</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic [AXI_ADDR_W-1:0]   s_axil_awaddr,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>17</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    s_axil_awvalid,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>18</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic                    s_axil_awready,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>19</td>
+<td class='lineTable'> <pre class='codegrey'>    // Yazma Verisi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>20</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic [AXI_DATA_W-1:0]   s_axil_wdata,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>21</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic [3:0]              s_axil_wstrb,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>22</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    s_axil_wvalid,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>23</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic                    s_axil_wready,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>24</td>
+<td class='lineTable'> <pre class='codegrey'>    // Yazma Yanıtı</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>25</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic [1:0]              s_axil_bresp,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>26</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic                    s_axil_bvalid,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>27</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    s_axil_bready,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>28</td>
+<td class='lineTable'> <pre class='codegrey'>    // Okuma Adresi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>29</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic [AXI_ADDR_W-1:0]   s_axil_araddr,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>30</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    s_axil_arvalid,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>31</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic                    s_axil_arready,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>32</td>
+<td class='lineTable'> <pre class='codegrey'>    // Okuma Verisi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>33</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic [AXI_DATA_W-1:0]   s_axil_rdata,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>34</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic [1:0]              s_axil_rresp,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>35</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic                    s_axil_rvalid,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>36</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    s_axil_rready</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>37</td>
+<td class='lineTable'> <pre class='codegrey'>);</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>38</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>39</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>40</td>
+<td class='lineTable'> <pre class='codegrey'>    // AXI El Sıkışma Durum Kontrolleri</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>41</td>
+<td class='lineTable'> <pre class='codegrey'>    logic aw_active;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>42</td>
+<td class='lineTable'> <pre class='codegrey'>    logic w_active;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>43</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [AXI_ADDR_W-1:0] aw_addr_reg;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>44</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>45</td>
+<td class='lineTable'> <pre class='codegrey'>    // W KANALI VERISI EL SIKISMASINDA KAYDEDILIR  (10 Eylul 2026)</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>46</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>47</td>
+<td class='lineTable'> <pre class='codegrey'>    // NEDEN</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>48</td>
+<td class='lineTable'> <pre class='codegrey'>    //   Once yalnizca `w_active` bayragi kuruluyordu; WDATA/WSTRB</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>49</td>
+<td class='lineTable'> <pre class='codegrey'>    //   hicbir yere kaydedilmiyordu. Fiziksel yazma ise</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>50</td>
+<td class='lineTable'> <pre class='codegrey'>    //       wr_en = aw_active && w_active && !bvalid</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>51</td>
+<td class='lineTable'> <pre class='codegrey'>    //   kosuluyla CANLI s_axil_wdata/wstrb sinyallerini ornekliyordu.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>52</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>53</td>
+<td class='lineTable'> <pre class='codegrey'>    //   AXI4-Lite'ta W ve AW kanallari BAGIMSIZDIR. W once gelirse el</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>54</td>
+<td class='lineTable'> <pre class='codegrey'>    //   sikismasi biter, WREADY duser ve master o andan itibaren</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>55</td>
+<td class='lineTable'> <pre class='codegrey'>    //   WDATA'yi degistirmekte SERBESTTIR. AW bir cevrim sonra gelince</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>56</td>
+<td class='lineTable'> <pre class='codegrey'>    //   wr_en yukselir ve artik DEGISMIS veri yazilir.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>57</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>58</td>
+<td class='lineTable'> <pre class='codegrey'>    //   Adres tarafinda bu zaten dogru yapiliyordu (aw_addr_reg);</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>59</td>
+<td class='lineTable'> <pre class='codegrey'>    //   veri tarafindaki eksiklik bir asimetriydi.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>60</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [AXI_DATA_W-1:0] w_data_reg;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>61</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [3:0]            w_strb_reg;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>62</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>63</td>
+<td class='lineTable'> <pre class='codegrey'>    localparam logic [1:0] RESP_OKAY = 2'b00;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>64</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>65</td>
+<td class='lineTable'> <pre class='codegrey'>    // --- AXI Yazma Kontrol Yazmaçları (Async reset içerir) ---</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>66</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk or negedge rst_n) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>67</td>
+<td class='lineTable'> <pre class='codegreen'>        if (!rst_n) begin</pre> </td>
+<td class='lineTable'>844</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>68</td>
+<td class='lineTable'> <pre class='codegreen'>            aw_active      &lt= 1'b0;</pre> </td>
+<td class='lineTable'>104</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>69</td>
+<td class='lineTable'> <pre class='codegreen'>            w_active       &lt= 1'b0;</pre> </td>
+<td class='lineTable'>104</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>70</td>
+<td class='lineTable'> <pre class='codegreen'>            aw_addr_reg    &lt= '0;</pre> </td>
+<td class='lineTable'>104</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>71</td>
+<td class='lineTable'> <pre class='codegreen'>            w_data_reg     &lt= '0;</pre> </td>
+<td class='lineTable'>104</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>72</td>
+<td class='lineTable'> <pre class='codegreen'>            w_strb_reg     &lt= '0;</pre> </td>
+<td class='lineTable'>104</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>73</td>
+<td class='lineTable'> <pre class='codegreen'>            s_axil_awready &lt= 1'b0;</pre> </td>
+<td class='lineTable'>104</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>74</td>
+<td class='lineTable'> <pre class='codegreen'>            s_axil_wready  &lt= 1'b0;</pre> </td>
+<td class='lineTable'>104</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>75</td>
+<td class='lineTable'> <pre class='codegreen'>            s_axil_bvalid  &lt= 1'b0;</pre> </td>
+<td class='lineTable'>104</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>76</td>
+<td class='lineTable'> <pre class='codegreen'>            s_axil_bresp   &lt= RESP_OKAY;</pre> </td>
+<td class='lineTable'>104</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>77</td>
+<td class='lineTable'> <pre class='codegrey'>        end else begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>78</td>
+<td class='lineTable'> <pre class='codegrey'>            // Adres handshake</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>79</td>
+<td class='lineTable'> <pre class='codegreen'>            if (s_axil_awvalid && s_axil_awready) begin</pre> </td>
+<td class='lineTable'>828</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>80</td>
+<td class='lineTable'> <pre class='codegreen'>                aw_active      &lt= 1'b1;</pre> </td>
+<td class='lineTable'>71</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>81</td>
+<td class='lineTable'> <pre class='codegreen'>                aw_addr_reg    &lt= s_axil_awaddr;</pre> </td>
+<td class='lineTable'>71</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>82</td>
+<td class='lineTable'> <pre class='codegreen'>                s_axil_awready &lt= 1'b0;</pre> </td>
+<td class='lineTable'>71</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>83</td>
+<td class='lineTable'> <pre class='codegreen'>            end else if (!aw_active) begin</pre> </td>
+<td class='lineTable'>803</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>84</td>
+<td class='lineTable'> <pre class='codegreen'>                s_axil_awready &lt= s_axil_awvalid;</pre> </td>
+<td class='lineTable'>775</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>85</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>86</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>87</td>
+<td class='lineTable'> <pre class='codegrey'>            // Veri handshake</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>88</td>
+<td class='lineTable'> <pre class='codegreen'>            if (s_axil_wvalid && s_axil_wready) begin</pre> </td>
+<td class='lineTable'>828</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>89</td>
+<td class='lineTable'> <pre class='codegreen'>                w_active      &lt= 1'b1;</pre> </td>
+<td class='lineTable'>94</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>90</td>
+<td class='lineTable'> <pre class='codegreen'>                w_data_reg    &lt= s_axil_wdata;   // el sikismasinda YAKALA</pre> </td>
+<td class='lineTable'>94</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>91</td>
+<td class='lineTable'> <pre class='codegreen'>                w_strb_reg    &lt= s_axil_wstrb;</pre> </td>
+<td class='lineTable'>94</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>92</td>
+<td class='lineTable'> <pre class='codegreen'>                s_axil_wready &lt= 1'b0;</pre> </td>
+<td class='lineTable'>94</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>93</td>
+<td class='lineTable'> <pre class='codegreen'>            end else if (!w_active) begin</pre> </td>
+<td class='lineTable'>803</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>94</td>
+<td class='lineTable'> <pre class='codegreen'>                s_axil_wready  &lt= s_axil_wvalid;</pre> </td>
+<td class='lineTable'>774</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>95</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>96</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>97</td>
+<td class='lineTable'> <pre class='codegrey'>            // Yazma işleminin tamamlanması</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>98</td>
+<td class='lineTable'> <pre class='codegreen'>            if (aw_active && w_active && !s_axil_bvalid) begin</pre> </td>
+<td class='lineTable'>828</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>99</td>
+<td class='lineTable'> <pre class='codegreen'>                aw_active     &lt= 1'b0;</pre> </td>
+<td class='lineTable'>94</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>100</td>
+<td class='lineTable'> <pre class='codegreen'>                w_active      &lt= 1'b0;</pre> </td>
+<td class='lineTable'>94</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>101</td>
+<td class='lineTable'> <pre class='codegreen'>                s_axil_bvalid &lt= 1'b1;</pre> </td>
+<td class='lineTable'>94</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>102</td>
+<td class='lineTable'> <pre class='codegreen'>                s_axil_bresp  &lt= RESP_OKAY;</pre> </td>
+<td class='lineTable'>94</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>103</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>104</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>105</td>
+<td class='lineTable'> <pre class='codegrey'>            // Yanıt tamamlama</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>106</td>
+<td class='lineTable'> <pre class='codegreen'>            if (s_axil_bvalid && s_axil_bready) begin</pre> </td>
+<td class='lineTable'>828</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>107</td>
+<td class='lineTable'> <pre class='codegreen'>                s_axil_bvalid &lt= 1'b0;</pre> </td>
+<td class='lineTable'>25</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>108</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>109</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>110</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>111</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>112</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>113</td>
+<td class='lineTable'> <pre class='codegrey'>    // ASIC: accept one read, capture the falling-edge SRAM output at</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>114</td>
+<td class='lineTable'> <pre class='codegrey'>    // the next rising edge, then advertise RVALID with registered data.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>115</td>
+<td class='lineTable'> <pre class='codegrey'>    // Keep the response stable until RREADY. FPGA behavior is unchanged.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>116</td>
+<td class='lineTable'> <pre class='codegrey'>`ifdef USE_SRAM_MACRO</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>117</td>
+<td class='lineTable'> <pre class='codegrey'>    logic macro_read_pending;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>118</td>
+<td class='lineTable'> <pre class='codegrey'>    assign s_axil_arready = rst_n && !macro_read_pending && !s_axil_rvalid;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>119</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk or negedge rst_n) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>120</td>
+<td class='lineTable'> <pre class='codegrey'>        if (!rst_n) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>121</td>
+<td class='lineTable'> <pre class='codegrey'>            macro_read_pending &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>122</td>
+<td class='lineTable'> <pre class='codegrey'>            s_axil_rvalid &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>123</td>
+<td class='lineTable'> <pre class='codegrey'>            s_axil_rresp &lt= RESP_OKAY;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>124</td>
+<td class='lineTable'> <pre class='codegrey'>        end else begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>125</td>
+<td class='lineTable'> <pre class='codegrey'>            macro_read_pending &lt= s_axil_arvalid && s_axil_arready;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>126</td>
+<td class='lineTable'> <pre class='codegrey'>            if (macro_read_pending) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>127</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_rvalid &lt= 1'b1;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>128</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_rresp &lt= RESP_OKAY;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>129</td>
+<td class='lineTable'> <pre class='codegrey'>            end else if (s_axil_rvalid && s_axil_rready) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>130</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_rvalid &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>131</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>132</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>133</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>134</td>
+<td class='lineTable'> <pre class='codegrey'>`else</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>135</td>
+<td class='lineTable'> <pre class='codegrey'>    // --- AXI Okuma Kontrol Yazmaçları (Async reset içerir) ---</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>136</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk or negedge rst_n) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>137</td>
+<td class='lineTable'> <pre class='codegreen'>        if (!rst_n) begin</pre> </td>
+<td class='lineTable'>844</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>138</td>
+<td class='lineTable'> <pre class='codegreen'>            s_axil_arready &lt= 1'b0;</pre> </td>
+<td class='lineTable'>38</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>139</td>
+<td class='lineTable'> <pre class='codegreen'>            s_axil_rvalid  &lt= 1'b0;</pre> </td>
+<td class='lineTable'>38</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>140</td>
+<td class='lineTable'> <pre class='codegreen'>            s_axil_rresp   &lt= RESP_OKAY;</pre> </td>
+<td class='lineTable'>38</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>141</td>
+<td class='lineTable'> <pre class='codegrey'>        end else begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>142</td>
+<td class='lineTable'> <pre class='codegreen'>            if (s_axil_arvalid && !s_axil_rvalid) begin</pre> </td>
+<td class='lineTable'>828</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>143</td>
+<td class='lineTable'> <pre class='codegreen'>                s_axil_arready &lt= 1'b1;</pre> </td>
+<td class='lineTable'>46</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>144</td>
+<td class='lineTable'> <pre class='codegreen'>                s_axil_rvalid  &lt= 1'b1;</pre> </td>
+<td class='lineTable'>46</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>145</td>
+<td class='lineTable'> <pre class='codegreen'>                s_axil_rresp   &lt= RESP_OKAY;</pre> </td>
+<td class='lineTable'>46</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>146</td>
+<td class='lineTable'> <pre class='codegrey'>            end else begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>147</td>
+<td class='lineTable'> <pre class='codegreen'>                s_axil_arready &lt= 1'b0;</pre> </td>
+<td class='lineTable'>812</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>148</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>149</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>150</td>
+<td class='lineTable'> <pre class='codegrey'>            // Okuma kanalı el sıkışması</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>151</td>
+<td class='lineTable'> <pre class='codegreen'>            if (s_axil_rvalid && s_axil_rready) begin</pre> </td>
+<td class='lineTable'>828</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>152</td>
+<td class='lineTable'> <pre class='codegreen'>                s_axil_rvalid &lt= 1'b0;</pre> </td>
+<td class='lineTable'>16</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>153</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>154</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>155</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>156</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>157</td>
+<td class='lineTable'> <pre class='codegrey'>`endif</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>158</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>159</td>
+<td class='lineTable'> <pre class='codegrey'>    // =========================================================================</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>160</td>
+<td class='lineTable'> <pre class='codegrey'>    // Bellek gerceklemesi - ortak sinyaller</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>161</td>
+<td class='lineTable'> <pre class='codegrey'>    // =========================================================================</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>162</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [31:0]                  ram_rdata;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>163</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [$clog2(RAM_DEPTH)-1:0] raddr;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>164</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [$clog2(RAM_DEPTH)-1:0] waddr;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>165</td>
+<td class='lineTable'> <pre class='codegrey'>    logic                         wr_en;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>166</td>
+<td class='lineTable'> <pre class='codegrey'>    logic                         rd_en;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>167</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>168</td>
+<td class='lineTable'> <pre class='codegrey'>    assign raddr = s_axil_araddr[$clog2(RAM_DEPTH)+1 : 2];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>169</td>
+<td class='lineTable'> <pre class='codegrey'>    assign waddr = aw_addr_reg  [$clog2(RAM_DEPTH)+1 : 2];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>170</td>
+<td class='lineTable'> <pre class='codegrey'>    assign wr_en = aw_active && w_active && !s_axil_bvalid;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>171</td>
+<td class='lineTable'> <pre class='codegrey'>`ifdef USE_SRAM_MACRO</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>172</td>
+<td class='lineTable'> <pre class='codegrey'>    assign rd_en = s_axil_arvalid && s_axil_arready;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>173</td>
+<td class='lineTable'> <pre class='codegrey'>`else</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>174</td>
+<td class='lineTable'> <pre class='codegrey'>    assign rd_en = s_axil_arvalid && !s_axil_rvalid;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>175</td>
+<td class='lineTable'> <pre class='codegrey'>`endif</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>176</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>177</td>
+<td class='lineTable'> <pre class='codegrey'>    assign s_axil_rdata = ram_rdata;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>178</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>179</td>
+<td class='lineTable'> <pre class='codegrey'>`ifdef USE_SRAM_MACRO</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>180</td>
+<td class='lineTable'> <pre class='codegrey'>    // =========================================================================</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>181</td>
+<td class='lineTable'> <pre class='codegrey'>    // ASIC GERCEKLEMESI - sky130 SRAM makrolari</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>182</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>183</td>
+<td class='lineTable'> <pre class='codegrey'>    // Makro: sky130_sram_2kbyte_1rw1r_32x512_8  (512 kelime x 32 bit)</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>184</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>185</td>
+<td class='lineTable'> <pre class='codegrey'>    // Bu modul yazma ve okumayi AYRI AXI kanallarindan yapiyor; dolayisiyla</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>186</td>
+<td class='lineTable'> <pre class='codegrey'>    // 1RW+1R makroya dogal olarak oturuyor:</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>187</td>
+<td class='lineTable'> <pre class='codegrey'>    //     Port 0 (RW) -&gt yazmalar</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>188</td>
+<td class='lineTable'> <pre class='codegrey'>    //     Port 1 (R)  -&gt okumalar</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>189</td>
+<td class='lineTable'> <pre class='codegrey'>    // Port 0'in dout0 cikisi kullanilmaz.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>190</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>191</td>
+<td class='lineTable'> <pre class='codegrey'>    // 2048 kelime = 4 makro:</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>192</td>
+<td class='lineTable'> <pre class='codegrey'>    //     addr[10:9] -&gt makro secimi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>193</td>
+<td class='lineTable'> <pre class='codegrey'>    //     addr[8:0]  -&gt makro ici adres</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>194</td>
+<td class='lineTable'> <pre class='codegrey'>    // =========================================================================</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>195</td>
+<td class='lineTable'> <pre class='codegrey'>    localparam int MACRO_WORDS = 512;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>196</td>
+<td class='lineTable'> <pre class='codegrey'>    localparam int MACRO_AW    = 9;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>197</td>
+<td class='lineTable'> <pre class='codegrey'>    localparam int MACRO_COUNT = RAM_DEPTH / MACRO_WORDS;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>198</td>
+<td class='lineTable'> <pre class='codegrey'>    localparam int SEL_W       = $clog2(MACRO_COUNT);</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>199</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>200</td>
+<td class='lineTable'> <pre class='codegrey'>    initial begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>201</td>
+<td class='lineTable'> <pre class='codegrey'>        if (RAM_DEPTH % MACRO_WORDS != 0) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>202</td>
+<td class='lineTable'> <pre class='codegrey'>            $error("RAM_DEPTH (%0d) makro kelime sayisinin kati olmali (%0d)",</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>203</td>
+<td class='lineTable'> <pre class='codegrey'>                   RAM_DEPTH, MACRO_WORDS);</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>204</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>205</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>206</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>207</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [SEL_W-1:0]    wsel, rsel;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>208</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [MACRO_AW-1:0] wmaddr, rmaddr;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>209</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>210</td>
+<td class='lineTable'> <pre class='codegrey'>    assign wsel   = waddr[$clog2(RAM_DEPTH)-1 : MACRO_AW];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>211</td>
+<td class='lineTable'> <pre class='codegrey'>    assign wmaddr = waddr[MACRO_AW-1:0];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>212</td>
+<td class='lineTable'> <pre class='codegrey'>    assign rsel   = raddr[$clog2(RAM_DEPTH)-1 : MACRO_AW];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>213</td>
+<td class='lineTable'> <pre class='codegrey'>    assign rmaddr = raddr[MACRO_AW-1:0];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>214</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>215</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [31:0] dout_r [MACRO_COUNT];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>216</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>217</td>
+<td class='lineTable'> <pre class='codegrey'>    genvar gi;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>218</td>
+<td class='lineTable'> <pre class='codegrey'>    generate</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>219</td>
+<td class='lineTable'> <pre class='codegrey'>        for (gi = 0; gi &lt MACRO_COUNT; gi = gi + 1) begin : g_sram</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>220</td>
+<td class='lineTable'> <pre class='codegrey'>            logic sec_w, sec_r;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>221</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>222</td>
+<td class='lineTable'> <pre class='codegrey'>            assign sec_w = wr_en && (wsel == gi[SEL_W-1:0]);</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>223</td>
+<td class='lineTable'> <pre class='codegrey'>            assign sec_r = rd_en && (rsel == gi[SEL_W-1:0]);</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>224</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>225</td>
+<td class='lineTable'> <pre class='codegrey'>            // NOT: VERBOSE varsayilani makro modelimizde 0 yapildi;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>226</td>
+<td class='lineTable'> <pre class='codegrey'>            // burada parametre gecersiz kilinmiyor cunku Verilator</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>227</td>
+<td class='lineTable'> <pre class='codegrey'>            // lint sirasinda makro BLACKBOX'tir ve parametresi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>228</td>
+<td class='lineTable'> <pre class='codegrey'>            // cozumlenemez.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>229</td>
+<td class='lineTable'> <pre class='codegrey'>            sky130_sram_2kbyte_1rw1r_32x512_8 u_macro (</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>230</td>
+<td class='lineTable'> <pre class='codegrey'>                // GUC PINLERI BAGLANMIYOR.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>231</td>
+<td class='lineTable'> <pre class='codegrey'>                //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>232</td>
+<td class='lineTable'> <pre class='codegrey'>                // vccd1/vssd1 makro modelinde 'inout' tipindedir. Sabit deger</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>233</td>
+<td class='lineTable'> <pre class='codegrey'>                // baglamak elektriksel kisa devredir; Verilator bunu dogru</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>234</td>
+<td class='lineTable'> <pre class='codegrey'>                // sekilde hata sayiyor:</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>235</td>
+<td class='lineTable'> <pre class='codegrey'>                //   %Error-PORTSHORT: Output port is connected to a constant pin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>236</td>
+<td class='lineTable'> <pre class='codegrey'>                //   %Error-UNSUPPORTED: Unsupported tristate port expression</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>237</td>
+<td class='lineTable'> <pre class='codegrey'>                //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>238</td>
+<td class='lineTable'> <pre class='codegrey'>                // ASIC akisinda makro guc baglantisi RTL'de degil, PDN</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>239</td>
+<td class='lineTable'> <pre class='codegrey'>                // (Power Distribution Network) adiminda fiziksel olarak</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>240</td>
+<td class='lineTable'> <pre class='codegrey'>                // yapilir. Simulasyonda ise USE_POWER_PINS tanimsiz oldugu</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>241</td>
+<td class='lineTable'> <pre class='codegrey'>                // icin bu portlar zaten yoktur.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>242</td>
+<td class='lineTable'> <pre class='codegrey'>                // Port 0 - yalnizca yazma icin kullaniliyor</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>243</td>
+<td class='lineTable'> <pre class='codegrey'>                .clk0   (clk),</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>244</td>
+<td class='lineTable'> <pre class='codegrey'>                .csb0   (~sec_w),                 // aktif dusuk</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>245</td>
+<td class='lineTable'> <pre class='codegrey'>                .web0   (~sec_w),                 // aktif dusuk</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>246</td>
+<td class='lineTable'> <pre class='codegrey'>                .wmask0 (w_strb_reg),            // el sikismasinda kaydedildi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>247</td>
+<td class='lineTable'> <pre class='codegrey'>                .addr0  (wmaddr),</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>248</td>
+<td class='lineTable'> <pre class='codegrey'>                .din0   (w_data_reg),            // el sikismasinda kaydedildi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>249</td>
+<td class='lineTable'> <pre class='codegrey'>                .dout0  (),                       // kullanilmiyor</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>250</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>251</td>
+<td class='lineTable'> <pre class='codegrey'>                // Port 1 - okuma</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>252</td>
+<td class='lineTable'> <pre class='codegrey'>                .clk1   (clk),</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>253</td>
+<td class='lineTable'> <pre class='codegrey'>                .csb1   (~sec_r),</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>254</td>
+<td class='lineTable'> <pre class='codegrey'>                .addr1  (rmaddr),</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>255</td>
+<td class='lineTable'> <pre class='codegrey'>                .dout1  (dout_r[gi])</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>256</td>
+<td class='lineTable'> <pre class='codegrey'>            );</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>257</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>258</td>
+<td class='lineTable'> <pre class='codegrey'>            // Simulasyonda X/U onlemek icin makro bellegini sifirla.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>259</td>
+<td class='lineTable'> <pre class='codegrey'>            //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>260</td>
+<td class='lineTable'> <pre class='codegrey'>            // SIM_MACRO_INIT ile korunuyor: bu blok makronun IC yapisina</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>261</td>
+<td class='lineTable'> <pre class='codegrey'>            // (u_macro.mem) erisiyor. ASIC akisinda ve Verilator lint'te</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>262</td>
+<td class='lineTable'> <pre class='codegrey'>            // makro BLACKBOX'tir, ici gorunmez ve bu referans cozumlenemez.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>263</td>
+<td class='lineTable'> <pre class='codegrey'>            // Yalnizca simulasyonda tanimlanir.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>264</td>
+<td class='lineTable'> <pre class='codegrey'>`ifdef SIM_MACRO_INIT</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>265</td>
+<td class='lineTable'> <pre class='codegrey'>            initial begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>266</td>
+<td class='lineTable'> <pre class='codegrey'>                for (int i = 0; i &lt MACRO_WORDS; i = i + 1)</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>267</td>
+<td class='lineTable'> <pre class='codegrey'>                    u_macro.mem[i] = 32'h0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>268</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>269</td>
+<td class='lineTable'> <pre class='codegrey'>`endif</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>270</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>271</td>
+<td class='lineTable'> <pre class='codegrey'>    endgenerate</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>272</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>273</td>
+<td class='lineTable'> <pre class='codegrey'>    // -------------------------------------------------------------------------</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>274</td>
+<td class='lineTable'> <pre class='codegrey'>    // Okuma coklayicisi - BIR CEVRIM GECIKMELI</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>275</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>276</td>
+<td class='lineTable'> <pre class='codegrey'>    // Makro cikisi kayitlidir; anlik rsel ile secim yapilirsa yanlis makronun</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>277</td>
+<td class='lineTable'> <pre class='codegrey'>    // cikisi alinir. Ayni tuzaga UART_RDR'de dusulmustu.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>278</td>
+<td class='lineTable'> <pre class='codegrey'>    // -------------------------------------------------------------------------</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>279</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [SEL_W-1:0] rsel_q;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>280</td>
+<td class='lineTable'> <pre class='codegrey'>    logic             rvalid_addr_q;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>281</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>282</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>283</td>
+<td class='lineTable'> <pre class='codegrey'>        rsel_q        &lt= rsel;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>284</td>
+<td class='lineTable'> <pre class='codegrey'>        rvalid_addr_q &lt= (raddr &lt RAM_DEPTH[$clog2(RAM_DEPTH)-1:0]) ||</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>285</td>
+<td class='lineTable'> <pre class='codegrey'>                         (RAM_DEPTH == (1 &lt&lt $clog2(RAM_DEPTH)));</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>286</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>287</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>288</td>
+<td class='lineTable'> <pre class='codegrey'>    // -------------------------------------------------------------------------</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>289</td>
+<td class='lineTable'> <pre class='codegrey'>    // Okuma verisi TUTULMALI</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>290</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>291</td>
+<td class='lineTable'> <pre class='codegrey'>    // Ozgun cikarimsal surumde ram_rdata bir KAYITTI ve bir sonraki okumaya</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>292</td>
+<td class='lineTable'> <pre class='codegrey'>    // kadar degerini korurdu. Ilk makro surumunde bunu kombinasyonel yaptim:</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>293</td>
+<td class='lineTable'> <pre class='codegrey'>    //     rd_en_q ? dout : 0xDEADBEEF</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>294</td>
+<td class='lineTable'> <pre class='codegrey'>    // AXI'de rready gecikirse rvalid bir cevrimden fazla yuksek kalir; o</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>295</td>
+<td class='lineTable'> <pre class='codegrey'>    // cevrimde rd_en_q dusmus olur ve master DEADBEEF okur.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>296</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>297</td>
+<td class='lineTable'> <pre class='codegrey'>    // Sonuc: yukleyici I-RAM'e yazdigi buyruklari geri okuyamadi, CPU hic</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>298</td>
+<td class='lineTable'> <pre class='codegrey'>    // baslayamadi. Ilk makro kosumu 8 hata verdi.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>299</td>
+<td class='lineTable'> <pre class='codegrey'>    // -------------------------------------------------------------------------</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>300</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [31:0] rdata_hold;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>301</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>302</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>303</td>
+<td class='lineTable'> <pre class='codegrey'>        if (macro_read_pending) rdata_hold &lt= dout_r[rsel_q];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>304</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>305</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>306</td>
+<td class='lineTable'> <pre class='codegrey'>    // No combinational SRAM-to-CPU bypass.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>307</td>
+<td class='lineTable'> <pre class='codegrey'>    assign ram_rdata = rdata_hold;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>308</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>309</td>
+<td class='lineTable'> <pre class='codegrey'>`else</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>310</td>
+<td class='lineTable'> <pre class='codegrey'>    // =========================================================================</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>311</td>
+<td class='lineTable'> <pre class='codegrey'>    // FPGA / HIZLI SIMULASYON - cikarimsal dizi (Vivado Block RAM'e esler)</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>312</td>
+<td class='lineTable'> <pre class='codegrey'>    // =========================================================================</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>313</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [31:0] ram [0:RAM_DEPTH-1];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>314</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>315</td>
+<td class='lineTable'> <pre class='codegrey'>    // --- Yazma (RESET ICERMEZ, saf BRAM cikarimi) ---</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>316</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>317</td>
+<td class='lineTable'> <pre class='codegreen'>        if (wr_en) begin</pre> </td>
+<td class='lineTable'>841</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>318</td>
+<td class='lineTable'> <pre class='codegreen'>            if (waddr &lt RAM_DEPTH) begin</pre> </td>
+<td class='lineTable'>25</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>319</td>
+<td class='lineTable'> <pre class='codegreen'>                if (w_strb_reg[0]) ram[waddr][7:0]   &lt= w_data_reg[7:0];</pre> </td>
+<td class='lineTable'>42</td>
+<td class='lineTable'>2</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>320</td>
+<td class='lineTable'> <pre class='codegreen'>                if (w_strb_reg[1]) ram[waddr][15:8]  &lt= w_data_reg[15:8];</pre> </td>
+<td class='lineTable'>40</td>
+<td class='lineTable'>2</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>321</td>
+<td class='lineTable'> <pre class='codegreen'>                if (w_strb_reg[2]) ram[waddr][23:16] &lt= w_data_reg[23:16];</pre> </td>
+<td class='lineTable'>40</td>
+<td class='lineTable'>2</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>322</td>
+<td class='lineTable'> <pre class='codegreen'>                if (w_strb_reg[3]) ram[waddr][31:24] &lt= w_data_reg[31:24];</pre> </td>
+<td class='lineTable'>40</td>
+<td class='lineTable'>2</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>323</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>324</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>325</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>326</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>327</td>
+<td class='lineTable'> <pre class='codegrey'>    // --- Okuma (RESET ICERMEZ) ---</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>328</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>329</td>
+<td class='lineTable'> <pre class='codegreen'>        if (rd_en) begin</pre> </td>
+<td class='lineTable'>841</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>330</td>
+<td class='lineTable'> <pre class='codegreen'>            if (raddr &lt RAM_DEPTH) begin</pre> </td>
+<td class='lineTable'>16</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>331</td>
+<td class='lineTable'> <pre class='codegreen'>                ram_rdata &lt= ram[raddr];</pre> </td>
+<td class='lineTable'>16</td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>332</td>
+<td class='lineTable'> <pre class='codegrey'>            end else begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'>333</td>
+<td class='lineTable'> <pre class='codered'>                ram_rdata &lt= 32'hDEADBEEF;</pre> </td>
+<td class='lineTable'> 0 </td>
+<td class='lineTable'>1</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>334</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>335</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>336</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>337</td>
+<td class='lineTable'> <pre class='codegrey'>`endif</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>338</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>339</td>
+<td class='lineTable'> <pre class='codegrey'>endmodule</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+</table>
+</div>
+<br clear=all>
+</div>
+<br clear=all>
+</div>
+</font>
+</div>
+<div class ='linesSection' style='padding-left:20px; padding-right:20px;'>
+<font face='arial' color=black style='font-size: 14px'>
+<div style='display:none' id='file_branchcov'>
+<button class='fileBranchCollapsible' id='button_file_branchcov'> <font size='4' color=#003399> &#8380; </font>
+ Branch Coverage of File 2 : C:/Users/ybari/2026_Arkhe/rtl/Memory/sram_module.sv</button> 
+<div class='fileBranchContent'>
+<br clear=all>
+<font size='2' face='arial' style='padding-left:6px'>
+Branch Coverage Summary for File : C:/Users/ybari/2026_Arkhe/rtl/Memory/sram_module.sv
+</font>
+<br clear=all>
+<table class='fileScoreTable'>
+<tr>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Total Branches </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Covered Branches </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Uncovered Branches </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Branch Coverage Score </th>
+</tr>
+<tr>
+<td class='fileScoreTable'>29</td>
+<td class='fileScoreTable'>27</td>
+<td class='fileScoreTable'>2</td>
+<td class='fileScoreTable' bgcolor='#98FF98'>93.1034</td>
+</tr>
+</table>
+<br clear=all>
+<div class='branchCoverageTable'>
+<table class='lineTable'>
+<tr>
+<th class='lineTable' style='background-color:#FFDD99; line-height:0;' width='80px'> LineNumber </th>
+<th class='lineTable' style='background-color:#FFEB99; line-height:0;'> Branch </th>
+<th class='lineTable' style='background-color:#80FFBF; line-height:1;' width='120px'> Desicion Evaluated  </th>
+<th class='lineTable' style='background-color:#FFE6E6; line-height:1;' width='140px'> TRUE/FALSE Branch Execution Count[s]  </th>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>1</td>
+<td class='lineTable'> <pre class='codegrey'>`timescale 1ns / 1ps</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>2</td>
+<td class='lineTable'> <pre class='codegrey'>// Description: Parametric 8 kB SRAM module with a standard AXI4-Lite Slave Interface.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>3</td>
+<td class='lineTable'> <pre class='codegrey'>//              Supports 4-bit write strobes (byte write enable) for BRAM inference in Vivado.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>4</td>
+<td class='lineTable'> <pre class='codegrey'>//              Refactored to separate RAM array logic from asynchronous resets.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>5</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>6</td>
+<td class='lineTable'> <pre class='codegrey'>module sram_module #(</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>7</td>
+<td class='lineTable'> <pre class='codegrey'>    parameter int AXI_ADDR_W = 32,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>8</td>
+<td class='lineTable'> <pre class='codegrey'>    parameter int AXI_DATA_W = 32,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>9</td>
+<td class='lineTable'> <pre class='codegrey'>    parameter int RAM_DEPTH  = 2048 // 2048 words * 4 bytes = 8 kB</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>10</td>
+<td class='lineTable'> <pre class='codegrey'>)(</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>11</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    clk,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>12</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    rst_n,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>13</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>14</td>
+<td class='lineTable'> <pre class='codegrey'>    // --- AXI4-Lite Slave Arayüzü ---</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>15</td>
+<td class='lineTable'> <pre class='codegrey'>    // Yazma Adresi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>16</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic [AXI_ADDR_W-1:0]   s_axil_awaddr,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>17</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    s_axil_awvalid,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>18</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic                    s_axil_awready,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>19</td>
+<td class='lineTable'> <pre class='codegrey'>    // Yazma Verisi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>20</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic [AXI_DATA_W-1:0]   s_axil_wdata,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>21</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic [3:0]              s_axil_wstrb,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>22</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    s_axil_wvalid,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>23</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic                    s_axil_wready,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>24</td>
+<td class='lineTable'> <pre class='codegrey'>    // Yazma Yanıtı</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>25</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic [1:0]              s_axil_bresp,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>26</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic                    s_axil_bvalid,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>27</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    s_axil_bready,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>28</td>
+<td class='lineTable'> <pre class='codegrey'>    // Okuma Adresi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>29</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic [AXI_ADDR_W-1:0]   s_axil_araddr,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>30</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    s_axil_arvalid,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>31</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic                    s_axil_arready,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>32</td>
+<td class='lineTable'> <pre class='codegrey'>    // Okuma Verisi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>33</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic [AXI_DATA_W-1:0]   s_axil_rdata,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>34</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic [1:0]              s_axil_rresp,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>35</td>
+<td class='lineTable'> <pre class='codegrey'>    output logic                    s_axil_rvalid,</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>36</td>
+<td class='lineTable'> <pre class='codegrey'>    input  logic                    s_axil_rready</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>37</td>
+<td class='lineTable'> <pre class='codegrey'>);</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>38</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>39</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>40</td>
+<td class='lineTable'> <pre class='codegrey'>    // AXI El Sıkışma Durum Kontrolleri</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>41</td>
+<td class='lineTable'> <pre class='codegrey'>    logic aw_active;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>42</td>
+<td class='lineTable'> <pre class='codegrey'>    logic w_active;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>43</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [AXI_ADDR_W-1:0] aw_addr_reg;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>44</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>45</td>
+<td class='lineTable'> <pre class='codegrey'>    // W KANALI VERISI EL SIKISMASINDA KAYDEDILIR  (10 Eylul 2026)</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>46</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>47</td>
+<td class='lineTable'> <pre class='codegrey'>    // NEDEN</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>48</td>
+<td class='lineTable'> <pre class='codegrey'>    //   Once yalnizca `w_active` bayragi kuruluyordu; WDATA/WSTRB</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>49</td>
+<td class='lineTable'> <pre class='codegrey'>    //   hicbir yere kaydedilmiyordu. Fiziksel yazma ise</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>50</td>
+<td class='lineTable'> <pre class='codegrey'>    //       wr_en = aw_active && w_active && !bvalid</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>51</td>
+<td class='lineTable'> <pre class='codegrey'>    //   kosuluyla CANLI s_axil_wdata/wstrb sinyallerini ornekliyordu.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>52</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>53</td>
+<td class='lineTable'> <pre class='codegrey'>    //   AXI4-Lite'ta W ve AW kanallari BAGIMSIZDIR. W once gelirse el</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>54</td>
+<td class='lineTable'> <pre class='codegrey'>    //   sikismasi biter, WREADY duser ve master o andan itibaren</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>55</td>
+<td class='lineTable'> <pre class='codegrey'>    //   WDATA'yi degistirmekte SERBESTTIR. AW bir cevrim sonra gelince</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>56</td>
+<td class='lineTable'> <pre class='codegrey'>    //   wr_en yukselir ve artik DEGISMIS veri yazilir.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>57</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>58</td>
+<td class='lineTable'> <pre class='codegrey'>    //   Adres tarafinda bu zaten dogru yapiliyordu (aw_addr_reg);</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>59</td>
+<td class='lineTable'> <pre class='codegrey'>    //   veri tarafindaki eksiklik bir asimetriydi.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>60</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [AXI_DATA_W-1:0] w_data_reg;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>61</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [3:0]            w_strb_reg;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>62</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>63</td>
+<td class='lineTable'> <pre class='codegrey'>    localparam logic [1:0] RESP_OKAY = 2'b00;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>64</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>65</td>
+<td class='lineTable'> <pre class='codegrey'>    // --- AXI Yazma Kontrol Yazmaçları (Async reset içerir) ---</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>66</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk or negedge rst_n) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>67</td>
+<td class='lineTable'> <pre class='codegreen'>        if (!rst_n) begin</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 1</b></font></td>
+<td class='lineTable'>844</td>
+<td class='lineTable'>16T 828F </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>68</td>
+<td class='lineTable'> <pre class='codegrey'>            aw_active      &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>69</td>
+<td class='lineTable'> <pre class='codegrey'>            w_active       &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>70</td>
+<td class='lineTable'> <pre class='codegrey'>            aw_addr_reg    &lt= '0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>71</td>
+<td class='lineTable'> <pre class='codegrey'>            w_data_reg     &lt= '0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>72</td>
+<td class='lineTable'> <pre class='codegrey'>            w_strb_reg     &lt= '0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>73</td>
+<td class='lineTable'> <pre class='codegrey'>            s_axil_awready &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>74</td>
+<td class='lineTable'> <pre class='codegrey'>            s_axil_wready  &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>75</td>
+<td class='lineTable'> <pre class='codegrey'>            s_axil_bvalid  &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>76</td>
+<td class='lineTable'> <pre class='codegrey'>            s_axil_bresp   &lt= RESP_OKAY;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>77</td>
+<td class='lineTable'> <pre class='codegrey'>        end else begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>78</td>
+<td class='lineTable'> <pre class='codegrey'>            // Adres handshake</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>79</td>
+<td class='lineTable'> <pre class='codegreen'>            if (s_axil_awvalid && s_axil_awready) begin</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 2</b></font></td>
+<td class='lineTable'>828</td>
+<td class='lineTable'>25T 803F </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>80</td>
+<td class='lineTable'> <pre class='codegrey'>                aw_active      &lt= 1'b1;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>81</td>
+<td class='lineTable'> <pre class='codegrey'>                aw_addr_reg    &lt= s_axil_awaddr;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>82</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_awready &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>83</td>
+<td class='lineTable'> <pre class='codegreen'>            end else if (!aw_active) begin</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 3</b></font></td>
+<td class='lineTable'>803</td>
+<td class='lineTable'>775T 28F </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable' align ='left'> <pre class='codered'> MISSING ELSE </pre> <font face='arial' color=orange style='font-size: 12px'><b> Branch 4</b></font></td>
+<td class='lineTable'> </td>
+<td class='lineTable'> 28</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>84</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_awready &lt= s_axil_awvalid;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>85</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>86</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>87</td>
+<td class='lineTable'> <pre class='codegrey'>            // Veri handshake</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>88</td>
+<td class='lineTable'> <pre class='codegreen'>            if (s_axil_wvalid && s_axil_wready) begin</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 5</b></font></td>
+<td class='lineTable'>828</td>
+<td class='lineTable'>25T 803F </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>89</td>
+<td class='lineTable'> <pre class='codegrey'>                w_active      &lt= 1'b1;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>90</td>
+<td class='lineTable'> <pre class='codegrey'>                w_data_reg    &lt= s_axil_wdata;   // el sikismasinda YAKALA</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>91</td>
+<td class='lineTable'> <pre class='codegrey'>                w_strb_reg    &lt= s_axil_wstrb;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>92</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_wready &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>93</td>
+<td class='lineTable'> <pre class='codegreen'>            end else if (!w_active) begin</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 6</b></font></td>
+<td class='lineTable'>803</td>
+<td class='lineTable'>774T 29F </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable' align ='left'> <pre class='codered'> MISSING ELSE </pre> <font face='arial' color=orange style='font-size: 12px'><b> Branch 7</b></font></td>
+<td class='lineTable'> </td>
+<td class='lineTable'> 29</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>94</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_wready  &lt= s_axil_wvalid;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>95</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>96</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>97</td>
+<td class='lineTable'> <pre class='codegrey'>            // Yazma işleminin tamamlanması</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>98</td>
+<td class='lineTable'> <pre class='codegreen'>            if (aw_active && w_active && !s_axil_bvalid) begin</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 8</b></font></td>
+<td class='lineTable'>828</td>
+<td class='lineTable'>25T 803F </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable' align ='left'> <pre class='codered'> MISSING ELSE </pre> <font face='arial' color=orange style='font-size: 12px'><b> Branch 9</b></font></td>
+<td class='lineTable'> </td>
+<td class='lineTable'> 803</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>99</td>
+<td class='lineTable'> <pre class='codegrey'>                aw_active     &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>100</td>
+<td class='lineTable'> <pre class='codegrey'>                w_active      &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>101</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_bvalid &lt= 1'b1;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>102</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_bresp  &lt= RESP_OKAY;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>103</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>104</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>105</td>
+<td class='lineTable'> <pre class='codegrey'>            // Yanıt tamamlama</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>106</td>
+<td class='lineTable'> <pre class='codegreen'>            if (s_axil_bvalid && s_axil_bready) begin</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 10</b></font></td>
+<td class='lineTable'>828</td>
+<td class='lineTable'>25T 803F </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable' align ='left'> <pre class='codered'> MISSING ELSE </pre> <font face='arial' color=orange style='font-size: 12px'><b> Branch 11</b></font></td>
+<td class='lineTable'> </td>
+<td class='lineTable'> 803</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>107</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_bvalid &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>108</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>109</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>110</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>111</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>112</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>113</td>
+<td class='lineTable'> <pre class='codegrey'>    // ASIC: accept one read, capture the falling-edge SRAM output at</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>114</td>
+<td class='lineTable'> <pre class='codegrey'>    // the next rising edge, then advertise RVALID with registered data.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>115</td>
+<td class='lineTable'> <pre class='codegrey'>    // Keep the response stable until RREADY. FPGA behavior is unchanged.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>116</td>
+<td class='lineTable'> <pre class='codegrey'>`ifdef USE_SRAM_MACRO</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>117</td>
+<td class='lineTable'> <pre class='codegrey'>    logic macro_read_pending;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>118</td>
+<td class='lineTable'> <pre class='codegrey'>    assign s_axil_arready = rst_n && !macro_read_pending && !s_axil_rvalid;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>119</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk or negedge rst_n) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>120</td>
+<td class='lineTable'> <pre class='codegrey'>        if (!rst_n) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>121</td>
+<td class='lineTable'> <pre class='codegrey'>            macro_read_pending &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>122</td>
+<td class='lineTable'> <pre class='codegrey'>            s_axil_rvalid &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>123</td>
+<td class='lineTable'> <pre class='codegrey'>            s_axil_rresp &lt= RESP_OKAY;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>124</td>
+<td class='lineTable'> <pre class='codegrey'>        end else begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>125</td>
+<td class='lineTable'> <pre class='codegrey'>            macro_read_pending &lt= s_axil_arvalid && s_axil_arready;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>126</td>
+<td class='lineTable'> <pre class='codegrey'>            if (macro_read_pending) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>127</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_rvalid &lt= 1'b1;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>128</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_rresp &lt= RESP_OKAY;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>129</td>
+<td class='lineTable'> <pre class='codegrey'>            end else if (s_axil_rvalid && s_axil_rready) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>130</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_rvalid &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>131</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>132</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>133</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>134</td>
+<td class='lineTable'> <pre class='codegrey'>`else</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>135</td>
+<td class='lineTable'> <pre class='codegrey'>    // --- AXI Okuma Kontrol Yazmaçları (Async reset içerir) ---</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>136</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk or negedge rst_n) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>137</td>
+<td class='lineTable'> <pre class='codegreen'>        if (!rst_n) begin</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 12</b></font></td>
+<td class='lineTable'>844</td>
+<td class='lineTable'>16T 828F </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>138</td>
+<td class='lineTable'> <pre class='codegrey'>            s_axil_arready &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>139</td>
+<td class='lineTable'> <pre class='codegrey'>            s_axil_rvalid  &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>140</td>
+<td class='lineTable'> <pre class='codegrey'>            s_axil_rresp   &lt= RESP_OKAY;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>141</td>
+<td class='lineTable'> <pre class='codegrey'>        end else begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>142</td>
+<td class='lineTable'> <pre class='codegreen'>            if (s_axil_arvalid && !s_axil_rvalid) begin</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 13</b></font></td>
+<td class='lineTable'>828</td>
+<td class='lineTable'>16T 812F </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>143</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_arready &lt= 1'b1;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>144</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_rvalid  &lt= 1'b1;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>145</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_rresp   &lt= RESP_OKAY;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>146</td>
+<td class='lineTable'> <pre class='codegreen'>            end else begin</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 14</b></font></td>
+<td class='lineTable'>812</td>
+<td class='lineTable'>812T </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>147</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_arready &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>148</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>149</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>150</td>
+<td class='lineTable'> <pre class='codegrey'>            // Okuma kanalı el sıkışması</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>151</td>
+<td class='lineTable'> <pre class='codegreen'>            if (s_axil_rvalid && s_axil_rready) begin</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 15</b></font></td>
+<td class='lineTable'>828</td>
+<td class='lineTable'>16T 812F </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable' align ='left'> <pre class='codered'> MISSING ELSE </pre> <font face='arial' color=orange style='font-size: 12px'><b> Branch 16</b></font></td>
+<td class='lineTable'> </td>
+<td class='lineTable'> 812</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>152</td>
+<td class='lineTable'> <pre class='codegrey'>                s_axil_rvalid &lt= 1'b0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>153</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>154</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>155</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>156</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>157</td>
+<td class='lineTable'> <pre class='codegrey'>`endif</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>158</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>159</td>
+<td class='lineTable'> <pre class='codegrey'>    // =========================================================================</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>160</td>
+<td class='lineTable'> <pre class='codegrey'>    // Bellek gerceklemesi - ortak sinyaller</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>161</td>
+<td class='lineTable'> <pre class='codegrey'>    // =========================================================================</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>162</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [31:0]                  ram_rdata;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>163</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [$clog2(RAM_DEPTH)-1:0] raddr;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>164</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [$clog2(RAM_DEPTH)-1:0] waddr;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>165</td>
+<td class='lineTable'> <pre class='codegrey'>    logic                         wr_en;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>166</td>
+<td class='lineTable'> <pre class='codegrey'>    logic                         rd_en;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>167</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>168</td>
+<td class='lineTable'> <pre class='codegrey'>    assign raddr = s_axil_araddr[$clog2(RAM_DEPTH)+1 : 2];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>169</td>
+<td class='lineTable'> <pre class='codegrey'>    assign waddr = aw_addr_reg  [$clog2(RAM_DEPTH)+1 : 2];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>170</td>
+<td class='lineTable'> <pre class='codegrey'>    assign wr_en = aw_active && w_active && !s_axil_bvalid;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>171</td>
+<td class='lineTable'> <pre class='codegrey'>`ifdef USE_SRAM_MACRO</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>172</td>
+<td class='lineTable'> <pre class='codegrey'>    assign rd_en = s_axil_arvalid && s_axil_arready;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>173</td>
+<td class='lineTable'> <pre class='codegrey'>`else</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>174</td>
+<td class='lineTable'> <pre class='codegrey'>    assign rd_en = s_axil_arvalid && !s_axil_rvalid;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>175</td>
+<td class='lineTable'> <pre class='codegrey'>`endif</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>176</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>177</td>
+<td class='lineTable'> <pre class='codegrey'>    assign s_axil_rdata = ram_rdata;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>178</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>179</td>
+<td class='lineTable'> <pre class='codegrey'>`ifdef USE_SRAM_MACRO</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>180</td>
+<td class='lineTable'> <pre class='codegrey'>    // =========================================================================</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>181</td>
+<td class='lineTable'> <pre class='codegrey'>    // ASIC GERCEKLEMESI - sky130 SRAM makrolari</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>182</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>183</td>
+<td class='lineTable'> <pre class='codegrey'>    // Makro: sky130_sram_2kbyte_1rw1r_32x512_8  (512 kelime x 32 bit)</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>184</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>185</td>
+<td class='lineTable'> <pre class='codegrey'>    // Bu modul yazma ve okumayi AYRI AXI kanallarindan yapiyor; dolayisiyla</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>186</td>
+<td class='lineTable'> <pre class='codegrey'>    // 1RW+1R makroya dogal olarak oturuyor:</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>187</td>
+<td class='lineTable'> <pre class='codegrey'>    //     Port 0 (RW) -&gt yazmalar</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>188</td>
+<td class='lineTable'> <pre class='codegrey'>    //     Port 1 (R)  -&gt okumalar</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>189</td>
+<td class='lineTable'> <pre class='codegrey'>    // Port 0'in dout0 cikisi kullanilmaz.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>190</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>191</td>
+<td class='lineTable'> <pre class='codegrey'>    // 2048 kelime = 4 makro:</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>192</td>
+<td class='lineTable'> <pre class='codegrey'>    //     addr[10:9] -&gt makro secimi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>193</td>
+<td class='lineTable'> <pre class='codegrey'>    //     addr[8:0]  -&gt makro ici adres</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>194</td>
+<td class='lineTable'> <pre class='codegrey'>    // =========================================================================</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>195</td>
+<td class='lineTable'> <pre class='codegrey'>    localparam int MACRO_WORDS = 512;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>196</td>
+<td class='lineTable'> <pre class='codegrey'>    localparam int MACRO_AW    = 9;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>197</td>
+<td class='lineTable'> <pre class='codegrey'>    localparam int MACRO_COUNT = RAM_DEPTH / MACRO_WORDS;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>198</td>
+<td class='lineTable'> <pre class='codegrey'>    localparam int SEL_W       = $clog2(MACRO_COUNT);</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>199</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>200</td>
+<td class='lineTable'> <pre class='codegrey'>    initial begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>201</td>
+<td class='lineTable'> <pre class='codegrey'>        if (RAM_DEPTH % MACRO_WORDS != 0) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>202</td>
+<td class='lineTable'> <pre class='codegrey'>            $error("RAM_DEPTH (%0d) makro kelime sayisinin kati olmali (%0d)",</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>203</td>
+<td class='lineTable'> <pre class='codegrey'>                   RAM_DEPTH, MACRO_WORDS);</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>204</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>205</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>206</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>207</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [SEL_W-1:0]    wsel, rsel;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>208</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [MACRO_AW-1:0] wmaddr, rmaddr;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>209</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>210</td>
+<td class='lineTable'> <pre class='codegrey'>    assign wsel   = waddr[$clog2(RAM_DEPTH)-1 : MACRO_AW];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>211</td>
+<td class='lineTable'> <pre class='codegrey'>    assign wmaddr = waddr[MACRO_AW-1:0];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>212</td>
+<td class='lineTable'> <pre class='codegrey'>    assign rsel   = raddr[$clog2(RAM_DEPTH)-1 : MACRO_AW];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>213</td>
+<td class='lineTable'> <pre class='codegrey'>    assign rmaddr = raddr[MACRO_AW-1:0];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>214</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>215</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [31:0] dout_r [MACRO_COUNT];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>216</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>217</td>
+<td class='lineTable'> <pre class='codegrey'>    genvar gi;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>218</td>
+<td class='lineTable'> <pre class='codegrey'>    generate</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>219</td>
+<td class='lineTable'> <pre class='codegrey'>        for (gi = 0; gi &lt MACRO_COUNT; gi = gi + 1) begin : g_sram</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>220</td>
+<td class='lineTable'> <pre class='codegrey'>            logic sec_w, sec_r;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>221</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>222</td>
+<td class='lineTable'> <pre class='codegrey'>            assign sec_w = wr_en && (wsel == gi[SEL_W-1:0]);</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>223</td>
+<td class='lineTable'> <pre class='codegrey'>            assign sec_r = rd_en && (rsel == gi[SEL_W-1:0]);</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>224</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>225</td>
+<td class='lineTable'> <pre class='codegrey'>            // NOT: VERBOSE varsayilani makro modelimizde 0 yapildi;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>226</td>
+<td class='lineTable'> <pre class='codegrey'>            // burada parametre gecersiz kilinmiyor cunku Verilator</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>227</td>
+<td class='lineTable'> <pre class='codegrey'>            // lint sirasinda makro BLACKBOX'tir ve parametresi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>228</td>
+<td class='lineTable'> <pre class='codegrey'>            // cozumlenemez.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>229</td>
+<td class='lineTable'> <pre class='codegrey'>            sky130_sram_2kbyte_1rw1r_32x512_8 u_macro (</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>230</td>
+<td class='lineTable'> <pre class='codegrey'>                // GUC PINLERI BAGLANMIYOR.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>231</td>
+<td class='lineTable'> <pre class='codegrey'>                //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>232</td>
+<td class='lineTable'> <pre class='codegrey'>                // vccd1/vssd1 makro modelinde 'inout' tipindedir. Sabit deger</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>233</td>
+<td class='lineTable'> <pre class='codegrey'>                // baglamak elektriksel kisa devredir; Verilator bunu dogru</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>234</td>
+<td class='lineTable'> <pre class='codegrey'>                // sekilde hata sayiyor:</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>235</td>
+<td class='lineTable'> <pre class='codegrey'>                //   %Error-PORTSHORT: Output port is connected to a constant pin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>236</td>
+<td class='lineTable'> <pre class='codegrey'>                //   %Error-UNSUPPORTED: Unsupported tristate port expression</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>237</td>
+<td class='lineTable'> <pre class='codegrey'>                //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>238</td>
+<td class='lineTable'> <pre class='codegrey'>                // ASIC akisinda makro guc baglantisi RTL'de degil, PDN</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>239</td>
+<td class='lineTable'> <pre class='codegrey'>                // (Power Distribution Network) adiminda fiziksel olarak</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>240</td>
+<td class='lineTable'> <pre class='codegrey'>                // yapilir. Simulasyonda ise USE_POWER_PINS tanimsiz oldugu</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>241</td>
+<td class='lineTable'> <pre class='codegrey'>                // icin bu portlar zaten yoktur.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>242</td>
+<td class='lineTable'> <pre class='codegrey'>                // Port 0 - yalnizca yazma icin kullaniliyor</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>243</td>
+<td class='lineTable'> <pre class='codegrey'>                .clk0   (clk),</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>244</td>
+<td class='lineTable'> <pre class='codegrey'>                .csb0   (~sec_w),                 // aktif dusuk</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>245</td>
+<td class='lineTable'> <pre class='codegrey'>                .web0   (~sec_w),                 // aktif dusuk</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>246</td>
+<td class='lineTable'> <pre class='codegrey'>                .wmask0 (w_strb_reg),            // el sikismasinda kaydedildi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>247</td>
+<td class='lineTable'> <pre class='codegrey'>                .addr0  (wmaddr),</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>248</td>
+<td class='lineTable'> <pre class='codegrey'>                .din0   (w_data_reg),            // el sikismasinda kaydedildi</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>249</td>
+<td class='lineTable'> <pre class='codegrey'>                .dout0  (),                       // kullanilmiyor</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>250</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>251</td>
+<td class='lineTable'> <pre class='codegrey'>                // Port 1 - okuma</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>252</td>
+<td class='lineTable'> <pre class='codegrey'>                .clk1   (clk),</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>253</td>
+<td class='lineTable'> <pre class='codegrey'>                .csb1   (~sec_r),</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>254</td>
+<td class='lineTable'> <pre class='codegrey'>                .addr1  (rmaddr),</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>255</td>
+<td class='lineTable'> <pre class='codegrey'>                .dout1  (dout_r[gi])</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>256</td>
+<td class='lineTable'> <pre class='codegrey'>            );</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>257</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>258</td>
+<td class='lineTable'> <pre class='codegrey'>            // Simulasyonda X/U onlemek icin makro bellegini sifirla.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>259</td>
+<td class='lineTable'> <pre class='codegrey'>            //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>260</td>
+<td class='lineTable'> <pre class='codegrey'>            // SIM_MACRO_INIT ile korunuyor: bu blok makronun IC yapisina</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>261</td>
+<td class='lineTable'> <pre class='codegrey'>            // (u_macro.mem) erisiyor. ASIC akisinda ve Verilator lint'te</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>262</td>
+<td class='lineTable'> <pre class='codegrey'>            // makro BLACKBOX'tir, ici gorunmez ve bu referans cozumlenemez.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>263</td>
+<td class='lineTable'> <pre class='codegrey'>            // Yalnizca simulasyonda tanimlanir.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>264</td>
+<td class='lineTable'> <pre class='codegrey'>`ifdef SIM_MACRO_INIT</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>265</td>
+<td class='lineTable'> <pre class='codegrey'>            initial begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>266</td>
+<td class='lineTable'> <pre class='codegrey'>                for (int i = 0; i &lt MACRO_WORDS; i = i + 1)</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>267</td>
+<td class='lineTable'> <pre class='codegrey'>                    u_macro.mem[i] = 32'h0;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>268</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>269</td>
+<td class='lineTable'> <pre class='codegrey'>`endif</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>270</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>271</td>
+<td class='lineTable'> <pre class='codegrey'>    endgenerate</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>272</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>273</td>
+<td class='lineTable'> <pre class='codegrey'>    // -------------------------------------------------------------------------</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>274</td>
+<td class='lineTable'> <pre class='codegrey'>    // Okuma coklayicisi - BIR CEVRIM GECIKMELI</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>275</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>276</td>
+<td class='lineTable'> <pre class='codegrey'>    // Makro cikisi kayitlidir; anlik rsel ile secim yapilirsa yanlis makronun</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>277</td>
+<td class='lineTable'> <pre class='codegrey'>    // cikisi alinir. Ayni tuzaga UART_RDR'de dusulmustu.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>278</td>
+<td class='lineTable'> <pre class='codegrey'>    // -------------------------------------------------------------------------</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>279</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [SEL_W-1:0] rsel_q;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>280</td>
+<td class='lineTable'> <pre class='codegrey'>    logic             rvalid_addr_q;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>281</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>282</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>283</td>
+<td class='lineTable'> <pre class='codegrey'>        rsel_q        &lt= rsel;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>284</td>
+<td class='lineTable'> <pre class='codegrey'>        rvalid_addr_q &lt= (raddr &lt RAM_DEPTH[$clog2(RAM_DEPTH)-1:0]) ||</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>285</td>
+<td class='lineTable'> <pre class='codegrey'>                         (RAM_DEPTH == (1 &lt&lt $clog2(RAM_DEPTH)));</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>286</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>287</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>288</td>
+<td class='lineTable'> <pre class='codegrey'>    // -------------------------------------------------------------------------</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>289</td>
+<td class='lineTable'> <pre class='codegrey'>    // Okuma verisi TUTULMALI</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>290</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>291</td>
+<td class='lineTable'> <pre class='codegrey'>    // Ozgun cikarimsal surumde ram_rdata bir KAYITTI ve bir sonraki okumaya</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>292</td>
+<td class='lineTable'> <pre class='codegrey'>    // kadar degerini korurdu. Ilk makro surumunde bunu kombinasyonel yaptim:</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>293</td>
+<td class='lineTable'> <pre class='codegrey'>    //     rd_en_q ? dout : 0xDEADBEEF</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>294</td>
+<td class='lineTable'> <pre class='codegrey'>    // AXI'de rready gecikirse rvalid bir cevrimden fazla yuksek kalir; o</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>295</td>
+<td class='lineTable'> <pre class='codegrey'>    // cevrimde rd_en_q dusmus olur ve master DEADBEEF okur.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>296</td>
+<td class='lineTable'> <pre class='codegrey'>    //</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>297</td>
+<td class='lineTable'> <pre class='codegrey'>    // Sonuc: yukleyici I-RAM'e yazdigi buyruklari geri okuyamadi, CPU hic</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>298</td>
+<td class='lineTable'> <pre class='codegrey'>    // baslayamadi. Ilk makro kosumu 8 hata verdi.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>299</td>
+<td class='lineTable'> <pre class='codegrey'>    // -------------------------------------------------------------------------</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>300</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [31:0] rdata_hold;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>301</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>302</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>303</td>
+<td class='lineTable'> <pre class='codegrey'>        if (macro_read_pending) rdata_hold &lt= dout_r[rsel_q];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>304</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>305</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>306</td>
+<td class='lineTable'> <pre class='codegrey'>    // No combinational SRAM-to-CPU bypass.</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>307</td>
+<td class='lineTable'> <pre class='codegrey'>    assign ram_rdata = rdata_hold;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>308</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>309</td>
+<td class='lineTable'> <pre class='codegrey'>`else</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>310</td>
+<td class='lineTable'> <pre class='codegrey'>    // =========================================================================</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>311</td>
+<td class='lineTable'> <pre class='codegrey'>    // FPGA / HIZLI SIMULASYON - cikarimsal dizi (Vivado Block RAM'e esler)</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>312</td>
+<td class='lineTable'> <pre class='codegrey'>    // =========================================================================</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>313</td>
+<td class='lineTable'> <pre class='codegrey'>    logic [31:0] ram [0:RAM_DEPTH-1];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>314</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>315</td>
+<td class='lineTable'> <pre class='codegrey'>    // --- Yazma (RESET ICERMEZ, saf BRAM cikarimi) ---</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>316</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>317</td>
+<td class='lineTable'> <pre class='codegrey'>        if (wr_en) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable' align ='left'> <pre class='codered'> MISSING ELSE </pre> <font face='arial' color=orange style='font-size: 12px'><b> Branch 17</b></font></td>
+<td class='lineTable'> </td>
+<td class='lineTable'> 816</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>318</td>
+<td class='lineTable'> <pre class='codegrey'>            if (waddr &lt RAM_DEPTH) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable' align ='left'> <pre class='codered'> MISSING ELSE </pre> <font face='arial' color=orange style='font-size: 12px'><b> Branch 18</b></font></td>
+<td class='lineTable'> </td>
+<td class='lineTable'> 0</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>319</td>
+<td class='lineTable'> <pre class='codegreen'>                if (w_strb_reg[0]) ram[waddr][7:0]   &lt= w_data_reg[7:0];</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 19</b></font></td>
+<td class='lineTable'>25</td>
+<td class='lineTable'>17T 8F </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable' align ='left'> <pre class='codered'> MISSING ELSE </pre> <font face='arial' color=orange style='font-size: 12px'><b> Branch 20</b></font></td>
+<td class='lineTable'> </td>
+<td class='lineTable'> 8</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>320</td>
+<td class='lineTable'> <pre class='codegreen'>                if (w_strb_reg[1]) ram[waddr][15:8]  &lt= w_data_reg[15:8];</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 21</b></font></td>
+<td class='lineTable'>25</td>
+<td class='lineTable'>15T 10F </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable' align ='left'> <pre class='codered'> MISSING ELSE </pre> <font face='arial' color=orange style='font-size: 12px'><b> Branch 22</b></font></td>
+<td class='lineTable'> </td>
+<td class='lineTable'> 10</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>321</td>
+<td class='lineTable'> <pre class='codegreen'>                if (w_strb_reg[2]) ram[waddr][23:16] &lt= w_data_reg[23:16];</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 23</b></font></td>
+<td class='lineTable'>25</td>
+<td class='lineTable'>15T 10F </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable' align ='left'> <pre class='codered'> MISSING ELSE </pre> <font face='arial' color=orange style='font-size: 12px'><b> Branch 24</b></font></td>
+<td class='lineTable'> </td>
+<td class='lineTable'> 10</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>322</td>
+<td class='lineTable'> <pre class='codegreen'>                if (w_strb_reg[3]) ram[waddr][31:24] &lt= w_data_reg[31:24];</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 25</b></font></td>
+<td class='lineTable'>25</td>
+<td class='lineTable'>15T 10F </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable' align ='left'> <pre class='codered'> MISSING ELSE </pre> <font face='arial' color=orange style='font-size: 12px'><b> Branch 26</b></font></td>
+<td class='lineTable'> </td>
+<td class='lineTable'> 10</td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>323</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>324</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>325</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>326</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>327</td>
+<td class='lineTable'> <pre class='codegrey'>    // --- Okuma (RESET ICERMEZ) ---</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>328</td>
+<td class='lineTable'> <pre class='codegrey'>    always_ff @(posedge clk) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>329</td>
+<td class='lineTable'> <pre class='codegrey'>        if (rd_en) begin</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable' align ='left'> <pre class='codered'> MISSING ELSE </pre> <font face='arial' color=orange style='font-size: 12px'><b> Branch 27</b></font></td>
+<td class='lineTable'> </td>
+<td class='lineTable'> 825</td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>330</td>
+<td class='lineTable'> <pre class='codegreen'>            if (raddr &lt RAM_DEPTH) begin</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 28</b></font></td>
+<td class='lineTable'>16</td>
+<td class='lineTable'>16T 0F </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>331</td>
+<td class='lineTable'> <pre class='codegrey'>                ram_rdata &lt= ram[raddr];</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'>332</td>
+<td class='lineTable'> <pre class='codered'>            end else begin</pre>
+ <font face='arial' color=orange style='font-size: 12px'><b> Branch 29</b></font></td>
+<td class='lineTable'>0</td>
+<td class='lineTable'>0T </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>333</td>
+<td class='lineTable'> <pre class='codegrey'>                ram_rdata &lt= 32'hDEADBEEF;</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>334</td>
+<td class='lineTable'> <pre class='codegrey'>            end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>335</td>
+<td class='lineTable'> <pre class='codegrey'>        end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>336</td>
+<td class='lineTable'> <pre class='codegrey'>    end</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>337</td>
+<td class='lineTable'> <pre class='codegrey'>`endif</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>338</td>
+<td class='lineTable'> <pre class='codegrey'> </pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+<tr class='lineTableHoverGrey'>
+<td class='lineTable'>339</td>
+<td class='lineTable'> <pre class='codegrey'>endmodule</pre> </td>
+<td class='lineTable'> </td>
+<td class='lineTable'> </td>
+</tr>
+</table>
+</div>
+<br clear=all>
+</div>
+<br clear=all>
+</div>
+</font>
+</div>
+<div class ='linesSection' style='padding-left:20px; padding-right:20px;'>
+<font face='arial' color=black style='font-size: 14px'>
+<div style='display:none' id='file_condcov'>
+<button class='fileCondCollapsible' id='button_file_condcov'> <font size='4' color=#b38f00> &#169; </font>
+ Condition Coverage of File 2 : C:/Users/ybari/2026_Arkhe/rtl/Memory/sram_module.sv</button> 
+<div class='fileCondContent'>
+<br clear=all>
+<font size='2' face='arial' style='padding-left:6px'>
+Condition Coverage Summary for File : C:/Users/ybari/2026_Arkhe/rtl/Memory/sram_module.sv
+</font>
+<br clear=all>
+<table class='fileScoreTable'>
+<tr>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Total Conditions </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Covered Conditions </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Uncovered Conditions </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Condition Coverage Score </th>
+</tr>
+<tr>
+<td class='fileScoreTable'>16</td>
+<td class='fileScoreTable'>14</td>
+<td class='fileScoreTable'>2</td>
+<td class='fileScoreTable' bgcolor='#98FF98'>87.5</td>
+</tr>
+</table>
+<br clear=all>
+<div class='condCoverageTable'>
+<table class='lineTable'>
+<tr>
+<th class='lineTable' style='background-color:#FFDD99; line-height:0;' width='80px'> LineNumber </th>
+<th class='lineTable' style='background-color:#FFEB99; line-height:0;'> Condition Result </th>
+<th class='lineTable' style='background-color:#80FFBF; line-height:1;' width='120px'> Evaluation Count </th>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>67</td>
+<td class='lineTable'> <pre class='codegreen'>(!rst_n)__TRUE</pre> </td>
+<td class='lineTable'>91 </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'> </td>
+<td class='lineTable'> <pre class='codegreen'>(!rst_n)__FALSE</pre> </td>
+<td class='lineTable'>1631 </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>83</td>
+<td class='lineTable'> <pre class='codegreen'>(!aw_active)__TRUE</pre> </td>
+<td class='lineTable'>850 </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'> </td>
+<td class='lineTable'> <pre class='codegreen'>(!aw_active)__FALSE</pre> </td>
+<td class='lineTable'>831 </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>93</td>
+<td class='lineTable'> <pre class='codegreen'>(!w_active)__TRUE</pre> </td>
+<td class='lineTable'>827 </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'> </td>
+<td class='lineTable'> <pre class='codegreen'>(!w_active)__FALSE</pre> </td>
+<td class='lineTable'>832 </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>98</td>
+<td class='lineTable'> <pre class='codegreen'>(!s_axil_bvalid)__TRUE</pre> </td>
+<td class='lineTable'>85 </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'> </td>
+<td class='lineTable'> <pre class='codegreen'>(!s_axil_bvalid)__FALSE</pre> </td>
+<td class='lineTable'>803 </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>137</td>
+<td class='lineTable'> <pre class='codegreen'>(!rst_n)__TRUE</pre> </td>
+<td class='lineTable'>48 </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'> </td>
+<td class='lineTable'> <pre class='codegreen'>(!rst_n)__FALSE</pre> </td>
+<td class='lineTable'>1624 </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>142</td>
+<td class='lineTable'> <pre class='codegreen'>(!s_axil_rvalid)__TRUE</pre> </td>
+<td class='lineTable'>57 </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'> </td>
+<td class='lineTable'> <pre class='codegreen'>(!s_axil_rvalid)__FALSE</pre> </td>
+<td class='lineTable'>828 </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>318</td>
+<td class='lineTable'> <pre class='codegreen'>(waddr < RAM_DEPTH)__TRUE</pre> </td>
+<td class='lineTable'>25 </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable'> <pre class='codered'>(waddr < RAM_DEPTH)__FALSE</pre> </td>
+<td class='lineTable'>0 </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>330</td>
+<td class='lineTable'> <pre class='codegreen'>(raddr < RAM_DEPTH)__TRUE</pre> </td>
+<td class='lineTable'>16 </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable'> </td>
+<td class='lineTable'> <pre class='codered'>(raddr < RAM_DEPTH)__FALSE</pre> </td>
+<td class='lineTable'>0 </td>
+</tr>
+</table>
+</div>
+<br clear=all>
+</div>
+<br clear=all>
+</div>
+</font>
+</div>
+<div class ='linesSection' style='padding-left:20px; padding-right:20px;'>
+<font face='arial' color=black style='font-size: 14px'>
+<div style='display:none' id='file_togglecov'>
+<button class='fileToggleCollapsible' id='button_file_togglecov'> <font size='4' color=#9999bb> &#8376; </font>
+ Toggle Coverage of File 2 : C:/Users/ybari/2026_Arkhe/rtl/Memory/sram_module.sv</button> 
+<div class='fileToggleContent'>
+<br clear=all>
+<font size='2' face='arial' style='padding-left:6px'>
+Toggle Coverage Summary for File : C:/Users/ybari/2026_Arkhe/rtl/Memory/sram_module.sv
+</font>
+<br clear=all>
+<table class='fileScoreTable'>
+<tr>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Total Toggles Variables </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Covered Variables </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Uncovered Variables </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Score </th>
+</tr>
+<tr>
+<td class='fileScoreTable'>10</td>
+<td class='fileScoreTable'>6</td>
+<td class='fileScoreTable'>4</td>
+<td class='fileScoreTable' bgcolor='#FFFFC2'>60</td>
+</tr>
+</table>
+<br clear=all>
+<table class='fileScoreTable'>
+<tr>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Total </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Covered </th>
+<th class='fileScoreTable' bgcolor='#DEE8EE'> Toggle Coverage Score </th>
+</tr>
+<tr>
+<td class='fileScoreTable'> <font size='2'> Total Bits </font> </td>
+<td class='fileScoreTable'> <font size='2'>252</font> </td>
+<td class='fileScoreTable'> <font size='2'>97</font> </td>
+<td class='fileScoreTable' bgcolor='#FFFFC2'> <font size='2'>38.49</td>
+</tr>
+<tr>
+<td class='fileScoreTable'> <font size='2'> Bits 0->1 </font> </td>
+<td class='fileScoreTable'> <font size='2'>126</font> </td>
+<td class='fileScoreTable'> <font size='2'>50 </font> </td>
+<td class='fileScoreTable' bgcolor='#FFFFC2'> <font size='2'>39.68</font> </td>
+</tr>
+<tr>
+<td class='fileScoreTable'> <font size='2'> Bits 1->0 </font> </td>
+<td class='fileScoreTable'> <font size='2'>126</font> </td>
+<td class='fileScoreTable'> <font size='2'>47</font> </td>
+<td class='fileScoreTable' bgcolor='#FFFFC2'> <font size='2'>37.3</font> </td>
+</tr>
+</table>
+<br clear=all>
+<div class='toggleCoverageTable'>
+<table class='lineTable' id='sortable1'>
+<tr>
+<th class='lineTable' style='background-color:#FFDD99; line-height:1;' width='80px' onclick='sortTable(1,0)'> LineNumber <button class='sortbutton1'> &#8645; </button></th>
+<th class='lineTable' style='background-color:#FFDD99; line-height:1;' width='80px' onclick='sortTable(1,1)'> Variable Type <button class='sortbutton1'> &#8645; </button></th>
+<th class='lineTable' style='background-color:#FFEB99; line-height:0;' onclick='sortTable(1,2)'> Variable <button class='sortbutton1'> &#8645; </button></th>
+<th class='lineTable' style='background-color:#80FFBF; line-height:1;' width='120px'> Toggle 0->1 </th>
+<th class='lineTable' style='background-color:#80FFBF; line-height:1;' width='120px'> Toggle 1->0 </th>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>41</td>
+<td class='lineTable'>logic</td>
+<td class='lineTable'> <pre class='codegreen'> All bits of aw_active</pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>42</td>
+<td class='lineTable'>logic</td>
+<td class='lineTable'> <pre class='codegreen'> All bits of w_active</pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>43</td>
+<td class='lineTable'>logic</td>
+<td class='lineTable'> <pre class='codegreen'> All bits of aw_addr_reg</pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>60</td>
+<td class='lineTable'>logic</td>
+<td class='lineTable'> <pre class='codegreen'>w_data_reg [0:3]</pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable' style='color:white;opacity:0'>60</td>
+<td class='lineTable' style='color:white;opacity:0'>logic</td>
+<td class='lineTable'> <pre class='codered'>w_data_reg [4]</pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+<td class='lineTable'> <pre class='codered'> 0 </pre> </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable' style='color:white;opacity:0'>60</td>
+<td class='lineTable' style='color:white;opacity:0'>logic</td>
+<td class='lineTable'> <pre class='codered'> All Other bits of w_data_reg</pre> </td>
+<td class='lineTable'> <pre class='codered'> 0 </pre> </td>
+<td class='lineTable'> <pre class='codered'> 0 </pre> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>61</td>
+<td class='lineTable'>logic</td>
+<td class='lineTable'> <pre class='codegreen'> All bits of w_strb_reg</pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>162</td>
+<td class='lineTable'>logic</td>
+<td class='lineTable'> <pre class='codegreen'>ram_rdata [0]</pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable' style='color:white;opacity:0'>162</td>
+<td class='lineTable' style='color:white;opacity:0'>logic</td>
+<td class='lineTable'> <pre class='codered'> All Other bits of ram_rdata</pre> </td>
+<td class='lineTable'> <pre class='codered'> 0 </pre> </td>
+<td class='lineTable'> <pre class='codered'> 0 </pre> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>163</td>
+<td class='lineTable'>logic</td>
+<td class='lineTable'> <pre class='codegreen'>raddr [0]</pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable' style='color:white;opacity:0'>163</td>
+<td class='lineTable' style='color:white;opacity:0'>logic</td>
+<td class='lineTable'> <pre class='codered'>raddr [3]</pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+<td class='lineTable'> <pre class='codered'> 0 </pre> </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable' style='color:white;opacity:0'>163</td>
+<td class='lineTable' style='color:white;opacity:0'>logic</td>
+<td class='lineTable'> <pre class='codered'> All Other bits of raddr</pre> </td>
+<td class='lineTable'> <pre class='codered'> 0 </pre> </td>
+<td class='lineTable'> <pre class='codered'> 0 </pre> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>164</td>
+<td class='lineTable'>logic</td>
+<td class='lineTable'> <pre class='codegreen'>waddr [2]</pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable' style='color:white;opacity:0'>164</td>
+<td class='lineTable' style='color:white;opacity:0'>logic</td>
+<td class='lineTable'> <pre class='codered'>waddr [3]</pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+<td class='lineTable'> <pre class='codered'> 0 </pre> </td>
+</tr>
+<tr class='lineTableHoverRed'>
+<td class='lineTable' style='color:white;opacity:0'>164</td>
+<td class='lineTable' style='color:white;opacity:0'>logic</td>
+<td class='lineTable'> <pre class='codered'> All Other bits of waddr</pre> </td>
+<td class='lineTable'> <pre class='codered'> 0 </pre> </td>
+<td class='lineTable'> <pre class='codered'> 0 </pre> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>165</td>
+<td class='lineTable'>logic</td>
+<td class='lineTable'> <pre class='codegreen'> All bits of wr_en</pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+</tr>
+<tr class='lineTableHoverGreen'>
+<td class='lineTable'>166</td>
+<td class='lineTable'>logic</td>
+<td class='lineTable'> <pre class='codegreen'> All bits of rd_en</pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+<td class='lineTable'> <pre class='codegreen'> 1 </pre> </td>
+</tr>
+</table>
+</div>
+<br clear=all>
+</div>
+<br clear=all>
+</div>
+</font>
+</div>
+</div>
+</div>
+
+<script type='text/javascript' src='jsCodeCov/fileCollapse.js'></script>
+<script type='text/javascript' src='jsCodeCov/checkdisplay.js'></script>
+<script> function openFileContent(id) {document.getElementById(id).click();} </script>
+<script> sortTable(1,0) </script>
+</body>
+</html>

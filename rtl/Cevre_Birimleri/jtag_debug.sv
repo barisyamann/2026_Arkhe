@@ -82,7 +82,7 @@ module jtag_debug (
     // CSR Yazmaç Ofsetleri
     // =========================================================================
     localparam logic [4:0] REG_DBG_CTRL   = 5'h00; // [0] CPU Halt, [1] CPU Resume
-    localparam logic [4:0] REG_DBG_STATUS = 5'h04; // [0] Halted, [1] Running, [2] Bus Busy
+    localparam logic [4:0] REG_DBG_STATUS = 5'h04; // [0] Halted, [1] Running, [2] Bus Busy, [3] Bus Hata, [5:4] AXI yanit kodu
     localparam logic [4:0] REG_DBG_ADDR   = 5'h08; // Hedef bellek adresi
     localparam logic [4:0] REG_DBG_DATA   = 5'h0C; // Okuma/yazma verisi
     localparam logic [4:0] REG_DBG_CMD    = 5'h10; // [0] Read, [1] Write
@@ -141,6 +141,26 @@ module jtag_debug (
     // blogu (CAPTURE_DR) bu sinyali kullaniyor ve eskiden bildiriminden
     // once geciyordu - Vivado [Synth 8-6901] uyariyordu.
     logic [31:0] bus_rdata_result;
+    // 12 Eylul 2026: AXI YANIT KODU DENETIMI
+    //
+    // SORUN
+    //   `m_axi_rresp` ve `m_axi_bresp` portlari tanimliydi ama modul
+    //   icinde HIC OKUNMUYORDU (Verilator UNUSEDSIGNAL uyarisi).
+    //
+    //   JTAG debug master interconnect uzerinden TUM slave'lere erisir.
+    //   Tanimsiz bir adres okunursa interconnect DECERR (2'b11) ve
+    //   0xDEADBEEF dondurur; yanit kodu kontrol edilmediginde bu COP
+    //   VERI GECERLI SANILIR. Debug oturumunda sessiz yanlis okuma
+    //   anlamina gelir.
+    //
+    // COZUM
+    //   Yanit kodu yakalanir ve iki yoldan bildirilir:
+    //     1. REG_DBG_STATUS[3] - CSR uzerinden okunabilir hata biti
+    //     2. IR_MEM_READ DR'sinin alt 32 biti - JTAG zincirinden
+    //        okunurken 0x00000000 = OKAY, 0xE4404E44 = hata
+    //   Bayrak yeni bir islem basladiginda temizlenir.
+    logic [1:0]  bus_resp_kod;      // son islemin AXI yanit kodu
+    logic        bus_hata;          // yanit OKAY degil
 
     // JTAG Instruction Codes
     localparam IR_BYPASS   = 4'hF;
@@ -186,7 +206,13 @@ module jtag_debug (
                     if (ir_reg == IR_IDCODE) begin
                         dr_reg     <= {32'h0, 32'h41524B48}; // "ARKH" identifier
                     end else if (ir_reg == IR_MEM_READ) begin
-                        dr_reg     <= {bus_rdata_result, 32'h0}; // Hafızadan okunan veri
+                        // Ust 32 bit: okunan veri
+                        // Alt 32 bit: yanit durumu (12 Eylul 2026)
+                        //   0x00000000 = OKAY
+                        //   0xE4404E44 = hata ("ERR0 ERR" benzeri imza),
+                        //                alt iki bit AXI yanit kodudur
+                        dr_reg     <= {bus_rdata_result,
+                                       bus_hata ? {30'h39101B9, bus_resp_kod} : 32'h0};
                     end
                     tap_state      <= jtag_tms ? EXIT1_DR : SHIFT_DR;
                 end
@@ -322,6 +348,8 @@ module jtag_debug (
             bus_wdata       <= 32'b0;
             bus_is_write    <= 1'b0;
             bus_rdata_result<= 32'b0;
+            bus_resp_kod    <= 2'b00;
+            bus_hata        <= 1'b0;
         end else begin
             case (bus_state)
                 BUS_IDLE: begin
@@ -335,6 +363,7 @@ module jtag_debug (
                                 bus_is_write <= 1'b0;
                                 bus_busy     <= 1'b1;
                                 bus_done     <= 1'b0;
+                                bus_hata     <= 1'b0;   // yeni islem: bayragi temizle
                                 bus_state    <= BUS_READ_ADDR;
                             end
                             IR_MEM_WRITE: begin
@@ -343,6 +372,7 @@ module jtag_debug (
                                 bus_is_write <= 1'b1;
                                 bus_busy     <= 1'b1;
                                 bus_done     <= 1'b0;
+                                bus_hata     <= 1'b0;   // yeni islem: bayragi temizle
                                 bus_state    <= BUS_WRITE_ADDR;
                             end
                             IR_DBG_CTRL: begin
@@ -380,6 +410,9 @@ module jtag_debug (
                 BUS_READ_DATA: begin
                     if (m_axi_rvalid) begin
                         bus_rdata_result <= m_axi_rdata;
+                        // AXI yanit kodu yakalanir (12 Eylul 2026)
+                        bus_resp_kod     <= m_axi_rresp;
+                        bus_hata         <= (m_axi_rresp != 2'b00);
                         bus_state        <= BUS_COMPLETE;
                     end
                 end
@@ -392,7 +425,10 @@ module jtag_debug (
 
                 BUS_WRITE_WAIT: begin
                     if (m_axi_bvalid) begin
-                        bus_state <= BUS_COMPLETE;
+                        // AXI yanit kodu yakalanir (12 Eylul 2026)
+                        bus_resp_kod <= m_axi_bresp;
+                        bus_hata     <= (m_axi_bresp != 2'b00);
+                        bus_state    <= BUS_COMPLETE;
                     end
                 end
 
@@ -561,7 +597,10 @@ module jtag_debug (
 
                 case (csr_ar_addr_lat[4:0])
                     REG_DBG_CTRL:   s_axi_rdata <= {31'b0, dbg_halted};
-                    REG_DBG_STATUS: s_axi_rdata <= {29'b0, bus_busy, ~dbg_halted, dbg_halted};
+                    // [0] Halted  [1] Running  [2] Bus Busy
+                    // [3] Bus Hata (12 Eylul 2026)  [5:4] son AXI yanit kodu
+                    REG_DBG_STATUS: s_axi_rdata <= {26'b0, bus_resp_kod, bus_hata,
+                                                    bus_busy, ~dbg_halted, dbg_halted};
                     REG_DBG_ADDR:   s_axi_rdata <= reg_addr;
                     REG_DBG_DATA:   s_axi_rdata <= bus_done ? bus_rdata_result : reg_data;
                     REG_DBG_CMD:    s_axi_rdata <= reg_cmd;

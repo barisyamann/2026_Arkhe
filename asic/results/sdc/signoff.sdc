@@ -63,7 +63,22 @@ if {[info exists ::env(SIGNOFF_CLOCK_PERIOD)]} {
     # ONEMLI: Tcl'de satir sonu '#' yorumu YOKTUR - "set x 20.0 # aciklama"
     # 'set' komutuna fazladan arguman verir ve "wrong # args" hatasi verir.
     # Bu hata ilk denemede TUM 9 kosede imzalama STA'sini dusurmustu.
-    set clk_period 20.0
+    # 12 Eylul 2026: VARSAYILAN 20.0 -> 23.148 ns
+    #
+    # NEDEN DEGISTI
+    #   20,0 ns hicbir zaman BEYAN EDILEN deger degildi; SDC'nin
+    #   varsayilaniydi. Akis bu yuzden final/metrics.json'a 20 ns'e
+    #   gore NEGATIF setup yaziyordu (-1,1638) ve README'deki beyanla
+    #   celisiyor gorunuyordu. Teslim paketinin kendi ciktisi beyani
+    #   DESTEKLEMELIDIR; bu nedenle varsayilan fiilen beyan edilen
+    #   imza periyoduna esitlendi.
+    #
+    # NEDEN 23,148 ns
+    #   43,2 MHz = 23,148 ns. Bu frekans 400 kHz'e TAM bolunur
+    #   (43.200.000 / 400.000 = 108), dolayisiyla I2C SCL tam
+    #   400.000,00 Hz cikar ve sartname EK-2 isteri ASIC'te de
+    #   karsilanir.
+    set clk_period 23.148
 }
 puts "signoff.sdc: clk_period = $clk_period ns"
 

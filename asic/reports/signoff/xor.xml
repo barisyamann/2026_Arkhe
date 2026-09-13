@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <report-database>
- <description>XOR /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/asic/runs/d45_anten2/59-magic-streamout/soc_top.magic.gds vs. /home/tatua7806/arkhe_exp/experiments/sramreg_20260905/asic/runs/d45_anten2/60-klayout-streamout/soc_top.klayout.gds</description>
+ <description>XOR /home/tatua7806/arkhe/asic/runs/S_final2/58-magic-streamout/soc_top.magic.gds vs. /home/tatua7806/arkhe/asic/runs/S_final2/59-klayout-streamout/soc_top.klayout.gds</description>
  <original-file/>
  <generator>drc: script='/nix/store/af8ijg47w5gfv25fb0dyfcw2aca9sqk6-python3.13-librelane-3.0.6/lib/python3.13/site-packages/librelane/scripts/klayout/xor.drc'</generator>
  <top-cell>soc_top</top-cell>

@@ -18,8 +18,6 @@
   "asic/reports/lint/verilator-lint.log",
   "asic/reports/lvs/lvs.netgen.json",
   "asic/reports/lvs/lvs.netgen.rpt",
-  "asic/reports/lvs_gds/lvs.netgen.json",
-  "asic/reports/lvs_gds/lvs.netgen.rpt",
   "asic/reports/power/irdrop.rpt",
   "asic/reports/power/max_ff_n40C_1v95/power.rpt",
   "asic/reports/power/max_ss_100C_1v60/power.rpt",
@@ -182,5 +180,5 @@
   "asic/results/spef/max/soc_top.max.spef",
   "asic/results/spef/min/soc_top.min.spef",
   "asic/results/spef/nom/soc_top.nom.spef",
-  "asic/results/spice/soc_top_gds.spice"
+  "asic/results/spice/soc_top.spice"
 ]

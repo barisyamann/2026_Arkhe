@@ -59,11 +59,21 @@ set clk_port   clk_i
 if {[info exists ::env(SIGNOFF_CLOCK_PERIOD)]} {
     set clk_period $::env(SIGNOFF_CLOCK_PERIOD)
 } else {
-    # 4 Eylul 2026 DENEYSEL: 100 MHz PnR -> 50 MHz gercek imzalama testi.
+    # 12 Eylul 2026: VARSAYILAN 20.0 -> 23.148 (43,2 MHz)
+    #
+    #   Teslim edilen S_saat kosumu 43,2 MHz beyan eder. 23,148 ns
+    #   secildi cunku 43.200.000 / 400.000 = 108 TAM bolunur, yani
+    #   I2C SCL tam 400.000,00 Hz olur (sartname EK-2 "400 kHz sabit").
+    #
+    #   SIGNOFF_CLOCK_PERIOD bir LibreLane degiskeni DEGILDIR - bu
+    #   dosyanin kendi ::env okumasidir. Bu yuzden akisa "-c" ile
+    #   verilemez; tek gecerli yol BU VARSAYILANI degistirmektir.
+    #   Denenmistir: -c SIGNOFF_CLOCK_PERIOD=23.148 SESSIZCE yok sayilir.
+    #
     # ONEMLI: Tcl'de satir sonu '#' yorumu YOKTUR - "set x 20.0 # aciklama"
     # 'set' komutuna fazladan arguman verir ve "wrong # args" hatasi verir.
     # Bu hata ilk denemede TUM 9 kosede imzalama STA'sini dusurmustu.
-    set clk_period 20.0
+    set clk_period 23.148
 }
 puts "signoff.sdc: clk_period = $clk_period ns"
 

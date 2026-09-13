@@ -1,0 +1,65 @@
+======================================================================
+ ARKHE SoC - BLOK SEVIYESI REGRESYON
+======================================================================
+  sartname_timer calisiyor...  sartname_timer GECTI     25 denetim    2.8 s
+  sartname_gpio calisiyor...  sartname_gpio GECTI     15 denetim    2.8 s
+  sartname_uart calisiyor...  sartname_uart GECTI     20 denetim    2.8 s
+  sartname_uart_stream calisiyor...  sartname_uart_stream GECTI     15 denetim    3.9 s
+  sartname_qspi calisiyor...  sartname_qspi GECTI     27 denetim    2.9 s
+  uart         calisiyor...  uart         GECTI     42 denetim    2.8 s
+  sync_fifo    calisiyor...  sync_fifo    GECTI     24 denetim    2.8 s
+  i2c          calisiyor...  i2c          GECTI     38 denetim    2.9 s
+  dma          calisiyor...  dma          GECTI     39 denetim    2.8 s
+  gpio         calisiyor...  gpio         GECTI     37 denetim    2.8 s
+  qspi         calisiyor...  qspi         GECTI     40 denetim    2.9 s
+  timer        calisiyor...  timer        GECTI     36 denetim    2.8 s
+  jtag_debug   calisiyor...  jtag_debug   GECTI     27 denetim    2.8 s
+  npu_blok     calisiyor...  npu_blok     GECTI     43 denetim    6.7 s
+  npu_golden   calisiyor...  npu_golden   GECTI      1 denetim    3.2 s
+  npu_dogruluk calisiyor...  npu_dogruluk GECTI     77 denetim    5.7 s
+  npu_hizlanma calisiyor...  npu_hizlanma GECTI      2 denetim   58.3 s
+  sistem       calisiyor...  sistem       GECTI     20 denetim  662.5 s
+  cekirdek_izi calisiyor...  cekirdek_izi GECTI      1 denetim    4.6 s
+  uvm_axi_agent calisiyor...  uvm_axi_agent GECTI     32 denetim  713.0 s
+  sistem_gercek_boot calisiyor...  sistem_gercek_boot GECTI     20 denetim  774.0 s
+======================================================================
+ 21/21 test gecti, toplam 581 denetim
+======================================================================
+ Kapsama raporlari uretiliyor...
+======================================================================
+ KOD KAPSAMA
+
+ Tam SoC (sistem_gercek_boot)
+   58 dosya, 59 modul, 68 ornek
+   Statement %62.56   Branch    %44.62
+   Condition %54.95   Toggle    %33.11
+   C:\Users\ybari\2026_Arkhe\evidence\coverage_sistem\codeCoverageReport\dashboard.html
+======================================================================
+
+======================================================================
+ ISLEVSEL KAPSAMA  (tum testlerin birlesimi)
+
+   ...cov_axi_ar              1/1    [sistem]  
+   ...cov_axi_aw              1/1    [sistem]  
+   ...cov_axi_r               1/1    [sistem]  
+   ...cov_axi_resp            3/3    [sistem]  
+   ...cov_axi_w               1/1    [sistem]  
+   ...cov_class               4/4    [npu_blok]  
+   ...cov_dma_state           6/6    [sistem]  
+   ...cov_fault_src           2/2    [sistem]  
+   ...cov_fifo_level          5/5    [sartname_uart_stream]  
+   ...cov_irq_dma             1/1    [sistem]  
+   ...cov_irq_fault           1/1    [sistem]  
+   ...cov_irq_npu             1/1    [sistem]  
+   ...cov_irq_npuxcov_npu_class   4/4    [sistem]  
+   ...cov_irq_timer           1/1    [sistem]  
+   ...cov_jtag_tms            2/2    [sistem]  
+   ...cov_npu_class           4/4    [sistem]  
+   ...cov_pack_cnt            4/4    [sartname_uart_stream]  
+   ...cov_uart2_fifo          5/5    [sistem]  
+   cov_gpio                   5/5    [sistem]  
+
+   TOPLAM  52/52  = %100.00
+======================================================================
+
+[exited with code 0]

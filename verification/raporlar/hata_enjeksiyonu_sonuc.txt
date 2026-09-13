@@ -1,0 +1,107 @@
+======================================================================
+ HATA ENJEKSIYONU - testler gercekten hata yakaliyor mu?
+======================================================================
+
+----------------------------------------------------------------------
+MUTASYON : wstrb_bit
+  hata   : WSTRB bit 1 YANLIS dilime baglaniyor ([15:8] yerine [7:0])
+  dosya  : rtl/Memory/sram_module.sv
+  test   : wstrb_kismi_yazma
+  neden  : 12 Eylul 2026'da yazilan kismi yazma testinin gercekten bayt eslemesini denetledigini kanitlar.
+  cikti  : wstrb_kismi_yazma BASARISIZ
+  SONUC  : [OK] test hatayi YAKALADI
+  (RTL geri yuklendi)
+
+----------------------------------------------------------------------
+MUTASYON : sram_w_yakalama
+  hata   : W verisi el sikismada YAKALANMIYOR (canli sinyal kullaniliyor)
+  dosya  : rtl/Memory/sram_module.sv
+  test   : sram_w_yakalama
+  neden  : 10 Eylul 2026'da duzeltilen GERCEK hatanin testi. Bu mutasyon o hatayi geri getirir.
+  cikti  : sram_w_yakalama BASARISIZ
+  SONUC  : [OK] test hatayi YAKALADI
+  (RTL geri yuklendi)
+
+----------------------------------------------------------------------
+MUTASYON : qspi_presc_bit
+  hata   : QSPI prescaler 7 bit yerine 6 bit (presc=63'te sarma)
+  dosya  : rtl/Cevre_Birimleri/qspi_master.sv
+  test   : qspi_sck_olcum
+  neden  : 10 Eylul 2026'da duzeltilen 6->7 bit hatasi. Ilk kosumda tb_qspi_presc_sinir KACIRMISTI (DUT ornekleMIYOR); 12 Eylul'de gercek DUT'u olcen tb_qspi_sck_olcum yazildi.
+  cikti  : qspi_sck_olcum BASARISIZ
+  SONUC  : [OK] test hatayi YAKALADI
+  (RTL geri yuklendi)
+
+----------------------------------------------------------------------
+MUTASYON : i2c_bolen
+  hata   : I2C bolen 1 eksik (SCL frekansi kayar)
+  dosya  : rtl/Cevre_Birimleri/i2c_peripheral.sv
+  test   : i2c_scl_periyot
+  neden  : Ilk kosumda i2c blok testi KACIRMISTI - yazmac/ACK akisini dogruluyor ama SCL FREKANSINI olcmuyordu. 12 Eylul'de uretilen dalgayi olcen tb_i2c_scl_periyot yazildi.
+  cikti  : i2c_scl_periyot BASARISIZ
+  SONUC  : [OK] test hatayi YAKALADI
+  (RTL geri yuklendi)
+
+----------------------------------------------------------------------
+MUTASYON : i2c_saat_germe
+  hata   : I2C saat germe devre disi (slave SCL'i tutsa master farketmez)
+  dosya  : rtl/Cevre_Birimleri/i2c_peripheral.sv
+  test   : i2c_saat_germe
+  neden  : Bu mutasyon testin ILK yazimini da yakaladi. Test once `scl` TELINI olcuyordu ve germe kapaliyken bile 1240->6240 ns uzama gorup GECIYORDU - cunku teli 5 us boyunca testbench'in kendisi cekiyordu, totolojik olcum. Test DUT'un IC ceyrek sayacini surekli izleyecek sekilde duzeltildi: duzeltilmis RTL'de 0 hareket, mutasyonlu RTL'de 248/250 hareket olculuyor.
+  cikti  : i2c_saat_germe BASARISIZ
+  SONUC  : [OK] test hatayi YAKALADI
+  (RTL geri yuklendi)
+
+----------------------------------------------------------------------
+MUTASYON : jtag_yanit_kodu
+  hata   : JTAG AXI yanit kodu denetimi kapali (DECERR gecerli sanilir)
+  dosya  : rtl/Cevre_Birimleri/jtag_debug.sv
+  test   : jtag_yanit_kodu
+  neden  : m_axi_rresp/bresp 12 Eylul'e kadar HIC okunmuyordu. JTAG interconnect uzerinden tum slave'lere eristigi icin tanimsiz adres DECERR + 0xDEADBEEF dondurur ve bu cop veri GECERLI sanilirdi. Mutasyonda test 9 -> 7 denetime duser ve KALIR.
+  cikti  : jtag_yanit_kodu BASARISIZ
+  SONUC  : [OK] test hatayi YAKALADI
+  (RTL geri yuklendi)
+
+----------------------------------------------------------------------
+MUTASYON : sram_rdata_bit
+  hata   : SRAM okuma verisi bit0 sifirlanir (kayitli okuma yolu bozulur)
+  dosya  : rtl/Memory/sram_module.sv
+  test   : sram_registered
+  neden  : tb_sram_registered.sv 13 Eylul 2026'ya kadar YAZILMIS ama regresyonda KAYITLI DEGILDI - her kosumda atlaniyordu. sram_module teslim edilen tasarimin parcasidir (filelist.f satir 23; soc_top ve npu_tcm_sram kullanir). Regresyona eklendi ve bu mutasyonla hata yakaladigi kanitlandi.
+  cikti  : sram_registered BASARISIZ
+  SONUC  : [OK] test hatayi YAKALADI
+  (RTL geri yuklendi)
+
+----------------------------------------------------------------------
+MUTASYON : npu_hakem_motor_dali
+  hata   : NPU hakemi motor dalini yok sayar (TCM yazma yolu CPU'ya sabitlenir)
+  dosya  : rtl/npu/npu_accelerator.sv
+  test   : npu_accelerator
+  neden  : A1 (13 Eylul 2026): Kapsam analizi npu_accelerator'un hakemlik mantiginda MOTOR dalinin hicbir testte uyarilmadigini gostermisti - eng_wr_req hic 1 olmuyordu. Test NPU'yu CSR'dan baslatip (weights_ready + start) tam cikarim kosturur; motor sonucu TCM'e yazarken hakem gozlemlenir. ILK denemede sayaclar dal secimini olcuyordu ve bu mutasyonu KACIRDI; gozlemciye VERI YOLU denetimi eklendi (tcm_* sinyalleri dogru kaynagi tasiyor mu). Artik mutasyon 4 cevrimde yakalaniyor.
+  cikti  : npu_accelerator BASARISIZ
+  SONUC  : [OK] test hatayi YAKALADI
+  (RTL geri yuklendi)
+
+----------------------------------------------------------------------
+MUTASYON : interconnect_sinir
+  hata   : Timer bolgesinin UST siniri bir eksik (0x40010FFF -> 0x40010FFE)
+  dosya  : rtl/Memory/axi_lite_interconnect.sv
+  test   : interconnect_adres
+  neden  : Interconnect 616 satirla en buyuk test edilmemis moduldu. Sinir adresi hatasi sistem testinde gorunmezdi cunku sistem testi yalnizca fiilen kullanilan adresleri dokunur.
+  cikti  : interconnect_adres BASARISIZ
+  SONUC  : [OK] test hatayi YAKALADI
+  (RTL geri yuklendi)
+
+======================================================================
+ OZET
+======================================================================
+  yakalanan : 9
+  KACIRILAN : 0
+  atlanan   : 0
+
+  Tum mutasyonlar yakalandi - testler ilgili hatalari
+  gercekten denetliyor.
+
+  DIKKAT: Bu betik RTL'i gecici olarak degistirir ve geri yukler.
+  Kosumdan sonra dogrulayin:
+    python scripts/rtl_manifest.py dogrula rtl_manifest.txt

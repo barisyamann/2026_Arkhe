@@ -6,7 +6,22 @@
 //              Peripherals (GPIO, Timer, UART1, UART2 Stream, I2C Master,
 //              QSPI Master, NPU Accelerator, DMA Controller, JTAG Debug).
 
-module soc_top (
+module soc_top #(
+    // -----------------------------------------------------------------
+    // Sistem saat frekansi (Hz).
+    //
+    // Cevre birimi bolucileri (I2C SCL, UART baud) bu degerden
+    // turetilir. Tek RTL iki hedefte kullanilir:
+    //
+    //   FPGA (Nexys A7) : 50_000_000  -> I2C PERIYOT=125, SCL tam 400 kHz
+    //   ASIC (sky130)   : 43_200_000  -> I2C PERIYOT=108, SCL tam 400 kHz
+    //
+    // Her iki deger de 400 kHz'e TAM bolunur; SCL sapmasi sifirdir.
+    // Modul kaynagi ayni kalir, yalnizca bu parametre degisir -
+    // `ifdef ile tasarim AYRILMAZ.
+    // -----------------------------------------------------------------
+    parameter int SYS_CLK_HZ = 50_000_000
+) (
     input  logic        clk_i,
     input  logic        rst_ni,
 
@@ -746,7 +761,7 @@ module soc_top (
 
     // UART 1 (General Purpose UART)
     uart_peripheral #(
-        .SYS_CLK_HZ     (50_000_000),
+        .SYS_CLK_HZ     (SYS_CLK_HZ),
         .DEFAULT_BAUD   (115_200)
     ) u_uart1 (
         .clk            (clk_i),
@@ -763,7 +778,7 @@ module soc_top (
 
     // UART 2 (UART Stream)
     uart_stream_peripheral #(
-        .SYS_CLK_HZ     (50_000_000),
+        .SYS_CLK_HZ     (SYS_CLK_HZ),
         .DEFAULT_BAUD   (115_200)
     ) u_uart2 (
         .clk            (clk_i),
@@ -782,7 +797,7 @@ module soc_top (
 
     // I2C Master (400 kHz Fast Mode)
     i2c_peripheral #(
-        .SYS_CLK_FREQ   (50_000_000),
+        .SYS_CLK_FREQ   (SYS_CLK_HZ),
         .I2C_FREQ       (400_000)
     ) u_i2c (
         .clk            (clk_i),

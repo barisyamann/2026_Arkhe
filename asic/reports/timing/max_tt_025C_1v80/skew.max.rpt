@@ -5,17 +5,17 @@ Clock Skew (Setup)
 ======================= max_tt_025C_1v80 Corner ===================================
 
 Clock clk_i
-4.874537 source latency _187827_/CLK ^
--3.466976 target latency _187432_/CLK ^
+4.347448 source latency _191870_/CLK ^
+-3.369815 target latency u_npu.u_npu_sram.g_sram[2].u_macro/clk0 ^
 0.250000 clock uncertainty
 0.000000 CRPR
 --------------
-1.657561 setup skew
+1.227633 setup skew
 
 Clock jtag_clk
-0.776273 source latency _189829_/CLK ^
--0.728142 target latency _188145_/CLK ^
+0.728882 source latency _190077_/CLK ^
+-0.672833 target latency _190010_/CLK ^
 0.000000 CRPR
 --------------
-0.048131 setup skew
+0.056049 setup skew
 

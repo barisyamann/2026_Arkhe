@@ -1,0 +1,36 @@
+Spike ham buyruk : 932
+RTL   ham buyruk : 1727
+hizalama PC      : 0x01000000
+Spike (hizali)   : 927
+RTL   (hizali)   : 927
+
+==================================================================
+KARSILASTIRMA
+==================================================================
+  karsilastirilan buyruk : 927
+  PC uyusmazligi         : 0
+  makine kodu uyusmazligi: 0
+  sikistirilmis (beklenen): 432
+  --- yazmac duzeyi (12 Eylul 2026) ---
+  yazmac karsilastirilan : 765
+  yazmac NO uyusmazligi  : 0
+  yazmac DEGER uyusmazligi: 0
+  tek tarafli yazmac bilgisi: 0
+  platform kimlik CSR farki : 3 (hata DEGIL, asagida listeli)
+
+platform kimlik CSR farklari (HATA DEGIL):
+  #477   PC=010002f4  mvendorid  Spike 0x0         CV32E40P 0x602
+  #481   PC=01000302  marchid    Spike 0x5         CV32E40P 0x4
+  #489   PC=0100031e  misa       Spike 0x40141104  CV32E40P 0x40001104
+  -> Spike genel bir RISC-V modelidir; CV32E40P OpenHW Group
+     cekirdegi kendi vendor/arch kimligini raporlar. misa
+     farki da beklenen: Spike rv32imc ile kosuldu.
+
+SONUC: 927 buyrukta PC dizisi BIREBIR ESLESTI.
+       765 buyrukta YAZMAC DEGERI de birebir eslesti.
+       Spike ISS ile RTL izleri TUR ve SIRA bakimindan ayni.
+
+       432 buyrukta makine kodu gosterimi farkli: Spike ham
+       16-bit sikistirilmis kodu, CV32E40P tracer'i ise
+       ACILMIS 32-bit karsiligini raporlar. Ayni buyruk,
+       farkli gosterim - PC esitligi dogru cozuldugunu kanitlar.

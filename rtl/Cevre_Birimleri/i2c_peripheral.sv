@@ -205,6 +205,11 @@ module i2c_peripheral #(
     assign ceyrek_uzunluk = (phase == 2'd3) ? (CW+1)'(SON_CEYREK)
                                             : (CW+1)'(QUARTER);
     logic          i2c_active;
+    // Saat germe sinyalleri (kullanimdan once bildirilmeli - asagida
+    // surulurler; ayrintili gerekce zamanlama uretecinde aciklanmistir)
+    logic [1:0]    scl_snk;         // iki kademeli senkronizator
+    logic          scl_hat;         // senkronize edilmis SCL hat degeri
+    logic          germe_dur;       // slave hatti tutuyor -> sayaci dondur
     logic          bit_done;        // Pulse: end of a full SCL bit period
     logic          sample;          // Pulse: SDA sample point (mid SCL-high)
 
@@ -235,12 +240,92 @@ module i2c_peripheral #(
     //  I2C Timing Generator
     // ================================================================
     assign i2c_active = (state != ST_IDLE);
-    assign bit_done   = i2c_active &&
+    //  germe_dur asagida (saat germe blogunda) uretilir.
+    //
+    //  DARBELERIN GERME ILE KAPILANMASI  -- 12 Eylul 2026
+    //    sample faz 2'de tick_cnt==0 anindadir ve faz 2'de master SCL'i
+    //    BIRAKMISTIR. Slave tam o anda hatti tutarsa sayac tick_cnt==0
+    //    uzerinde donar ve kapilanmamis bir 'sample' germe boyunca HER
+    //    CEVRIM darbelenir -- SDA defalarca ornelenirdi.
+    //
+    //    Dogru I2C davranisi hattin GERCEKTEN yukselmesini beklemektir
+    //    (UM10204 §3.1.9): veri SCL yuksekken gecerlidir. Bu yuzden her
+    //    iki darbe de germe sirasinda bastirilir. Germe bitince sayac
+    //    kaldigi yerden devam eder ve darbe normal sekilde olusur.
+    //
+    //    bit_done faz 3'tedir (scl_oe=1, master suruyor) -- orada germe
+    //    tanim geregi olusamaz; kapilama yine de simetri icin eklendi.
+    assign bit_done   = i2c_active && !germe_dur &&
                         (phase    == 2'd3) &&
                         (tick_cnt == (ceyrek_uzunluk - 1));
-    assign sample     = i2c_active &&
+    assign sample     = i2c_active && !germe_dur &&
                         (phase    == 2'd2) &&
                         (tick_cnt == '0);
+
+    // ----------------------------------------------------------------
+    //  SAAT GERME (CLOCK STRETCHING)            -- 12 Eylul 2026
+    //
+    //  NEDEN EKLENDI
+    //    Port taramasi scl_i'nin YALNIZCA port tanimi oldugunu, hicbir
+    //    yerde okunmadigini gosterdi. Yani master SCL'i biraktiktan
+    //    sonra hattin gercekten YUKSELDIGINI hic dogrulamiyordu.
+    //
+    //    I2C acik drenajdir: scl_oe=0 "hatti birak" demektir, "hat
+    //    yuksek" demek DEGILDIR. Yavas bir slave SCL'i asagi cekerek
+    //    "henuz hazir degilim" der (UM10204 §3.1.9). Germeyi gormeyen
+    //    bir master zamanlamasini yurutmeye devam eder ve slave'in
+    //    kaciridigi bitler sessiz veri bozulmasina yol acar.
+    //
+    //  NASIL CALISIR
+    //    Ceyrek sayaci YALNIZCA su durumda dondurulur:
+    //      - master SCL'i birakmis (scl_oe = 0), VE
+    //      - hat hala asagida (scl_i = 0)
+    //    Bu tam olarak SCL-yuksek penceresidir (faz 1 ve 2). Master
+    //    SCL'i kendi suruyorsa (scl_oe = 1, faz 0 ve 3) hattin asagida
+    //    olmasi NORMALDIR; orada dondurmek kilitlenme olurdu.
+    //
+    //    Metastabilite icin iki kademeli senkronizator kullanilir --
+    //    scl_i baska bir saat alanindan (harici cihaz) gelir.
+    //
+    //  ZAMANLAMAYA ETKISI
+    //    Hicbir slave germezse scl_i, scl_oe=0 oldugunda daima 1'dir,
+    //    germe_dur hep 0 kalir ve sayac ESKISI GIBI calisir. Yani
+    //    400 kHz SCL olcumu (tb_i2c_scl_frekans / tb_i2c_scl_periyot)
+    //    degismez -- germe yalnizca bir slave hatti cektiginde devreye
+    //    girer.
+    // ----------------------------------------------------------------
+    //  SENKRONIZATOR GECIKMESININ TELAFISI  -- olculerek bulundu
+    //    Ilk uygulamada germe_dur = !scl_oe && !scl_snk[1] idi ve
+    //    tb_i2c_scl_periyot periyodu 2500 -> 2540 ns olarak OLCTU:
+    //    bit basina TAM 2 cevrim (40 ns @ 50 MHz). Neden: master SCL'i
+    //    biraktigi anda senkronizator hala ESKI (dusuk) degeri tasiyor,
+    //    bu yuzden germe olmadigi halde her bitte iki cevrim donuluyordu.
+    //
+    //    Cozum: senkronizator boru hatti TAZELENENE kadar germe karari
+    //    VERILMEZ. scl_oe dustukten sonra iki cevrim beklenir; ancak o
+    //    zaman scl_snk[1] hattin gercek durumunu yansitir.
+    //
+    //    Boylece germe yokken sayac hic durmaz (periyot tam 2500 ns
+    //    kalir), germe varsa iki cevrim sonra yakalanir.
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) scl_snk <= 2'b11;          // bosta hat yuksek kabul
+        else        scl_snk <= {scl_snk[0], scl_i};
+    end
+    assign scl_hat = scl_snk[1];
+
+    // Master SCL'i biraktiktan sonra senkronizatorun tazelenmesi icin
+    // gecen cevrim sayisi (0,1,2 -> 2'de doyar).
+    logic [1:0] birakma_yasi;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n)                  birakma_yasi <= 2'd0;
+        else if (!i2c_active || scl_oe)  birakma_yasi <= 2'd0;
+        else if (birakma_yasi != 2'd2) birakma_yasi <= birakma_yasi + 2'd1;
+    end
+
+    // Yalnizca (a) master hatti birakmis, (b) senkronizator tazelenmis
+    // ve (c) hat hala asagidaysa dur.
+    assign germe_dur = i2c_active && !scl_oe &&
+                       (birakma_yasi == 2'd2) && !scl_hat;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -249,6 +334,10 @@ module i2c_peripheral #(
         end else if (!i2c_active) begin
             tick_cnt <= '0;
             phase    <= 2'd0;
+        end else if (germe_dur) begin
+            // Slave SCL'i asagi tutuyor: zamanlamayi OLDUGU YERDE dondur.
+            tick_cnt <= tick_cnt;
+            phase    <= phase;
         end else begin
             if (tick_cnt == (ceyrek_uzunluk - 1)) begin
                 tick_cnt <= '0;
