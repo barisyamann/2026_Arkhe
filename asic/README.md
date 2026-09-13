@@ -59,13 +59,22 @@ make asic_run
 
 `make asic_run` temiz, zaman etiketli bir `asic/run/` çalışma alanı kullanır; LibreLane'in varsayılan `runs` yolu bu dizine yönlendirilir. Mevcut koşu üzerine yazılmaz. Akış bittikten sonra raporlar kaynak adım eşlemesiyle toplanır ve aynı GDS için ek çıkarım/LVS aşaması çağrılır; akış başarısızlığı toplama başarılı olsa da nonzero olarak döndürülür. `make collect RUN=run/<etiket>` elle toplama, `make gds_lvs` ek GDS kontrolü içindir. Önceki raporlar tarihli collection dizininde korunur. `make asic_verify` yayımlanan dosya ve SHA-256 bütünlüğünü kontrol eder; signoff başarısı anlamına gelmez. Yeniden üretilmiş sonuçların özgün teslim hash'leriyle aynı olması beklenmez; bu durumda yeni raporlar ayrıca değerlendirilmelidir.
 
-Paketleme sırasında yapılandırma/lint çalıştırıldı; tam PnR yeniden çalıştırılmadı. Kanıt `evidence/packaging_config_check_runs`; etkin ayar karşılaştırması `provenance/config_comparison.json` (boş fark). Çok saat süren fiziksel akış için 8 çekirdek ve yaklaşık 62 GB RAM kullanılan referanstır; 16 GB ham koşuya ek PDK/geçici alan gerekir. Temiz makinede en az 40 GB boş çalışma alanı önerilir; bitiş süresi garanti edilmez.
+Paketleme sırasında yapılandırma/lint çalıştırıldı; tam PnR yeniden çalıştırılmadı. Kanıt `evidence/packaging_config_check_runs`; etkin ayar karşılaştırması `provenance/config_comparison.json` — **380 anahtar aynı, gerçek tasarım farkı 0** (30 fark akışın kendi eklediği mutlak yollardır). `python scripts/config_karsilastir.py` ile yeniden üretilir. Çok saat süren fiziksel akış için 8 çekirdek ve yaklaşık 62 GB RAM kullanılan referanstır; 16 GB ham koşuya ek PDK/geçici alan gerekir. Temiz makinede en az 40 GB boş çalışma alanı önerilir; bitiş süresi garanti edilmez.
 
 ## 4. RTL ve girdiler
 
 `filelist.f` depo köküne göre kaynakları listeler. `config.yaml` aynı 57 kaynak için `asic/` dizinine göre yollar kullanır; JSON biçimi geçerli YAML'dır. Include dizinleri, `USE_SRAM_MACRO` tanımı ve bütün etkin ayarlar bu dosyada bulunur. `results/config/resolved.json` özgün, değiştirilmemiş koşu yapılandırmasıdır; tarihsel mutlak yollar burada bilerek korunmuştur.
 
-RTL, testbench ve yazılım kökteki `rtl/`, `tb/`, `sw_nexys/`, `scripts/` dizinlerindedir. Model/ağırlık ve yardımcı proje dosyaları da korunmuştur. `provenance/source_hashes.json` paketleme anındaki RTL hash'lerini içerir. 5 Eylül aday manifestinden farklı dosya `rtl/npu/npu_tcm_sram.sv`'dir. Hiçbir RTL dosyasının mtime'ı bu koşunun sentez başlangıcından yeni değildir. Ek kontrol: senteze giren 57 dosyanın tamamı GitHub `d800acb` commit’inin byte içerikleriyle eşleşmiştir; `provenance/git_source_match.json` sonucu kaydeder.
+RTL, testbench ve yazılım kökteki `rtl/`, `tb/`, `sw_nexys/`, `scripts/` dizinlerindedir. Model/ağırlık ve yardımcı proje dosyaları da korunmuştur. `provenance/source_hashes.json` paketleme anındaki RTL hash'lerini içerir. 5 Eylül aday manifestinden farklı dosya `rtl/npu/npu_tcm_sram.sv`'dir. Hiçbir RTL dosyasının mtime'ı bu koşunun sentez başlangıcından yeni değildir. Ek kontrol: senteze giren 57 dosyanın tamamı `asic/rtl_manifest.txt` ile SHA-256 düzeyinde eşleşir:
+
+```bash
+python scripts/rtl_manifest.py dogrula asic/rtl_manifest.txt
+# SONUC: TUM DOSYALAR ESLESIYOR  (57 dosya)
+```
+
+Hash'ler satır sonları LF'e normalize edilerek alınır; CRLF/LF farkı gerçek kaynak farkı sayılmaz.
+
+> **Not.** `provenance/git_source_match.json` dosyası **önceki `d45_anten2` koşusuna** aittir ve o koşunun kaynağının `d800acb` commit'iyle eşleştiğini kaydeder. S_final2'nin kaynak kanıtı yukarıdaki manifest doğrulamasıdır; iki dosya karıştırılmamalıdır.
 
 5 Eylül doğrulama logları `evidence/candidate_validation` altında **tarihsel aday testi** olarak korunmuştur; değiştirilmiş son RTL için yeni tam regresyon sonucu olarak sunulmaz.
 
