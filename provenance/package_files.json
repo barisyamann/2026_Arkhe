@@ -1,27 +1,27 @@
 {
  "JURI_TEKNIK_OZET.md": {
-  "bytes": 8412,
-  "sha256": "b55eb1c444bfbd9bb4b294bb0d5eb26ec6cdc09d6ab52ec72ff87b8367d1ccf5"
+  "bytes": 10537,
+  "sha256": "2278f8bec79dbaedbd55637de6257171a3e6cacc8f76246ffeeeff698c698105"
  },
  "README.md": {
-  "bytes": 2131,
-  "sha256": "7635025e9523d6adf6713f8b96279cace438f787071fce955e485849b7560694"
+  "bytes": 3291,
+  "sha256": "91025fbd9521fbc52195d1a07cc130f94fd9df6cbc26ed603bcfa6a945dc261d"
  },
  "asic/Makefile": {
   "bytes": 233,
   "sha256": "09f618d295b9679e21365b8c2bcdc9bd787c53ecee37a0fadc322510edd7499e"
  },
  "asic/README.md": {
-  "bytes": 29979,
-  "sha256": "9a7c2f4797770f9ad391b9e004fd7b532b36aef9259c3255110ade772e356929"
+  "bytes": 34705,
+  "sha256": "1066d225e0bad5f40baff7eb7e8f52442510989af53e81c6773b802c5a1f61be"
  },
  "asic/THIRD_PARTY.md": {
-  "bytes": 7683,
-  "sha256": "a3079d3edb8e2111cb47dce86a1d4dbfec917ad21d6391f29f3df1781b12d90c"
+  "bytes": 7689,
+  "sha256": "7a04a75a3ee523fd4df80d3a3fc77683777a3dfbda7e5290ee8f886ec75b1a0e"
  },
  "asic/config.yaml": {
-  "bytes": 20986,
-  "sha256": "f57794a222657b62996fba71f962a5f7a2d7a4978b0e1f82ddd6b06622c59000"
+  "bytes": 20987,
+  "sha256": "743f40cd8f0db5db1af6446e227fd783d16b728d3ea106f9dbaafc60b81c893f"
  },
  "asic/constraints/design.sdc": {
   "bytes": 11408,
@@ -1004,8 +1004,8 @@
   "sha256": "7e75ba965d2661d40679a0a53f94bdd26bbcc01d967d62eec6224d5c2355c36f"
  },
  "docs/SUNUM_ICERIGI.md": {
-  "bytes": 21730,
-  "sha256": "11e453ea1349b6b69a8d24466cf26c774607845a54f5f3d799bd7e290b15ae43"
+  "bytes": 27032,
+  "sha256": "d9873ae86bdc01e460644af0f9156d1b7d1e1c5e3857201c0c1a3a5c6cfd97f7"
  },
  "docs/historical_asic_README_20260826.md": {
   "bytes": 33835,
@@ -2428,8 +2428,8 @@
   "sha256": "4e2f2b6cabf08ec379792ec05a1be9e224b3a7dca7babc9be00cacbe986a399f"
  },
  "provenance/config_comparison.json": {
-  "bytes": 2,
-  "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  "bytes": 1931,
+  "sha256": "135c448df076e163bb0657ffb8431f919ce42e77b04c4ec6ae0659c530f38443"
  },
  "provenance/git_source_match.json": {
   "bytes": 198,
@@ -4028,8 +4028,8 @@
   "sha256": "b6f8c97361096bd74c0cde3f57cd2daf04abf2b759933c86584aa50d67cb637c"
  },
  "scripts/run_regression.py": {
-  "bytes": 49009,
-  "sha256": "6b71d6aeb0cbc0e70bf134613cecac52e99079e1d746a0e5acf61132573739ca"
+  "bytes": 51414,
+  "sha256": "59c1c0f1d0f22f0e40a3194a96bbf2af6d05e95bd68aef14e2dfbe01579c59fa"
  },
  "scripts/run_simulation.tcl": {
   "bytes": 96,
@@ -4848,8 +4848,8 @@
   "sha256": "09cc0dcbaaecc178f7d9ac5b120fd3330f4c0f482c20fc14d7db43a166b2b8e5"
  },
  "tb/tb_soc_top.sv": {
-  "bytes": 77793,
-  "sha256": "c451d6346a4f92c73a3038cf063984f3b7393884adc1aee949f1e193edc5d978"
+  "bytes": 87599,
+  "sha256": "018593b202bf6a2e5350f9ee7acbe576f0b65febf54f164c4ef70c0a3315d59b"
  },
  "tb/tb_sram_registered.sv": {
   "bytes": 6213,
@@ -4872,8 +4872,8 @@
   "sha256": "c1fa0aa0db30296a035401f00c96a0d12a4dcde8276e04cd56da73b85cfaa305"
  },
  "tb/uvm/axil_uvm_pkg.sv": {
-  "bytes": 85950,
-  "sha256": "39081dd719bb20dd28a87e49ef84fe838bb7857488994c45d11ef18cbe075dba"
+  "bytes": 86669,
+  "sha256": "390be428c9c62b5d76056eb1333d6e56bc6b046d9d0aa40609e0e0cc8da5912a"
  },
  "teknotest/dfx_runtime.txt": {
   "bytes": 113,

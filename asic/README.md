@@ -435,7 +435,7 @@ kopyasıdır**; ayrı veya farklı bir koşum değildir.
 | Dosya adı | `arkhe_soc_S_final2_fiziksel_ciktilar.tar.gz` |
 | Boyut | **692.043.282 bayt** (660 MiB / 692 MB) |
 | SHA-256 | `395134199f8e0b1b84b6a3aed989a0825207897a9006e6cd5f169fc7739329e0` |
-| İndirme bağlantısı | *(yüklendikten sonra yazılacak)* |
+| İndirme bağlantısı | <https://drive.google.com/drive/folders/12KrecGAQVRhM7vGnPL8ZmkDDyxLFeYo1?usp=sharing> (Google Drive klasörü; arşiv ve `.sha256` dosyası bu klasörün içindedir) |
 | İçerik | `asic/` dizininin tamamı: **249 dosya**, açılmış hâli 4,68 GB — nihai GDSII (`soc_top.gds`), Magic ve KLayout GDSII, nihai DEF, ODB, MAG, üç RC köşesi SPEF, dokuz köşe SDF, nihai GDSII'den çıkarılan SPICE, üç netlist, dokuz köşe zamanlama ve güç raporları, `config.yaml`, `filelist.f`, `rtl_manifest.txt`, kısıt dosyaları (`constraints/`), `checksums/SHA256SUMS` |
 | Arşiv biçimi | `tar -czf` — açıldığında tek bir `asic/` dizini oluşturur |
 
