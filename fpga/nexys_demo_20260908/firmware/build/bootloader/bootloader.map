@@ -1,0 +1,40 @@
+
+There are no discarded input sections
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+BOOTROM          0x00000000         0x00000400         xr
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\bootloader\bootloader.o
+
+.text           0x00000000       0xa8
+                0x00000000                        . = ALIGN (0x4)
+ *(.text.start)
+ .text.start    0x00000000       0xa6 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\bootloader\bootloader.o
+                0x00000000                _start
+ *(.text*)
+ .text          0x000000a6        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\bootloader\bootloader.o
+ *(.rodata*)
+                0x000000a8                        . = ALIGN (0x4)
+ *fill*         0x000000a6        0x2 
+
+.data           0x000000a8        0x0
+ .data          0x000000a8        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\bootloader\bootloader.o
+
+.bss            0x000000a8        0x0
+ .bss           0x000000a8        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\bootloader\bootloader.o
+
+/DISCARD/
+ *(.comment)
+ *(.note*)
+ *(.eh_frame*)
+OUTPUT(C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\bootloader\bootloader.elf elf32-littleriscv)
+
+.riscv.attributes
+                0x00000000       0x36
+ .riscv.attributes
+                0x00000000       0x36 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\bootloader\bootloader.o

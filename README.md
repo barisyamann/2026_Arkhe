@@ -17,7 +17,7 @@ RISC-V (CV32E40P) tabanlı, TFLite Micro Speech modelini donanımda
 | **DRC** | KLayout **0** · Routing **0** · XOR **0** · Magic 7.658 (makro kaynaklı, belgeli) |
 | **Anten** | 0 / 0 |
 | **Doğrulama** | 37/37 test · 702 denetim · 9/9 mutasyon yakalandı |
-| **FPGA** | route error 0 · WNS +1,572 ns · WHS +0,042 ns |
+| **FPGA** | 14 Eylül bitstream'leri, güncel RTL · Demo A (`nexys_top`): WNS **+1,207** / WHS **+0,033** ns · Demo C (`nexys_usb_top`): **+1,270** / **+0,023** ns · TNS ve THS sıfır, route DRC 0 hata |
 
 Beyan edilen çalışma noktası **43,2 MHz** (23,148 ns). ASIC koşu
 etiketi **`S_final2`**.

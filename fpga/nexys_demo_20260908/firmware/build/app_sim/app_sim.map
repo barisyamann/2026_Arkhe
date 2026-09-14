@@ -1,0 +1,92 @@
+
+There are no discarded input sections
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+IRAM             0x01000000         0x00002000         xr
+RAM              0x20000000         0x00002000         xrw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\main.o
+LOAD C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\crt0.o
+
+.text           0x01000000      0x7d4
+                0x01000000                        . = ALIGN (0x4)
+ *(.init)
+ *(.text.start)
+ .text.start    0x01000000       0x52 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\crt0.o
+                0x01000000                _start
+ *(.text*)
+ *fill*         0x01000052       0xae 
+ .text          0x01000100      0x2be C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\main.o
+                0x01000146                uart_init
+                0x0100015a                uart_putc
+                0x01000176                uart_print
+                0x010001a4                uart_print_dec
+                0x01000200                trap_handler
+                0x0100034a                uart_print_hex8
+                0x0100037c                uart_print_hex32
+ .text.startup  0x010003be      0x2f4 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\main.o
+                0x010003be                main
+ .text          0x010006b2        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\crt0.o
+ *(.rodata*)
+ *fill*         0x010006b2        0x2 
+ .rodata.str1.4
+                0x010006b4      0x11e C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\main.o
+                                0x122 (size before relaxing)
+                0x010007d4                        . = ALIGN (0x4)
+ *fill*         0x010007d2        0x2 
+
+.rela.dyn       0x010007d4        0x0
+ .rela.text.start
+                0x010007d4        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\main.o
+
+.data           0x20000000        0x0 load address 0x010007d4
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __data_start = .
+ *(.data*)
+ .data          0x20000000        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\main.o
+ .data          0x20000000        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\crt0.o
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __data_end = .
+                0x010007d4                        __data_load_start = LOADADDR (.data)
+
+.bss            0x20000000        0x0 load address 0x010007d4
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __bss_start = .
+ *(.bss*)
+ .bss           0x20000000        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\main.o
+ .bss           0x20000000        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\crt0.o
+ *(COMMON)
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __bss_end = .
+
+.sbss           0x20000000       0x1c load address 0x010007d4
+ .sbss          0x20000000       0x1c C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\main.o
+                0x20000000                bus_fault_st
+                0x20000004                bus_fault_addr
+                0x20000008                bus_fault_flag
+                0x2000000c                npu_class
+                0x20000010                npu_done_flag
+                0x20000014                dma_flag
+                0x20000018                timer_flag
+
+.stack          0x2000001c        0x4 load address 0x010007d4
+                0x20000020                        . = ALIGN (0x10)
+ *fill*         0x2000001c        0x4 
+                0x20002000                        __stack_top = (ORIGIN (RAM) + LENGTH (RAM))
+OUTPUT(C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\app_sim.elf elf32-littleriscv)
+
+.comment        0x00000000       0x33
+ .comment       0x00000000       0x33 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\main.o
+                                 0x34 (size before relaxing)
+
+.riscv.attributes
+                0x00000000       0x3c
+ .riscv.attributes
+                0x00000000       0x3c C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\main.o
+ .riscv.attributes
+                0x0000003c       0x36 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\app_sim\crt0.o

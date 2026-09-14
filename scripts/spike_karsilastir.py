@@ -166,6 +166,21 @@ def main():
                     default=str(KOK / "build/regression/cekirdek_izi"
                                       "/trace_core_00000000.log"))
     ap.add_argument("--baslangic", default=BASLANGIC_PC)
+    # --- 13 Eylul 2026: dis inceleme bulgusu ---
+    # Once uzunluk farki ve tek tarafli yazmac bilgisi HATA SAYILMIYORDU:
+    # Spike 927, RTL 800 buyruk olsa bile ilk 800 uyusuyorsa betik PASS
+    # donuyordu. Self-checking dogrulama icin fazla gevsek.
+    #
+    # Artik ikisi de hata sayilir. Mesru bir fark varsa ACIKCA beyan
+    # edilir; sessizce gecistirilmez.
+    ap.add_argument("--izin-uzunluk-farki", type=int, default=0,
+                    metavar="N",
+                    help="Hizalama sonrasi izin verilen buyruk sayisi farki "
+                         "(varsayilan 0 - fark HATADIR)")
+    ap.add_argument("--izin-tek-tarafli", type=int, default=0,
+                    metavar="N",
+                    help="Izin verilen tek tarafli yazmac bilgisi sayisi "
+                         "(varsayilan 0 - HATADIR)")
     a = ap.parse_args()
 
     for yol in (a.spike, a.rtl):
@@ -300,7 +315,13 @@ def main():
                     "  #%-5d DEGER FARKLI PC=%s x%-2s  Spike %-8s RTL %-8s"
                     % (i, spc, syz, sdg, rdg))
 
-    hata = pc_hata + kod_hata + yazmac_no_hata + yazmac_deger_hata
+    # --- 13 Eylul 2026: iki yeni hata kalemi (dis inceleme) ---
+    uzunluk_farki = abs(len(s) - len(r))
+    uzunluk_hata = max(0, uzunluk_farki - a.izin_uzunluk_farki)
+    tek_tarafli_hata = max(0, yazmac_tek_tarafli - a.izin_tek_tarafli)
+
+    hata = (pc_hata + kod_hata + yazmac_no_hata + yazmac_deger_hata
+            + uzunluk_hata + tek_tarafli_hata)
 
     print("=" * 66)
     print("KARSILASTIRMA")
@@ -313,13 +334,22 @@ def main():
     print("  yazmac karsilastirilan : %d" % yazmac_karsilastirilan)
     print("  yazmac NO uyusmazligi  : %d" % yazmac_no_hata)
     print("  yazmac DEGER uyusmazligi: %d" % yazmac_deger_hata)
-    print("  tek tarafli yazmac bilgisi: %d" % yazmac_tek_tarafli)
+    print("  tek tarafli yazmac bilgisi: %d%s" %
+          (yazmac_tek_tarafli,
+           "  <-- HATA" if tek_tarafli_hata else
+           ("  (izinli)" if yazmac_tek_tarafli else "")))
     if kimlik_csr_farki:
         print("  platform kimlik CSR farki : %d (hata DEGIL, asagida listeli)"
               % len(kimlik_csr_farki))
     if len(s) != len(r):
-        print("  UZUNLUK FARKI          : Spike %d, RTL %d" % (len(s), len(r)))
-        print("  (RTL izi sonsuz dongude kesilmis olabilir - normal)")
+        print("  UZUNLUK FARKI          : Spike %d, RTL %d (fark %d)%s" %
+              (len(s), len(r), uzunluk_farki,
+               "  <-- HATA" if uzunluk_hata else "  (izinli)"))
+        if uzunluk_hata:
+            print("  Iki iz ayni sayida buyruk icermiyor. Bu, RTL'in erken")
+            print("  durdugunu veya fazladan buyruk yuruttugunu gosterebilir.")
+            print("  Mesru bir sebep varsa --izin-uzunluk-farki N ile ACIKCA")
+            print("  beyan edin; sessizce gecistirmeyin.")
     print()
 
     if kimlik_csr_farki:

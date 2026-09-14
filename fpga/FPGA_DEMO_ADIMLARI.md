@@ -6,6 +6,23 @@ demo aracıyla uçtan uca çalıştırmak.
 Bu belge, demoyu **kendiniz yapmanız** için yazılmıştır. Her adımda ne
 göreceğiniz ve ters giderse ne yapacağınız yazılıdır.
 
+## Üç demo var — hangisi ne işe yarar
+
+| Demo | Ne ölçer | Ek donanım | Bölüm |
+|---|---|---|---|
+| **A** | TEKNOFEST'in resmi aracı; sınıflandırma doğruluğu ve arayüz uyumu | Pmod JB'ye 3,3 V UART-TTL modülü | aşağıda |
+| **B** | SoC'un tamamı: CPU, bellek, çevre birimleri, NPU | yok (tek USB) | aşağıda |
+| **C** | **B'nin üst kümesi** + harici ESP32 ile **gerçek I2C** | ESP32 (Pmod JA) | aşağıda |
+
+> **Demo C, Demo B'yi kapsar.** C'yi koşarsanız B'yi ayrıca koşmanıza
+> gerek yoktur; C tüm B denetimlerini ve üzerine 3 I2C denetimini içerir.
+>
+> **Jüri demosu için asıl olan A'dır** — resmi araç odur. B ve C kendi
+> doğrulama kanıtlarımızdır.
+
+Her üç bitstream de **14 Eylül 2026'da güncel RTL'den** üretilmiştir;
+ASIC teslimiyle aynı kaynak.
+
 ---
 
 ## Gerekenler
@@ -206,7 +223,7 @@ Referans koşumuz `fpga/demo_teknofest/sonuclar/` altındadır. Karşılaştır:
 | `mismatch_count` | **0** |
 | Gecikme (medyan) | 7,74 ms |
 | Hızlanma | 183× (yazılım referansı 1418 ms) |
-| Sağlamlık | 9 geçti / 1 atlandı |
+| Sağlamlık | **9 PASS / 1 FAIL / 1 SKIP** — `back_to_back` beş çerçevenin dördüne yanıt verir (bilinen sınırlama, kök nedeni bulundu); `peripheral_interleave` opsiyoneldir ve atlanır |
 
 `golden_agreement_pct = 100.0` ve `timeouts = 0` görüyorsan demo başarılıdır.
 
@@ -326,6 +343,109 @@ rapor kısmi sonucu kaydeder.
 
 Demo B'nin flash imajı Demo A'nınkini ezer. Demo A'yı tekrar
 çalıştıracaksan **Adım 2'yi tekrarla** ve `nexys_top.bit`'i geri yükle.
+
+---
+
+## Demo C — tam SoC testi + harici ESP32 I2C (`DEMO_C_I2C/run_jury.py`)
+
+**Demo B'nin üst kümesidir.** Aynı öztestler, aynı NPU çıkarımları, aynı
+anahtar/LED kontrolleri — üzerine **gerçek bir I2C cihazıyla veri
+alışverişi** eklenir. Demo B'yi ayrıca koşmaya gerek yoktur.
+
+### Neden var
+
+Demo B'nin kendi raporu I2C'yi eksik ilan ediyordu:
+
+> *"I2C: harici slave yok; yalnızca boş hat işlem tamamlanması"*
+
+Yani sadece "master işlemi başlattı, `TX_DONE` kuruldu" doğrulanıyordu.
+Demo C bunu kapatır: kart bir bayt yazar, ESP32 **tersini** döndürür,
+kart geri okuyup karşılaştırır.
+
+### C-1. ESP32'yi hazırla
+
+Arduino IDE → `fpga/DEMO_C_I2C/esp32_slave/esp32_slave.ino` → yükle →
+Seri Monitor **115200**:
+
+```
+ARKHE I2C SLAVE HAZIR (adres 0x42)
+  SDA=GPIO21  SCL=GPIO22
+```
+
+### C-2. Bağlantı
+
+| Nexys Pmod JA | FPGA pini | ESP32 |
+|---|---|---|
+| **JA1** | `C17` | **GPIO22** (SCL) |
+| **JA2** | `D18` | **GPIO21** (SDA) |
+| **JA5** veya **JA6** | GND | **GND** |
+
+> **GND'yi bağlamayı unutma** — iki kartın referansı ortak olmazsa hat
+> güvenilmez çalışır.
+>
+> 400 kHz'de sorun çıkarsa SCL ve SDA'ya 3,3 V'a giden 2,2–4,7 kΩ
+> harici direnç ekle. Dahili pull-up'larla da çalışır.
+
+### C-3. Programla
+
+MCS hazır (`arkhe_demo_c.mcs`, bitstream + flash birlikte):
+
+```
+Hardware Manager → Add Configuration Memory Device → s25fl128s...
+→ Program Configuration Memory Device → arkhe_demo_c.mcs
+→ Erase + Program + Verify
+→ sonra Program Device ile nexys_usb_top.bit
+```
+
+Kendin üretmek istersen: `python build_firmware.py` sonra Vivado Tcl'de
+`source gen_mcs.tcl`.
+
+### C-4. Koş
+
+```powershell
+cd C:\Users\ybari\2026_Arkhe\fpga\DEMO_C_I2C
+python run_jury.py --port COM16
+```
+
+`Hazir... CPU RESET` görünce **CPU RESET'e bir kez bas**, sonra dokunma.
+
+**Elle kısım** (otomatik bölüm bitince): 16 anahtar hepsi **0** → Enter,
+hepsi **1** → Enter, tekrar **0** → Enter, sonra 4 LED deseni için
+`e`/`h`.
+
+### C-5. Beklenen sonuç
+
+```
+I2C_ESP_TX_DONE      PASS
+I2C_ESP_RX_DONE      PASS
+I2C_ESP_YAZILAN 5A -> I2C_ESP_OKUNAN A5
+I2C_ESP_YAZILAN A5 -> I2C_ESP_OKUNAN 5A
+I2C_ESP_YAZILAN 3C -> I2C_ESP_OKUNAN C3
+I2C_ESP_VERI_DOGRU   PASS
+
+GECTI: 2 x 86 oztest kontrolu, 21 NPU sonucu, UART bayt testleri
+GPIO: PASS: 16 anahtar, yukselen/dusen kenar IRQ, dort LED deseni
+```
+
+ESP32 Seri Monitor'de eşzamanlı: `yazildi: 0x5A  ->  okunacak: 0xA5`
+
+> **ESP32 bağlı değilse test sessizce geçmez.** Yazma yine `TX_DONE`
+> verir (master hattı kendisi sürer) ama okuma `0xFF` döner —
+> `I2C_ESP_VERI_DOGRU` 0 çıkar ve koşum KALDI der.
+
+### Bilinen davranış: ESP32 sürücü gecikmesi
+
+ESP32'nin `Wire` slave TX yolu bir işlem geriden gelir. Bu yüzden test
+her değeri **iki kez** yazıp okur: ilk tur tamponu doldurur, ikinci tur
+geri okur. Bu Arkhe SoC'un I2C kontrolcüsünde bir kusur **değildir**;
+ölçülmüş ve `evidence/fpga_democ_20260914/OKUBENI.md` içinde
+belgelenmiştir.
+
+### Demo A'ya dönüş
+
+Demo C'nin flash imajı Demo A'nınkini ezer. Demo A'yı tekrar
+koşacaksan `nexys_demo_20260908/firmware/build/arkhe_stream_demo.mcs`
+dosyasını geri yükle.
 
 ---
 

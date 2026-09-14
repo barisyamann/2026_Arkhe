@@ -1,6 +1,6 @@
-# ARKHE — K_diyot ASIC teslimi
+# ARKHE — S_final2 ASIC teslimi
 
-Bu paket 11 Eylül 2026 tarihli **K_diyot** koşusunun kaynakları, raporları ve fiziksel çıktılarıdır.
+Bu paket 13 Eylül 2026 tarihli **`S_final2`** koşusunun kaynakları, raporları ve fiziksel çıktılarıdır. Koşu adı akış loglarında da görülebilir (`reports/general/flow.log` → `runs/S_final2/`) ve `environment/versions.txt` ile eşleşir.
 
 **Beyan edilen çalışma noktası: 23,148 ns (43,2 MHz). Dokuz PVT köşesinin tamamında setup ve hold pozitiftir, setup TNS sıfırdır.**
 
@@ -205,6 +205,54 @@ temizlik onayı değildir. Toplu resmi waiver kabulü iddia edilmez.
 
 ## 9. Bilinen sorunlar ve kapsam
 
+### Buyruk getirme adres çözücüsü — geçersiz adres için hata yolu yok
+
+**Bulgu (13 Eylül 2026, dış inceleme).** `rtl/Memory/soc_top.sv:550`
+buyruk tarafı adres çözümünü **iki yollu** yapar:
+
+```systemverilog
+assign instr_to_rom    = (instr_axil_araddr[31:24] == 8'h00);
+assign iram_m0_arvalid = instr_axil_arvalid && !instr_to_rom;
+```
+
+Yani üst bayt `0x00` ise Boot ROM'a, **diğer her adres** I-RAM'e
+yönlendirilir. Üçüncü bir yol — geçersiz adres için DECERR/trap —
+yoktur.
+
+`sram_module.sv:168` adresin yalnızca gerekli alt bitlerini kullanır
+(`s_axil_araddr[$clog2(RAM_DEPTH)+1 : 2]`, I-RAM için `[12:2]`).
+Sonuç olarak CPU'nun PC'si hatayla örneğin `0x4000_0000`'a giderse
+istek I-RAM'e yönlenir ve alt bitlerine göre **I-RAM içindeki başka
+bir komuta alias olur**; hata sinyali üretilmez.
+
+**Etkisi.** Normal program akışı Boot ROM → I-RAM olduğu için mevcut
+testlerin tamamı geçer ve bu davranış gözlenmez. Şartnamenin asgari
+kriterlerini ihlal etmez. Ancak sağlamlık (robustness) açısından
+gerçek bir tasarım açığıdır: kaçak bir sıçrama sessizce yanlış komut
+yürütür.
+
+**Doğrusu ne olurdu.** Buyruk tarafında üç yol:
+
+| Adres | Hedef |
+|---|---|
+| Boot ROM aralığı | ROM |
+| I-RAM aralığı | I-RAM |
+| **diğer her adres** | **DECERR / buyruk erişim hatası** |
+
+**Neden bu teslimde düzeltilmedi.** Düzeltme `soc_top.sv`'yi
+değiştirir. Teslim edilen GDSII (`S_final2`) bu dosyanın mevcut
+hâlinden sentezlenmiştir ve kaynak bütünlüğü `asic/rtl_manifest.txt`
+ile SHA-256 düzeyinde bu koşuya bağlıdır
+(`provenance/git_source_match.json`, commit `098d1b0`). RTL'i
+değiştirmek GDS ile kaynak arasındaki kanıt zincirini koparır; tam
+fiziksel akışın (~5,5 saat) yeniden koşulması ve bütün imzalama
+sonuçlarının yenilenmesi gerekir.
+
+Bu nedenle **sessizce değiştirilmemiş**, bilinen sınırlama olarak
+burada beyan edilmiştir. Düzeltme, fiziksel akışın yeniden
+koşulabileceği bir sonraki revizyona planlanmıştır.
+
+
 ### Kullanılmayan giriş portları
 
 RTL sistematik olarak tarandı: her giriş portunun modül gövdesinde kaç
@@ -354,6 +402,34 @@ Betik, teslim edilen `config.yaml` ile koşumun kendi ürettiği `results/config
 Bu değerler tahminle değil **ölçümle** seçilmiştir. Varsayılan ayarlarla (marj 0,6) hold onarıcısı yalnızca 17 tampon ekleyip ihlalleri kapsam dışı bırakıyor, marj 1,2 yapıldığında ise 12.828 tampon ekleyip yönlendirmeyi boğuyordu (`GRT-0232`). 0,8 marj ile 6.803 tampon eklenmiş ve zamanlama kapanmıştır. Ayrıntılı kök neden analizi: `verification/kanitlar/HOLD_KOK_NEDEN_CTS.md`.
 
 Dokuz köşe: nom/min/max × TT(25°C,1,80V), SS(100°C,1,60V), FF(−40°C,1,95V). Kesin değerler ve her köşenin WNS/TNS/yol kontrolleri `reports/timing/summary.rpt` ve alt dizinlerde; makine tarafından seçilmiş metrikler `provenance/signoff_metrics.json`.
+
+
+### Parazitik açıklaması yapılmamış (unannotated) netler
+
+`results/metrics/metrics.json` dokuz köşenin tamamında şunu raporlar:
+
+    timing__unannotated_net__count           = 1493
+    timing__unannotated_net_filtered__count  = 0
+
+**Ne anlama geliyor.** İlk sayı, çıkarılan SPEF'te parazitik kaydı
+bulunmayan net sayısıdır. İkinci sayı, akışın kendi eleme adımından
+(`filter_unannotated`, `OpenROAD.STAPostPNR` içinde) **sonra geriye
+kalan** net sayısıdır. LibreLane bu elemede güç/toprak şebekesi,
+besleme bağlantıları ve makro içi soyut netler gibi zamanlama yolu
+oluşturmayan netleri ayıklar.
+
+**Filtrelenmiş sayı sıfırdır.** Yani 1.493 netin tamamı akış tarafından
+bilinen ve zamanlama analizini etkilemeyen kategorilere girmiştir;
+geriye zamanlama yolu üzerinde açıklaması eksik **tek bir net
+kalmamıştır**. Sayının dokuz köşede birebir aynı (1493/0) olması da bunu
+destekler — köşeye göre değişen bir çıkarım eksikliği olsaydı bu sayılar
+farklılaşırdı.
+
+**Sınır.** Bu netlerin tek tek dökümü teslim paketinde yoktur; eleme
+adımının ayrıntılı logu koşu çalışma dizininde kalır
+(`runs/S_final2/56-openroad-stapostpnr/<köşe>/filter_unannotated.log`)
+ve rapor toplamasına dahil edilmemiştir. Dolayısıyla burada beyan edilen
+şey akışın kendi ölçümüdür: **filtrelenmiş unannotated net sayısı 0**.
 
 ## 12. Çıktı konumları ve bütünlük
 

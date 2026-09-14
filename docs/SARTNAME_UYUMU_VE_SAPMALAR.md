@@ -499,15 +499,24 @@ değerlendirileceğini söyler; 2,4× yavaşlama doğrudan puan kaybı olurdu.
 
 Testlerin gerçekten hata yakaladığı **ölçülmüştür**: `scripts/hata_enjeksiyon.py` RTL'e kasıtlı hata sokup ilgili testin kırmızıya döndüğünü doğrular. 9/9 mutasyon yakalanmaktadır; kampanya sonrası 57/57 RTL dosyası birebir korunur. Döküm: `evidence/denetim_20260910/HATA_ENJEKSIYONU.md`.
 
-### §5.2 Ödül Minimum Kriterleri — 5/5
+### §5.2 Ödül Minimum Kriterleri
 
-| Kriter | Durum | Kanıt |
-|---|:---:|---|
-| FPGA'da test senaryoları | ✓ | 34/34 çevre birimi + 15/15 NPU |
-| Self-checking boot + çevre birimi | ✓ | `sistem_gercek_boot` |
-| AXI protokol kontrolü | ✓ | UVM agent |
-| YZ hızlandırıcı test senaryosu | ✓ | altın vektör |
-| Üretime hazır GDSII | ✓ | LVS/DRC/anten temiz |
+> Aşağıdaki tablo **kendi ölçümlerimizi** verir; puanlama jürinin
+> takdirindedir. Her satırda hem sağlanan hem de açık kalan yön
+> belirtilmiştir.
+
+| Kriter | Ölçülen durum | Kanıt |
+|---|---|---|
+| FPGA'da test senaryoları | Kart üzerinde resmi araçla **156/156 örnek, altın referansla %100 uyum, 0 zaman aşımı**, ölçülen hızlanma **177×**. Ayrı bir koşumda dört sınıf skoru da altın referansla karşılaştırıldı: **MAE %0,078**. Sağlamlık senaryoları **9 PASS / 1 FAIL / 1 SKIP** — `back_to_back` beş çerçevenin dördüne yanıt veriyor (bilinen sınırlama, §6'da) | `evidence/fpga_demo_20260914_normal/`, `evidence/fpga_demo_20260914_skorlu/`, `evidence/FPGA_DEMO_A_IKI_KOSUM.md` |
+| Self-checking boot + çevre birimi | Gerçek QSPI boot zinciri (Boot ROM → Flash → I-RAM → `jalr` → uygulama) simülasyonda; kart üzerinde **2×86 öztest**, 21 NPU çıkarımı, elle GPIO/LED kontrolleri dahil. **I2C harici ESP32 slave ile gerçek yaz-oku doğrulandı** | `sistem_gercek_boot`, `evidence/fpga_democ_20260914/` |
+| AXI protokol kontrolü | 2 UVM pasif agent + 5 SVA checker, **401.729 işlem, 0 protokol ihlali**, 13 adres bölgesinin tamamı uyarıldı | `verification/AXI_UVM_KAPSAM_MATRISI.md` |
+| YZ hızlandırıcı test senaryosu | Altın vektör + dört sınıflı doğruluk + sarmalayıcı entegrasyonu; kart üzerinde 21 çıkarım, referansla 0 uyuşmazlık | `npu_golden`, `npu_dogruluk`, `npu_accelerator` |
+| GDSII üretimi ve fiziksel imzalama | GDSII üretildi. **Temiz:** LVS (GDS kaynaklı dahil), KLayout DRC, detailed-route DRC, XOR, anten, PDN — hepsi 0. **Açık:** Magic DRC 7.658 (tamamı `nwell.4`, makro kaynaklı), max slew 16.030, max cap 1.952, fanout 81 | `asic/README.md` §9, §11 |
+
+**Üretime hazır (production-ready) iddiasında bulunmuyoruz.** Magic DRC
+ve elektriksel DRV kalemleri açıktır; kök nedenleri ölçülmüş ve
+`asic/README.md` §9'da belgelenmiştir. Şartname açık ihlallerin
+teslimi geçersiz kılmadığını, ancak gizlenmemesi gerektiğini söyler.
 
 ---
 

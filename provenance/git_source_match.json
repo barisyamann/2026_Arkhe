@@ -1,6 +1,13 @@
 {
-  "commit": "d800acba6e464ba7ea453b7cb11bec954e36e4db",
+  "aciklama": "Teslim edilen S_final2 kosumunun RTL kaynaginin hangi git commit'iyle eslestigini kanitlar.",
+  "kosum": "S_final2",
+  "commit": "098d1b0492a9f0f18536dd5915c00ae2ea420b92",
+  "commit_mesaji": "S_final2 teslim paketi; depo yapisi sartname Tablo 8'e gore duzenlendi",
   "checked_sources": 57,
+  "matched": 57,
   "mismatches": [],
-  "method": "SHA256 of git show commit:path compared with frozen d45 source_hashes.json"
+  "missing_in_commit": [],
+  "method": "SHA-256 of 'git show <commit>:<path>', satir sonlari LF'e normalize edilerek; asic/rtl_manifest.txt ile karsilastirilir (scripts/rtl_manifest.py ile ayni kural).",
+  "yeniden_uretme": "python scripts/git_kaynak_esles.py --commit <sha> --yaz",
+  "onceki_kosu_notu": "Bu dosyanin onceki surumu d800acb commit'ini dogruluyordu; o commit ONCEKI d45_anten2 kosumunun kaynagidir ve teslim edilen S_final2'nin kaynagi DEGILDIR."
 }

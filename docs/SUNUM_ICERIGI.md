@@ -504,22 +504,26 @@ FF(−40 °C, 1,95 V)
 
 | | Değer |
 |---|---:|
-| Toplam | 121,8 mW |
-| İç (internal) | 104,4 mW |
-| Anahtarlama | 17,0 mW |
+| Toplam | **105,7 mW** |
+| İç (internal) | 90,6 mW |
+| Anahtarlama | 14,6 mW |
 | Sızıntı | 0,42 mW |
-| En kötü IR düşümü | %3,00 |
+| En kötü IR düşümü | **5,13 mV** (VPWR; 1,80 V'un ~%0,28'i) |
+| PDN ihlali | 0 |
 
-> Değerler `metrics.json` içindeki toplam güçtür. Köşeye göre değişir —
-> örneğin nom_tt_025C_1v80 köşesinde 112,8 mW. Slaytta "yaklaşık 120 mW"
-> demek ve köşe adını belirtmek yeterlidir.
+> **Bu değerler TAHMİNÎdir ve slaytta öyle söylenmelidir.** Açık
+> switching-activity girdisi (VCD/SAIF) yoktur; `VSRC_LOC_FILES`
+> kullanılmamıştır. Doğru ifade: *"LibreLane varsayılan switching-activity
+> kabulü altında tahminî toplam güç yaklaşık 105,7 mW."*
+> **"Ölçüldü" demeyin.** Kaynak: `results/metrics/metrics.json`
+> (`power__total = 0,10566 W`).
 
 ### 10.4 Dürüstlükle sunulacak açık kalemler
 
 Bunları **kendiniz söyleyin**, jüri sormadan. Gizlemeye çalışmak çok daha
 kötü görünür ve bizim en güçlü yanımız şeffaflığımızdır.
 
-**a) Slew / kapasite ihlalleri — 19.341 / 1.888**
+**a) Slew / kapasite / fanout ihlalleri — 16.030 / 1.952 / 81**
 
 Söylenecek: "Bu ihlaller açıktır ve kapatılamamıştır. İki farklı yaklaşım
 denedik — geçiş eşiğini kütüphane sınırına çekmek ve DRV onarım marjlarını
@@ -527,7 +531,21 @@ artırmak. Her ikisi de ölçümle tasarımı **kötüleştirdi**: ortalama slew
 1,10 ns'den 1,95 ns'ye çıktı ve hold 9/9 temizliği kayboldu. Bu yüzden
 özgün koşuyu koruduk. Denemelerin sayısal sonuçları teslimde belgelidir."
 
-**b) Magic DRC — 7.658 bulgu**
+**b) Buyruk getirme adres çözücüsünde hata yolu yok**
+
+Söylenecek: "Dış incelemede bulundu ve **biz de doğruladık**. Buyruk
+tarafı iki yollu: üst bayt `0x00` ise Boot ROM, diğer her adres I-RAM.
+Geçersiz adres için DECERR yolu yok; kaçak bir PC I-RAM içinde alias
+oluyor. Normal akış Boot ROM → I-RAM olduğu için testler görmüyor,
+şartname kriterlerini de ihlal etmiyor — ama gerçek bir sağlamlık
+açığı. Düzeltmesi üç yollu çözücü.
+
+Bu teslimde **bilerek düzeltmedik**: `soc_top.sv` değişirse teslim
+edilen GDS ile kaynak arasındaki SHA-256 kanıt zinciri kopar ve 5,5
+saatlik fiziksel akışın tamamı yenilenmeli. Sessizce değiştirmek
+yerine `asic/README` §9'da bilinen sınırlama olarak beyan ettik."
+
+**c) Magic DRC — 7.658 bulgu**
 
 Söylenecek: "Kök nedeni tespit ettik: LEF/DEF soyut görünümündeki tap
 geometrisi `nsubdiff` katmanını içermiyor ve Magic bunu `nwell.4` ihlali
@@ -536,7 +554,7 @@ tapın MAGLEF görünümü ihlalli. KLayout aynı GDS'te 0 veriyor. Ancak bunu
 'çözülmüş' saymıyoruz — tek bir aracın temiz sonucu diğerinin kural
 kapsamını doğrulamaz."
 
-**c) İki ayrı SDC: PnR 14 ns, signoff 23,148 ns**
+**d) İki ayrı SDC: PnR 14 ns, signoff 23,148 ns**
 
 Söylenecek: "İki farklı kısıt dosyası kullanıyoruz ve bu bilinçli bir
 tercih. PnR'a 14 ns veriyoruz — optimizasyonu zorlamak için. İmzalama
@@ -562,55 +580,75 @@ isteri **tam** karşılanıyor.
 |---|---|
 | Kart | Nexys A7-100T (XC7A100T) |
 | Saat | 50 MHz |
-| Bitstream zamanlaması | WNS +1,218 ns · Hold +0,055 ns · tüm kısıtlar sağlanmış |
+| Bitstream zamanlaması | Demo A: WNS **+1,207** / WHS **+0,033** ns · Demo C: **+1,270** / **+0,023** ns · TNS ve THS sıfır |
 | Arayüz | Core UART (kart üstü USB) + Stream UART (Pmod JB, harici 3,3 V modül) |
 
 ### Resmi demo aracıyla ölçülen sonuç
 
-**İki bağımsız koşum, aynı sonuç** — 8 Eylül ve 13 Eylül:
+Bitstream **14 Eylül 2026'da güncel RTL'den yeniden üretilmiştir** — ASIC
+teslimiyle aynı kaynaktan. Aynı bitstream'le iki koşum alındı; fark
+yalnızca firmware'in UART'a ne yazdırdığıdır.
 
-| Metrik | 8 Eylül | **13 Eylül (son)** |
+| Metrik | Normal firmware | Skor yazdıran firmware |
 |---|---:|---:|
-| Gönderilen örnek | 156 | **156** |
-| **Altın referans uyumu** | %100,00 | **%100,00 (156/156)** |
-| Uyuşmazlık | 0 | **0** |
-| Zaman aşımı | 0 | **0** |
-| Gecikme (medyan / p95) | 7,74 / 8,78 ms | 7,87 / 11,56 ms |
-| Ölçülen hızlanma | 183,3× | 180,1× |
-| Sağlamlık senaryoları | 9/10 | **9/10** (+1 opsiyonel atlandı) |
+| Gönderilen örnek | 156 | 156 |
+| **Altın referans uyumu** | **%100,00** | **%100,00** |
+| Uyuşmazlık | **0** | **0** |
+| Zaman aşımı | **0** | **0** |
+| Gecikme (medyan) | **8,02 ms** | 23,96 ms |
+| **Ölçülen hızlanma** | **177×** | 59× |
+| Skor karşılaştırması | — | **156 örnek** |
+| **Skor hatası (MAE)** | — | **%0,078** |
+| Sağlamlık | 9 PASS / 1 FAIL / 1 SKIP | 9 PASS / 1 FAIL / 1 SKIP |
 
-Ham çıktılar: `evidence/fpga_demo_20260913/` ve
-`fpga/demo_teknofest/sonuclar/`.
+Ham çıktılar: `evidence/fpga_demo_20260914_normal/` ve
+`evidence/fpga_demo_20260914_skorlu/` · açıklama:
+`evidence/FPGA_DEMO_A_IKI_KOSUM.md`
 
-> Söylenecek: "Bu sonucu iki ayrı günde, iki ayrı koşumda aldık. Aradaki
-> hızlanma farkı (183,3× / 180,1×) ölçüm gürültüsüdür; **uyum oranı her
-> ikisinde de tam %100**."
+> **Söylenecek:** "Hızlanma **177×**. Ayrıca nicemlemenin doğruluğunu da
+> ölçtük: donanımın ürettiği dört olasılık altın referans modelle
+> ortalama **%0,078** hatayla eşleşiyor. Bu ölçüm için dört skoru
+> UART'tan yazdırmak gerekti; o da ISR'yi uzattığı için aynı koşumda
+> gecikme 24 ms'ye çıktı. İkisini ayrı koşumlarda aldık, ikisini de
+> teslim ettik — ölçülen gecikme farkı UART yazdırma süresidir, NPU
+> çıkarım süresi değil."
 
 ### Kart üzerinde tam SoC testi (kendi doğrulama firmware'imiz)
 
 Demo aracı sınıflandırma doğruluğunu ölçer. Ayrıca **SoC'un tamamını**
 kart üzerinde sınayan kendi test firmware'imiz vardır
-(`fpga/JURI_FPGA_TESTI/run_jury.py`, 13 Eylül 2026):
+(`fpga/DEMO_C_I2C/run_jury.py`, 14 Eylül 2026):
 
 | | |
 |---|---:|
 | Sonuç | **GEÇTİ** (`passed: true`) |
-| Öztest | **2 × 83 kontrol** |
+| Öztest | **2 × 86 kontrol** |
 | NPU çıkarımı | **21** (7 vektör × 3 tur), referansla 0 uyuşmazlık |
 | Kullanıcı arayüzü | **PASS** — 16 anahtar, yükselen/düşen kenar IRQ, 4 LED deseni |
+| **I2C harici cihaz** | **ESP32 slave ile gerçek yaz-oku, 3/3 doğru** |
 
 Kapsanan zincir: Flash → CPU açılışı → CPU aritmetik/mantık/çarpma-bölme
 ve uç durumlar → D-RAM → NPU TCM (15 banka) → GPIO → Timer (3 kesme) →
-DMA (banka sınırı, koruma kelimeleri) → Bus fault → I2C → UART2 tüm bayt
-değerleri → NPU uçtan uca (UART2 → DMA → çıkarım → ISR).
+DMA (banka sınırı, koruma kelimeleri) → Bus fault → **I2C (harici ESP32
+slave)** → UART2 tüm bayt değerleri → NPU uçtan uca (UART2 → DMA →
+çıkarım → ISR).
 
 Dört sınıfın (SILENCE/UNKNOWN/YES/NO) tamamı kapsandı; üç turun hepsinde
 aynı sınıf üretildi. Elle kontroller **atlanmadı**.
 
-Ham çıktı: `evidence/fpga_juri_20260913/`.
+Ham çıktı: `evidence/fpga_democ_20260914/`.
 
-> Kapsam dışı kalanlar raporda açıkça listelidir: I2C harici slave,
-> QSPI flash yazma/silme, JTAG halt/resume, CPU tam ISA.
+> **I2C hakkında söylenecek:** "Önceki sürümde I2C yalnızca 'master
+> işlemi başlattı, TX_DONE kuruldu' seviyesindeydi — karşı tarafta cihaz
+> yoktu. Bunu kendi raporumuzda eksik olarak yazmıştık. Şimdi ESP32'yi
+> I2C slave yapıp kapattık: kart bir bayt yazıyor, ESP32 tersini
+> döndürüyor, kart geri okuyup doğruluyor. Üç değerde de tuttu. I2C
+> kontrolcüsü ACK bitini yazılıma açmıyor, ama NACK'te veri hiç gelmez —
+> dolayısıyla doğru verinin geri okunması ACK'in kesin kanıtıdır."
+
+> Kapsam dışı kalanlar raporda açıkça listelidir: I2C flash
+> programlama/silme ve çoklu-slave hakemliği, QSPI flash yazma/silme,
+> JTAG halt/resume, CPU tam ISA.
 
 > **Dürüstlükle söylenecek:** Başarısız tek senaryo `back_to_back` —
 > aralıksız beş çerçevenin dördüne yanıt geldi. **İki koşumda da birebir

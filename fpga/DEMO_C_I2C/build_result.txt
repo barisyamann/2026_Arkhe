@@ -1,0 +1,5 @@
+STATUS write_bitstream Complete!
+WNS 1.269516
+TNS 0.000000
+WHS 0.022782
+THS 0.000000

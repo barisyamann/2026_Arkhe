@@ -1,0 +1,18 @@
+{
+  "passed": false,
+  "physical_board_test": true,
+  "port": "COM16",
+  "seed": 20260905,
+  "rounds": 3,
+  "inferences": [],
+  "selftests": 0,
+  "manual_gpio": "NOT_RUN",
+  "limits": [
+    "I2C: harici slave yok; yalnizca bos hat islem tamamlanmasi",
+    "QSPI: boot okuma; flash yazma/silme ve tum opcode modlari yok",
+    "D-RAM: 1KB test alani; calisan stack ve tum 8KB hucreler yok",
+    "JTAG debug/halt/resume, CPU tum ISA ve ASIC zamanlama kapsami yok",
+    "NPU: 7 referans vektorun tekrari; yeni ses/veri dogrulugu iddiasi yok"
+  ],
+  "error": "RuntimeError: Kart testi basarisiz: CHECK I2C_ESP_VERI_DOGRU FAIL 00000000 00000003"
+}

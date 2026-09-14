@@ -1,6 +1,28 @@
 # UVM doğrulamasında daha ne yapılabilir?
 
-**Tarih:** 13 Eylül 2026
+> ## ⚠️ TARİHSEL BELGE — güncel durumu YANSITMAZ
+>
+> Bu analiz, aktif UVM altyapısı ve referans model **eklenmeden önceki**
+> durumu gösterir. Aşağıdaki tabloda "❌ yok" işaretli üç madde
+> **artık mevcuttur**:
+>
+> | Bu belgede | Güncel durum |
+> |---|---|
+> | `uvm_sequencer` ❌ yok | ✅ `axil_sequencer` var |
+> | `uvm_driver` ❌ yok | ✅ `axil_driver` var |
+> | `uvm_sequence` ❌ yok | ✅ dört sequence var (`axil_wstrb_seq`, `axil_yanit_seq`, `axil_rastgele_seq`, `axil_sanal_seq`) |
+> | Referans model yok | ✅ scoreboard'da associative-array referans modeli var (1.038 okuma doğrulandı) |
+>
+> Ayrıca `uvm_aktif` testi **regresyona bağlanmıştır** (13 denetim).
+> Paket 1.283 değil **1.870 satırdır**.
+>
+> **Güncel ve ölçülmüş durum için:**
+> `verification/AXI_UVM_KAPSAM_MATRISI.md`
+>
+> Bu belge, o gelişmelerin neden yapıldığını gösteren analiz kaydı
+> olarak korunmaktadır.
+
+**Tarih:** 13 Eylül 2026 (aktif altyapı eklenmeden önce)
 **Yöntem:** Mevcut UVM altyapısının **ölçülen** çıktısı incelenerek,
 neyin kapalı neyin açık olduğu tespit edildi.
 

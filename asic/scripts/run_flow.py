@@ -8,7 +8,11 @@ if alias.is_symlink():
  if alias.resolve()!=run.resolve():raise SystemExit('runs symlink does not point to run')
 elif alias.exists():raise SystemExit('runs already exists; preserve it and choose a fresh checkout')
 else:alias.symlink_to('run',target_is_directory=True)
-tag='d45_anten2_reproduce_'+time.strftime('%Y%m%d_%H%M%S')
+# Kosu etiketi. Teslim edilen kosunun adi S_final2'dir; yeniden uretim
+# kosulari onun uzerine YAZMAZ, ayri bir zaman etiketli dizine gider.
+# (Onceki surumde burada 'd45_anten2_reproduce_' yaziyordu - o, artik
+#  teslim edilmeyen eski kosunun adiydi ve provenance'i karistiriyordu.)
+tag='S_final2_reproduce_'+time.strftime('%Y%m%d_%H%M%S')
 if (run/tag).exists():raise SystemExit('Run already exists')
 command=[os.environ.get('LIBRELANE','librelane'),'--manual-pdk','--pdk-root',os.environ['PDK_ROOT'],'--run-tag',tag,'config.yaml']
 result=subprocess.run(command,cwd=A)

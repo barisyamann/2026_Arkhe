@@ -546,6 +546,7 @@ TESTLER = [
         mem=["app.hex", "app_sim.hex", "boot.hex", "flash.hex",
              "flash_sim.hex", "fc_weights_packed32.mem"],
         mem_zorunlu=False,                # bulunamazsa test atlanir, cokmez
+        mem_kritik=["boot.hex", "flash.hex"],   # bunlar olmadan sistem testi anlamsiz
     ),
     # -------------------------------------------------------------------------
     # GERCEK IKI ASAMALI BOOT TESTI
@@ -589,6 +590,7 @@ TESTLER = [
              "flash.hex", "flash_sim.hex", "flash_core_test.hex",
              "fc_weights_packed32.mem"],
         mem_zorunlu=False,
+        mem_kritik=["core_test.hex"],   # Spike karsilastirmasinin izi bundan uretilir
         ek_bayrak=["-L", "uvm",
                    "-i", str(ROOT/"rtl"/"cv32e40p-master"/"bhv"/"include"),
                    "-i", str(ROOT/"rtl"/"cv32e40p-master"/"rtl"/"include")],
@@ -631,6 +633,7 @@ TESTLER = [
         mem=["app.hex", "app_sim.hex", "boot.hex", "flash.hex",
              "flash_sim.hex", "fc_weights_packed32.mem"],
         mem_zorunlu=False,
+        mem_kritik=["boot.hex", "flash.hex", "fc_weights_packed32.mem"],
         ek_bayrak=["-L", "uvm"],
         elab_bayrak=["-L", "uvm"],
     ),
@@ -675,6 +678,8 @@ TESTLER = [
         mem=["app.hex", "app_sim.hex", "boot.hex", "flash.hex",
              "flash_sim.hex", "fc_weights_packed32.mem"],
         mem_zorunlu=False,
+        # Gercek boot zinciri bu ikisi olmadan kosamaz - eksikse FAIL
+        mem_kritik=["boot.hex", "flash.hex"],
     ),
 ]
 
@@ -748,9 +753,31 @@ def test_kos(t, vivado_bin, kapsam=False, ek_tanim=None):
         shutil.rmtree(d, ignore_errors=True)
     d.mkdir(parents=True, exist_ok=True)
 
+    # -------------------------------------------------------------------------
+    # BELLEK IMAJLARI  (mem_kritik: 13 Eylul 2026, dis inceleme bulgusu)
+    #
+    # Onceden mem_zorunlu=False olan testlerde eksik bir imaj SESSIZCE
+    # atlaniyordu ('continue') ve test o bellek OLMADAN kosuyordu. Temiz
+    # bir klonda kritik bir imaj eksik olsa bile regresyon GECTI diyebilirdi.
+    #
+    # Sartname teslim edilen otomasyonun temiz ortamda yeniden
+    # calistirilabilmesini ve raporlanan sonuclarin betik ciktisiyla ayni
+    # olmasini ister. Sessiz atlama bu garantiyi bozar.
+    #
+    # Artik uc kademe var:
+    #   mem_zorunlu=True      -> listedeki HER imaj zorunlu
+    #   mem_kritik=[...]      -> yalnizca bu imajlar zorunlu, digerleri
+    #                            opsiyonel (testin kendi varyantina gore
+    #                            bazi imajlar gercekten gerekmez)
+    #   ikisi de yoksa        -> eksik imaj ATLANDI olarak raporlanir
+    # -------------------------------------------------------------------------
+    mem_kritik = set(t.get("mem_kritik", []))
     for m in t["mem"]:
         kaynak = mem_bul(m)
         if kaynak is None:
+            if m in mem_kritik:
+                return dict(ad=t["ad"], durum="BASARISIZ", denetim=0,
+                            not_=f"KRITIK bellek imaji eksik: {m}")
             if not t.get("mem_zorunlu", True):
                 continue
             return dict(ad=t["ad"], durum="ATLANDI", denetim=0,

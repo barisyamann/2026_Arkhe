@@ -8,6 +8,6 @@ Bağlantı: core UART kartın USB-UART bağlantısı; stream UART 3,3V UART-TTL 
 
 `bitstream/nexys_top.bit` ve `firmware/build/flash_demo.hex` farklı katmanlardır: bitstream FPGA mantığını, flash imajı uygulama ve ağırlıkları taşır. HEX dosyası Verilog bellek sözcük biçimidir; MCS değildir. Var olan flash programlama akışında doğru adrese yerleştirilmelidir; yalnız .bit yüklemek uygulama flash'ını güncellemez. Boot yerleşimi firmware betiklerinde 0x800000 uygulama, 0x802000 ağırlıklardır.
 
-Yönlendirme raporu WNS +1,218 ns, WHS +0,055 ns. Son kayıtlı sağlamlık deneyi 9 PASS, 1 FAIL, 1 SKIP: back_to_back beş çerçveden dördüne yanıt; peripheral_interleave atlanmış. Bu yüzden tüm demo testleri geçti denmez.
+Yönlendirme raporu **WNS +1,572 ns, WHS +0,042 ns** (kaynak: `reports/nexys_top_timing_summary_routed.rpt`; TNS ve THS sıfır, 17.892 uç noktanın hiçbirinde ihlal yok). Son kayıtlı sağlamlık deneyi 9 PASS, 1 FAIL, 1 SKIP: back_to_back beş çerçveden dördüne yanıt; peripheral_interleave atlanmış. Bu yüzden tüm demo testleri geçti denmez.
 
 Yeniden FPGA derleme betiği `build_fpga.tcl` depo kökündeki d45 RTL ve buradaki wrapper/XDC ile çalışır. `vivado -mode batch -source fpga/nexys_demo_20260908/build_fpga.tcl` depo kökünden çağrılır. Firmware kaynakları bağımsız kopyadır; dizin düzeni nedeniyle burada kopyalanan tarihsel build.py doğrudan çalıştırılmadan kök/weights yolu uyarlanmalıdır. Kaynak içerikleri ve hazır HEX dosyaları korunmuştur.

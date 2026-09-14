@@ -155,7 +155,7 @@
       "mode": "regex_line",
       "line_terminator": "\n",
       "encoding": "ascii",
-      "regex": "\\[IRQ\\]\\s*Class:\\s*(?P<label>[0-3])",
+      "regex": "\\[IRQ\\]\\s*Class:\\s*(?P<label>[0-3])\\s*scores=(?P<scores>[-\\d.,]+)",
       "json_label_key": "label",
       "json_scores_key": "scores",
       "csv_label_index": 0,

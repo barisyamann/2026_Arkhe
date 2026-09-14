@@ -17,6 +17,7 @@ typedef struct {
 
 #define NPU_REG_CTRL     ((volatile unsigned int *)(0x40060000 + 0x00))
 #define NPU_REG_STATUS   ((volatile unsigned int *)(0x40060000 + 0x04))
+#define NPU_REG_OUT_ADDR ((volatile unsigned int *)(0x40060000 + 0x0C))
 #define NPU_REG_CLASS    ((volatile unsigned int *)(0x40060000 + 0x10))
 
 #define NPU_TCM_BASE     ((volatile unsigned int *)(0x20010000))
@@ -187,9 +188,27 @@ void __attribute__((interrupt("machine"), aligned(256))) trap_handler(void)
         npu_done_flag = 1;
 
         // Sonucu UART'tan yazdir - sartnamenin istedigi adim
-        uart_print("[IRQ] Class: ");
-        uart_print_dec(npu_class);
-        uart_print("\n");
+        // DORT SINIF SKORU DA YAZDIRILIR (13 Eylul 2026)
+        //   Onceden yalnizca sinif yazdiriliyordu. TEKNOFEST demo araci
+        //   ICD'deki (?P<scores>...) grubunu gorurse skorlari altin
+        //   referansla da karsilastirir ve raporda "golden skor hata
+        //   orani (MAE)" uretir. Puanlamada kullanilmaz; argmax ayni
+        //   olsa bile nicemleme/tasma sorunu olup olmadigini gosterir.
+        //
+        //   Skorlar CSR'da DEGIL, TCM'de durur. Cikis ofsetini OUT_ADDR
+        //   yazmaci (0x4006000C) verir; ayni okuma jury firmware'inde
+        //   de kullanilir (fpga/JURI_FPGA_TESTI/jury.c, infer()).
+        {
+            unsigned int out_off = *NPU_REG_OUT_ADDR;
+            uart_print("[IRQ] Class: ");
+            uart_print_dec(npu_class);
+            uart_print(" scores=");
+            for (int k = 0; k < 4; k++) {
+                if (k) uart_print(",");
+                uart_print_dec(NPU_TCM_BASE[out_off + k]);
+            }
+            uart_print("\n");
+        }
 
         // --- Kesmeyi sustur ---
         //

@@ -1,0 +1,30 @@
+{
+  "physical_board_test_performed": true,
+  "fpga_clock_mhz": 50,
+  "post_route_timing_ns": {
+    "WNS": 1.397639,
+    "WHS": 0.082924,
+    "TNS": 0.0,
+    "THS": 0.0
+  },
+  "simulation": {
+    "ad": "jury",
+    "durum": "GECTI",
+    "denetim": 1,
+    "hata": 0,
+    "sure": 647.7241404056549,
+    "not_": ""
+  },
+  "simulation_checks": 174,
+  "simulation_scope": "Real QSPI boot, 2 x 83 selfchecks, 2 full-reference NPU inferences, 256 UART bytes, GPIO output and rising/falling IRQ, invalid command",
+  "simulation_uart_baud": 1000000,
+  "hardware_uart_baud": 115200,
+  "simulation_difference": "Same jury C source; JURY_SIM sets CPB=50 instead of CPB=434 to accelerate serial simulation",
+  "host_negative_tests": "7 unittest cases passed",
+  "mcs_payload_verified_at": "0x00800000",
+  "mcs_payload_bytes": 24192,
+  "changes": "Separate jury firmware, linker script, 8KB-loading boot ROM, existing single-USB FPGA wrapper. ASIC functional RTL unchanged.",
+  "limitations": "Behavioral RTL simulation is not a physical board run or ASIC timing proof. DRC warnings are retained in drc.rpt.",
+  "physical_board_evidence": "juri_board_20260905_142243.json",
+  "physical_board_scope": "21 inferences + 2 selftests + manual GPIO on 5 September build; distinct from d45 ASIC"
+}

@@ -1,0 +1,127 @@
+{
+  "tohum": 20260831,
+  "aday_denenen": 169,
+  "vektor_sayisi": 7,
+  "aciklama": "Ayni girdi hem yazilim referans modeline hem RTL'e verilir; siniflandirma ve softmax olasiliklari birebir esitlenmelidir.",
+  "vektorler": [
+    {
+      "ad": "deterministik_golden",
+      "sinif": 3,
+      "sinif_adi": "NO",
+      "logits": [
+        -128,
+        79,
+        83,
+        109
+      ],
+      "probs": [
+        0,
+        225,
+        326,
+        3543
+      ]
+    },
+    {
+      "ad": "rastgele_sinif0_silence",
+      "sinif": 0,
+      "sinif_adi": "SILENCE",
+      "logits": [
+        25,
+        21,
+        17,
+        -3
+      ],
+      "probs": [
+        1820,
+        1261,
+        873,
+        139
+      ]
+    },
+    {
+      "ad": "rastgele_sinif1_unknown",
+      "sinif": 1,
+      "sinif_adi": "UNKNOWN",
+      "logits": [
+        -128,
+        120,
+        77,
+        102
+      ],
+      "probs": [
+        0,
+        3381,
+        65,
+        648
+      ]
+    },
+    {
+      "ad": "rastgele_sinif2_yes",
+      "sinif": 2,
+      "sinif_adi": "YES",
+      "logits": [
+        -22,
+        23,
+        25,
+        25
+      ],
+      "probs": [
+        19,
+        1197,
+        1439,
+        1439
+      ]
+    },
+    {
+      "ad": "rastgele_sinif3_no",
+      "sinif": 3,
+      "sinif_adi": "NO",
+      "logits": [
+        -128,
+        119,
+        126,
+        127
+      ],
+      "probs": [
+        0,
+        821,
+        1562,
+        1712
+      ]
+    },
+    {
+      "ad": "ses_yes",
+      "sinif": 2,
+      "sinif_adi": "YES",
+      "logits": [
+        6,
+        8,
+        35,
+        5
+      ],
+      "probs": [
+        234,
+        282,
+        3364,
+        214
+      ]
+    },
+    {
+      "ad": "ses_no",
+      "sinif": 3,
+      "sinif_adi": "NO",
+      "logits": [
+        -1,
+        19,
+        6,
+        26
+      ],
+      "probs": [
+        194,
+        1217,
+        369,
+        2314
+      ]
+    }
+  ]
+}

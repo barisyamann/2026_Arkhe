@@ -1,0 +1,69 @@
+
+There are no discarded input sections
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+IRAM             0x01000000         0x00002000         xr
+RAM              0x20000000         0x00002000         xrw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\core_test.o
+LOAD C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\crt0.o
+
+.text           0x01000000      0x23c
+                0x01000000                        . = ALIGN (0x4)
+ *(.init)
+ *(.text.start)
+ .text.start    0x01000000       0x52 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\crt0.o
+                0x01000000                _start
+ *(.text*)
+ .text          0x01000052        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\core_test.o
+ .text.startup  0x01000052      0x1e8 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\core_test.o
+                0x01000052                main
+ .text          0x0100023a        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\crt0.o
+ *(.rodata*)
+                0x0100023c                        . = ALIGN (0x4)
+ *fill*         0x0100023a        0x2 
+
+.rela.dyn       0x0100023c        0x0
+ .rela.text.start
+                0x0100023c        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\core_test.o
+
+.data           0x20000000        0x0 load address 0x0100023c
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __data_start = .
+ *(.data*)
+ .data          0x20000000        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\core_test.o
+ .data          0x20000000        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\crt0.o
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __data_end = .
+                0x0100023c                        __data_load_start = LOADADDR (.data)
+
+.bss            0x20000000        0x0 load address 0x0100023c
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __bss_start = .
+ *(.bss*)
+ .bss           0x20000000        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\core_test.o
+ .bss           0x20000000        0x0 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\crt0.o
+ *(COMMON)
+                0x20000000                        . = ALIGN (0x4)
+                0x20000000                        __bss_end = .
+
+.stack          0x20000000        0x0 load address 0x0100023c
+                0x20000000                        . = ALIGN (0x10)
+                0x20002000                        __stack_top = (ORIGIN (RAM) + LENGTH (RAM))
+OUTPUT(C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\core_test.elf elf32-littleriscv)
+
+.comment        0x00000000       0x33
+ .comment       0x00000000       0x33 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\core_test.o
+                                 0x34 (size before relaxing)
+
+.riscv.attributes
+                0x00000000       0x38
+ .riscv.attributes
+                0x00000000       0x38 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\core_test.o
+ .riscv.attributes
+                0x00000038       0x36 C:\Users\ybari\2026_Arkhe\fpga\nexys_demo_20260908\firmware\build\core_test\crt0.o

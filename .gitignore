@@ -54,3 +54,13 @@ fpga/*/build/
 # (nasil uretilecegi fpga/FPGA_DEMO_ADIMLARI.md icinde yazilidir)
 *.mcs
 *.prm
+
+# FPGA Vivado calisma dizinleri - turetilmis, build_fpga*.tcl ile uretilir
+fpga/*/vivado/
+fpga/*/build_*_eski/
+fpga/*/bitstream/*_eski.bit
+fpga/*/nexys_usb_top_eski.bit
+fpga/*/__pycache__/
+fpga/*/firmware/*/*.o
+fpga/*/firmware/*/*.elf
+fpga/*/firmware/*/*.map

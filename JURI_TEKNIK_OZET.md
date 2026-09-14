@@ -175,7 +175,14 @@ bizim test kapsamımızın hedefi değildir. Ayrıştırma
 
 Kapsama, şartname EK-3'te **"Opsiyonel***"** olarak işaretlidir.
 
-8 Eylül 16:18 FPGA bitstream'inin yönlendirme sonrası WNS +1,218 ns, hold +0,055 ns; tüm tanımlı zamanlama kısıtları sağlanmıştır.
+FPGA bitstream'lerinin yönlendirme sonrası zamanlaması, her biri kendi raporundan:
+
+| Bitstream | Kullanım | WNS | WHS | Kaynak |
+|---|---|---:|---:|---|
+| `nexys_top.bit` | Demo A (resmi araç) | **+1,207 ns** | **+0,033 ns** | `fpga/nexys_demo_20260908/reports/nexys_top_timing_summary_routed.rpt` |
+| `nexys_usb_top.bit` | Demo C (tam SoC + ESP32 I2C) | **+1,270 ns** | **+0,023 ns** | `fpga/DEMO_C_I2C/build_result.txt` |
+
+Her ikisinde de TNS ve THS sıfırdır; tüm tanımlı zamanlama kısıtları sağlanmıştır.
 
 8 Eylül 17:31'de yarışma paketiyle gelen `demo_harness.py` aracı, public dataset'in tamamıyla kart üzerinde koşulmuştur. Ham çıktılar `fpga/demo_teknofest/sonuclar/` altındadır.
 
@@ -188,7 +195,7 @@ Kapsama, şartname EK-3'te **"Opsiyonel***"** olarak işaretlidir.
 | Zaman aşımı | 0 |
 | Gecikme (medyan / p95 / maks) | 7,74 / 8,78 / 21,58 ms |
 | Ölçülen hızlanma | 183,3× |
-| Sağlamlık senaryoları | 9/10 (+1 opsiyonel atlandı) |
+| Sağlamlık senaryoları | **9 PASS / 1 FAIL / 1 SKIP** (FAIL: `back_to_back`; SKIP: `peripheral_interleave`, opsiyonel) |
 
 Uyum matrisi tamamen köşegendir (silence 6, unknown 16, yes 50, no 84); köşegen dışı hücre yoktur. Donanım doğruluğu ve golden model doğruluğu %72,44 ile aynıdır, fark 0,00 puandır; bu oran veri setinin zorluğudur ve puanlamada kullanılmaz.
 
@@ -202,4 +209,4 @@ Fonksiyonel doğrulama Vivado xsim 2025.2 (`xvlog`/`xelab`/`xsim`) ile yapılmı
 
 ## Teslimin kullanımı
 
-Zorunlu raporlar `asic/reports`, nihai görünümler/netlistler/SDC/SPEF/GDS-SPICE/config/metrikler `asic/results` altındadır. `asic/run` teslimde boştur. Büyük dosyalar Release delivery arşivinden indirilir; `make asic_verify` bütünlüğü denetler. Kurulum ve `make asic_run` açıklaması `asic/README.md` içindedir.
+Zorunlu raporlar `asic/reports`, nihai görünümler/netlistler/SDC/SPEF/GDS-SPICE/config/metrikler `asic/results` altındadır. `asic/run` teslimde boştur. Büyük fiziksel çıktılar (GDSII, DEF, ODB, MAG, SPEF, SDF, SPICE, netlistler) **bu depodadır** ve 100 MB'ı aşanlar **Git LFS** ile saklanır. Depoyu klonlarken `git lfs install` yapılmalıdır; yapılmazsa bu dosyalar işaretçi metni olarak iner. Yedek olarak `asic/` dizininin tamamı bulut arşivinde de sunulmuştur (ayrıntı ve SHA-256: `asic/README.md` §12.1). `make asic_verify` bütünlüğü denetler. Kurulum ve `make asic_run` açıklaması `asic/README.md` içindedir.
