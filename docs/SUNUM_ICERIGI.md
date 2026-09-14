@@ -1,7 +1,7 @@
 # Arkhe SoC — Jüri Sunumu İçeriği
 
 **TEKNOFEST 2026 Çip Tasarımı Yarışması — Mikrodenetleyici Kategorisi**
-Hazırlık tarihi: 9 Eylül 2026
+Hazırlık tarihi: 14 Eylül 2026
 
 ---
 

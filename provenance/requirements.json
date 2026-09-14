@@ -15,6 +15,8 @@
   "asic/reports/drc/drc.magic.lyrdb",
   "asic/reports/drc/drc.magic.rpt",
   "asic/reports/general/flow.log",
+  "asic/reports/general/warning.log",
+  "asic/reports/general/error.log",
   "asic/reports/lint/verilator-lint.log",
   "asic/reports/lvs/lvs.netgen.json",
   "asic/reports/lvs/lvs.netgen.rpt",
