@@ -8,7 +8,8 @@
 Bu belge, **hangi cevre biriminin hangi agent/checker tarafindan
 gorulduğunu** olculmus sayilarla gosterir. Rakamlar iddia degil,
 `uvm_axi_agent` regresyon kosumunun kendi ciktisindandir
-(`build/regression/uvm_axi_agent/sim.log`).
+(`evidence/uvm_20260914/uvm_axi_agent_sim.log`). Ham log ve ayrıntılı
+açıklama o klasördedir; `build/` dizini depoya dahil değildir.
 
 ---
 
@@ -163,5 +164,5 @@ dogrulamasi olarak sunulmamaktadir.
 | AXI agent kullanimi | 2 UVM agent + 5 SVA checker |
 | Protokol ihlali | **0** |
 
-Kaynak: `build/regression/uvm_axi_agent/sim.log`
+Kaynak: `evidence/uvm_20260914/` (ham loglar + `OKUBENI.md`)
 Kosum: 13 Eylul 2026, HEAD · 37/37 test, 702 denetim

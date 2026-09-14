@@ -1,0 +1,251 @@
+
+****** xsim v2025.2 (64-bit)
+  **** SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+  **** IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+  **** SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+  **** Start of session at: Mon Sep 14 05:20:24 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/snap/xsim_script.tcl
+# xsim {snap} -autoloadwcfg -tclbatch {run.tcl}
+Time resolution is 1 ps
+source run.tcl
+## run all
+UVM_INFO C:AMDDesignTo����5.2Vivadodata/system_verilog/uvm_1.2/xlnx_uvm_package.sv(18601) @ 0: reporter [UVM/RELNOTES] 
+----------------------------------------------------------------
+UVM-1.2
+(C) 2007-2014 Mentor Graphics Corporation
+(C) 2007-2014 Cadence Design Systems, Inc.
+(C) 2006-2014 Synopsys, Inc.
+(C) 2011-2013 Cypress Semiconductor Corp.
+(C) 2013-2014 NVIDIA Corporation
+----------------------------------------------------------------
+
+  ***********       IMPORTANT RELEASE NOTES         ************
+
+  You are using a version of the UVM library that has been compiled
+  with `UVM_NO_DEPRECATED undefined.
+
+  You are using a version of the UVM library that has been compiled
+  with `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR undefined.
+
+      (Specify +UVM_NO_RELNOTES to turn off this notice)
+
+[SPI_FLASH] 24192 bayt yuklendi: flash_sim.hex
+[0] SoC Simülasyonu Başlatıldı.
+[UVM] kosulacak test: axil_passive_test
+UVM_INFO @ 0: reporter [RNTST] Running test axil_passive_test...
+WARNING: 0ns : none of the conditions were true for unique case from File:C:/Users/ybari/2026_Arkhe/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:419
+UVM_INFO C:AMDDesignTo����5.2Vivadodata/system_verilog/uvm_1.2/xlnx_uvm_package.sv(20867) @ 0: reporter [UVM/COMP/NAMECHECK] This implementation of the component name checks requires DPI to be enabled
+[0] GPIO Çıkışı Değişti: gpio_o = 16'h0000
+[TB] HIZLI ACILIS: I-RAM dogrudan yuklendi, acilis adresi
+[TB]               0x01000000'a zorlandi, yukleyici atlandi.
+[TB] Gercek QSPI boot icin derlemeye -d REAL_BOOT ekleyin.
+[152000] Reset kaldırıldı. İşlemci çalışıyor...
+[UART] 
+[UART] *** ARKHE FPGA TEST ***
+[UART] Timer test
+[UART] Timer OK
+[UART] Bus fault test
+[UART] Bus fault @ 0x00000100 ST=0x05
+[UART] Decode fault test
+[UART] Decode fault @ 0x40090000 ST=0x05
+[UART] I2C test
+[16389190000] *** I2C İşlemi Tamamlandı - IRQ aktif ***
+[UART] I2C CFG=0x02
+[UART] 
+[UART] Run: 1
+[UART] Clear TCM
+[UART] Stream ready
+      [OK]   CPU UART-stream ve DMA'yi kurdu
+[TB] UART-stream'den 1960 bayt gonderiliyor (0x55)
+[21905070000] [DMA] Transfer başladı: src=0x40030020, dst=0x20010000, len=490 words
+[41498990000] [DMA] Transfer tamamlandı.
+[41499010000] *** DMA Transfer Tamamlandı - IRQ aktif ***
+[TB] UART-stream gonderimi tamamlandi
+[41502750000] *** DMA kesmesi temizlendi ***
+[UART] DMA done
+[TB] UART_RDR testi: A1 B2 C3 D4 gonderiliyor
+[TB] UART2 FIFO seviye taramasi: 256 bayt gonderiliyor
+[UART] RDR: A1B2C3D4
+[UART] Start NPU
+[44773990000] [NPU_ENGINE] Starting upgraded NPU computation: in_addr=0x0000, out_addr=0x1dac
+      UART2 FIFO seviyesi = 256 (beklenen 256)
+      [OK] UART2 FIFO tum seviye bantlarini tarayip doldu
+[44989730000] NPU donanım motorunun tamamlanması bekleniyor...
+[46485730000] [NPU_ENGINE] Upgraded NPU computation done. Selected Class=3
+            fc_acc: [0]=-985885, [1]=242268, [2]=240758, [3]=387226
+            probs:  [0]=0, [1]=1050, [2]=1050, [3]=1995
+[46485730000] NPU donanım motoru DONE sinyalini verdi!
+  [XTANI] t=47650150000 m_rdata=0xxxxxxx33 read_sel_q=2
+          s0=0x00000000 s1=0x1ae33fad s2=0xxxxxxx33 s5=0x00000004
+          s6=0x000000d4 s10=0x00000000 s11=0x00000000 s12=0x00000005
+          rvalid: s0=0 s1=0 s2=1 s5=0 s6=0 s10=0
+[UART] [IRQ] Class: 3
+[UART] -> NO
+[48543830000] GPIO Çıkışı Değişti: gpio_o = 16'haaaa
+      [OK]   NPU beklenen sinifi verdi: 3 (NO), GPIO 0xAAAA
+  -- REUSE: global reset olmadan ikinci cikarim
+[UART] Wait 2ms
+[UART] 
+[UART] Run: 2
+[UART] Clear TCM
+[UART] Stream ready
+[TB] UART-stream'den 1960 bayt gonderiliyor (0x80)
+[55708670000] [DMA] Transfer başladı: src=0x40030020, dst=0x20010000, len=490 words
+[75302590000] [DMA] Transfer tamamlandı.
+[75302610000] *** DMA Transfer Tamamlandı - IRQ aktif ***
+[TB] UART-stream gonderimi tamamlandi
+[75306350000] *** DMA kesmesi temizlendi ***
+[UART] DMA done
+[UART] RDR: A1B2C3D4
+[UART] Start NPU
+[78543670000] [NPU_ENGINE] Starting upgraded NPU computation: in_addr=0x0000, out_addr=0x1dac
+[80255410000] [NPU_ENGINE] Upgraded NPU computation done. Selected Class=0
+            fc_acc: [0]=427, [1]=-518, [2]=-94, [3]=186
+            probs:  [0]=1024, [1]=1024, [2]=1024, [3]=1024
+[UART] [IRQ] Class: 0
+[UART] -> SILENCE
+[82755290000] GPIO Çıkışı Değişti: gpio_o = 16'h0f0f
+      [OK]   Uygulama reset olmadan yeni tura girdi
+      [OK]   Ikinci cikarim RESET OLMADAN dogru sonuc verdi: 0 (SILENCE)
+  -- CIKARIM: desen 0x68 -> beklenen sinif UNKNOWN (1) (GPIO 0xffff)
+[UART] Wait 2ms
+[UART] 
+[UART] Run: 3
+[UART] Clear TCM
+[UART] Stream ready
+[TB] UART-stream'den 1960 bayt gonderiliyor (0x68)
+[89919970000] [DMA] Transfer başladı: src=0x40030020, dst=0x20010000, len=490 words
+[109513890000] [DMA] Transfer tamamlandı.
+[109513910000] *** DMA Transfer Tamamlandı - IRQ aktif ***
+[TB] UART-stream gonderimi tamamlandi
+[109517650000] *** DMA kesmesi temizlendi ***
+[UART] DMA done
+[UART] RDR: A1B2C3D4
+[UART] Start NPU
+[112754970000] [NPU_ENGINE] Starting upgraded NPU computation: in_addr=0x0000, out_addr=0x1dac
+[114466710000] [NPU_ENGINE] Upgraded NPU computation done. Selected Class=1
+            fc_acc: [0]=-1064767, [1]=264596, [2]=256812, [3]=420955
+            probs:  [0]=0, [1]=1365, [2]=1365, [3]=1365
+  [XTANI] t=115631130000 m_rdata=0xxxxxxx31 read_sel_q=2
+          s0=0x00000000 s1=0x1ae33fad s2=0xxxxxxx31 s5=0x00000004
+          s6=0x000000d4 s10=0x00000000 s11=0x00000000 s12=0x00000005
+          rvalid: s0=0 s1=0 s2=1 s5=0 s6=0 s10=0
+[UART] [IRQ] Class: 1
+[UART] -> UNKNOWN
+[116970130000] GPIO Çıkışı Değişti: gpio_o = 16'hffff
+      [OK]   UNKNOWN (1) sinifi dogru uretildi (GPIO 0xffff)
+  -- CIKARIM: desen 0x84 -> beklenen sinif YES (2) (GPIO 0x5555)
+[UART] Wait 2ms
+[UART] 
+[UART] Run: 4
+[UART] Clear TCM
+[UART] Stream ready
+[TB] UART-stream'den 1960 bayt gonderiliyor (0x84)
+[124135050000] [DMA] Transfer başladı: src=0x40030020, dst=0x20010000, len=490 words
+[143728970000] [DMA] Transfer tamamlandı.
+[143728990000] *** DMA Transfer Tamamlandı - IRQ aktif ***
+[TB] UART-stream gonderimi tamamlandi
+[143732730000] *** DMA kesmesi temizlendi ***
+[UART] DMA done
+[UART] RDR: A1B2C3D4
+[UART] Start NPU
+[146970050000] [NPU_ENGINE] Starting upgraded NPU computation: in_addr=0x0000, out_addr=0x1dac
+[148681790000] [NPU_ENGINE] Upgraded NPU computation done. Selected Class=2
+            fc_acc: [0]=-423, [1]=-1149, [2]=1334, [3]=264
+            probs:  [0]=1021, [1]=932, [2]=1120, [3]=1021
+  [XTANI] t=149846210000 m_rdata=0xxxxxxx32 read_sel_q=2
+          s0=0x00000000 s1=0x1ae33fad s2=0xxxxxxx32 s5=0x00000004
+          s6=0x000000d4 s10=0x00000000 s11=0x00000000 s12=0x00000005
+          rvalid: s0=0 s1=0 s2=1 s5=0 s6=0 s10=0
+[UART] [IRQ] Class: 2
+[UART] -> YES
+[150828810000] GPIO Çıkışı Değişti: gpio_o = 16'h5555
+      [OK]   YES (2) sinifi dogru uretildi (GPIO 0x5555)
+      [OK]   DMA UART-stream verisini TCM'e tasidi
+      [OK]   Veri yolu hatasi yakalandi, adres ve kaynak dogru
+      [OK]   I2C protokol motoru NACK ile dogru sonlandi
+      [OK]   UART_RDR bayt okuma dogru: A1B2C3D4
+      [OK]   ISR sonucu UART'tan yazdirdi
+--- Sistem duzeyi mimari degismezler ---
+      [OK]   bellek haritasi ayrik - hicbir taban adresi cakismiyor
+      [OK]   QSPI CS bosta pasif (yuksek)
+      [OK]   I2C acik drenaj kurali korunuyor (asla '1' surulmuyor)
+      [OK]   iki UART de bosta MARK seviyesinde
+[150828830000] GPIO girişleri 0xA5A5 olarak ayarlandı.
+
+================================================================
+ JTAG HATA AYIKLAMA (DEBUG) PORTU DOGRULAMA TESTI BASLATILDI
+================================================================
+     [JTAG] TAP Reset yapiliyor...
+ ---> JTAG IDCODE okunuyor...
+      [OK]   JTAG IDCODE = 0x0000000041524b48
+ ---> CPU'ya HALT istegi gonderiliyor...
+      [OK]   CPU halt (debug_req_o) = 0x0000000000000001
+ ---> JTAG uzerinden TCM SRAM adresine veri yaziliyor (0x20011000 = 0xDEADBEEF)...
+ ---> JTAG uzerinden TCM SRAM adresi okunuyor (0x20011000)...
+      [OK]   JTAG bellek okuma/yazma = 0x00000000deadbeef
+ ---> CPU Resume ediliyor...
+      [OK]   CPU resume (debug_req_o) = 0x0000000000000000
+================================================================
+ JTAG PORTU DOGRULAMA TESTI TAMAMLANDI
+================================================================
+[150922730000] SoC Simülasyonu Tamamlandı.
+================================================================
+ TUM TESTLER GECTI - 0 hata
+================================================================
+
+================= UVM AXI4-Lite PASSIVE AGENT =================
+  -- agent 1: NPU motoru -> TCM (AXI4-Lite master) --
+  islem (scoreboard) : 162064
+  -- agent 2: SoC ana yolu (merged_m_*) --
+  islem (scoreboard) : 239665
+  -- genel --
+  TOPLAM islem       : 401729
+  monitor okuma/yazma: 382691 / 19038  (iki agent birlikte;
+                        sayaclar static, ornekler paylasir)
+  hatali yanit       : 2  (SLVERR/DECERR - gecerli yanit, ihlal degil)
+  gecersiz yanit kodu: 0  (AXI4-Lite'ta EXOKAY olamaz)
+  asili kalmis islem : 0  (>10us)
+  [OK]   162064 AXI4-Lite islemi yakalandi ve paketlendi
+  -- referans model (veri dogrulugu) --
+  NPU TCM  : 4 adres izlendi, 0 okuma dogrulandi
+  SoC yolu : 3647 adres izlendi, 1038 okuma dogrulandi
+  [OK]   1038 okumada yazilan deger BIREBIR geri okundu
+  [OK]   tum yanit kodlari gecerli (OKAY), protokol ihlali yok
+  [OK]   asili kalmis islem yok (hepsi <10us tamamlandi)
+  [OK]   yazmalarda WSTRB==0 yok (her yazma en az bir bayt yazar)
+  [OK]   butun adresler 4 bayta hizali
+  [OK]   okuma+yazma sayimi toplamla tutarli (162064)
+  [OK]   master kanallari kararli (AR/AW/W: VALID dusmedi, bilgi degismedi)
+  [OK]   slave kanallari kararli (R/B: VALID dusmedi, yanit degismedi)
+  [OK]   el sikisan cevrimlerde X/Z bilinmeyen deger yok
+  [OK]   okuma verisinde aciklanamayan X yok
+  bilgi  : 3 okumada ust bitler X (yazilmamis Data RAM -
+           simulasyon artefakti, gercek SRAM X uretmez;
+           bkz. evidence/denetim_20260910/RDATA_X_BULGUSU.md)
+  bilgi  : fonksiyonel kapsam -> tur %100.0  bolge %75.0  strb %33.3  yanit %33.3
+  bilgi  : kapsam TOPLAM %52.1
+  [OK]   SoC ana yolu: 239665 islem (okuma=220643 yazma=19022)
+  bilgi  : SoC kapsam -> tur %100.0  bolge %100.0  strb %66.7  yanit %100.0
+  bilgi  : SoC kapsam TOPLAM %91.0
+  [OK]   reset aktifken hicbir kanalda VALID yuksek degildi
+  [OK]   EXOKAY (2'b01) yaniti yok - AXI4-Lite yanit kumesi dogru
+  [OK]   yazmalar tek genislikte (tam=16 bayt=0 yarim=0)
+  [OK]   ardisik okuma serisi olustu (en uzun 40512 islem) - akis kesintisiz
+  [OK]   adres araligi gercekten tarandi (0x00000000 .. 0x000076bc)
+  kapsam : WSTRB desenleri -
+           strb=0xf : 16 yazma
+  bilgi  : kismi yazma=0  en uzun islem=20 ns
+==============================================================
+  capraz kontrol (ham sinyal sayimi):
+    R  el sikismasi  : 382691   monitor okuma : 382691
+    B  el sikismasi  : 19038   monitor yazma : 19038
+  [OK]   monitor hicbir islemi kacirmadi (ham sayim tutuyor)
+$finish called at time : 150922730 ns : File "C:/Users/ybari/2026_Arkhe/tb/tb_soc_top.sv" Line 997
+run: Time (s): cpu = 00:00:00 ; elapsed = 00:08:12 . Memory (MB): peak = 207.793 ; gain = 0.000
+## quit
+INFO: xsimkernel Simulation Memory Usage: 1597520 KB (Peak: 1597520 KB), Simulation CPU Usage: 487218 ms
+INFO: [Common 17-206] Exiting xsim at Mon Sep 14 05:28:40 2026...

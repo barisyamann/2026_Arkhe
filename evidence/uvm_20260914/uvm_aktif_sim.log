@@ -1,0 +1,150 @@
+
+****** xsim v2025.2 (64-bit)
+  **** SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+  **** IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+  **** SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+  **** Start of session at: Mon Sep 14 05:29:38 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/snap/xsim_script.tcl
+# xsim {snap} -autoloadwcfg -tclbatch {run.tcl}
+Time resolution is 1 ps
+source run.tcl
+## run all
+UVM_INFO C:AMDDesignTo����5.2Vivadodata/system_verilog/uvm_1.2/xlnx_uvm_package.sv(18601) @ 0: reporter [UVM/RELNOTES] 
+----------------------------------------------------------------
+UVM-1.2
+(C) 2007-2014 Mentor Graphics Corporation
+(C) 2007-2014 Cadence Design Systems, Inc.
+(C) 2006-2014 Synopsys, Inc.
+(C) 2011-2013 Cypress Semiconductor Corp.
+(C) 2013-2014 NVIDIA Corporation
+----------------------------------------------------------------
+
+  ***********       IMPORTANT RELEASE NOTES         ************
+
+  You are using a version of the UVM library that has been compiled
+  with `UVM_NO_DEPRECATED undefined.
+
+  You are using a version of the UVM library that has been compiled
+  with `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR undefined.
+
+      (Specify +UVM_NO_RELNOTES to turn off this notice)
+
+[SPI_FLASH] 24192 bayt yuklendi: flash_sim.hex
+[0] SoC Simülasyonu Başlatıldı.
+[UVM] kosulacak test: axil_aktif_test
+UVM_INFO @ 0: reporter [RNTST] Running test axil_aktif_test...
+WARNING: 0ns : none of the conditions were true for unique case from File:C:/Users/ybari/2026_Arkhe/rtl/cv32e40p-master/rtl/cv32e40p_load_store_unit.sv:419
+UVM_INFO C:AMDDesignTo����5.2Vivadodata/system_verilog/uvm_1.2/xlnx_uvm_package.sv(20867) @ 0: reporter [UVM/COMP/NAMECHECK] This implementation of the component name checks requires DPI to be enabled
+[0] GPIO Çıkışı Değişti: gpio_o = 16'h0000
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(214) @ 30000: uvm_test_top.env.soc_agent.mon [axil_monitor] reset aktifken VALID yuksek (ar=0 aw=1 w=1)
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(214) @ 50000: uvm_test_top.env.soc_agent.mon [axil_monitor] reset aktifken VALID yuksek (ar=0 aw=1 w=1)
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(214) @ 70000: uvm_test_top.env.soc_agent.mon [axil_monitor] reset aktifken VALID yuksek (ar=0 aw=1 w=1)
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(214) @ 90000: uvm_test_top.env.soc_agent.mon [axil_monitor] reset aktifken VALID yuksek (ar=0 aw=1 w=1)
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(214) @ 110000: uvm_test_top.env.soc_agent.mon [axil_monitor] reset aktifken VALID yuksek (ar=0 aw=1 w=1)
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(214) @ 130000: uvm_test_top.env.soc_agent.mon [axil_monitor] reset aktifken VALID yuksek (ar=0 aw=1 w=1)
+[TB] HIZLI ACILIS: I-RAM dogrudan yuklendi, acilis adresi
+[TB]               0x01000000'a zorlandi, yukleyici atlandi.
+[TB] Gercek QSPI boot icin derlemeye -d REAL_BOOT ekleyin.
+[152000] Reset kaldırıldı. İşlemci çalışıyor...
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(249) @ 9430000: uvm_test_top.env.soc_agent.mon [axil_monitor] AW: el sikismadan once awaddr degisti 0x5e617de8 -> 0x06aaa944
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(265) @ 9430000: uvm_test_top.env.soc_agent.mon [axil_monitor] W: el sikismadan once wdata/wstrb degisti
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(265) @ 9890000: uvm_test_top.env.soc_agent.mon [axil_monitor] W: el sikismadan once wdata/wstrb degisti
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(249) @ 10270000: uvm_test_top.env.soc_agent.mon [axil_monitor] AW: el sikismadan once awaddr degisti 0x08126d70 -> 0x38a9f730
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(232) @ 10990000: uvm_test_top.env.soc_agent.mon [axil_monitor] AR: el sikismadan once araddr degisti 0x069dc660 -> 0x5848ac34
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(265) @ 11570000: uvm_test_top.env.soc_agent.mon [axil_monitor] W: el sikismadan once wdata/wstrb degisti
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(249) @ 11650000: uvm_test_top.env.soc_agent.mon [axil_monitor] AW: el sikismadan once awaddr degisti 0x063c1a00 -> 0x698eaf54
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(232) @ 12830000: uvm_test_top.env.soc_agent.mon [axil_monitor] AR: el sikismadan once araddr degisti 0x6d23c5c0 -> 0x06caa698
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(249) @ 14490000: uvm_test_top.env.soc_agent.mon [axil_monitor] AW: el sikismadan once awaddr degisti 0x066807e0 -> 0x2a370880
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(265) @ 14490000: uvm_test_top.env.soc_agent.mon [axil_monitor] W: el sikismadan once wdata/wstrb degisti
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(265) @ 14950000: uvm_test_top.env.soc_agent.mon [axil_monitor] W: el sikismadan once wdata/wstrb degisti
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(249) @ 15030000: uvm_test_top.env.soc_agent.mon [axil_monitor] AW: el sikismadan once awaddr degisti 0x45907c8c -> 0x06a8be4c
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(265) @ 15350000: uvm_test_top.env.soc_agent.mon [axil_monitor] W: el sikismadan once wdata/wstrb degisti
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(249) @ 15430000: uvm_test_top.env.soc_agent.mon [axil_monitor] AW: el sikismadan once awaddr degisti 0x86b54d4c -> 0x0864bc80
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(232) @ 15850000: uvm_test_top.env.soc_agent.mon [axil_monitor] AR: el sikismadan once araddr degisti 0x79b05274 -> 0x09adeea0
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(249) @ 16070000: uvm_test_top.env.soc_agent.mon [axil_monitor] AW: el sikismadan once awaddr degisti 0x3a445720 -> 0x0902710c
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(265) @ 16070000: uvm_test_top.env.soc_agent.mon [axil_monitor] W: el sikismadan once wdata/wstrb degisti
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(232) @ 16390000: uvm_test_top.env.soc_agent.mon [axil_monitor] AR: el sikismadan once araddr degisti 0x0857d3b0 -> 0x825e8210
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(249) @ 16770000: uvm_test_top.env.soc_agent.mon [axil_monitor] AW: el sikismadan once awaddr degisti 0x064646dc -> 0x3cebfad8
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(265) @ 16770000: uvm_test_top.env.soc_agent.mon [axil_monitor] W: el sikismadan once wdata/wstrb degisti
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(232) @ 17190000: uvm_test_top.env.soc_agent.mon [axil_monitor] AR: el sikismadan once araddr degisti 0x07efc034 -> 0x31f786bc
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(232) @ 17470000: uvm_test_top.env.soc_agent.mon [axil_monitor] AR: el sikismadan once araddr degisti 0x05ec1fc0 -> 0x29f9f078
+UVM_ERROR C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(232) @ 17930000: uvm_test_top.env.soc_agent.mon [axil_monitor] AR: el sikismadan once araddr degisti 0x06a73880 -> 0x5e21b4a8
+UVM_INFO C:AMDDesignTo����5.2Vivadodata/system_verilog/uvm_1.2/xlnx_uvm_package.sv(19968) @ 29540000: reporter [TEST_DONE] 'run' phase is ready to proceed to the 'extract' phase
+UVM_INFO C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(499) @ 29540000: uvm_test_top.env.agent.mon [axil_monitor] islem ozeti: okuma=152 yazma=132 hatali_yanit=0
+UVM_INFO C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(880) @ 29540000: uvm_test_top.env.sb [axil_scoreboard] scoreboard: toplam=0 okuma=0 yazma=0
+UVM_INFO C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(883) @ 29540000: uvm_test_top.env.sb [axil_scoreboard]   protokol: gecersiz_yanit=0 bos_strb=0 hizasiz=0
+UVM_INFO C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(886) @ 29540000: uvm_test_top.env.sb [axil_scoreboard]   bilgi   : hata_yaniti=0 kismi_yazma=0 uzun=0 en_uzun=0 ns
+UVM_INFO C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(897) @ 29540000: uvm_test_top.env.sb [axil_scoreboard]   --- fonksiyonel kapsam ---
+UVM_INFO C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(900) @ 29540000: uvm_test_top.env.sb [axil_scoreboard]   islem turu    : %0.0
+UVM_INFO C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(903) @ 29540000: uvm_test_top.env.sb [axil_scoreboard]   adres bolgesi : %0.0
+UVM_INFO C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(906) @ 29540000: uvm_test_top.env.sb [axil_scoreboard]   WSTRB deseni  : %0.0
+UVM_INFO C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(909) @ 29540000: uvm_test_top.env.sb [axil_scoreboard]   yanit kodu    : %0.0
+UVM_INFO C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(912) @ 29540000: uvm_test_top.env.sb [axil_scoreboard]   TOPLAM        : %0.0
+UVM_INFO C:/Users/ybari/2026_Arkhe/tb/uvm/axil_uvm_pkg.sv(499) @ 29540000: uvm_test_top.env.soc_agent.mon [axil_monitor] islem ozeti: okuma=152 yazma=132 hatali_yanit=0
+UVM_INFO C:AMDDesignTo����5.2Vivadodata/system_verilog/uvm_1.2/xlnx_uvm_package.sv(13673) @ 29540000: reporter [UVM/REPORT/SERVER] 
+--- UVM Report Summary ---
+
+** Report counts by severity
+UVM_INFO :   15
+UVM_WARNING :    0
+UVM_ERROR :   29
+UVM_FATAL :    0
+** Report counts by id
+[RNTST]     1
+[TEST_DONE]     1
+[UVM/COMP/NAMECHECK]     1
+[UVM/RELNOTES]     1
+[axil_monitor]    31
+[axil_scoreboard]     9
+
+
+================= UVM AXI4-Lite PASSIVE AGENT =================
+  -- agent 1: NPU motoru -> TCM (AXI4-Lite master) --
+  islem (scoreboard) : 0
+  -- agent 2: SoC ana yolu (merged_m_*) --
+  islem (scoreboard) : 284
+  -- genel --
+  TOPLAM islem       : 284
+  monitor okuma/yazma: 152 / 132  (iki agent birlikte;
+                        sayaclar static, ornekler paylasir)
+  hatali yanit       : 0  (SLVERR/DECERR - gecerli yanit, ihlal degil)
+  gecersiz yanit kodu: 0  (AXI4-Lite'ta EXOKAY olamaz)
+  asili kalmis islem : 0  (>10us)
+  bilgi  : NPU agent aktif kipte kullanilmaz (atlandi)
+  -- referans model (veri dogrulugu) --
+  NPU TCM  : 0 adres izlendi, 0 okuma dogrulandi
+  SoC yolu : 33 adres izlendi, 7 okuma dogrulandi
+  [OK]   7 okumada yazilan deger BIREBIR geri okundu
+  [OK]   tum yanit kodlari gecerli (OKAY), protokol ihlali yok
+  [OK]   asili kalmis islem yok (hepsi <10us tamamlandi)
+  [OK]   yazmalarda WSTRB==0 yok (her yazma en az bir bayt yazar)
+  [OK]   butun adresler 4 bayta hizali
+  [OK]   okuma+yazma sayimi toplamla tutarli (0)
+  bilgi  : master kararlilik denetimi aktif kipte atlandi
+  [OK]   slave kanallari kararli (R/B: VALID dusmedi, yanit degismedi)
+  [OK]   el sikisan cevrimlerde X/Z bilinmeyen deger yok
+  [OK]   okuma verisinde aciklanamayan X yok
+  bilgi  : fonksiyonel kapsam -> tur %0.0  bolge %0.0  strb %0.0  yanit %0.0
+  bilgi  : kapsam TOPLAM %0.0
+  [OK]   SoC ana yolu: 284 islem (okuma=152 yazma=132)
+  bilgi  : SoC kapsam -> tur %100.0  bolge %7.7  strb %100.0  yanit %33.3
+  bilgi  : SoC kapsam TOPLAM %49.7
+  bilgi  : reset/VALID denetimi aktif kipte atlandi
+  [OK]   EXOKAY (2'b01) yaniti yok - AXI4-Lite yanit kumesi dogru
+  [OK]   yazma islemi yok (salt okuma senaryosu)
+  bilgi  : okuma serisi denetimi aktif kipte atlandi
+  bilgi  : adres dagilimi denetimi aktif kipte atlandi
+  kapsam : WSTRB desenleri -
+           (yazma islemi yok)
+  bilgi  : kismi yazma=0  en uzun islem=0 ns
+==============================================================
+  capraz kontrol (ham sinyal sayimi):
+    R  el sikismasi  : 152   monitor okuma : 152
+    B  el sikismasi  : 132   monitor yazma : 132
+  [OK]   monitor hicbir islemi kacirmadi (ham sayim tutuyor)
+$finish called at time : 29540 ns : File "C:\AMDDesignTools\2025.2\Vivado\data/system_verilog/uvm_1.2/xlnx_uvm_package.sv" Line 18699
+## quit
+INFO: [Common 17-206] Exiting xsim at Mon Sep 14 05:29:42 2026...
