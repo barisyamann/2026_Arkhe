@@ -1,7 +1,7 @@
 {
  "JURI_TEKNIK_OZET.md": {
-  "bytes": 11305,
-  "sha256": "cc536e8d94ac210f21f34e2c46650946e2f6abdca2a999c5c80026c4f8ccdd28"
+  "bytes": 11475,
+  "sha256": "23d98c6e8b1aaef0daa25aca67654dab77c40a3ed2fe26b06ba58bca1bef543a"
  },
  "README.md": {
   "bytes": 3437,
@@ -1004,8 +1004,8 @@
   "sha256": "7e75ba965d2661d40679a0a53f94bdd26bbcc01d967d62eec6224d5c2355c36f"
  },
  "docs/SUNUM_ICERIGI.md": {
-  "bytes": 29320,
-  "sha256": "bf80419d0a623b04eddd978f6455a456ccb6cce0133a06b93eae61e99f6b5d7f"
+  "bytes": 29336,
+  "sha256": "0ef2889b54522bd05e6bcb31bb0d54ce6d38cd91c8bd0e787c1f9bb5c944044e"
  },
  "docs/historical_asic_README_20260826.md": {
   "bytes": 33835,
@@ -2440,8 +2440,8 @@
   "sha256": "78b1ed5b7a3179861c04390ce3453bab1b3a8104fae370dc394647a53b62fd9b"
  },
  "provenance/output_mapping.json": {
-  "bytes": 22368,
-  "sha256": "e2b14fb5a07ba88ff506983d1073e6db18f49a2d29d8d507f7a168ae0e009ab8"
+  "bytes": 22150,
+  "sha256": "771ee8ca30480f6d94eb731bf3d07369bbf11fa0e794f16b35dd8b4f2be48005"
  },
  "provenance/requirements.json": {
   "bytes": 9187,
