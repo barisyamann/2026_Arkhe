@@ -9,7 +9,7 @@
   "asic/filelist.f",
   "asic/reports/antenna/antenna.rpt",
   "asic/reports/antenna/antenna_summary.rpt",
-  "asic/reports/connectivity/full_disconnected_pins_table.txt",
+  "asic/reports/signoff/full_disconnected_pins_table.txt",
   "asic/reports/drc/drc.klayout.json",
   "asic/reports/drc/drc.klayout.lyrdb",
   "asic/reports/drc/drc.magic.lyrdb",

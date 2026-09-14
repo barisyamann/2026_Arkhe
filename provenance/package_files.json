@@ -1,19 +1,19 @@
 {
  "JURI_TEKNIK_OZET.md": {
-  "bytes": 10537,
-  "sha256": "2278f8bec79dbaedbd55637de6257171a3e6cacc8f76246ffeeeff698c698105"
+  "bytes": 11305,
+  "sha256": "cc536e8d94ac210f21f34e2c46650946e2f6abdca2a999c5c80026c4f8ccdd28"
  },
  "README.md": {
-  "bytes": 3291,
-  "sha256": "91025fbd9521fbc52195d1a07cc130f94fd9df6cbc26ed603bcfa6a945dc261d"
+  "bytes": 3437,
+  "sha256": "a75ef96d4d85e0accfabf392f8fb30408e6bcd91c95377aebf0f0bf33ac618b4"
  },
  "asic/Makefile": {
   "bytes": 233,
   "sha256": "09f618d295b9679e21365b8c2bcdc9bd787c53ecee37a0fadc322510edd7499e"
  },
  "asic/README.md": {
-  "bytes": 38238,
-  "sha256": "cfbdb46b842edfb3532366739d887f3bbbc6a1fefc2101a0bcb36d7618d926f6"
+  "bytes": 39924,
+  "sha256": "a4990d9d3d35f1840b8e28847e13971cb69cc76a3915d35081a32b0c61565529"
  },
  "asic/THIRD_PARTY.md": {
   "bytes": 7689,
@@ -98,18 +98,6 @@
  "asic/reports/antenna/openroad-checkantennas-1.log": {
   "bytes": 931,
   "sha256": "6e07c3983559a78c3fb8822a4fd1a3deaeb86c24095bc34c096f5e408b472f71"
- },
- "asic/reports/connectivity/full_disconnected_pins_table.txt": {
-  "bytes": 130135,
-  "sha256": "e99b5f8be9a718f62c4575ebceeb2991e9cc571623690e224b572f61f536ea0a"
- },
- "asic/reports/connectivity/odb-reportdisconnectedpins.log": {
-  "bytes": 106,
-  "sha256": "9897918fca257995754eabb494fe671da3f09dfb33b801cdd3036f7fe29c3cfc"
- },
- "asic/reports/connectivity/runtime.txt": {
-  "bytes": 12,
-  "sha256": "7f174f1163d195e5629904536197b959f743604dc523f7bd3395df49dac37b13"
  },
  "asic/reports/drc/drc.klayout.json": {
   "bytes": 4811,
@@ -251,6 +239,10 @@
   "bytes": 2821025,
   "sha256": "cd8fbe6e8f65073a8e1d616e03115efeb2a932832f1d962af2db74bb93e043fb"
  },
+ "asic/reports/signoff/full_disconnected_pins_table.txt": {
+  "bytes": 130135,
+  "sha256": "e99b5f8be9a718f62c4575ebceeb2991e9cc571623690e224b572f61f536ea0a"
+ },
  "asic/reports/signoff/klayout-xor.log": {
   "bytes": 26646,
   "sha256": "5378fdc2a909482b4734b84cdbfd5410d1d445a7578d55b0a9c3f29a0c1c7c5b"
@@ -258,6 +250,14 @@
  "asic/reports/signoff/manufacturability.rpt": {
   "bytes": 163,
   "sha256": "aad856d43f78314d0ee0dc195049e2baf00a2489f4c2bf8c0fe8afe6d2100a83"
+ },
+ "asic/reports/signoff/odb-reportdisconnectedpins-runtime.txt": {
+  "bytes": 12,
+  "sha256": "7f174f1163d195e5629904536197b959f743604dc523f7bd3395df49dac37b13"
+ },
+ "asic/reports/signoff/odb-reportdisconnectedpins.log": {
+  "bytes": 106,
+  "sha256": "9897918fca257995754eabb494fe671da3f09dfb33b801cdd3036f7fe29c3cfc"
  },
  "asic/reports/signoff/xor.xml": {
   "bytes": 7788,
@@ -976,8 +976,8 @@
   "sha256": "1b80bc0c27144245e6200b44329597d1610d5de23a04451cde1f46709ef5d70c"
  },
  "asic/scripts/run_flow.py": {
-  "bytes": 1274,
-  "sha256": "ca6e7a4402c696fcf2f83e0baec06e93e8ddec8379fcafc825de451da5fecca8"
+  "bytes": 1556,
+  "sha256": "66ef98e616df92ab42f5e18a29611c0a112a396d10c0c4ff607b3d000908423d"
  },
  "asic/scripts/run_gds_lvs.py": {
   "bytes": 1979,
@@ -1004,8 +1004,8 @@
   "sha256": "7e75ba965d2661d40679a0a53f94bdd26bbcc01d967d62eec6224d5c2355c36f"
  },
  "docs/SUNUM_ICERIGI.md": {
-  "bytes": 28750,
-  "sha256": "88bf150b35adcf3e65299081c20778e91a5c09ae2a92fddb880532c17a7065e5"
+  "bytes": 29320,
+  "sha256": "bf80419d0a623b04eddd978f6455a456ccb6cce0133a06b93eae61e99f6b5d7f"
  },
  "docs/historical_asic_README_20260826.md": {
   "bytes": 33835,
@@ -1600,12 +1600,12 @@
   "sha256": "e1c97fbbb9215c3ed8fb77b46817bc0f004c6c9cc208c17d131b7fb46131ff9b"
  },
  "fpga/nexys_demo_20260908/README.md": {
-  "bytes": 2151,
-  "sha256": "403b6800e2a508885dd815c0a8096068e57928b351fde0d89d1330da095b7e00"
+  "bytes": 2275,
+  "sha256": "7d6d9f57e220b9947d4c28e158b8b8758f0fdf91132359a758f496bd4c883ebc"
  },
  "fpga/nexys_demo_20260908/bitstream/nexys_top.bit": {
   "bytes": 3825910,
-  "sha256": "87ed11e8a4f67303d6e88c86c6c5376c0fb57b879a01f9dd8ef8cbb88fa2712c"
+  "sha256": "c0258a263b91cc6680ace437d8702e0737d9eb2007991c831dc292aad20a6ff8"
  },
  "fpga/nexys_demo_20260908/build_fpga.tcl": {
   "bytes": 1048,
@@ -1620,8 +1620,8 @@
   "sha256": "3bffe79adaa4ea40da483c337c9e7ac46e1a8faf6a1c4b195b6d30a8adbc8b4c"
  },
  "fpga/nexys_demo_20260908/demo/arkhe_icd.json": {
-  "bytes": 16278,
-  "sha256": "34c2c5eb7ae15fd4e0bded2e96bd0a7d919c059e8ab3d5258603efffd9431b04"
+  "bytes": 16310,
+  "sha256": "4005eaa93bd10077fafcf577b59f2da5edc19451d5f6dcfc685e91f4afc23f4f"
  },
  "fpga/nexys_demo_20260908/demo/demo_gui.py": {
   "bytes": 53536,
@@ -2293,7 +2293,7 @@
  },
  "fpga/nexys_demo_20260908/firmware/build/app_demo.hex": {
   "bytes": 20480,
-  "sha256": "04ddccd64359872a3d32d5cd368d7028cd8639f1906bf58e68d37973b8f77944"
+  "sha256": "5ad53753b86ca2837c11a0f26bfe2c01bc6bd2460c205610ecb7c5a3ad0c69dc"
  },
  "fpga/nexys_demo_20260908/firmware/build/arkhe_demo_flash.prm": {
   "bytes": 565,
@@ -2301,11 +2301,11 @@
  },
  "fpga/nexys_demo_20260908/firmware/build/flash_demo.bin": {
   "bytes": 24192,
-  "sha256": "56a6f6018792a7ffb9bab9031b96075fec4223f6ed24a192379604822d2ceb38"
+  "sha256": "d9edf4dab7165a48d6037828a4e5b90df87feacf4a3635e84db4f188804fe525"
  },
  "fpga/nexys_demo_20260908/firmware/build/flash_demo.hex": {
   "bytes": 60480,
-  "sha256": "dc8341eade6a5f3d4cc0e3c5c4ab4009b09abab07522780eb1ce8920fc76ed95"
+  "sha256": "b807ac1237cbe2fa1694ab35d1e91656b23d7d2825d3ba66c08a6702f4bbb642"
  },
  "fpga/nexys_demo_20260908/firmware/build/gen_mcs_demo.tcl": {
   "bytes": 452,
@@ -2332,8 +2332,8 @@
   "sha256": "b1bd039803d4839e6efdabe758bbc433b8886e5c81babed44baeac6b6df01387"
  },
  "fpga/nexys_demo_20260908/firmware/src/main.c": {
-  "bytes": 22321,
-  "sha256": "aa65e8203b999e3e8b262fccc30b217e0d0e38f2d8f8c0e857da95a5a9d1a49a"
+  "bytes": 23323,
+  "sha256": "2e50842333de5336d0133291a920cad4bb65b3d5ea5d74222611152be0faf05c"
  },
  "fpga/nexys_demo_20260908/firmware/src/npu_sw_bench.c": {
   "bytes": 7818,
@@ -2356,8 +2356,8 @@
   "sha256": "e5a04f6b6036d27e7c603945acde935b4a70728ab59b9169ec352d8863653e3c"
  },
  "fpga/nexys_demo_20260908/reports/nexys_top_drc_routed.rpt": {
-  "bytes": 43778,
-  "sha256": "ff746c5e6af9053809d6d44010dcec71d4d59ac85c821010b76f7c783753cb41"
+  "bytes": 44691,
+  "sha256": "434b25a4ecd9d634abacbcc0b354653d28a0be9e8f64119ef92c5799ccf9e13b"
  },
  "fpga/nexys_demo_20260908/reports/nexys_top_io_placed.rpt": {
   "bytes": 99480,
@@ -2376,12 +2376,12 @@
   "sha256": "18da34a58d2f46033a134df045357f7a9c9b28c7cfcb2c511bb81839f5ab9b93"
  },
  "fpga/nexys_demo_20260908/reports/nexys_top_timing_summary_routed.rpt": {
-  "bytes": 750363,
-  "sha256": "7abbd1d82389be64c13389467deb9f11bb3ed6f1ad5b7cc18c92e7d9e2b48912"
+  "bytes": 749490,
+  "sha256": "351cf6e8a523cbcbd2c4d8b5758a4ef5a9857e9e8005f8327ff72603264ade47"
  },
  "fpga/nexys_demo_20260908/reports/nexys_top_utilization_placed.rpt": {
   "bytes": 11588,
-  "sha256": "982af870c917ddafde14e0ac44a02ea2328141025199c907cbab5c918ed67108"
+  "sha256": "a02dc88fd0d12da6570ed5629117c1a6c6a62b9d431309ceb1be92fea6f73336"
  },
  "fpga/nexys_demo_20260908/reports/power_impl.rpt": {
   "bytes": 9224,
@@ -2440,16 +2440,16 @@
   "sha256": "78b1ed5b7a3179861c04390ce3453bab1b3a8104fae370dc394647a53b62fd9b"
  },
  "provenance/output_mapping.json": {
-  "bytes": 22138,
-  "sha256": "c2a5126468880605b44115f3ba35674adf74387e0704d8ef66d4297364811ba2"
+  "bytes": 22368,
+  "sha256": "e2b14fb5a07ba88ff506983d1073e6db18f49a2d29d8d507f7a168ae0e009ab8"
  },
  "provenance/requirements.json": {
-  "bytes": 9192,
-  "sha256": "0d3b8de140e8f2125a5d64fcd805468840411228c4c6ca74d6344fba718c87da"
+  "bytes": 9187,
+  "sha256": "a71e82581bc1f3d54125d0e636421b8e1ac5d07c4fbdfa2e8e7eb971b0ed84ac"
  },
  "provenance/signoff_metrics.json": {
-  "bytes": 2884,
-  "sha256": "43eafea352a6add7b95032fda0263fee8015f9ead76aaeae2166badc1e3d2689"
+  "bytes": 2817,
+  "sha256": "f08f3ce5dd08e5163ed349401301328d195f1beb91fba632cfe0a6b19ace1f52"
  },
  "provenance/source_hashes.json": {
   "bytes": 50237,
@@ -4056,8 +4056,8 @@
   "sha256": "b0310e98bb59c440b3880a0346fe936dec0eff85a7b64ae79f659bf92c92edee"
  },
  "scripts/spike_karsilastir.py": {
-  "bytes": 15904,
-  "sha256": "a0c72c00c6540322294d5655c24382872a747ef123b37ed57d85c899b30f3616"
+  "bytes": 15515,
+  "sha256": "75802c1ea848be6c8ac964739a377c5044fb7a90fa9580decb2d59bc489020f6"
  },
  "scripts/sta_tarama.tcl": {
   "bytes": 3385,

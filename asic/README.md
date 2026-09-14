@@ -433,6 +433,33 @@ ve rapor toplamasına dahil edilmemiştir. Dolayısıyla burada beyan edilen
 
 ## 12. Çıktı konumları ve bütünlük
 
+### Rapor konumları (Final İstenen Çıktılar, Tablo 8)
+
+Bütün raporlar `asic/reports/` altında, şartnamenin Tablo 8'de tanımladığı
+alt dizinlerde toplanmıştır:
+
+| Dizin | İçerik | Şartname |
+|---|---|---|
+| `reports/general/` | `flow.log`, `warning.log`, `error.log` | §5.1 |
+| `reports/lint/` | Verilator lint tam çıktısı | §5.2 |
+| `reports/synthesis/` | `stat.rpt`, `stat.json`, `latch.rpt`, `chk.rpt`, `pre_techmap.rpt` | §5.3 |
+| `reports/timing/` | `summary.rpt` + dokuz köşe alt dizini (`max/min/checks/skew/ws/wns/tns/violator_list/clock/unpropagated`) | §5.5 |
+| `reports/drc/` | `drc.magic.rpt`, `drc.klayout.lyrdb`, `drc.klayout.json` | §5.6 |
+| `reports/lvs/` | `lvs.netgen.rpt`, `lvs.netgen.json` | §5.6 |
+| `reports/antenna/` | `antenna.rpt`, `antenna_summary.rpt` | §5.6 |
+| `reports/pdn/` | `*-grid-errors.rpt` | §5.6 |
+| `reports/routing/` | Yönlendirme DRC, congestion, kablo uzunluğu, via | §5.4 |
+| `reports/power/` | Dokuz köşe `power.rpt`, `irdrop.rpt`, `net-VPWR.csv`, `net-VGND.csv` | §5.7 |
+| `reports/signoff/` | `manufacturability.rpt`, `xor.xml`, **`full_disconnected_pins_table.txt`** | §5.6 |
+
+> **Not.** Bağlantısız pin raporu (`full_disconnected_pins_table.txt`,
+> `Odb.ReportDisconnectedPins` adımının çıktısı) şartname §5.6'da
+> fiziksel signoff kalemleri arasında sayıldığı için `reports/signoff/`
+> altındadır. Akış toplama eşlemesi (`provenance/output_mapping.json`)
+> bu konumu kullanır.
+
+### Nihai çıktılar
+
 Esas GDS `results/gds/soc_top.gds`, üretici Magic. Magic/KLayout alternatifleri aynı dizinde; XOR raporu `reports/signoff/xor.xml`. Üç netlist rolü `_synth.v`, `_pnr.v`, `_powered.v` ile ayrılır. Tüm SPEF köşeleri `results/spef/{min,nom,max}` altındadır.
 
 **SPICE çıkarımı hakkında:** Bu koşuda SPICE **nihai GDSII görünümünden** çıkarılmıştır (`results/spice/soc_top.spice`, `MAGIC_EXT_USE_GDS=true`) ve Netgen LVS bu netlist üzerinde koşulmuştur — sonuç **`Circuits match uniquely`**.
