@@ -102,7 +102,7 @@ Gerçek cihaz modelleri (`sky130_fd_pr__pfet_01v8_hvt`,
 
 ## İşlevsel doğrulama ve FPGA
 
-Tarihsel aday logları ve test kaynakları pakette korunmuştur. 5–6 Eylül NPU doğrulamasında 1.400 girdide sınıf uyuşmazlığı 0; 1.300 etiketli girdide TFLite/RTL doğruluğu %84,15. 100 stres girdisi doğruluk paydasına katılmaz. Tam CPU iş yükünde 68.474.022 çevrim ve NPU motorunda 85.587 çevrim yaklaşık 800,05× hesaplama oranı verir; veri aktarımı ve boot dahil değildir. Bu ölçümler son d45 RTL'sinin yeniden çalıştırılmış tam regresyonu olarak sunulmaz.
+Tarihsel aday logları ve test kaynakları pakette korunmuştur. 5–6 Eylül NPU doğrulamasında 1.400 girdide sınıf uyuşmazlığı 0; 1.300 etiketli girdide TFLite/RTL doğruluğu %84,15. 100 stres girdisi doğruluk paydasına katılmaz. Tam CPU iş yükünde 68.474.022 çevrim ve NPU motorunda 85.587 çevrim yaklaşık 800,05× hesaplama oranı verir; veri aktarımı ve boot dahil değildir. Bu ölçümler güncel RTL'nin yeniden çalıştırılmış tam regresyonu olarak sunulmaz; güncel regresyon sonucu yukarıdaki 37/37 test tablosudur.
 
 8 Eylül QSPI testinde yeni FIFO negatif senaryolarıyla 30 kontrol geçmiştir. Kaynak/test kayıtlarının tarih ve kapsamları `evidence/` altında tutulur. Son UVM veya kod kapsamı için tamamlanmamış loglar başarı kabul edilmez.
 
@@ -193,8 +193,9 @@ Her ikisinde de TNS ve THS sıfırdır; tüm tanımlı zamanlama kısıtları sa
 | **Golden ile uyum** | **%100,00 (156/156)** |
 | Uyuşmazlık | 0 |
 | Zaman aşımı | 0 |
-| Gecikme (medyan / p95 / maks) | 7,74 / 8,78 / 21,58 ms |
-| Ölçülen hızlanma | 183,3× |
+| Gecikme (medyan / p95 / maks) | 8,02 / 17,98 / 23,33 ms |
+| **Ölçülen hızlanma** | **177×** (yazılım referansı 1418 ms) |
+| Skor karşılaştırması (ayrı koşum) | 156 örnek, **MAE %0,078** |
 | Sağlamlık senaryoları | **9 PASS / 1 FAIL / 1 SKIP** (FAIL: `back_to_back`; SKIP: `peripheral_interleave`, opsiyonel) |
 
 Uyum matrisi tamamen köşegendir (silence 6, unknown 16, yes 50, no 84); köşegen dışı hücre yoktur. Donanım doğruluğu ve golden model doğruluğu %72,44 ile aynıdır, fark 0,00 puandır; bu oran veri setinin zorluğudur ve puanlamada kullanılmaz.

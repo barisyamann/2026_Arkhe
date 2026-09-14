@@ -470,7 +470,7 @@ değerlendirileceğini söyler; 2,4× yavaşlama doğrudan puan kaybı olurdu.
 | 1960 değer girdi → 4 sınıf | ✓ | kartta `[0, 225, 326, 3543]` |
 | UART-stream → bellek → AXI → hızlandırıcı | ✓ | DMA zinciri |
 | Kesme üretimi | ✓ | `irq_o` |
-| Yazılıma karşı hızlanma | ✓ | **183,3×** |
+| Yazılıma karşı hızlanma | ✓ | **177×** (kart üzerinde ölçüldü, 14 Eylül) |
 | %10 doğruluk penceresi | ✓ | altın referansla **birebir** |
 
 ### EK-2 Çevre Birimi Yazmaçları

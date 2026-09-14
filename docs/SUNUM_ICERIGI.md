@@ -260,8 +260,8 @@ Boru hattı:
 | **FPGA'da altın referans uyumu** | **156/156 (%100)** |
 | Uyuşmazlık | 0 |
 | Donanım vs yazılım model doğruluğu farkı | **0,00 puan** |
-| Ölçülen hızlanma | **183,3×** |
-| Çıkarım gecikmesi (medyan) | 7,74 ms |
+| Ölçülen hızlanma | **177×** |
+| Çıkarım gecikmesi (medyan) | 8,02 ms |
 
 Uyum matrisi tamamen köşegen: silence 6, unknown 16, yes 50, no 84 —
 köşegen dışı hücre yok.
@@ -655,7 +655,7 @@ Ham çıktı: `evidence/fpga_democ_20260914/`.
 > aynı sonuç**, yani rastgele bir kararsızlık değil, deterministik ve kök
 > nedeni bilinen bir sınır.
 >
-> Kök nedeni tek satıra indirdik: `rtl/cevre/uart_stream_peripheral.sv`
+> Kök nedeni tek satıra indirdik: `rtl/Cevre_Birimleri/files_1/uart_stream_peripheral.sv`
 > içindeki toplayıcı sayacı `pack_cnt_r`, yalnızca reset ve tam kelime
 > okumasıyla sıfırlanıyor; `UARTS_FIFO_CLR` komutuyla sıfırlanmıyor. Bir
 > önceki senaryodan devreden yarım kelime kalıntısı sonraki çerçeveyi

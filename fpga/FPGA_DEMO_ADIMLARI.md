@@ -221,8 +221,8 @@ Referans koşumuz `fpga/demo_teknofest/sonuclar/` altındadır. Karşılaştır:
 | `timeouts` | **0** |
 | `golden_agreement_pct` | **100.0** |
 | `mismatch_count` | **0** |
-| Gecikme (medyan) | 7,74 ms |
-| Hızlanma | 183× (yazılım referansı 1418 ms) |
+| Gecikme (medyan) | 8,02 ms |
+| Hızlanma | **177×** (yazılım referansı 1418 ms) |
 | Sağlamlık | **9 PASS / 1 FAIL / 1 SKIP** — `back_to_back` beş çerçevenin dördüne yanıt verir (bilinen sınırlama, kök nedeni bulundu); `peripheral_interleave` opsiyoneldir ve atlanır |
 
 `golden_agreement_pct = 100.0` ve `timeouts = 0` görüyorsan demo başarılıdır.
