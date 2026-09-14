@@ -493,7 +493,7 @@ değerlendirileceğini söyler; 2,4× yavaşlama doğrudan puan kaybı olurdu.
 | Çekirdek testleri (Spike ISS) | Elden gelenin en iyisi | ✓ 927 komut, 0 fark |
 | Doğrulama planı | Elden gelenin en iyisi | ✓ |
 | Blok seviyesi testler | Opsiyonel | ✓ **17 blok** |
-| Code coverage | Opsiyonel | ✓ %81,7 satır / %75,1 dal (bizim RTL) |
+| Code coverage | Opsiyonel | ✓ %81,6 satır / %74,9 dal (bizim RTL) |
 
 **Güncel RTL ile regresyon: 37/37 test, 702 denetim, tamamı geçti** (13 Eylül 2026). Eklenen testler: 10-11 Eylül'de düzeltilen dört RTL hatası için `sram_w_yakalama`, `axi_w_yakalama`, `qspi_presc_sinir`, `axi_protokol`, `sinir_degerleri`; 12 Eylül'de ASIC saat hedefi için `i2c_scl_frekans` ve `i2c_scl_periyot`, UVM kapsam genişletmesinin açığa çıkardığı bayt-seçmeli yazma boşluğu için `wstrb_kismi_yazma`, hata enjeksiyonunun ortaya çıkardığı iki dekoratif test yerine `qspi_sck_olcum`, ve blok testi bulunmayan iki büyük modül için `interconnect_adres` (13 slave adres çözme) ile `npu_accelerator`; JTAG saat alani gecisi icin `jtag_cdc`; kullanilmayan giris portu taramasinin ortaya cikardigi iki islevsel eksiklik icin `jtag_yanit_kodu` (AXI yanit kodu denetimi) ve `i2c_saat_germe` (I2C clock stretching). 13 Eylul'de iki eksik daha kapatildi: regresyonda kayitli OLMAYAN `tb_sram_registered` (sram_module teslim edilen tasarimin parcasidir, filelist.f satir 23) eklendi; `npu_accelerator` hakemliginin MOTOR dali (A1) uyandirilip veri yolu denetimiyle dogrulandi. Ayrica aktif UVM testi (`uvm_aktif`) regresyona baglandi: kodda mevcut olan driver/sequencer/sequence altyapisi artik ana kosumda calisir ve pasif izlemenin uyaramadigi WSTRB/yanit kapsam bin'lerini kapatir.
 

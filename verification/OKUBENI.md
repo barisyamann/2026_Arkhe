@@ -103,7 +103,7 @@ simülatör seviyesinde de yakalanır.
 
 | Grup | Statement | Branch |
 |---|---:|---:|
-| **Bizim RTL** | **%81,7** | **%75,1** |
+| **Bizim RTL** | **%81,6** | **%74,9** |
 | CV32E40P (üçüncü taraf) | %52,4 | %52,5 |
 | Paketler (çalıştırılabilir kod yok) | %50,0 | %0,0 |
 

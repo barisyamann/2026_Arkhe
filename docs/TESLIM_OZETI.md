@@ -16,7 +16,7 @@ görünümüdür. Her bölüm kendi açıklama belgesiyle (`README.md` veya
 | **Fiziksel signoff** | Route DRC 0 · KLayout DRC 0 · LVS eşleşiyor · XOR 0 · anten 0/0 · illegal overlap 0 · **Magic DRC'de 7.658 açık bulgu** (makro kaynaklı, aşağıda) |
 | **Regresyon** | **37/37 test, 702 denetim** |
 | **İşlevsel kapsam** | **52/52 = %100** |
-| **Kod kapsamı (bizim RTL)** | %81,7 statement / %75,1 branch |
+| **Kod kapsamı (bizim RTL)** | %81,6 statement / %74,9 branch |
 | **Hata enjeksiyonu** | **9/9 mutasyon yakalanıyor** |
 
 ---
@@ -71,7 +71,7 @@ Vivado ara dosyaları (`build/`, 61 MB) dahil edilmedi.
 | Protokol kontrolü | zorunlu | **İki UVM agent + 5 SVA checker**, 401.729 işlem, 13/13 adres bölgesi, fonksiyonel kapsam |
 | Blok testleri | opsiyonel | **17 blok** |
 | Spike ISS | "tür ve sıra" | 927 buyruk + **765 yazmaç değeri** — sonuç doğruluğu da |
-| Code coverage | opsiyonel | %81,7 / %75,1 |
+| Code coverage | opsiyonel | %81,6 / %74,9 |
 | — | *istenmiyor* | **Hata enjeksiyonu** — testlerin gerçekten hata yakaladığı kanıtlı |
 | — | *istenmiyor* | Dokuz köşe PVT imza STA |
 

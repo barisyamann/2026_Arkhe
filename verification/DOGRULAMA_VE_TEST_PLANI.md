@@ -119,7 +119,7 @@ Hepsi self-checking; elle inceleme gerekmez.
     Regresyon        : 37/37 test, 702 denetim
     Hata enjeksiyonu : 9/9 mutasyon yakalandı, 0 kaçtı
     İşlevsel kapsam  : 52/52 covergroup = %100
-    Kod kapsamı      : %81,7 statement / %75,1 branch (bizim RTL)
+    Kod kapsamı      : %81,6 statement / %74,9 branch (bizim RTL)
     RTL bütünlüğü    : 57/57 dosya
 
 Koşum: `python scripts/run_regression.py`
